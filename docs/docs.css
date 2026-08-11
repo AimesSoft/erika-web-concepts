@@ -42,6 +42,8 @@ aside{
   overflow-y:auto;padding:28px 24px 44px;background:var(--card);
 }
 .brand{display:flex;align-items:baseline;gap:10px}
+.brand a{color:var(--sumi)}
+.brand a:hover{text-decoration:none}
 .brand .n{font-family:var(--latin);font-size:26px;letter-spacing:-.01em}
 .brand .v{
   font-family:var(--mono);font-size:10.5px;color:var(--sumi-3);
