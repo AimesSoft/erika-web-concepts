@@ -38,6 +38,8 @@ test("server-renders the Erika official project site", async () => {
   assert.match(html, /ERIKA/);
   assert.match(html, /让每一帧/);
   assert.match(html, /NipaPlay 自研/);
+  assert.match(html, /<img[^>]+src="\/og\.png"/);
+  assert.match(html, /VISUAL EVIDENCE \/ 01/);
   assert.match(html, /硬解，不绕路/);
   assert.match(html, /VERSION INTEL/);
   assert.match(html, /版本情报/);
@@ -74,6 +76,7 @@ test("ships site-specific metadata, artwork, and source", async () => {
 
   assert.match(page, /让每一帧/);
   assert.match(page, /古戸ヱリカ/);
+  assert.match(page, /src="\/og\.png"/);
   assert.match(layout, /Erika — 让每一帧，抵达真相/);
   assert.match(layout, /version-sync\.js/);
   assert.doesNotMatch(layout, /headers\(\)|generateMetadata/);

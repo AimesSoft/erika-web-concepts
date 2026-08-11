@@ -136,32 +136,21 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="hero-art" aria-label="Erika 播放内核视觉示意">
-          <div className="case-sheet">
-            <div className="case-sheet-head">
-              <span>EVIDENCE // 00:05</span>
-              <span className="live-dot">CORE ONLINE</span>
-            </div>
-            <div className="manga-frame">
-              <div className="checker" aria-hidden="true" />
-              <div className="signal-ring ring-one" aria-hidden="true" />
-              <div className="signal-ring ring-two" aria-hidden="true" />
-              <div className="erika-orb" aria-hidden="true">
-                <span>E</span>
-              </div>
-              <div className="scan-beam" aria-hidden="true" />
-              <div className="frame-caption">
-                <small>PLAYBACK TRACE</small>
-                <strong>FRAME_024</strong>
-              </div>
-            </div>
-            <div className="case-metrics">
-              <div><span>DECODE</span><strong>HARDWARE</strong></div>
-              <div><span>COPY</span><strong>ZERO</strong></div>
-              <div><span>SYNC</span><strong>LOCKED</strong></div>
-            </div>
-          </div>
-          <div className="speech-bubble">GOOD!<br />证据链已闭合。</div>
+        <div className="hero-art">
+          <figure className="hero-keyvisual">
+            <img
+              src="/og.png"
+              width="1659"
+              height="948"
+              alt="Erika 侦探站在播放画面前追查每一帧的黑红漫画风主视觉"
+              fetchPriority="high"
+            />
+            <figcaption>
+              <span>VISUAL EVIDENCE / 01</span>
+              <strong>FRAME TRACE: LOCKED</strong>
+            </figcaption>
+          </figure>
+          <div className="visual-status"><i aria-hidden="true" /> CORE ONLINE</div>
           <div className="case-stamp">CASE<br /><b>05</b></div>
           <div className="tape tape-top">TRUTH / FRAME / TRUTH / FRAME</div>
           <div className="tape tape-bottom">DO NOT CROSS · RENDER PATH</div>
