@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>时钟与调度 — Erika 开发者文档</title>
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><span class="n">Erika</span><span class="v">v0.1.5</span></div>
+  <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <nav>
+    <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.html">快速开始</a></li>
+      <li><a href="../guide/rust.html">Rust 嵌入</a></li>
+      <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/flutter.html">Flutter 嵌入</a></li>
+    </ul>
+    <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="architecture.html">架构总览</a></li>
+      <li><a href="decode.html">硬件解码</a></li>
+      <li><a href="zero-copy.html">零拷贝导入</a></li>
+      <li><a href="render.html">渲染管线</a></li>
+      <li><a href="hdr.html">高动态范围</a></li>
+      <li><a href="upscale.html">神经超分</a></li>
+      <li><a href="subtitle-danmaku.html">字幕与弹幕</a></li>
+      <li><a href="clock.html" aria-current="page">时钟与调度</a></li>
+    </ul>
+    <h2><span class="no">三</span>项目 <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.html">构建与依赖</a></li>
+      <li><a href="../project/releasing.html">发布与产物</a></li>
+      <li><a href="../project/contributing.html">贡献指南</a></li>
+      <li><a href="../project/changelog.html">更新日志</a></li>
+    </ul>
+    <h2><span class="no">四</span>参考 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.html">C ABI 总览</a></li>
+      <li><a href="../reference/capi-handle.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>时钟与调度</p>
+  <h1>时钟与调度</h1>
+  <p class="kicker">Clock &amp; Scheduling</p>
+  <p class="lead">音频输出是主时钟。视频帧的呈现目标按 vsync 量化对齐到音频时钟，音频与视频之间没有独立的显示时钟。缓冲不足时显式进入 buffering，时钟冻结并在数据恢复后重新锚定。</p>
+
+  <ul class="meta-strip">
+    <li>主时钟 <b>音频</b></li>
+    <li>ring buffer <b>192,000 帧</b></li>
+    <li>vsync <b>16.67 ms 量化</b></li>
+  </ul>
+
+  <section id="clock">
+    <h2>音频主时钟<span class="jp">オーディオマスター</span><a class="anchor" href="#clock">#</a></h2>
+    <p>所有音频输出后端把数据推入统一的 f32 PCM ring buffer（容量 192,000 帧，溢出丢最旧）。播放时钟以媒体时间为基准，结合锚定时刻与倍速推导当前时间。</p>
+    <p>Presenter 在每次 <code>render_tick</code> 中读取音频时钟快照并同步给播放线程。时钟修正受三个参数约束：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>参数</th><th>默认</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">deadband</td><td class="m">5 ms</td><td>偏差小于该值的抖动不修正。</td></tr>
+          <tr><td class="m">最大单次修正</td><td class="m">5 ms</td><td>每次修正的上限，避免跳变。</td></tr>
+          <tr><td class="m">快照阈值</td><td class="m">250 ms</td><td>超过该值的偏差视为脱轨，直接重新锚定。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>参考时间取媒体时间加已入队音频时长（音频 lead 120 ms），使视频提前于音频队列末尾呈现。倍速不为 1 时跳过音频时钟同步，音频由 SoundTouch 变速（SEQUENCE 25 ms）。</p>
+  </section>
+
+  <section id="vsync">
+    <h2>vsync 量化调度<span class="jp">VSync スケジューリング</span><a class="anchor" href="#vsync">#</a></h2>
+    <p>视频帧的呈现目标按 vsync 间隔（默认 16,666,667 ns，即 60 Hz）量化。调度器为每一帧给出三种决定之一：</p>
+    <ul class="body">
+      <li><b>Present</b> — 目标时间落在本 vsync 周期内，立即呈现。</li>
+      <li><b>Wait</b> — 帧早于呈现窗口，等待下一个周期。</li>
+      <li><b>Drop</b> — 帧晚于呈现窗口，跳过以减少累积延迟。</li>
+    </ul>
+    <p>连续丢帧上限为 5 帧。达到上限后停止丢帧，回到 Wait，避免长时间无画面输出。</p>
+    <p>暂停期间时钟冻结，seek 会解码并呈现请求位置的关键帧，同时保持媒体时钟不推进。</p>
+  </section>
+
+  <section id="buffering">
+    <h2>缓冲状态<span class="jp">バッファリング</span><a class="anchor" href="#buffering">#</a></h2>
+    <p>音频或视频输入不足时，播放进入显式 buffering：播放时钟冻结，不再前进；数据恢复后时钟按恢复后的媒体时间重新锚定。宿主经 <code>BufferingChanged</code> 事件感知状态变化。</p>
+    <div class="note">
+      <p>时钟在缓冲期间不推进，是为了避免恢复后出现长时间的帧丢弃或黑屏。</p>
+    </div>
+  </section>
+
+  <section id="diagnostics">
+    <h2>诊断设施<span class="jp">診断</span><a class="anchor" href="#diagnostics">#</a></h2>
+    <p>时钟与播放的轨迹输出由环境变量控制，写入 <code>/tmp/erika_playback_trace.log</code>：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>环境变量</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr><td class="m">ERIKA_CLOCK_TRACE</td><td>时钟修正与锚定事件。</td></tr>
+          <tr><td class="m">ERIKA_PLAYBACK_TRACE</td><td>播放状态机事件。</td></tr>
+          <tr><td class="m">ERIKA_DANMAKU_TRACE</td><td>弹幕 plan 生成事件。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>诊断输出在 Android 上经 logcat 的 <code>Erika</code> tag 发出。调试 HUD 用帧计数差值计算 fps，可由 <code>set_debug_hud_enabled</code> 控制。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>Erika <b>v0.1.5</b></span>
+    <span>Section <b>Kernel</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="subtitle-danmaku.html"><span class="dir">Prev</span>字幕与弹幕</a>
+    <a class="nx" href="../reference/capi.html"><span class="dir">Next</span>C ABI 总览</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

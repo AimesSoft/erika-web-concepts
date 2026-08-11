@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>更新日志 — Erika 开发者文档</title>
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><span class="n">Erika</span><span class="v">v0.1.5</span></div>
+  <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <nav>
+    <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.html">快速开始</a></li>
+      <li><a href="../guide/rust.html">Rust 嵌入</a></li>
+      <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/flutter.html">Flutter 嵌入</a></li>
+    </ul>
+    <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.html">架构总览</a></li>
+      <li><a href="../kernel/decode.html">硬件解码</a></li>
+      <li><a href="../kernel/zero-copy.html">零拷贝导入</a></li>
+      <li><a href="../kernel/render.html">渲染管线</a></li>
+      <li><a href="../kernel/hdr.html">高动态范围</a></li>
+      <li><a href="../kernel/upscale.html">神经超分</a></li>
+      <li><a href="../kernel/subtitle-danmaku.html">字幕与弹幕</a></li>
+      <li><a href="../kernel/clock.html">时钟与调度</a></li>
+    </ul>
+    <h2><span class="no">三</span>项目 <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="building.html">构建与依赖</a></li>
+      <li><a href="releasing.html">发布与产物</a></li>
+      <li><a href="contributing.html">贡献指南</a></li>
+      <li><a href="changelog.html" aria-current="page">更新日志</a></li>
+    </ul>
+    <h2><span class="no">四</span>参考 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.html">C ABI 总览</a></li>
+      <li><a href="../reference/capi-handle.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>project<span class="sep">/</span>更新日志</p>
+  <h1>更新日志</h1>
+  <p class="kicker">Changelog</p>
+  <p class="lead">按版本列出对宿主可见的变化。已回退的条目不在此列；完整历史以仓库根 <code>CHANGELOG.md</code> 为准。0.1.3 及更早的 breaking change 见文末小结。</p>
+
+  <ul class="meta-strip">
+    <li>当前 <b>0.1.5</b></li>
+    <li>发布 <b>2026-08-03</b></li>
+  </ul>
+
+  <section id="v015">
+    <h2>0.1.5<span class="jp">バージョン</span><a class="anchor" href="#v015">#</a></h2>
+    <h3>系统媒体控制与后台音频</h3>
+    <ul class="body">
+      <li>Now Playing 元数据、播放状态、时间线、play / pause / seek 与上一首下一首导航，覆盖 iOS、tvOS、macOS、Android、Windows、OpenHarmony 六平台。</li>
+      <li>iOS 与 Android 的可选后台音频播放。后台时挂起视频解码，生命周期回调经有界 barrier 排队，不会无限阻塞应用线程。</li>
+      <li>未携带 <code>ErikaMediaMetadata</code> 打开媒体时清除陈旧元数据；pause / play 时序确定化；Android 媒体回调按 Flutter engine 隔离。</li>
+      <li>Android 封面图缓存；原生播放状态未变化时不重建媒体通知。</li>
+    </ul>
+    <h3>平台支持与发布产物</h3>
+    <ul class="body">
+      <li>tvOS 插件与 native target：真机与 arm64 / x86_64 模拟器，含 Metal 呈现、Apple 音频、VideoToolbox、字幕、弹幕、截图与 HTTP 源。</li>
+      <li>新增 <code>erika-capi-tvos.zip</code>（真机 + 通用模拟器 xcframework），自动加入 release workflow。</li>
+      <li>OpenHarmony 可选预编译消费：CMake 构建可下载带标签的 <code>liberika_capi.so</code> 放在 <code>liberika_flutter.so</code> 旁，失败回退源码构建。</li>
+      <li>macOS / iOS / tvOS 的 CI 与发布统一到 macOS 26 runner；macOS x64 与 arm64 交叉构建后合成通用包。零长度 HTTP 资源不再误判为截断。</li>
+    </ul>
+    <h3>字幕内存字体</h3>
+    <ul class="body">
+      <li>内存字幕字体注册表贯通 Rust、C API、Dart 与各原生 Flutter 嵌入。宿主可检查字体 faces、选择有序回退集合、替换字体数据、清空注册表，全程不写盘。</li>
+      <li>libass 保留有序回退；TTC / OTC 数据跨 face 共享；同路径字体被替换时渲染器缓存失效，活跃字幕轨立即使用新数据。</li>
+      <li>注册表与选中集合的代数分离；渲染器重建后重放 libass codec private data；OpenHarmony 与 tvOS 补齐完整内存字体 C API 面。</li>
+    </ul>
+    <h3>播放恢复</h3>
+    <ul class="body">
+      <li>音视频输入饥饿时进入显式缓冲转换。stall 期间播放时钟冻结，数据恢复后重锚定到媒体时间，避免时钟跑过头造成长时间掉帧或黑屏。</li>
+    </ul>
+  </section>
+
+  <section id="v014">
+    <h2>0.1.4<span class="jp">バージョン</span><a class="anchor" href="#v014">#</a></h2>
+    <h3>兼容性提示</h3>
+    <ul class="body">
+      <li>弹幕字号按像素每 em 解释。<code>ab_glyph</code> 的 <code>PxScale</code> 是 ascender 到 descender 的高度，旧代码把 em 尺寸直接传入，渲染比请求小。现在文字与请求一致，升级后弹幕变大。PingFang SC 的比例是 1.4，同一配置可大 40%。想要旧外观的宿主应调低字号。</li>
+      <li>弹幕滚动时长随视口逻辑宽度缩放（640 pt 时 ×0.9，1920 pt 及以上 ×1.3）。同一配置在大窗口上滚动得更慢。</li>
+    </ul>
+    <h3>平台支持与发布产物</h3>
+    <ul class="body">
+      <li>OpenHarmony 播放后端与 Flutter 插件：AVCodec H.264 / HEVC 硬解、OHNativeBuffer / Vulkan 零拷贝呈现、WGPU 合成、字幕、弹幕、音频、诊断与 RGBA 截图。发布 <code>erika-capi-openharmony-arm64.zip</code>。</li>
+      <li>Windows ARM64 原生依赖与 <code>erika_capi</code> 构建，新增 <code>erika-capi-windows-arm64.zip</code>。</li>
+      <li>macOS arm64 / x86_64 / universal 可选构建与对应归档。</li>
+      <li>Apple Silicon 上 Android 源码构建改用 NDK 自带的通用 <code>glslc</code>。x86_64 产物重新启用 FFmpeg 优化汇编，源码构建需要 NASM。</li>
+    </ul>
+    <h3>播放、渲染与窗口集成</h3>
+    <ul class="body">
+      <li>共享播放时钟直接发布，帧快照原子采样时间、状态与代数。弹幕、字幕与渲染共用同一时间基。</li>
+      <li>暂停中 seek 解码并呈现预览帧，媒体时钟保持冻结。seek preroll、EOF、紧随 seek 的暂停与恢复启动竞态不再产生时钟回滚、worker 空转或长时间黑帧。</li>
+      <li>音频与视频的 demux 需求分离，音频背压不再阻塞视频包扫描。切换或添加字幕不重置音视频 demux 选择。</li>
+      <li>macOS 呈现重构为 <code>CVDisplayLink</code>，慢帧合并，屏幕变化后重设 display link。resize 与窗口迁移期间的重复 overlay 附着与 GPU 资源工作减少。</li>
+      <li>桌面 overlay API 支持多 <code>FlutterView</code> 与次窗口。播放器在宿主窗口间迁移时保持表面、可见性、代际与 aspect-fit 状态。</li>
+      <li>Windows D3D11 overlay 生命周期、非阻塞呈现与恢复 seek 处理改进。字幕在视频视口内合成，弹幕保持全窗口视口。</li>
+    </ul>
+    <h3>弹幕与字幕</h3>
+    <ul class="body">
+      <li>弹幕碰撞边界与光栅化描边对齐，修正阴影 / 描边 / 文字层序，稳定轨道偏好，高密度重叠限制在溢出轨。</li>
+      <li>异步重排期间旧弹幕 plan 继续移动；纯绘制设置复用布局，可见性即时生效。</li>
+      <li>增量 glyph atlas 上传与可复用 Metal instance buffer，减少每帧 DFM 分配与候选遍历开销。</li>
+      <li>外挂文本字幕的字符集检测与转码，覆盖 GBK、Big5、Shift_JIS、UTF-16，UTF-8 直通，低置信度或二进制输入回退保护。</li>
+      <li>libass 全平台注册 Erika 内置 Droid Sans Fallback；无系统字体提供者的目标默认该族，不再落到不可解析的 <code>Arial</code>。</li>
+      <li>字幕回退与选择性样式覆盖：自定义字体族与文件、RGBA 颜色、度量、文本属性、边框、对齐、边距、模糊。入口为 <code>erika_presenter_set_subtitle_font</code>、<code>erika_presenter_set_subtitle_style</code> 与 <code>ErikaPlayer.setSubtitleStyle</code>。</li>
+    </ul>
+    <h3>网络与媒体诊断</h3>
+    <ul class="body">
+      <li><code>erika_open_with_headers</code> 与 <code>erika_presenter_open_with_headers</code>。请求头应用到 probe、range 读、重试与预取，但不传给字幕与弹幕 sidecar。</li>
+      <li>拒绝宿主传入 Erika 管理的传输头与非法 HTTP 字段。HTTP range 输入加固：被忽略的 <code>Range</code>、错误偏移、瞬时失败、部分响应、重复预取与假 EOF，重试有界。</li>
+      <li>轨道 bitrate 与有理帧率元数据贯通 Rust、C、Dart。可选原生 debug HUD 覆盖解码器、渲染器、GPU、音频、输出与 HDR、弹幕诊断。</li>
+    </ul>
+    <h3>音频、色彩与编解码</h3>
+    <ul class="body">
+      <li>环绕到立体声降混矩阵归一化，防止削波。</li>
+      <li>全部音频后端加入逐回调音量斜坡；WASAPI 设备丢失恢复带可观测恢复状态与有界退避。</li>
+      <li>Metal、WGPU、D3D11 支持 BT.2100 HLG 解码；D3D11 overlay 在 HDR10 输出上正确编码 PQ。</li>
+      <li>FFmpeg 升至 8.1.2；Darwin AV1 硬解导入改进；seek 加载期间保留最后一帧，不再闪黑。</li>
+    </ul>
+  </section>
+
+  <section id="earlier">
+    <h2>0.1.3 及更早<span class="jp">以前</span><a class="anchor" href="#earlier">#</a></h2>
+    <p>0.1.3 引入 Android 完整播放路径（MediaCodec、AHardwareBuffer / wgpu、AAudio、PlatformView、字幕、弹幕、截图、SDR / HDR）。其中两条 breaking change 至今有效：</p>
+    <ul class="body">
+      <li><b>表面尺寸语义。</b> attach 与 resize 的 <code>width</code> / <code>height</code> 表示物理像素的精确 drawable 尺寸，不再乘以 <code>scale</code>。<code>scale</code> 只影响弹幕等逻辑 UI 内容。</li>
+      <li><b>play 异步化。</b> <code>play</code> 排队执行，不再等待播放 worker。最终结果以 <code>StateChanged</code> 与 <code>Error</code> 事件为准。</li>
+    </ul>
+  </section>
+
+  <footer class="doc-foot">
+    <span>Erika <b>v0.1.5</b></span>
+    <span>Section <b>Project</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="contributing.html"><span class="dir">Prev</span>贡献指南</a>
+    <a class="nx" href="../guide/quickstart.html"><span class="dir">Next</span>快速开始</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

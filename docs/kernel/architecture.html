@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>架构总览 — Erika 开发者文档</title>
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><span class="n">Erika</span><span class="v">v0.1.5</span></div>
+  <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <nav>
+    <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.html">快速开始</a></li>
+      <li><a href="../guide/rust.html">Rust 嵌入</a></li>
+      <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/flutter.html">Flutter 嵌入</a></li>
+    </ul>
+    <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="architecture.html" aria-current="page">架构总览</a></li>
+      <li><a href="decode.html">硬件解码</a></li>
+      <li><a href="zero-copy.html">零拷贝导入</a></li>
+      <li><a href="render.html">渲染管线</a></li>
+      <li><a href="hdr.html">高动态范围</a></li>
+      <li><a href="upscale.html">神经超分</a></li>
+      <li><a href="subtitle-danmaku.html">字幕与弹幕</a></li>
+      <li><a href="clock.html">时钟与调度</a></li>
+    </ul>
+    <h2><span class="no">三</span>项目 <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.html">构建与依赖</a></li>
+      <li><a href="../project/releasing.html">发布与产物</a></li>
+      <li><a href="../project/contributing.html">贡献指南</a></li>
+      <li><a href="../project/changelog.html">更新日志</a></li>
+    </ul>
+    <h2><span class="no">四</span>参考 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.html">C ABI 总览</a></li>
+      <li><a href="../reference/capi-handle.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>架构总览</p>
+  <h1>架构总览</h1>
+  <p class="kicker">Architecture</p>
+  <p class="lead">Erika 由 Rust 实现，从 demux、解码到 GPU 呈现、音频、字幕与弹幕均在内核内部完成。宿主提供渲染表面并发送播放命令，不参与渲染管线。</p>
+
+  <ul class="meta-strip">
+    <li>核心 crate <b>crates/erika</b></li>
+    <li>C ABI 层 <b>crates/erika_capi</b></li>
+    <li>内部线程 <b>5</b></li>
+    <li>后端 trait <b>3</b></li>
+  </ul>
+
+  <section id="repo">
+    <h2>仓库分层<span class="jp">構成</span><a class="anchor" href="#repo">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>路径</th><th>职责</th></tr></thead>
+        <tbody>
+          <tr><td class="k">crates/erika</td><td>核心播放库。Player、Presenter、渲染后端、音频、字幕、弹幕。</td></tr>
+          <tr><td class="k">crates/erika_capi</td><td>C ABI 导出层。全部导出以 <code>include/erika.h</code> 为准。</td></tr>
+          <tr><td class="k">crates/erika_ffmpeg_sys</td><td>FFmpeg bindgen 绑定。</td></tr>
+          <tr><td class="k">packages/erika_flutter</td><td>Flutter 插件，覆盖 macOS / iOS / tvOS / Windows / Android / HarmonyOS。</td></tr>
+          <tr><td class="k">examples/</td><td>验证、冒烟与演示程序。<code>macos_native_demo</code>、<code>windows_native_demo</code> 为端到端示例。</td></tr>
+          <tr><td class="k">xtask/</td><td>原生依赖构建编排。<code>deps plan / fetch / status / build</code>。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="modules">
+    <h2>模块划分<span class="jp">モジュール</span><a class="anchor" href="#modules">#</a></h2>
+    <p><code>crates/erika/src/</code> 下的模块按职责划分，平台相关代码以 <code>#[cfg(target_os = …)]</code> 门控，集中在 <code>apple.rs</code>、<code>windows.rs</code>、<code>android.rs</code>、<code>ohos.rs</code> 及其子目录。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>模块</th><th>职责</th></tr></thead>
+        <tbody>
+          <tr><td class="k">core</td><td><code>Player</code>、<code>PlayerConfig</code>、事件类型、<code>RendererBackend</code> trait。</td></tr>
+          <tr><td class="k">playback</td><td>播放状态机、音频主时钟、帧调度器、<code>VideoDecodePreference</code>。</td></tr>
+          <tr><td class="k">presenter</td><td><code>PresenterRuntime</code>。串起 player、renderer、audio、overlay，由 <code>render_tick</code> 驱动。</td></tr>
+          <tr><td class="k">ffmpeg</td><td>demux、decode、resample、seek。<code>DecoderBackend</code> 五种后端的选择与配置。</td></tr>
+          <tr><td class="k">audio</td><td><code>AudioOutputBackend</code> trait、f32 PCM ring buffer、音频时钟。</td></tr>
+          <tr><td class="k">renderer</td><td><code>metal</code>（Apple）、<code>d3d11</code>（Windows）、<code>wgpu</code>（Android、HarmonyOS）后端；<code>pipeline</code> 做后端无关的色彩与 tone map 决策。</td></tr>
+          <tr><td class="k">subtitle</td><td>SRT / WebVTT / ASS 解析与 libass 渲染，嵌入与外挂字幕轨。</td></tr>
+          <tr><td class="k">danmaku</td><td>Bilibili XML / JSON 解析、DFM+ 碰撞避让布局、glyph atlas 渲染。</td></tr>
+          <tr><td class="k">overlay</td><td>合成时间线，字幕与弹幕的播放窗口管理。</td></tr>
+          <tr><td class="k">source</td><td><code>MediaSource</code> trait，file 与 HTTP range 两种实现。</td></tr>
+          <tr><td class="k">trace / debug_hud</td><td>诊断设施。环境变量开关与 HUD 覆盖层。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="flow">
+    <h2>数据流<span class="jp">データフロー</span><a class="anchor" href="#flow">#</a></h2>
+    <p>播放链路从媒体源开始，到渲染表面结束：</p>
+    <div class="code">
+      <p class="lbl">playback data flow</p>
+<pre>MediaSource (file / HTTP range)
+  → demux (ffmpeg)
+  → decode (DecoderBackend: hardware / software)
+  → frame queue (video / audio / subtitle)
+  → PresenterRuntime::render_tick(host_time)
+  → RenderFrameContext { media_time, overlay, danmaku, output_size }
+  → RendererBackend::render_current_frame
+  → surface (Metal / D3D11 / wgpu)</pre>
+    </div>
+    <p>状态与事件走独立的 crossbeam channel。播放器状态变化、时长、轨道、缓冲、错误等信息发布到事件通道，宿主经 <code>poll_event</code> 或 Rust 侧的事件订阅消费。</p>
+    <div class="note">
+      <p><b>时间基准。</b> 音频输出是主时钟。视频呈现按 vsync 量化对齐音频时钟，细节见<a href="clock.html">时钟与调度</a>。</p>
+    </div>
+  </section>
+
+  <section id="threads">
+    <h2>线程模型<span class="jp">スレッド</span><a class="anchor" href="#threads">#</a></h2>
+    <p>内核内部维护 5 个常驻线程，另有一部分平台音频输出跑在系统回调上下文（CoreAudio 回调、WASAPI render 线程）。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>线程名</th><th>职责</th></tr></thead>
+        <tbody>
+          <tr><td class="k">erika-playback</td><td>命令循环。消费 <code>PlaybackCommand</code>，内联视频解码，管理状态机。</td></tr>
+          <tr><td class="k">erika-demux</td><td>demux 消费线程，向 playback 线程投递 bounded 包队列（容量 512）。</td></tr>
+          <tr><td class="k">erika-danmaku</td><td>弹幕 plan 生成。Mutex + Condvar 请求模型，结果经 unbounded channel 回传。</td></tr>
+          <tr><td class="k">erika-upscaler-build</td><td>ArtCNN 权重加载与后端构建（Metal 路径）。</td></tr>
+          <tr><td class="k">erika-wasapi-render</td><td>Windows WASAPI 音频输出线程。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>宿主线程与内核的边界由 C ABI 层约束：一个 handle 不提供内部同步，不得从多个线程并发调用。</p>
+  </section>
+
+  <section id="entry">
+    <h2>三个入口<span class="jp">エントリポイント</span><a class="anchor" href="#entry">#</a></h2>
+    <p>Erika 暴露三组使用方式，按宿主语言和渲染所有权区分。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>入口</th><th>宿主</th><th>渲染所有权</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Player</td><td>Rust</td><td>宿主拉取帧数据</td><td>完整 Rust API。事件订阅 + 视频/音频/字幕帧订阅。</td></tr>
+          <tr><td class="k">ErikaHandle</td><td>C / Swift / Dart FFI</td><td>宿主拉取帧数据</td><td>pull 模型。宿主自行管理渲染循环。</td></tr>
+          <tr><td class="k">ErikaPresenterHandle</td><td>C / Swift / Dart FFI</td><td>内核托管</td><td>push 模型。宿主提供表面并每帧调用 <code>render_tick</code>。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>三套入口共享同一套内部实现。C ABI 层每个导出函数用 <code>catch_unwind</code> 包裹，panic 映射为 <code>ErikaStatus_Panic</code>，不越过 FFI 边界。</p>
+  </section>
+
+  <section id="abstractions">
+    <h2>后端抽象<span class="jp">抽象化</span><a class="anchor" href="#abstractions">#</a></h2>
+    <p>平台差异收敛在三个 trait 之后，使 presenter 与渲染循环保持平台无关。</p>
+    <ul class="body">
+      <li><code>RendererBackend</code>（core.rs）— 表面附着与大小调整、<code>render_current_frame</code>、<code>upload_player_frame</code>、截图。Metal、D3D11、wgpu 三种实现。</li>
+      <li><code>AudioOutputBackend</code>（audio.rs）— 配置、播放控制、<code>push(PcmAudioFrame)</code>、时钟快照。CoreAudio / AudioQueue / WASAPI / AAudio / OHAudio 实现。</li>
+      <li><code>DecoderBackend</code>（ffmpeg.rs）— 软件、VideoToolbox、D3D11VA、MediaCodec、AVCodec 五种解码后端。</li>
+    </ul>
+    <p>选择规则：<code>RendererBackendPreference</code>（平台原生或 wgpu 回退）决定渲染后端，<code>VideoDecodePreference</code> 按平台默认选择解码后端。</p>
+  </section>
+
+  <section id="platforms">
+    <h2>平台覆盖<span class="jp">対応環境</span><a class="anchor" href="#platforms">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>平台</th><th>最低</th><th>解码</th><th>渲染</th><th>音频</th><th>状态</th></tr></thead>
+        <tbody>
+          <tr><td class="p">macOS</td><td class="m">14</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">CoreAudio</td><td class="st ok">可用</td></tr>
+          <tr><td class="p">iOS</td><td class="m">16</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">AudioQueue</td><td class="st ok">可用</td></tr>
+          <tr><td class="p">tvOS</td><td class="m">13</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">AudioQueue</td><td class="st ok">可用</td></tr>
+          <tr><td class="p">Windows</td><td class="m">10</td><td class="m">D3D11VA</td><td class="m">Direct3D 11</td><td class="m">WASAPI</td><td class="st ok">可用</td></tr>
+          <tr><td class="p">Android</td><td class="m">8</td><td class="m">MediaCodec / 软解</td><td class="m">wgpu · Vulkan+GLES</td><td class="m">AAudio</td><td class="st ok">可用</td></tr>
+          <tr><td class="p">HarmonyOS</td><td class="m">API 18</td><td class="m">AVCodec / 软解</td><td class="m">wgpu · Vulkan</td><td class="m">OHAudio</td><td class="st ok">可用</td></tr>
+          <tr><td class="p">Linux</td><td class="m">—</td><td class="m">—</td><td class="m">wgpu</td><td class="m">—</td><td class="st wait">规划中</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>平台表上方的版本为功能基线。构建时实际部署目标为 macOS 11.0 / iOS 13.0，见<a href="../project/building.html">构建与依赖</a>。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>Erika <b>v0.1.5</b></span>
+    <span>Section <b>Kernel</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="../guide/flutter.html"><span class="dir">Prev</span>Flutter 嵌入</a>
+    <a class="nx" href="decode.html"><span class="dir">Next</span>硬件解码</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

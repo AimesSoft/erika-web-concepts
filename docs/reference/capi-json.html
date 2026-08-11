@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JSON bridge — Erika 开发者文档</title>
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><span class="n">Erika</span><span class="v">v0.1.5</span></div>
+  <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <nav>
+    <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.html">快速开始</a></li>
+      <li><a href="../guide/rust.html">Rust 嵌入</a></li>
+      <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/flutter.html">Flutter 嵌入</a></li>
+    </ul>
+    <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.html">架构总览</a></li>
+      <li><a href="../kernel/decode.html">硬件解码</a></li>
+      <li><a href="../kernel/zero-copy.html">零拷贝导入</a></li>
+      <li><a href="../kernel/render.html">渲染管线</a></li>
+      <li><a href="../kernel/hdr.html">高动态范围</a></li>
+      <li><a href="../kernel/upscale.html">神经超分</a></li>
+      <li><a href="../kernel/subtitle-danmaku.html">字幕与弹幕</a></li>
+      <li><a href="../kernel/clock.html">时钟与调度</a></li>
+    </ul>
+    <h2><span class="no">三</span>项目 <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.html">构建与依赖</a></li>
+      <li><a href="../project/releasing.html">发布与产物</a></li>
+      <li><a href="../project/contributing.html">贡献指南</a></li>
+      <li><a href="../project/changelog.html">更新日志</a></li>
+    </ul>
+    <h2><span class="no">四</span>参考 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="capi.html">C ABI 总览</a></li>
+      <li><a href="capi-handle.html">ErikaHandle</a></li>
+      <li><a href="capi-presenter.html">ErikaPresenterHandle</a></li>
+      <li><a href="capi-json.html" aria-current="page">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>JSON bridge</p>
+  <h1>JSON bridge</h1>
+  <p class="kicker">JSON Bridge Reference</p>
+  <p class="lead">三个 JSON 变体函数与 33 个命名方法。供已用平台通道序列化结构化参数的宿主使用，例如 Dart FFI 宿主的 <code>MethodChannel</code> 一侧。方法与 presenter 的 C 函数一一对应，参数经 JSON 对象传入。</p>
+
+  <ul class="meta-strip">
+    <li>方法 <b>33</b> 个</li>
+    <li>命名 <b>camelCase</b></li>
+  </ul>
+
+  <section id="entries">
+    <h2>入口函数<span class="jp">入口関数</span><a class="anchor" href="#entries">#</a></h2>
+
+    <div class="api" id="erika_presenter_invoke_json">
+      <p class="sig"><b>char *erika_presenter_invoke_json</b>(ErikaPresenterHandle *handle, const char *method, const char *arguments_json)</p>
+      <p class="desc">调用命名方法。返回的 JSON 字符串归调用方所有，用 <code>erika_string_free</code> 释放。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_render_tick_json">
+      <p class="sig"><b>char *erika_presenter_render_tick_json</b>(ErikaPresenterHandle *handle, double time_seconds)</p>
+      <p class="desc"><code>render_tick</code> 的 JSON 变体，返回统计 JSON。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_poll_event_json">
+      <p class="sig"><b>char *erika_presenter_poll_event_json</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc"><code>poll_event</code> 的 JSON 变体。事件队列为空时返回 NULL。</p>
+    </div>
+
+    <p class="note">返回字符串的释放规则与 C 面一致：<code>invoke_json</code> / <code>render_tick_json</code> 的结果用 <code>erika_string_free</code>；<code>poll_event_json</code> 的空闲 NULL 不需要释放。未知方法名返回错误响应。</p>
+  </section>
+
+  <section id="envelope">
+    <h2>响应信封<span class="jp">レスポンス</span><a class="anchor" href="#envelope">#</a></h2>
+    <p>成功响应：</p>
+    <div class="code">
+<pre>{ "ok": true, "status": 0, "value": <span class="c">/* 方法返回值，无值时为 null */</span> }</pre>
+    </div>
+    <p>失败响应：</p>
+    <div class="code">
+<pre>{ "ok": false, "status": 3, "error": "human readable message" }</pre>
+    </div>
+    <p>只检查 <code>ok</code> 字段。错误消息与 C 面的线程局部错误一致；panic 被捕获并映射为相同形状的错误响应。</p>
+  </section>
+
+  <section id="methods">
+    <h2>方法清单<span class="jp">メソッド</span><a class="anchor" href="#methods">#</a></h2>
+    <p>参数名一律 camelCase。方括号内为可选参数，省略时使用 C 函数默认值。只列出参数与返回，语义与同名的 <a href="capi-presenter.html">C 函数</a>一致。</p>
+
+    <h3>播放控制</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>方法</th><th>参数</th><th>返回</th></tr></thead>
+        <tbody>
+          <tr><td class="k">open</td><td class="m">uri，[headers]</td><td class="m">null</td></tr>
+          <tr><td class="k">play / pause / stop / close</td><td class="m">—</td><td class="m">null</td></tr>
+          <tr><td class="k">seek</td><td class="m">positionMicros</td><td class="m">null</td></tr>
+          <tr><td class="k">setPlaybackRate</td><td class="m">rate</td><td class="m">null</td></tr>
+          <tr><td class="k">setVolume</td><td class="m">volume</td><td class="m">null</td></tr>
+          <tr><td class="k">setUpscaler</td><td class="m">mode</td><td class="m">null</td></tr>
+          <tr><td class="k">setSubtitleScale</td><td class="m">scale</td><td class="m">null</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>轨道</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>方法</th><th>参数</th><th>返回</th></tr></thead>
+        <tbody>
+          <tr><td class="k">tracks</td><td class="m">—</td><td class="m">轨道数组</td></tr>
+          <tr><td class="k">addExternalSubtitle</td><td class="m">uri</td><td class="m">trackId</td></tr>
+          <tr><td class="k">removeSubtitleTrack</td><td class="m">trackId</td><td class="m">null</td></tr>
+          <tr><td class="k">selectAudioTrack / selectSubtitleTrack</td><td class="m">[trackId]，默认 -1</td><td class="m">null</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>内存字体</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>方法</th><th>参数</th><th>返回</th></tr></thead>
+        <tbody>
+          <tr><td class="k">selectSubtitleMemoryFonts</td><td class="m">fontIds</td><td class="m">null</td></tr>
+          <tr><td class="k">clearSubtitleMemoryFonts</td><td class="m">—</td><td class="m">null</td></tr>
+          <tr><td class="k">getSubtitleMemoryFontStatus</td><td class="m">—</td><td class="m">字体注册状态</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>弹幕</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>方法</th><th>参数</th><th>返回</th></tr></thead>
+        <tbody>
+          <tr><td class="k">loadDanmakuFile</td><td class="m">uri</td><td class="m">null</td></tr>
+          <tr><td class="k">loadDanmakuJson</td><td class="m">json</td><td class="m">null</td></tr>
+          <tr><td class="k">addDanmakuTrackFile</td><td class="m">uri，[name]，[offsetMicros]</td><td class="m">trackId</td></tr>
+          <tr><td class="k">addDanmakuTrackJson</td><td class="m">json，[name]，[offsetMicros]</td><td class="m">trackId</td></tr>
+          <tr><td class="k">removeDanmakuTrack</td><td class="m">trackId</td><td class="m">null</td></tr>
+          <tr><td class="k">setDanmakuTrackEnabled</td><td class="m">trackId，[enabled]，默认 true</td><td class="m">null</td></tr>
+          <tr><td class="k">setDanmakuTrackOffset</td><td class="m">trackId，[offsetMicros]</td><td class="m">null</td></tr>
+          <tr><td class="k">setDanmakuGlobalOffset</td><td class="m">[offsetMicros]</td><td class="m">null</td></tr>
+          <tr><td class="k">danmakuTracks</td><td class="m">—</td><td class="m">弹幕轨数组</td></tr>
+          <tr><td class="k">clearDanmaku</td><td class="m">—</td><td class="m">null</td></tr>
+          <tr><td class="k">setDanmakuEnabled</td><td class="m">[enabled]，默认 true</td><td class="m">null</td></tr>
+          <tr><td class="k">setDanmakuConfig</td><td class="m">部分覆盖字段</td><td class="m">null</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><code>setDanmakuConfig</code> 只覆盖传入的字段，未提供的字段保持当前值。可用的字段名与 <code>ErikaDanmakuConfig</code> 一致：<code>enabled</code>、<code>fontSize</code>、<code>opacity</code>、<code>displayArea</code> 等。</p>
+
+    <h3>状态查询</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>方法</th><th>参数</th><th>返回</th></tr></thead>
+        <tbody>
+          <tr><td class="k">getUpscalerStatus</td><td class="m">—</td><td class="m">超分状态</td></tr>
+          <tr><td class="k">getOutputStatus</td><td class="m">—</td><td class="m">输出状态</td></tr>
+          <tr><td class="k">getPresenterStats</td><td class="m">—</td><td class="m">渲染统计</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="example">
+    <h2>示例<span class="jp">例</span><a class="anchor" href="#example">#</a></h2>
+    <div class="code">
+<pre><span class="c">// seek 到 30 秒</span>
+char *out = erika_presenter_invoke_json(p,
+    <span class="s">"seek"</span>, <span class="s">"{ \"positionMicros\": 30000000 }"</span>);
+<span class="c">// {"ok":true,"status":0,"value":null}</span>
+erika_string_free(out);
+
+<span class="c">// 打开并附带请求头</span>
+out = erika_presenter_invoke_json(p, <span class="s">"open"</span>,
+    <span class="s">"{ \"uri\": \"https://example.com/v.mp4\", "</span>
+    <span class="s">"\"headers\": [{\"name\":\"Referer\",\"value\":\"https://example.com\"}] }"</span>);
+erika_string_free(out);
+
+<span class="c">// 事件轮询：队列为空时返回 NULL</span>
+char *ev = erika_presenter_poll_event_json(p);
+<span class="k">if</span> (ev) { erika_string_free(ev); }</pre>
+    </div>
+  </section>
+
+  <footer class="doc-foot">
+    <span>Erika <b>v0.1.5</b></span>
+    <span>Section <b>Reference</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="capi-presenter.html"><span class="dir">Prev</span>ErikaPresenterHandle 参考</a>
+    <a class="nx" href="../project/building.html"><span class="dir">Next</span>构建与依赖</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

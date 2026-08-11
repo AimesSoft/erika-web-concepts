@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>快速开始 — Erika 开发者文档</title>
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><span class="n">Erika</span><span class="v">v0.1.5</span></div>
+  <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <nav>
+    <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="quickstart.html" aria-current="page">快速开始</a></li>
+      <li><a href="rust.html">Rust 嵌入</a></li>
+      <li><a href="c.html">C ABI 嵌入</a></li>
+      <li><a href="flutter.html">Flutter 嵌入</a></li>
+    </ul>
+    <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.html">架构总览</a></li>
+      <li><a href="../kernel/decode.html">硬件解码</a></li>
+      <li><a href="../kernel/zero-copy.html">零拷贝导入</a></li>
+      <li><a href="../kernel/render.html">渲染管线</a></li>
+      <li><a href="../kernel/hdr.html">高动态范围</a></li>
+      <li><a href="../kernel/upscale.html">神经超分</a></li>
+      <li><a href="../kernel/subtitle-danmaku.html">字幕与弹幕</a></li>
+      <li><a href="../kernel/clock.html">时钟与调度</a></li>
+    </ul>
+    <h2><span class="no">三</span>项目 <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.html">构建与依赖</a></li>
+      <li><a href="../project/releasing.html">发布与产物</a></li>
+      <li><a href="../project/contributing.html">贡献指南</a></li>
+      <li><a href="../project/changelog.html">更新日志</a></li>
+    </ul>
+    <h2><span class="no">四</span>参考 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.html">C ABI 总览</a></li>
+      <li><a href="../reference/capi-handle.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>快速开始</p>
+  <h1>快速开始</h1>
+  <p class="kicker">Quickstart</p>
+  <p class="lead">Erika 尚未发布到 crates.io 与 pub.dev。接入方式有两种：直接使用 GitHub Releases 的预编译归档，或以 git 依赖从源码构建。两种方式都按宿主语言选择入口。</p>
+
+  <ul class="meta-strip">
+    <li>预编译 <b>6 平台</b></li>
+    <li>源码 <b>Rust 1.92+</b></li>
+    <li>原生依赖 <b>静态链接</b></li>
+  </ul>
+
+  <section id="prebuilt">
+    <h2>预编译产物<span class="jp">プリビルト</span><a class="anchor" href="#prebuilt">#</a></h2>
+    <p>GitHub Releases（<code>github.com/AimesSoft/Erika/releases</code>）按平台提供归档。原生依赖（FFmpeg、libass、FreeType、HarfBuzz、FriBidi、zlib、dav1d）已经以 <code>lgpl</code> profile 静态链接，除操作系统框架外自包含。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>归档</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr><td class="m">erika-capi-macos-universal.zip</td><td>liberika_capi.dylib / .a</td></tr>
+          <tr><td class="m">erika-capi-windows-x64.zip</td><td>erika_capi.dll / .dll.lib / .lib</td></tr>
+          <tr><td class="m">erika-capi-ios.zip</td><td>erika_capi.xcframework</td></tr>
+          <tr><td class="m">erika-capi-tvos.zip</td><td>erika_capi.xcframework</td></tr>
+          <tr><td class="m">erika-capi-android.zip</td><td>4 个 ABI 的库 + libc++_shared.so</td></tr>
+          <tr><td class="m">erika-capi-openharmony-arm64.zip</td><td>liberika_capi.so + N-API 桥</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>每个归档含 <code>include/erika.h</code>、许可证文本与记录 tag/commit 的 <code>MANIFEST.txt</code>。Linux 暂未发布。归档的消费方式见<a href="../project/releasing.html">发布与产物</a>。</p>
+  </section>
+
+  <section id="rust">
+    <h2>Rust 接入<span class="jp">Rust</span><a class="anchor" href="#rust">#</a></h2>
+    <div class="code">
+      <p class="lbl">Cargo.toml</p>
+<pre><span class="c"># 或使用预编译归档的 .a / .dylib 与 erika.h（经 FFI 调用）</span>
+[dependencies]
+erika = { git = <span class="s">"https://github.com/AimesSoft/Erika"</span>, tag = <span class="s">"v0.1.5"</span> }</pre>
+    </div>
+    <p>从源码构建前，先用 xtask 准备原生依赖：</p>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>cargo run -p xtask -- deps build --all --profile lgpl</pre>
+    </div>
+    <div class="code">
+      <p class="lbl">src/main.rs</p>
+<pre><span class="k">use</span> erika::{Player, PlayerConfig, MediaRequest};
+
+<span class="k">let</span> player = Player::new(PlayerConfig::default())?;
+player.open(MediaRequest::file(<span class="s">"/path/to/video.mp4"</span>))?;
+player.play()?;</pre>
+    </div>
+    <p>完整 API 见<a href="rust.html">Rust 嵌入</a>。</p>
+  </section>
+
+  <section id="c">
+    <h2>C 接入<span class="jp">C ABI</span><a class="anchor" href="#c">#</a></h2>
+    <p>使用预编译归档中的 <code>erika.h</code> 与 <code>liberika_capi</code>。push 模型的最小示例：</p>
+    <div class="code">
+      <p class="lbl">main.c</p>
+<pre><span class="k">#include</span> <span class="s">"erika.h"</span>
+
+ErikaPresenterHandle *p = erika_presenter_create();
+erika_presenter_attach_metal_layer(p, (uint64_t)layer, w, h, scale);
+erika_presenter_open(p, <span class="s">"/path/to/video.mp4"</span>);
+erika_presenter_play(p);
+
+<span class="c">/* 每个显示帧 */</span>
+ErikaPresenterStats stats;
+erika_presenter_render_tick(p, host_time, &amp;stats);</pre>
+    </div>
+    <p><code>ErikaPresenterHandle</code> 由内核托管完整播放栈。宿主自行管理渲染循环时改用 <code>ErikaHandle</code> 拉取帧数据。完整对比与约定见<a href="c.html">C ABI 嵌入</a>。</p>
+  </section>
+
+  <section id="flutter">
+    <h2>Flutter 接入<span class="jp">Flutter</span><a class="anchor" href="#flutter">#</a></h2>
+    <div class="code">
+      <p class="lbl">pubspec.yaml</p>
+<pre>dependencies:
+  erika_flutter:
+    git:
+      url: https://github.com/AimesSoft/Erika
+      path: packages/erika_flutter</pre>
+    </div>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre><span class="k">export</span> ERIKA_PREBUILT=1   <span class="c"># 使用预编译运行时，下载失败回退源码构建</span></pre>
+    </div>
+    <div class="code">
+      <p class="lbl">lib/main.dart</p>
+<pre><span class="k">final</span> player = ErikaPlayer();
+<span class="k">await</span> player.open(<span class="s">'/path/to/video.mp4'</span>);
+<span class="k">await</span> player.play();</pre>
+    </div>
+    <p>插件覆盖 macOS / iOS / tvOS / Windows / Android / HarmonyOS 六个目标。视图路径与完整 API 见<a href="flutter.html">Flutter 嵌入</a>。</p>
+  </section>
+
+  <section id="platforms">
+    <h2>平台支持<span class="jp">対応環境</span><a class="anchor" href="#platforms">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>平台</th><th>最低</th><th>解码</th><th>渲染</th><th>音频</th><th>状态</th></tr></thead>
+        <tbody>
+          <tr><td class="p">macOS</td><td class="m">14</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">CoreAudio</td><td class="st ok">可用</td></tr>
+          <tr><td class="p">iOS</td><td class="m">16</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">AudioQueue</td><td class="st ok">可用</td></tr>
+          <tr><td class="p">tvOS</td><td class="m">13</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">AudioQueue</td><td class="st ok">可用</td></tr>
+          <tr><td class="p">Windows</td><td class="m">10</td><td class="m">D3D11VA</td><td class="m">Direct3D 11</td><td class="m">WASAPI</td><td class="st ok">可用</td></tr>
+          <tr><td class="p">Android</td><td class="m">8</td><td class="m">MediaCodec / 软解</td><td class="m">wgpu · Vulkan+GLES</td><td class="m">AAudio</td><td class="st ok">可用</td></tr>
+          <tr><td class="p">HarmonyOS</td><td class="m">API 18</td><td class="m">AVCodec / 软解</td><td class="m">wgpu · Vulkan</td><td class="m">OHAudio</td><td class="st ok">可用</td></tr>
+          <tr><td class="p">Linux</td><td class="m">—</td><td class="m">—</td><td class="m">wgpu</td><td class="m">—</td><td class="st wait">规划中</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="doc-foot">
+    <span>Erika <b>v0.1.5</b></span>
+    <span>Section <b>Guide</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="../index.html"><span class="dir">Prev</span>文档目录</a>
+    <a class="nx" href="rust.html"><span class="dir">Next</span>Rust 嵌入</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

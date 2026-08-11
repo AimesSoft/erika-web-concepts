@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>字幕与弹幕 — Erika 开发者文档</title>
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><span class="n">Erika</span><span class="v">v0.1.5</span></div>
+  <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <nav>
+    <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.html">快速开始</a></li>
+      <li><a href="../guide/rust.html">Rust 嵌入</a></li>
+      <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/flutter.html">Flutter 嵌入</a></li>
+    </ul>
+    <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="architecture.html">架构总览</a></li>
+      <li><a href="decode.html">硬件解码</a></li>
+      <li><a href="zero-copy.html">零拷贝导入</a></li>
+      <li><a href="render.html">渲染管线</a></li>
+      <li><a href="hdr.html">高动态范围</a></li>
+      <li><a href="upscale.html">神经超分</a></li>
+      <li><a href="subtitle-danmaku.html" aria-current="page">字幕与弹幕</a></li>
+      <li><a href="clock.html">时钟与调度</a></li>
+    </ul>
+    <h2><span class="no">三</span>项目 <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.html">构建与依赖</a></li>
+      <li><a href="../project/releasing.html">发布与产物</a></li>
+      <li><a href="../project/contributing.html">贡献指南</a></li>
+      <li><a href="../project/changelog.html">更新日志</a></li>
+    </ul>
+    <h2><span class="no">四</span>参考 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.html">C ABI 总览</a></li>
+      <li><a href="../reference/capi-handle.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>字幕与弹幕</p>
+  <h1>字幕与弹幕</h1>
+  <p class="kicker">Subtitle &amp; Danmaku</p>
+  <p class="lead">字幕轨支持 SRT / WebVTT / ASS，由 libass 渲染；弹幕支持 Bilibili XML 与 JSON 两种输入，走 DFM+ 碰撞避让布局，经 glyph atlas 在 GPU 上绘制。两者都在渲染管线的合成 pass 中与视频合屏。</p>
+
+  <ul class="meta-strip">
+    <li>字幕渲染 <b>libass</b></li>
+    <li>弹幕布局 <b>DFM+</b></li>
+    <li>绘制 <b>glyph atlas</b></li>
+  </ul>
+
+  <section id="subtitle">
+    <h2>字幕<span class="jp">字幕</span><a class="anchor" href="#subtitle">#</a></h2>
+    <p>字幕轨分嵌入与外挂两种来源（<code>ErikaTrackSource</code>）。外挂字幕经 <code>add_external_subtitle</code> 添加，返回轨道 id；字幕轨 id 为 -1 表示禁用字幕。外部文本字幕自带字符集检测与转码，覆盖 GBK、Big5、Shift_JIS、UTF-16，UTF-8 直通，低置信度或二进制输入走保守回退。</p>
+    <p>渲染统一由 libass 完成，内嵌的 Droid Sans Fallback 在所有平台上注册为内存字体，无系统字体提供者的目标平台默认使用该家族。</p>
+    <h3>样式覆盖</h3>
+    <p>宿主可以整体覆盖字幕样式。覆盖粒度按位控制，<code>ErikaSubtitleStyle.override_mask</code> 的位标志：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>标志</th><th>位</th><th>覆盖项</th></tr></thead>
+        <tbody>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_FONT_SIZE_FIELDS</td><td class="m">2</td><td>字号</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_FONT_NAME</td><td class="m">3</td><td>字体族与字体文件</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_COLORS</td><td class="m">4</td><td>主色与描边色</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_ATTRIBUTES</td><td class="m">5</td><td>粗体、斜体、下划线、删除线</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_BORDER</td><td class="m">6</td><td>边框样式与宽度</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_ALIGNMENT</td><td class="m">7</td><td>对齐</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_MARGINS</td><td class="m">8</td><td>边距</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_BLUR</td><td class="m">11</td><td>模糊</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><code>ERIKA_SUBTITLE_OVERRIDE_ALL</code> 是以上各位的组合。容器 ASS 脚本保留自己的字体，除非宿主通过字体名覆盖位强制替换。</p>
+    <h3>内存字体</h3>
+    <p>0.1.5 引入内存字体注册表。宿主可以注册字体数据（不写盘）、查询字体的 faces、选择有序回退集合、替换字体数据并清空注册表。已激活字幕轨在字体替换后立即使用新数据，渲染器缓存自动失效。</p>
+  </section>
+
+  <section id="danmaku">
+    <h2>弹幕<span class="jp">弾幕</span><a class="anchor" href="#danmaku">#</a></h2>
+    <p>弹幕输入为 Bilibili XML（文件或 URL）与 JSON（内联字符串）。两条加载路径：</p>
+    <ul class="body">
+      <li><code>load_danmaku_file</code> / <code>load_danmaku_json</code> — 替换全部弹幕为一条匿名轨。</li>
+      <li><code>add_danmaku_track_file</code> / <code>add_danmaku_track_json</code> — 建立命名多轨列表，每轨可单独启停与偏移。</li>
+    </ul>
+    <p>轨级 <code>offset_micros</code> 偏移单条轨的时间线，全局偏移作用于所有轨。布局在 <code>erika-danmaku</code> 线程中生成，plan 以 generation 与 media time 门控，与视频保持同步。</p>
+    <h3>DFM+ 布局</h3>
+    <p>弹幕布局由 DFM+ 碰撞避让引擎完成：滚动、顶部与底部三种模式各自的轨道分配、密度限制与覆盖策略。绘制走 glyph atlas，字形一次性栅格化进 atlas，之后逐帧以实例化顶点绘制。</p>
+    <p>布局参数经 <code>ErikaDanmakuConfig</code> 控制：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>字段</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">font_size</td><td>弹幕逻辑字号，与 NipaPlay 默认弹幕字体一致，按表面 scale 换算为 glyph 像素。</td></tr>
+          <tr><td class="m">opacity / outline_width / shadow_*</td><td>透明度、描边宽度、阴影偏移与样式。</td></tr>
+          <tr><td class="m">display_area</td><td>弹幕可占的显示区域比例。</td></tr>
+          <tr><td class="m">scroll_duration_seconds / scroll_speed_factor</td><td>滚动时长与速度系数。</td></tr>
+          <tr><td class="m">merge_duplicates</td><td>重复弹幕合并。</td></tr>
+          <tr><td class="m">allow_stacking / allow_scroll_overwrite</td><td>同轨堆叠与滚动覆盖策略。</td></tr>
+          <tr><td class="m">max_quantity / max_lines_per_mode</td><td>弹幕总量与单模式最大行数。</td></tr>
+          <tr><td class="m">block_top / block_bottom / block_scroll</td><td>按模式屏蔽弹幕。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>屏蔽词经 <code>set_danmaku_block_words_json</code> 提供，JSON 数组格式，逐条匹配弹幕文本。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>Erika <b>v0.1.5</b></span>
+    <span>Section <b>Kernel</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="upscale.html"><span class="dir">Prev</span>神经超分</a>
+    <a class="nx" href="clock.html"><span class="dir">Next</span>时钟与调度</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

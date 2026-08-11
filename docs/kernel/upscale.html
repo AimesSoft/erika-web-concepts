@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>神经超分 — Erika 开发者文档</title>
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><span class="n">Erika</span><span class="v">v0.1.5</span></div>
+  <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <nav>
+    <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.html">快速开始</a></li>
+      <li><a href="../guide/rust.html">Rust 嵌入</a></li>
+      <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/flutter.html">Flutter 嵌入</a></li>
+    </ul>
+    <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="architecture.html">架构总览</a></li>
+      <li><a href="decode.html">硬件解码</a></li>
+      <li><a href="zero-copy.html">零拷贝导入</a></li>
+      <li><a href="render.html">渲染管线</a></li>
+      <li><a href="hdr.html">高动态范围</a></li>
+      <li><a href="upscale.html" aria-current="page">神经超分</a></li>
+      <li><a href="subtitle-danmaku.html">字幕与弹幕</a></li>
+      <li><a href="clock.html">时钟与调度</a></li>
+    </ul>
+    <h2><span class="no">三</span>项目 <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.html">构建与依赖</a></li>
+      <li><a href="../project/releasing.html">发布与产物</a></li>
+      <li><a href="../project/contributing.html">贡献指南</a></li>
+      <li><a href="../project/changelog.html">更新日志</a></li>
+    </ul>
+    <h2><span class="no">四</span>参考 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.html">C ABI 总览</a></li>
+      <li><a href="../reference/capi-handle.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>神经超分</p>
+  <h1>神经超分</h1>
+  <p class="kicker">Neural Upscaling</p>
+  <p class="lead">ArtCNN 是一个面向动漫内容的亮度 2× 神经超分模型。它只处理亮度通道，输出以 <code>NeuralUpscale</code> pass 接入渲染管线。后端不可用时保留原生亮度采样，并显式上报 <code>Inactive</code> 状态。</p>
+
+  <ul class="meta-strip">
+    <li>模型 <b>ArtCNN C4</b></li>
+    <li>倍数 <b>亮度 ×2</b></li>
+    <li>执行 <b>Metal / wgpu</b></li>
+  </ul>
+
+  <section id="model">
+    <h2>模型与模式<span class="jp">モデル</span><a class="anchor" href="#model">#</a></h2>
+    <p>模型权重随 crate 内嵌（<code>crates/erika/assets/artcnn</code>），编译期打包，运行时不访问文件系统。权重按 F16 与 F32 两种精度提供，对应两种请求模式：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>模式</th><th>值</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Off</td><td class="m">0</td><td>关闭超分，原生亮度采样。</td></tr>
+          <tr><td class="k">ArtCnnC4F16</td><td class="m">1</td><td>半精度权重，面向 Metal simdgroup matrix 路径。</td></tr>
+          <tr><td class="k">ArtCnnC4F32</td><td class="m">2</td><td>单精度权重，面向 wgpu compute 路径。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="backends">
+    <h2>执行路径<span class="jp">実行経路</span><a class="anchor" href="#backends">#</a></h2>
+    <p>两种 compute 实现共享同一份模型描述，权重格式对应请求模式：</p>
+    <ul class="body">
+      <li><b>Metal</b>（macOS / iOS / tvOS）— simdgroup matrix 卷积。权重在 <code>erika-upscaler-build</code> 线程后台构建，构建完成后以 <code>SimdgroupMatrix</code> 状态接入管线。</li>
+      <li><b>wgpu compute</b>（Android / HarmonyOS）— 分块 compute 算子，F32 路径。</li>
+    </ul>
+    <p>其余渲染后端（D3D11）没有 ArtCNN 执行器，请求启用时保留原生亮度采样，<code>active_backend</code> 报告 <code>Inactive</code>，宿主可以看到该平台不支持超分。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>后端状态</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">Off</td><td>未请求。</td></tr>
+          <tr><td class="m">Inactive</td><td>已请求但后端不可用，保留原生采样。</td></tr>
+          <tr><td class="m">Building</td><td>权重构建中，尚未接入管线。</td></tr>
+          <tr><td class="m">Scalar</td><td>标量执行路径。</td></tr>
+          <tr><td class="m">SimdgroupMatrix</td><td>simdgroup matrix 执行路径。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="pipeline">
+    <h2>接入方式<span class="jp">パイプライン</span><a class="anchor" href="#pipeline">#</a></h2>
+    <p>超分作为 <code>NeuralUpscale</code> pass 插入 pass 图，位于导入与采样之间：亮度通道经模型放大 2×，色度通道按常规缩放。后续的 tone mapping、合成与输出变换保持不变。</p>
+    <p>每帧的编码与 GPU 耗时记录在 <code>last_encode_micros</code> 与 <code>last_gpu_micros</code>。执行失败会累计 <code>fallback_count</code> 并临时回退原生采样，下一帧重试。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>Erika <b>v0.1.5</b></span>
+    <span>Section <b>Kernel</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="hdr.html"><span class="dir">Prev</span>高动态范围</a>
+    <a class="nx" href="subtitle-danmaku.html"><span class="dir">Next</span>字幕与弹幕</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

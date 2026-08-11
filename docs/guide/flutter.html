@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flutter 嵌入 — Erika 开发者文档</title>
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><span class="n">Erika</span><span class="v">v0.1.5</span></div>
+  <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <nav>
+    <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="quickstart.html">快速开始</a></li>
+      <li><a href="rust.html">Rust 嵌入</a></li>
+      <li><a href="c.html">C ABI 嵌入</a></li>
+      <li><a href="flutter.html" aria-current="page">Flutter 嵌入</a></li>
+    </ul>
+    <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.html">架构总览</a></li>
+      <li><a href="../kernel/decode.html">硬件解码</a></li>
+      <li><a href="../kernel/zero-copy.html">零拷贝导入</a></li>
+      <li><a href="../kernel/render.html">渲染管线</a></li>
+      <li><a href="../kernel/hdr.html">高动态范围</a></li>
+      <li><a href="../kernel/upscale.html">神经超分</a></li>
+      <li><a href="../kernel/subtitle-danmaku.html">字幕与弹幕</a></li>
+      <li><a href="../kernel/clock.html">时钟与调度</a></li>
+    </ul>
+    <h2><span class="no">三</span>项目 <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.html">构建与依赖</a></li>
+      <li><a href="../project/releasing.html">发布与产物</a></li>
+      <li><a href="../project/contributing.html">贡献指南</a></li>
+      <li><a href="../project/changelog.html">更新日志</a></li>
+    </ul>
+    <h2><span class="no">四</span>参考 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.html">C ABI 总览</a></li>
+      <li><a href="../reference/capi-handle.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Flutter 嵌入</p>
+  <h1>Flutter 嵌入</h1>
+  <p class="kicker">Flutter Embedding</p>
+  <p class="lead">插件 <code>erika_flutter</code> 覆盖 macOS / iOS / tvOS / Windows / Android / HarmonyOS 六个目标。播放器 API 与原生侧一一对应，视图提供两条路径：platform view 用于兼容与诊断，原生 window overlay 是桌面端的推荐路径。</p>
+
+  <ul class="meta-strip">
+    <li>目标 <b>6</b> 平台</li>
+    <li>视图路径 <b>2</b> 条</li>
+    <li>Dart SDK <b>≥3.5</b></li>
+  </ul>
+
+  <section id="setup">
+    <h2>依赖<span class="jp">依存</span><a class="anchor" href="#setup">#</a></h2>
+    <div class="code">
+      <p class="lbl">pubspec.yaml</p>
+<pre>dependencies:
+  erika_flutter:
+    git:
+      url: https://github.com/AimesSoft/Erika
+      path: packages/erika_flutter</pre>
+    </div>
+    <p>环境要求：Dart SDK ≥ 3.5.0，Flutter ≥ 3.24.0。构建时默认从源码编译原生库；设置 <code>ERIKA_PREBUILT=1</code> 后改用预编译运行时，下载失败自动回退源码构建。Android 与 HarmonyOS 的预编译消费方式见<a href="../project/releasing.html">发布与产物</a>。</p>
+  </section>
+
+  <section id="player">
+    <h2>播放器 API<span class="jp">プレイヤー API</span><a class="anchor" href="#player">#</a></h2>
+    <div class="code">
+      <p class="lbl">lib/main.dart</p>
+<pre><span class="k">final</span> player = ErikaPlayer();
+<span class="k">await</span> player.open(<span class="s">'/path/to/video.mp4'</span>);
+<span class="k">await</span> player.play();
+
+<span class="k">await</span> player.seek(Duration(seconds: 30));
+<span class="k">await</span> player.setPlaybackRate(1.25);
+<span class="k">await</span> player.setVolume(0.8);
+
+<span class="k">await</span> player.dispose();</pre>
+    </div>
+    <p>方法与 C ABI 的 presenter 面一一对应：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>分组</th><th>方法</th></tr></thead>
+        <tbody>
+          <tr><td class="k">播放控制</td><td class="m">open / play / pause / stop / close / seek / setPlaybackRate / setVolume</td></tr>
+          <tr><td class="k">字幕</td><td class="m">addExternalSubtitle / removeSubtitleTrack / selectSubtitleTrack / setSubtitleScale / setSubtitleStyle / registerSubtitleMemoryFont / selectSubtitleMemoryFonts / clearSubtitleMemoryFonts / getSubtitleMemoryFontStatus</td></tr>
+          <tr><td class="k">弹幕</td><td class="m">loadDanmakuFile / loadDanmakuJson / addDanmakuTrackFile / addDanmakuTrackJson / removeDanmakuTrack / setDanmakuTrackEnabled / setDanmakuTrackOffset / setDanmakuGlobalOffset / clearDanmaku / setDanmakuEnabled / setDanmakuConfig</td></tr>
+          <tr><td class="k">输出</td><td class="m">setUpscaler / getUpscalerStatus / getOutputStatus / getResourceStatus / getPresenterStats / setDebugHudEnabled</td></tr>
+          <tr><td class="k">系统媒体</td><td class="m">setMediaMetadata / setSystemMediaNavigation</td></tr>
+          <tr><td class="k">视图</td><td class="m">attachView / detachView / createTextureSurface / resizeTextureSurface / releaseTextureSurface / attachWindowOverlay / detachWindowOverlay / setWindowOverlayFrame</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><code>ErikaMediaMetadata</code> 携带标题、艺术家、专辑与封面，经系统媒体控制（Now Playing）呈现。后台音频播放时挂起视频解码，见<a href="../project/changelog.html">更新日志</a> 0.1.5。</p>
+  </section>
+
+  <section id="views">
+    <h2>视图路径<span class="jp">ビュー</span><a class="anchor" href="#views">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>组件</th><th>机制</th><th>适用</th></tr></thead>
+        <tbody>
+          <tr><td class="k">ErikaVideoView</td><td>Flutter platform view 或 Texture。</td><td>兼容与诊断路径，所有平台可用。</td></tr>
+          <tr><td class="k">ErikaWindowOverlayVideoView</td><td>原生 window overlay（桌面）或挖空路径。</td><td>macOS / iOS / tvOS 推荐路径，完整播放器 UI。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="code">
+      <p class="lbl">推荐：原生 overlay 路径</p>
+<pre>ErikaWindowOverlayVideoView(player: player)</pre>
+    </div>
+    <div class="code">
+      <p class="lbl">兼容 / 诊断：platform view 路径</p>
+<pre>ErikaVideoView(player: player)</pre>
+    </div>
+    <p>desktop 的 overlay API 支持多窗口与次窗口定位，播放器在宿主窗口间迁移时保持表面、可见性、代际与 aspect-fit 状态。</p>
+  </section>
+
+  <section id="events">
+    <h2>事件<span class="jp">イベント</span><a class="anchor" href="#events">#</a></h2>
+    <p>播放器状态经 <code>ErikaPlayerEvent</code> 发布，与原生事件一一对应：状态、时长、位置、轨道、缓冲、视频参数、解码器、音频输出、错误等。事件载荷类型（<code>ErikaTrackInfo</code>、<code>ErikaVideoParams</code>、<code>ErikaVideoDecoderInfo</code> 等）镜像 <code>erika.h</code> 的结构体。</p>
+  </section>
+
+  <section id="platforms">
+    <h2>平台差异<span class="jp">プラットフォーム</span><a class="anchor" href="#platforms">#</a></h2>
+    <ul class="body">
+      <li>Android 与 HarmonyOS 的 surface 策略不同：Android 走 <code>SurfaceTexture</code> / Texture，HarmonyOS 走原生视图。插件内部按平台选择，宿主代码一致。</li>
+      <li>tvOS 无 window overlay 概念，走 platform view。</li>
+      <li>系统媒体控制（Now Playing）在 iOS、tvOS、macOS、Android、Windows、HarmonyOS 六平台可用。</li>
+    </ul>
+  </section>
+
+  <footer class="doc-foot">
+    <span>Erika <b>v0.1.5</b></span>
+    <span>Section <b>Guide</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="c.html"><span class="dir">Prev</span>C ABI 嵌入</a>
+    <a class="nx" href="../kernel/architecture.html"><span class="dir">Next</span>架构总览</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

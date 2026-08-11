@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ErikaPresenterHandle 参考 — Erika 开发者文档</title>
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><span class="n">Erika</span><span class="v">v0.1.5</span></div>
+  <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <nav>
+    <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.html">快速开始</a></li>
+      <li><a href="../guide/rust.html">Rust 嵌入</a></li>
+      <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/flutter.html">Flutter 嵌入</a></li>
+    </ul>
+    <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.html">架构总览</a></li>
+      <li><a href="../kernel/decode.html">硬件解码</a></li>
+      <li><a href="../kernel/zero-copy.html">零拷贝导入</a></li>
+      <li><a href="../kernel/render.html">渲染管线</a></li>
+      <li><a href="../kernel/hdr.html">高动态范围</a></li>
+      <li><a href="../kernel/upscale.html">神经超分</a></li>
+      <li><a href="../kernel/subtitle-danmaku.html">字幕与弹幕</a></li>
+      <li><a href="../kernel/clock.html">时钟与调度</a></li>
+    </ul>
+    <h2><span class="no">三</span>项目 <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.html">构建与依赖</a></li>
+      <li><a href="../project/releasing.html">发布与产物</a></li>
+      <li><a href="../project/contributing.html">贡献指南</a></li>
+      <li><a href="../project/changelog.html">更新日志</a></li>
+    </ul>
+    <h2><span class="no">四</span>参考 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="capi.html">C ABI 总览</a></li>
+      <li><a href="capi-handle.html">ErikaHandle</a></li>
+      <li><a href="capi-presenter.html" aria-current="page">ErikaPresenterHandle</a></li>
+      <li><a href="capi-json.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>ErikaPresenterHandle</p>
+  <h1>ErikaPresenterHandle 参考</h1>
+  <p class="kicker">ErikaPresenterHandle Reference</p>
+  <p class="lead">push 模型入口的全部 63 个函数：生命周期、播放与运行参数、字幕、弹幕、输出诊断、表面与呈现、渲染循环、JSON bridge、截图。仅编译于 macOS / iOS / Windows / Android / OpenHarmony，其他目标 <code>create</code> 返回 NULL。</p>
+
+  <ul class="meta-strip">
+    <li>函数 <b>63</b> 个</li>
+    <li>平台 <b>5</b> 个</li>
+  </ul>
+
+  <section id="lifecycle">
+    <h2>生命周期与配置<span class="jp">ライフサイクル</span><a class="anchor" href="#lifecycle">#</a></h2>
+
+    <div class="api" id="erika_presenter_create">
+      <p class="sig"><b>ErikaPresenterHandle *erika_presenter_create</b>(void)</p>
+      <p class="desc">创建 presenter。返回 NULL 表示创建失败，用 <code>erika_last_error_message</code> 读取原因。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_create_with_config">
+      <p class="sig"><b>ErikaPresenterHandle *erika_presenter_create_with_config</b>(ErikaPresenterConfig config)</p>
+      <p class="desc">以配置创建 presenter。config 选择输出模式、EDR headroom 与超分模式。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_create_with_output_mode">
+      <p class="sig"><b>ErikaPresenterHandle *erika_presenter_create_with_output_mode</b>(int32_t output_mode, float edr_headroom)</p>
+      <p class="desc">以输出模式与 headroom 创建 presenter，等价于配置对应字段的 <code>create_with_config</code>。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_destroy">
+      <p class="sig"><b>void erika_presenter_destroy</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">销毁 presenter 并释放全部资源。</p>
+    </div>
+  </section>
+
+  <section id="playback">
+    <h2>播放与运行参数<span class="jp">再生</span><a class="anchor" href="#playback">#</a></h2>
+
+    <div class="api" id="erika_presenter_open">
+      <p class="sig"><b>ErikaStatus erika_presenter_open</b>(ErikaPresenterHandle *handle, const char *uri)</p>
+      <p class="desc">打开媒体。<code>uri</code> 是本地路径或 HTTP(S) URL。open 是异步的，就绪状态经 <code>StateChanged</code> / <code>DurationChanged</code> 事件到达。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_open_with_headers">
+      <p class="sig"><b>ErikaStatus erika_presenter_open_with_headers</b>(ErikaPresenterHandle *handle, const char *uri, const ErikaHttpHeader *headers, uintptr_t header_count)</p>
+      <p class="desc">带自定义 HTTP 请求头打开媒体。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_play">
+      <p class="sig"><b>ErikaStatus erika_presenter_play</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">开始播放。play 只投递工作，最终结果以 <code>StateChanged</code> 或 <code>Error</code> 事件为准。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_pause">
+      <p class="sig"><b>ErikaStatus erika_presenter_pause</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">暂停播放。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_stop">
+      <p class="sig"><b>ErikaStatus erika_presenter_stop</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">停止播放。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_close">
+      <p class="sig"><b>ErikaStatus erika_presenter_close</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">关闭并释放媒体资源。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_seek">
+      <p class="sig"><b>ErikaStatus erika_presenter_seek</b>(ErikaPresenterHandle *handle, uint64_t position_micros)</p>
+      <p class="desc">跳转到指定位置，单位为微秒。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_playback_rate">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_playback_rate</b>(ErikaPresenterHandle *handle, double rate)</p>
+      <p class="desc">设置播放倍速。1.0 为正常速度。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_volume">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_volume</b>(ErikaPresenterHandle *handle, double volume)</p>
+      <p class="desc">设置音量，范围为 0.0–1.0。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_upscaler">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_upscaler</b>(ErikaPresenterHandle *handle, int32_t mode)</p>
+      <p class="desc">设置超分模式，取 <code>ErikaLumaUpscalerMode</code>。Metal 与具备 compute 能力的 wgpu/Vulkan 渲染器执行 ArtCNN；其他后端保留原生亮度采样并显式上报 Inactive。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_subtitle_scale">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_subtitle_scale</b>(ErikaPresenterHandle *handle, double scale)</p>
+      <p class="desc">设置字幕缩放比例。</p>
+    </div>
+  </section>
+
+  <section id="subtitle">
+    <h2>字幕字体与样式<span class="jp">字幕</span><a class="anchor" href="#subtitle">#</a></h2>
+
+    <div class="api" id="erika_presenter_set_subtitle_font">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_subtitle_font</b>(ErikaPresenterHandle *handle, const char *family, const char *file_path)</p>
+      <p class="desc">设置回退字幕字体。NULL 或空串清除对应的半边。容器 ASS 脚本保留自己的字体，除非经 <code>set_subtitle_style</code> 传入字体名覆盖位。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_register_subtitle_memory_font">
+      <p class="sig"><b>ErikaStatus erika_presenter_register_subtitle_memory_font</b>(ErikaPresenterHandle *handle, const uint8_t *data, uintptr_t data_len, uint64_t *out_font_id)</p>
+      <p class="desc">注册内存字体数据，输出字体 id。数据不写盘，同路径字体被替换时渲染器缓存失效，活跃字幕轨立即使用新数据。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_select_subtitle_memory_fonts">
+      <p class="sig"><b>ErikaStatus erika_presenter_select_subtitle_memory_fonts</b>(ErikaPresenterHandle *handle, const uint64_t *font_ids, uintptr_t font_count)</p>
+      <p class="desc">选择有序回退字体集合。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_clear_subtitle_memory_fonts">
+      <p class="sig"><b>ErikaStatus erika_presenter_clear_subtitle_memory_fonts</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">清空内存字体注册表。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_subtitle_memory_font_status">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_subtitle_memory_font_status</b>(ErikaPresenterHandle *handle, ErikaSubtitleMemoryFontStatus *out_status)</p>
+      <p class="desc">读取注册表状态（数量、字节数、选中的字体 id）。结果用 <code>erika_subtitle_memory_font_status_free</code> 释放。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_subtitle_memory_font_info">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_subtitle_memory_font_info</b>(ErikaPresenterHandle *handle, uint64_t font_id, ErikaSubtitleMemoryFontInfo *out_info)</p>
+      <p class="desc">读取指定字体的 faces 与元数据。结果用 <code>erika_subtitle_memory_font_info_free</code> 释放。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_subtitle_style">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_subtitle_style</b>(ErikaPresenterHandle *handle, ErikaSubtitleStyle style)</p>
+      <p class="desc">应用字幕样式覆盖。覆盖粒度由 <code>style.override_mask</code> 的位标志控制。</p>
+    </div>
+  </section>
+
+  <section id="output">
+    <h2>输出与诊断<span class="jp">出力と診断</span><a class="anchor" href="#output">#</a></h2>
+
+    <div class="api" id="erika_presenter_set_output_headroom">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_output_headroom</b>(ErikaPresenterHandle *handle, float headroom, bool known)</p>
+      <p class="desc">提供期望 headroom 及有效性标志，参与输出协商。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_upscaler_status">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_upscaler_status</b>(ErikaPresenterHandle *handle, ErikaUpscalerStatus *out_status)</p>
+      <p class="desc">读取超分状态：请求模式、活跃后端、回退次数与帧计数。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_output_status">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_output_status</b>(ErikaPresenterHandle *handle, ErikaOutputStatus *out_status)</p>
+      <p class="desc">读取输出状态：活跃编码、表面格式、headroom 与回退原因。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_resource_status">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_resource_status</b>(ErikaPresenterHandle *handle, ErikaPresenterResourceStatus *out_status)</p>
+      <p class="desc">读取渲染器内存快照。device 级的计数是进程范围的，可能包含其他 presenter 的分配。</p>
+    </div>
+  </section>
+
+  <section id="tracks">
+    <h2>轨道<span class="jp">トラック</span><a class="anchor" href="#tracks">#</a></h2>
+
+    <div class="api" id="erika_presenter_add_external_subtitle">
+      <p class="sig"><b>ErikaStatus erika_presenter_add_external_subtitle</b>(ErikaPresenterHandle *handle, const char *uri, int64_t *out_track_id)</p>
+      <p class="desc">添加外挂字幕轨，输出轨道 id。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_remove_subtitle_track">
+      <p class="sig"><b>ErikaStatus erika_presenter_remove_subtitle_track</b>(ErikaPresenterHandle *handle, int64_t track_id)</p>
+      <p class="desc">移除字幕轨。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_select_audio_track">
+      <p class="sig"><b>ErikaStatus erika_presenter_select_audio_track</b>(ErikaPresenterHandle *handle, int64_t track_id)</p>
+      <p class="desc">选择音频轨。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_select_subtitle_track">
+      <p class="sig"><b>ErikaStatus erika_presenter_select_subtitle_track</b>(ErikaPresenterHandle *handle, int64_t track_id)</p>
+      <p class="desc">选择字幕轨。id 为 -1 禁用字幕。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_track_selection">
+      <p class="sig"><b>ErikaStatus erika_presenter_track_selection</b>(ErikaPresenterHandle *handle, ErikaTrackSelection *out_selection)</p>
+      <p class="desc">读取当前选中的视频、音频与字幕轨。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_tracks">
+      <p class="sig"><b>ErikaStatus erika_presenter_tracks</b>(ErikaPresenterHandle *handle, ErikaTrackInfo *out_tracks, uintptr_t capacity, uintptr_t *out_len)</p>
+      <p class="desc">按计数数组惯用法读取轨道列表。每条填充的记录用 <code>erika_track_info_free</code> 释放。</p>
+    </div>
+  </section>
+
+  <section id="danmaku">
+    <h2>弹幕<span class="jp">弾幕</span><a class="anchor" href="#danmaku">#</a></h2>
+    <p><code>load_*</code> 系列替换全部弹幕为一条匿名轨；<code>add_*_track</code> 系列建立命名多轨列表。输入为 Bilibili XML（文件，路径或 URL）或 JSON（内联字符串）。<code>offset_micros</code> 偏移单条轨的时间线，全局偏移作用于所有轨。</p>
+
+    <div class="api" id="erika_presenter_load_danmaku_file">
+      <p class="sig"><b>ErikaStatus erika_presenter_load_danmaku_file</b>(ErikaPresenterHandle *handle, const char *uri)</p>
+      <p class="desc">从文件或 URL 加载 Bilibili XML 弹幕，替换为一条匿名轨。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_load_danmaku_json">
+      <p class="sig"><b>ErikaStatus erika_presenter_load_danmaku_json</b>(ErikaPresenterHandle *handle, const char *json)</p>
+      <p class="desc">从内联 JSON 加载弹幕，替换为一条匿名轨。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_add_danmaku_track_file">
+      <p class="sig"><b>ErikaStatus erika_presenter_add_danmaku_track_file</b>(ErikaPresenterHandle *handle, const char *uri, const char *name, int64_t offset_micros, uint64_t *out_track_id)</p>
+      <p class="desc">添加命名弹幕轨（XML 文件），可带时间线偏移，输出轨道 id。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_add_danmaku_track_json">
+      <p class="sig"><b>ErikaStatus erika_presenter_add_danmaku_track_json</b>(ErikaPresenterHandle *handle, const char *json, const char *name, int64_t offset_micros, uint64_t *out_track_id)</p>
+      <p class="desc">添加命名弹幕轨（内联 JSON），可带时间线偏移，输出轨道 id。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_remove_danmaku_track">
+      <p class="sig"><b>ErikaStatus erika_presenter_remove_danmaku_track</b>(ErikaPresenterHandle *handle, uint64_t track_id)</p>
+      <p class="desc">移除弹幕轨。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_track_enabled">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_track_enabled</b>(ErikaPresenterHandle *handle, uint64_t track_id, bool enabled)</p>
+      <p class="desc">启停单条弹幕轨。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_track_offset">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_track_offset</b>(ErikaPresenterHandle *handle, uint64_t track_id, int64_t offset_micros)</p>
+      <p class="desc">设置单条弹幕轨的时间线偏移。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_global_offset">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_global_offset</b>(ErikaPresenterHandle *handle, int64_t offset_micros)</p>
+      <p class="desc">设置全局弹幕时间线偏移。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_danmaku_tracks">
+      <p class="sig"><b>ErikaStatus erika_presenter_danmaku_tracks</b>(ErikaPresenterHandle *handle, ErikaDanmakuTrackInfo *out_tracks, uintptr_t capacity, uintptr_t *out_len)</p>
+      <p class="desc">按计数数组惯用法读取弹幕轨列表。每条填充的记录用 <code>erika_danmaku_track_info_free</code> 释放。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_clear_danmaku">
+      <p class="sig"><b>ErikaStatus erika_presenter_clear_danmaku</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">清空全部弹幕轨。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_enabled">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_enabled</b>(ErikaPresenterHandle *handle, bool enabled)</p>
+      <p class="desc">全局启停弹幕显示。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_config">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_config</b>(ErikaPresenterHandle *handle, ErikaDanmakuConfig config)</p>
+      <p class="desc">应用弹幕布局与显示配置。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_config_ptr">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_config_ptr</b>(ErikaPresenterHandle *handle, const ErikaDanmakuConfig *config)</p>
+      <p class="desc">以指针形式应用弹幕配置，等价于按值版本。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_danmaku_config">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_danmaku_config</b>(ErikaPresenterHandle *handle, ErikaDanmakuConfig *out_config)</p>
+      <p class="desc">读取当前生效的弹幕配置。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_font">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_font</b>(ErikaPresenterHandle *handle, const char *family, const char *file_path)</p>
+      <p class="desc">设置弹幕字体族与字体文件。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_block_words_json">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_block_words_json</b>(ErikaPresenterHandle *handle, const char *json)</p>
+      <p class="desc">设置弹幕屏蔽词列表，JSON 数组格式。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_debug_hud_enabled">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_debug_hud_enabled</b>(ErikaPresenterHandle *handle, bool enabled)</p>
+      <p class="desc">启停调试 HUD 覆盖层。</p>
+    </div>
+  </section>
+
+  <section id="surface">
+    <h2>表面与呈现<span class="jp">サーフェス</span><a class="anchor" href="#surface">#</a></h2>
+    <p>渲染后端（原生 Metal、原生 D3D11 或 wgpu）由 presenter 配置决定，与附着调用无关。任何 drawable 尺寸或 scale 变化都要调用 <code>resize_surface</code>。</p>
+
+    <div class="api" id="erika_presenter_attach_metal_layer">
+      <p class="sig"><b>ErikaStatus erika_presenter_attach_metal_layer</b>(ErikaPresenterHandle *handle, uint64_t raw_layer, uint32_t width, uint32_t height, double scale)</p>
+      <p class="desc">附着 Metal 表面（macOS / iOS）。<code>raw_layer</code> 是 <code>CAMetalLayer*</code> 转为 uint64_t。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_attach_wgpu_surface">
+      <p class="sig"><b>ErikaStatus erika_presenter_attach_wgpu_surface</b>(ErikaPresenterHandle *handle, ErikaWgpuSurfaceKind kind, uint64_t raw_window, uint64_t raw_display, uint32_t width, uint32_t height, double scale)</p>
+      <p class="desc">附着 wgpu 表面。<code>raw_window</code> / <code>raw_display</code> 是对应 kind 的平台句柄。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_attach_wgpu_surface_with_output_capabilities">
+      <p class="sig"><b>ErikaStatus erika_presenter_attach_wgpu_surface_with_output_capabilities</b>(ErikaPresenterHandle *handle, ErikaWgpuSurfaceKind kind, uint64_t raw_window, uint64_t raw_display, uint32_t width, uint32_t height, double scale, ErikaSurfaceOutputCapabilities output_capabilities)</p>
+      <p class="desc">带输出能力声明附着 wgpu 表面，用于 HDR 协商。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_attach_windows_hwnd">
+      <p class="sig"><b>ErikaStatus erika_presenter_attach_windows_hwnd</b>(ErikaPresenterHandle *handle, uint64_t hwnd, uint64_t hinstance, uint32_t width, uint32_t height, double scale)</p>
+      <p class="desc">附着 Windows 表面。封装 <code>attach_wgpu_surface</code> 的 WindowsHwnd 变体：hwnd 为 HWND，hinstance 为 HINSTANCE。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_resize_surface">
+      <p class="sig"><b>ErikaStatus erika_presenter_resize_surface</b>(ErikaPresenterHandle *handle, uint32_t width, uint32_t height, double scale)</p>
+      <p class="desc">调整表面尺寸或 scale。任何 drawable 尺寸变化后调用。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_detach_surface">
+      <p class="sig"><b>ErikaStatus erika_presenter_detach_surface</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">分离当前表面。</p>
+    </div>
+  </section>
+
+  <section id="loop">
+    <h2>渲染循环与事件<span class="jp">レンダーループ</span><a class="anchor" href="#loop">#</a></h2>
+
+    <div class="api" id="erika_presenter_render_tick">
+      <p class="sig"><b>ErikaStatus erika_presenter_render_tick</b>(ErikaPresenterHandle *handle, double time_seconds, ErikaPresenterStats *out_stats)</p>
+      <p class="desc">每个显示帧调用一次。<code>time_seconds</code> 是宿主显示时钟的时间（呈现时间戳），用于 vsync 量化调度。<code>out_stats</code> 可为 NULL。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_audio_only_tick">
+      <p class="sig"><b>ErikaStatus erika_presenter_audio_only_tick</b>(ErikaPresenterHandle *handle, ErikaPresenterStats *out_stats)</p>
+      <p class="desc">音频专用的 tick。挂起视频解码，用于后台音频播放。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_stats">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_stats</b>(ErikaPresenterHandle *handle, ErikaPresenterStats *out_stats)</p>
+      <p class="desc">读取累计统计，与 <code>render_tick</code> 的统计一致，可在任意时刻查询。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_poll_event">
+      <p class="sig"><b>ErikaStatus erika_presenter_poll_event</b>(ErikaPresenterHandle *handle, ErikaEvent *out_event)</p>
+      <p class="desc">非阻塞轮询事件队列。队列为空时返回 <code>NoEvent</code>。</p>
+    </div>
+  </section>
+
+  <section id="json">
+    <h2>JSON bridge<span class="jp">JSON ブリッジ</span><a class="anchor" href="#json">#</a></h2>
+    <p>供已用平台通道序列化结构化参数的宿主使用。方法表见<a href="capi-json.html">JSON bridge</a>。</p>
+
+    <div class="api" id="erika_presenter_invoke_json">
+      <p class="sig"><b>char *erika_presenter_invoke_json</b>(ErikaPresenterHandle *handle, const char *method, const char *arguments_json)</p>
+      <p class="desc">调用命名方法。返回的 JSON 字符串归调用方所有，用 <code>erika_string_free</code> 释放。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_render_tick_json">
+      <p class="sig"><b>char *erika_presenter_render_tick_json</b>(ErikaPresenterHandle *handle, double time_seconds)</p>
+      <p class="desc">render_tick 的 JSON 变体，返回统计 JSON。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_poll_event_json">
+      <p class="sig"><b>char *erika_presenter_poll_event_json</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">poll_event 的 JSON 变体。空闲时返回 NULL。</p>
+    </div>
+  </section>
+
+  <section id="capture">
+    <h2>截图<span class="jp">スクリーンショット</span><a class="anchor" href="#capture">#</a></h2>
+
+    <div class="api" id="erika_presenter_capture_frame_rgba">
+      <p class="sig"><b>ErikaStatus erika_presenter_capture_frame_rgba</b>(ErikaPresenterHandle *handle, uint32_t width, uint32_t height, uint8_t *out_rgba, uintptr_t out_capacity)</p>
+      <p class="desc">离屏渲染当前合成帧（视频 + 字幕 + 弹幕）到调用方分配的 RGBA8 缓冲。<code>out_capacity</code> 必须 ≥ width × height × 4。无可用帧时失败。</p>
+    </div>
+  </section>
+
+  <footer class="doc-foot">
+    <span>Erika <b>v0.1.5</b></span>
+    <span>Section <b>Reference</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="capi-handle.html"><span class="dir">Prev</span>ErikaHandle 参考</a>
+    <a class="nx" href="capi-json.html"><span class="dir">Next</span>JSON bridge</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

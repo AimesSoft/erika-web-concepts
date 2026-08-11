@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>贡献指南 — Erika 开发者文档</title>
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><span class="n">Erika</span><span class="v">v0.1.5</span></div>
+  <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <nav>
+    <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.html">快速开始</a></li>
+      <li><a href="../guide/rust.html">Rust 嵌入</a></li>
+      <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/flutter.html">Flutter 嵌入</a></li>
+    </ul>
+    <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.html">架构总览</a></li>
+      <li><a href="../kernel/decode.html">硬件解码</a></li>
+      <li><a href="../kernel/zero-copy.html">零拷贝导入</a></li>
+      <li><a href="../kernel/render.html">渲染管线</a></li>
+      <li><a href="../kernel/hdr.html">高动态范围</a></li>
+      <li><a href="../kernel/upscale.html">神经超分</a></li>
+      <li><a href="../kernel/subtitle-danmaku.html">字幕与弹幕</a></li>
+      <li><a href="../kernel/clock.html">时钟与调度</a></li>
+    </ul>
+    <h2><span class="no">三</span>项目 <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="building.html">构建与依赖</a></li>
+      <li><a href="releasing.html">发布与产物</a></li>
+      <li><a href="contributing.html" aria-current="page">贡献指南</a></li>
+      <li><a href="changelog.html">更新日志</a></li>
+    </ul>
+    <h2><span class="no">四</span>参考 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.html">C ABI 总览</a></li>
+      <li><a href="../reference/capi-handle.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>project<span class="sep">/</span>贡献指南</p>
+  <h1>贡献指南</h1>
+  <p class="kicker">Contributing</p>
+  <p class="lead">本文给出代码库地图、改动一个平台所需的全部位置、C ABI 契约的约束，以及测试与提交约定。改动前先读<a href="../kernel/architecture.html">架构总览</a>理解运行时模型。</p>
+
+  <ul class="meta-strip">
+    <li>crates <b>3</b> 个</li>
+    <li>trait <b>3</b> 个</li>
+    <li>语言 <b>Rust</b></li>
+  </ul>
+
+  <section id="layout">
+    <h2>仓库布局<span class="jp">レイアウト</span><a class="anchor" href="#layout">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>路径</th><th>职责</th></tr></thead>
+        <tbody>
+          <tr><td class="m">crates/erika</td><td>核心引擎。playback、renderer、audio、subtitle、danmaku、presenter 等模块。</td></tr>
+          <tr><td class="m">crates/erika_capi</td><td>C ABI 导出层，产 <code>erika.h</code>。</td></tr>
+          <tr><td class="m">crates/erika_ffmpeg_sys</td><td>FFmpeg bindgen 绑定。</td></tr>
+          <tr><td class="m">packages/erika_flutter</td><td>Flutter 插件，六个平台。</td></tr>
+          <tr><td class="m">examples/</td><td>验证与冒烟程序。</td></tr>
+          <tr><td class="m">xtask/</td><td>原生依赖构建编排。</td></tr>
+          <tr><td class="m">third_party/</td><td>构建出的原生依赖，gitignore 输出。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="model">
+    <h2>运行时模型<span class="jp">ランタイム</span><a class="anchor" href="#model">#</a></h2>
+    <p>三个事实决定大多数改动的落点：</p>
+    <ul class="body">
+      <li><b>PresenterRuntime 拥有整个栈。</b> 宿主每帧调 <code>render_tick(time_seconds)</code>；runtime 拉取解码帧、更新 overlay（字幕 + 弹幕）、渲染并呈现。弹幕 plan 以 generation + media_time 门控，与视频保持同步。</li>
+      <li><b>音频是主时钟。</b> 音频输出跑在自己的后端线程，播放调度器把视频呈现按 vsync 量化对齐到音频时钟。</li>
+      <li><b>后端可插拔。</b> <code>RendererBackend</code>、<code>AudioOutputBackend</code>、<code>DecoderBackend</code> 三个 trait 使 presenter 保持平台无关。偏好经 <code>RendererBackendPreference</code>（PlatformNative / WgpuFallback）与 <code>VideoDecodePreference</code> 选择。</li>
+    </ul>
+  </section>
+
+  <section id="backend">
+    <h2>新增一个平台后端<span class="jp">新規バックエンド</span><a class="anchor" href="#backend">#</a></h2>
+    <p>新平台通常意味着三块，各自藏在 <code>#[cfg(target_os = ...)]</code> 之后：</p>
+    <ol class="body">
+      <li><b>解码。</b> 在 <code>DecoderBackend</code> 里加变体，配置硬件设备（参考 D3D11VA 与 VideoToolbox 路径），产出渲染器可零拷贝导入的 <code>PlayerVideoFrame</code>。互操作不可用时回退软解。</li>
+      <li><b>渲染。</b> 在 <code>renderer/&lt;backend&gt;.rs</code> 实现 <code>RendererBackend</code>：attach / detach / resize、<code>upload_player_frame</code>（拥有导入的 GPU 表示）、<code>render_current_frame</code>（合成 overlay），以及可选的 capture、runtime_stats、set_luma_upscaler。用 <code>renderer::pipeline</code> 做色彩与 tone-map 决策，行为与其它后端一致。D3D11 后端是最近的完整范例。</li>
+      <li><b>音频。</b> 实现 <code>AudioOutputBackend</code>：configure / start / pause / stop / push / set_volume / state / stats，以及用于 A/V 同步的 <code>clock_snapshot</code>。复用 <code>BufferedAudioOutput</code> / <code>AudioRingBuffer</code>；WASAPI 是参考实现。</li>
+    </ol>
+    <p>然后把后端接进 presenter 选择，并加一个 <code>&lt;platform&gt;_native_demo</code> 示例做端到端验证。</p>
+  </section>
+
+  <section id="cabi">
+    <h2>C ABI 是一份契约<span class="jp">C ABI 契約</span><a class="anchor" href="#cabi">#</a></h2>
+    <p><code>erika_capi</code> 是所有非 Rust 宿主的稳定接入面。改它时：</p>
+    <ul class="body">
+      <li><b>把 panic 留在里面。</b> 每个导出都把函数体包在 <code>catch_unwind</code>，panic 映射为 <code>ErikaStatus_Panic</code>。unwind 绝不穿越边界。</li>
+      <li><b>尊重所有权。</b> 交出的字符串归调用方所有，由配套 <code>*_free</code> 释放。</li>
+      <li><b>同步 <code>erika.h</code>。</b> 手动更新头文件以匹配，新函数带注释。</li>
+      <li><b>同步 Swift 镜像结构体。</b> Apple 插件在 Swift 侧手写镜像 C 结构体（如 <code>ErikaPresenterStats</code>）。改了 <code>erika.h</code> 的结构体，必须同时更新 <code>packages/erika_flutter</code> 的两个 Swift 镜像文件。不匹配会破坏栈，可能表现为误导性的 autorelease-pool 崩溃。</li>
+      <li><b>记录 JSON 方法。</b> presenter 的 JSON bridge 方法与 C 面一一对应，新增时要同步<a href="../reference/capi-json.html">方法清单</a>。</li>
+    </ul>
+  </section>
+
+  <section id="testing">
+    <h2>测试与验证<span class="jp">テスト</span><a class="anchor" href="#testing">#</a></h2>
+    <div class="code">
+<pre>cargo test --workspace
+cargo clippy --workspace
+cargo fmt --all</pre>
+    </div>
+    <ul class="body">
+      <li>平台相关代码以 <code>#[cfg]</code> 门控。改某个分支时，保持 macOS / iOS / Windows / Android / fallback 各分支都能编译。本地测不了的目标交给 CI。</li>
+      <li>神经超分权重在 <code>tests/artcnn_upscaler.rs</code>（Metal）与 <code>tests/wgpu_artcnn.rs</code>（分块 wgpu）中对照 onnxruntime 参考验证。修改 kernel 前必须重新核对对应路径。</li>
+      <li>Android SDR 播放与明确的 output fallback 已验证。API 35 HDR 真机 active path 通过 <code>Rgba16Float + SCRGB_LINEAR</code> 及恢复检查之前，不得把 extended-linear scRGB 标记为真机已验证。</li>
+      <li>原生 demo 兼作冒烟测试：<code>cargo run -p macos_native_demo -- --smoke-seconds 3 "$SAMPLE"</code>（Windows 有等价命令）。它打印流水线计数器，用确认硬解与零拷贝互操作仍然生效。</li>
+    </ul>
+  </section>
+
+  <section id="conventions">
+    <h2>约定<span class="jp">規約</span><a class="anchor" href="#conventions">#</a></h2>
+    <ul class="body">
+      <li>Edition 2024，Rust 1.92+。跑 <code>cargo fmt</code>，保持 clippy 干净。</li>
+      <li>热路径或跨 FFI 不 <code>unwrap</code> / <code>panic</code>。返回 <code>Result</code>，在边界映射为 <code>ErikaStatus</code>。</li>
+      <li>与周围代码一致：命名、注释密度、既有的 <code>cfg</code> 结构。平台胶水留在平台模块里，别散进引擎。</li>
+      <li>保持文档同步。用户可见的改动要反映到本套文档；基准语言为英文，翻译随后。</li>
+      <li>PR 保持聚焦。注明你构建与测试过的平台，以及留给 CI 的平台。</li>
+    </ul>
+  </section>
+
+  <footer class="doc-foot">
+    <span>Erika <b>v0.1.5</b></span>
+    <span>Section <b>Project</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="releasing.html"><span class="dir">Prev</span>发布与产物</a>
+    <a class="nx" href="changelog.html"><span class="dir">Next</span>更新日志</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

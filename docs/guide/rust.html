@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rust 嵌入 — Erika 开发者文档</title>
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><span class="n">Erika</span><span class="v">v0.1.5</span></div>
+  <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <nav>
+    <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="quickstart.html">快速开始</a></li>
+      <li><a href="rust.html" aria-current="page">Rust 嵌入</a></li>
+      <li><a href="c.html">C ABI 嵌入</a></li>
+      <li><a href="flutter.html">Flutter 嵌入</a></li>
+    </ul>
+    <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.html">架构总览</a></li>
+      <li><a href="../kernel/decode.html">硬件解码</a></li>
+      <li><a href="../kernel/zero-copy.html">零拷贝导入</a></li>
+      <li><a href="../kernel/render.html">渲染管线</a></li>
+      <li><a href="../kernel/hdr.html">高动态范围</a></li>
+      <li><a href="../kernel/upscale.html">神经超分</a></li>
+      <li><a href="../kernel/subtitle-danmaku.html">字幕与弹幕</a></li>
+      <li><a href="../kernel/clock.html">时钟与调度</a></li>
+    </ul>
+    <h2><span class="no">三</span>项目 <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.html">构建与依赖</a></li>
+      <li><a href="../project/releasing.html">发布与产物</a></li>
+      <li><a href="../project/contributing.html">贡献指南</a></li>
+      <li><a href="../project/changelog.html">更新日志</a></li>
+    </ul>
+    <h2><span class="no">四</span>参考 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.html">C ABI 总览</a></li>
+      <li><a href="../reference/capi-handle.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Rust 嵌入</p>
+  <h1>Rust 嵌入</h1>
+  <p class="kicker">Rust Embedding</p>
+  <p class="lead">Rust 宿主直接使用 <code>erika</code> crate 的 <code>Player</code>。播放器持有内部线程与状态机，宿主订阅事件通道感知状态变化，并按需订阅视频、音频与字幕帧。</p>
+
+  <ul class="meta-strip">
+    <li>入口 <b>Player</b></li>
+    <li>事件 <b>12 种</b></li>
+    <li>帧订阅 <b>3 通道</b></li>
+  </ul>
+
+  <section id="setup">
+    <h2>依赖与构建<span class="jp">セットアップ</span><a class="anchor" href="#setup">#</a></h2>
+    <div class="code">
+      <p class="lbl">Cargo.toml</p>
+<pre>[dependencies]
+erika = { git = <span class="s">"https://github.com/AimesSoft/Erika"</span>, tag = <span class="s">"v0.1.5"</span> }</pre>
+    </div>
+    <p>首次构建前准备原生依赖：</p>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>cargo run -p xtask -- deps build --all --profile lgpl
+cargo build -p erika</pre>
+    </div>
+  </section>
+
+  <section id="lifecycle">
+    <h2>播放生命周期<span class="jp">ライフサイクル</span><a class="anchor" href="#lifecycle">#</a></h2>
+    <div class="code">
+      <p class="lbl">src/main.rs</p>
+<pre><span class="k">use</span> erika::{Player, PlayerConfig, MediaRequest};
+
+<span class="k">let</span> player = Player::new(PlayerConfig::default())?;
+player.open(MediaRequest::file(<span class="s">"/path/to/video.mp4"</span>))?;
+player.play()?;
+player.pause()?;
+player.seek(1_500_000)?;   <span class="c">// 微秒</span>
+player.set_playback_rate(1.5)?;
+player.stop()?;
+player.close()?;</pre>
+    </div>
+    <p>方法语义：</p>
+    <ul class="body">
+      <li><code>open</code> 是异步的。返回后媒体尚未就绪，就绪状态经事件通道发布（<code>DurationChanged</code>、<code>TracksChanged</code>、<code>VideoParamsChanged</code> 等）。打开失败时播放器转入 <code>Error</code> 状态。</li>
+      <li><code>play</code> 只投递命令。最终结果以 <code>StateChanged</code> 或 <code>Error</code> 事件为准。</li>
+      <li><code>seek</code> 以微秒为单位。暂停期间 seek 会解码并呈现目标位置附近的关键帧，时钟保持冻结。</li>
+      <li><code>close</code> 先结束内部线程再返回，之后可以安全丢弃播放器。</li>
+    </ul>
+    <p><code>MediaRequest</code> 支持 HTTP(S) URL 与请求头。构造 <code>MediaRequest::new(uri)</code> 后用 <code>with_http_headers</code> 添加头。Debug 输出对 header 值打码。</p>
+  </section>
+
+  <section id="events">
+    <h2>事件订阅<span class="jp">イベント</span><a class="anchor" href="#events">#</a></h2>
+    <div class="code">
+      <p class="lbl">事件循环</p>
+<pre><span class="k">let</span> events = player.subscribe();
+
+<span class="k">loop</span> {
+  <span class="k">match</span> events.recv() {
+    Ok(PlayerEvent::StateChanged(state)) =&gt; { <span class="c">/* 更新 UI */</span> }
+    Ok(PlayerEvent::BufferingChanged(b)) =&gt; { <span class="c">/* 缓冲指示 */</span> }
+    Ok(PlayerEvent::Error(e)) =&gt; { <span class="c">/* 错误处理 */</span> }
+    Ok(PlayerEvent::Closed) =&gt; break,
+    _ =&gt; {}
+  }
+}</pre>
+    </div>
+    <p>事件通道为 unbounded，容量不受背压影响。事件类型与 C ABI 的 <code>ErikaEventKind</code> 一一对应：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>事件</th><th>触发条件</th></tr></thead>
+        <tbody>
+          <tr><td class="m">StateChanged</td><td>播放状态机迁移。</td></tr>
+          <tr><td class="m">DurationChanged</td><td>时长确定或变化。</td></tr>
+          <tr><td class="m">PositionChanged</td><td>播放位置推进。</td></tr>
+          <tr><td class="m">TracksChanged</td><td>轨道列表变化。</td></tr>
+          <tr><td class="m">TrackSelectionChanged</td><td>选中轨道变化。</td></tr>
+          <tr><td class="m">BufferingChanged</td><td>缓冲状态切换。</td></tr>
+          <tr><td class="m">VideoParamsChanged</td><td>视频参数（尺寸、色彩）变化。</td></tr>
+          <tr><td class="m">VideoDecoderChanged</td><td>解码后端切换。</td></tr>
+          <tr><td class="m">AudioOutputChanged</td><td>音频输出状态变化。</td></tr>
+          <tr><td class="m">SurfaceAttached / SurfaceDetached</td><td>表面附着与分离。</td></tr>
+          <tr><td class="m">Error</td><td>错误发生。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="frames">
+    <h2>帧订阅<span class="jp">フレーム</span><a class="anchor" href="#frames">#</a></h2>
+    <p>宿主自行渲染时订阅帧通道。三个通道均为 bounded，容量取 <code>PlayerConfig</code> 中对应的队列配置：</p>
+    <div class="code">
+      <p class="lbl">帧拉取</p>
+<pre><span class="k">let</span> video = player.subscribe_video_frames();
+<span class="k">let</span> audio = player.subscribe_audio_frames();
+<span class="k">let</span> subtitles = player.subscribe_subtitle_frames();
+
+<span class="k">loop</span> {
+  <span class="k">if</span> <span class="k">let</span> Ok(frame) = video.try_recv() {
+    <span class="c">/* 上传纹理并呈现 */</span>
+  }
+  <span class="c">/* 每 10 ms 轮询一次，或 select 多个通道 */</span>
+}</pre>
+    </div>
+    <p>队列满时新帧被丢弃，播放继续。需要推模型（内核托管渲染）时使用 presenter，Rust 侧入口为 <code>Presenter</code>，C 宿主经 <code>ErikaPresenterHandle</code> 使用同一实现。</p>
+  </section>
+
+  <section id="config">
+    <h2>配置项<span class="jp">設定</span><a class="anchor" href="#config">#</a></h2>
+    <p><code>PlayerConfig</code> 的默认值与字段：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>字段</th><th>默认</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">name</td><td class="m">"Erika"</td><td>播放器实例名，用于线程命名与诊断。</td></tr>
+          <tr><td class="m">event_channel_capacity</td><td class="m">1024</td><td>事件通道容量。</td></tr>
+          <tr><td class="m">renderer</td><td class="m">Auto</td><td>渲染后端偏好。</td></tr>
+          <tr><td class="m">video_frame_queue_capacity</td><td class="m">3</td><td>视频帧队列深度。</td></tr>
+          <tr><td class="m">audio_frame_queue_capacity</td><td class="m">192</td><td>音频帧队列深度。</td></tr>
+          <tr><td class="m">subtitle_frame_queue_capacity</td><td class="m">16</td><td>字幕帧队列深度，带下限常量。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><code>Player</code> 实现了 <code>Clone</code>，克隆体共享同一播放会话，可用于向多个持有者分发事件。</p>
+  </section>
+
+  <section id="errors">
+    <h2>错误处理<span class="jp">エラー</span><a class="anchor" href="#errors">#</a></h2>
+    <p>方法返回 <code>Result&lt;(), PlayerError&gt;</code>。错误分两类：</p>
+    <ul class="body">
+      <li><code>PlayerError::Closed</code> — 播放器已关闭，操作被拒绝。</li>
+      <li><code>PlayerError::InvalidStateTransition</code> — 在非法状态下调用（渲染器、背压、源、播放四类）。</li>
+    </ul>
+    <p>打开请求带序号与代际校验，过期的 open 返回 superseded 错误。播放过程中异步失败不通过返回值上报，经 <code>Error</code> 事件发布。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>Erika <b>v0.1.5</b></span>
+    <span>Section <b>Guide</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="quickstart.html"><span class="dir">Prev</span>快速开始</a>
+    <a class="nx" href="c.html"><span class="dir">Next</span>C ABI 嵌入</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

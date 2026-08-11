@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>C ABI 总览 — Erika 开发者文档</title>
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><span class="n">Erika</span><span class="v">v0.1.5</span></div>
+  <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <nav>
+    <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.html">快速开始</a></li>
+      <li><a href="../guide/rust.html">Rust 嵌入</a></li>
+      <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/flutter.html">Flutter 嵌入</a></li>
+    </ul>
+    <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.html">架构总览</a></li>
+      <li><a href="../kernel/decode.html">硬件解码</a></li>
+      <li><a href="../kernel/zero-copy.html">零拷贝导入</a></li>
+      <li><a href="../kernel/render.html">渲染管线</a></li>
+      <li><a href="../kernel/hdr.html">高动态范围</a></li>
+      <li><a href="../kernel/upscale.html">神经超分</a></li>
+      <li><a href="../kernel/subtitle-danmaku.html">字幕与弹幕</a></li>
+      <li><a href="../kernel/clock.html">时钟与调度</a></li>
+    </ul>
+    <h2><span class="no">三</span>项目 <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.html">构建与依赖</a></li>
+      <li><a href="../project/releasing.html">发布与产物</a></li>
+      <li><a href="../project/contributing.html">贡献指南</a></li>
+      <li><a href="../project/changelog.html">更新日志</a></li>
+    </ul>
+    <h2><span class="no">四</span>参考 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="capi.html" aria-current="page">C ABI 总览</a></li>
+      <li><a href="capi-handle.html">ErikaHandle</a></li>
+      <li><a href="capi-presenter.html">ErikaPresenterHandle</a></li>
+      <li><a href="capi-json.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>C ABI 总览</p>
+  <h1>C ABI 总览</h1>
+  <p class="kicker">C ABI Overview</p>
+  <p class="lead">C ABI 的全局约定与类型定义。函数清单按入口族分页：<a href="capi-handle.html">ErikaHandle</a>（22 个）、<a href="capi-presenter.html">ErikaPresenterHandle</a>（63 个）、通用辅助函数（6 个）。以 <code>crates/erika_capi/include/erika.h</code> 为唯一权威。</p>
+
+  <ul class="meta-strip">
+    <li>导出函数 <b>91</b></li>
+    <li>类型 <b>33</b></li>
+    <li>事件 <b>12</b> 种</li>
+  </ul>
+
+  <section id="entry">
+    <h2>入口与约定<span class="jp">入口と規約</span><a class="anchor" href="#entry">#</a></h2>
+    <p>两个独立的入口族，一次集成二选一：</p>
+    <ul class="body">
+      <li><b>ErikaHandle</b> — pull 模型。宿主渲染并拉取状态。</li>
+      <li><b>ErikaPresenterHandle</b> — push 模型。内核托管解码、时序、音频与渲染；宿主提供表面并调用 <code>render_tick</code>。编译于 macOS / iOS / Windows / Android / OpenHarmony；其他目标 <code>create</code> 返回 NULL。</li>
+    </ul>
+    <p>全局约定：</p>
+    <ul class="body">
+      <li>每个可能失败的调用返回 <code>ErikaStatus</code>。<code>Ok</code>（0）与 <code>NoEvent</code>（5）是仅有的非错误结果。panic 被捕获并映射为 <code>ErikaStatus_Panic</code>。</li>
+      <li>非 Ok/NoEvent 结果的人读消息存放在线程局部槽位。在同一线程经 <code>erika_last_error_message()</code> 读取，用 <code>erika_string_free()</code> 释放。</li>
+      <li>Erika 返回的 <code>char*</code> 归调用方所有。独立字符串用 <code>erika_string_free()</code>；<code>ErikaTrackInfo</code> / <code>ErikaDanmakuTrackInfo</code> 内的字符串用配套的 <code>*_info_free()</code>。</li>
+      <li><code>const char*</code> 参数仅调用期间借用，必须是 NUL 结尾的 UTF-8。</li>
+      <li>列表查询使用计数数组惯用法：<code>(buf, capacity, &amp;len)</code>。<code>len</code> 置为总数，最多写入 <code>capacity</code> 条；capacity 为 0 且 buf 为 NULL 时只查询数量。</li>
+      <li>attach 与 resize 的宽高是物理像素。scale 是 UI（弹幕等）的逻辑内容 / DPI 比例，不缩放表面范围。</li>
+      <li>一个 handle 不提供内部同步，不得从多个线程并发调用。</li>
+    </ul>
+  </section>
+
+  <section id="status">
+    <h2>ErikaStatus<span class="jp">ステータス</span><a class="anchor" href="#status">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>值</th><th>名称</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">0</td><td class="k">Ok</td><td>成功。</td></tr>
+          <tr><td class="m">1</td><td class="k">NullPointer</td><td>参数为空指针。</td></tr>
+          <tr><td class="m">2</td><td class="k">InvalidUtf8</td><td>字符串参数不是合法 UTF-8。</td></tr>
+          <tr><td class="m">3</td><td class="k">PlayerError</td><td>播放器错误。</td></tr>
+          <tr><td class="m">4</td><td class="k">Panic</td><td>内部 panic，已捕获。</td></tr>
+          <tr><td class="m">5</td><td class="k">NoEvent</td><td>事件队列为空（非错误）。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="state">
+    <h2>ErikaState<span class="jp">状態</span><a class="anchor" href="#state">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>值</th><th>名称</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">0</td><td class="k">Idle</td><td>创建后的初始状态。</td></tr>
+          <tr><td class="m">1</td><td class="k">Opening</td><td>打开中。</td></tr>
+          <tr><td class="m">2</td><td class="k">Ready</td><td>已就绪，未播放。</td></tr>
+          <tr><td class="m">3</td><td class="k">Playing</td><td>播放中。</td></tr>
+          <tr><td class="m">4</td><td class="k">Paused</td><td>已暂停。</td></tr>
+          <tr><td class="m">5</td><td class="k">Stopped</td><td>已停止。</td></tr>
+          <tr><td class="m">6</td><td class="k">Closed</td><td>已关闭。</td></tr>
+          <tr><td class="m">7</td><td class="k">Error</td><td>错误状态。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="events">
+    <h2>ErikaEventKind<span class="jp">イベント</span><a class="anchor" href="#events">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>值</th><th>名称</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">0</td><td class="k">None</td><td>无事件。</td></tr>
+          <tr><td class="m">1</td><td class="k">StateChanged</td><td>播放状态变化。</td></tr>
+          <tr><td class="m">2</td><td class="k">DurationChanged</td><td>时长确定或变化。</td></tr>
+          <tr><td class="m">3</td><td class="k">PositionChanged</td><td>播放位置推进。</td></tr>
+          <tr><td class="m">4</td><td class="k">TracksChanged</td><td>轨道列表变化。</td></tr>
+          <tr><td class="m">5</td><td class="k">BufferingChanged</td><td>缓冲状态切换。</td></tr>
+          <tr><td class="m">6</td><td class="k">VideoParamsChanged</td><td>视频参数变化。</td></tr>
+          <tr><td class="m">7</td><td class="k">SurfaceAttached</td><td>表面已附着。</td></tr>
+          <tr><td class="m">8</td><td class="k">SurfaceDetached</td><td>表面已分离。</td></tr>
+          <tr><td class="m">9</td><td class="k">Error</td><td>错误。</td></tr>
+          <tr><td class="m">10</td><td class="k">TrackSelectionChanged</td><td>选中轨道变化。</td></tr>
+          <tr><td class="m">11</td><td class="k">VideoDecoderChanged</td><td>视频解码后端切换。</td></tr>
+          <tr><td class="m">12</td><td class="k">AudioOutputChanged</td><td>音频输出状态变化。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="types">
+    <h2>类型清单<span class="jp">型</span><a class="anchor" href="#types">#</a></h2>
+    <p>33 个类型定义全部位于 <code>erika.h</code>。结构与枚举的字段含义在函数条目中按需说明。</p>
+    <h3>句柄</h3>
+    <ul class="body">
+      <li><code>ErikaHandle</code> — pull 模型句柄。</li>
+      <li><code>ErikaPresenterHandle</code> — push 模型句柄。</li>
+    </ul>
+    <h3>结构体</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>类型</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td class="m">ErikaHttpHeader</td><td>打开时的 HTTP 请求头（name / value）。</td></tr>
+          <tr><td class="m">ErikaPresenterConfig</td><td>输出模式、EDR headroom、超分模式。</td></tr>
+          <tr><td class="m">ErikaSubtitleStyle</td><td>字幕样式覆盖，含 override_mask。</td></tr>
+          <tr><td class="m">ErikaSurfaceOutputCapabilities</td><td>表面输出能力（extended-linear、direct composition、headroom）。</td></tr>
+          <tr><td class="m">ErikaUpscalerStatus</td><td>超分状态与帧计数。</td></tr>
+          <tr><td class="m">ErikaOutputStatus</td><td>输出编码、headroom 与回退状态。</td></tr>
+          <tr><td class="m">ErikaPresenterResourceStatus</td><td>渲染器内存快照。</td></tr>
+          <tr><td class="m">ErikaSubtitleMemoryFontStatus</td><td>内存字体注册状态。</td></tr>
+          <tr><td class="m">ErikaSubtitleMemoryFontFace / Info</td><td>内存字体的 face 与元数据。</td></tr>
+          <tr><td class="m">ErikaDanmakuConfig</td><td>弹幕布局与显示参数。</td></tr>
+          <tr><td class="m">ErikaDanmakuTrackInfo</td><td>弹幕轨信息。</td></tr>
+          <tr><td class="m">ErikaVideoParams</td><td>视频尺寸与原色 / 传输。</td></tr>
+          <tr><td class="m">ErikaTrackCounts / Selection / Info</td><td>轨道数量、当前选择、轨道信息。</td></tr>
+          <tr><td class="m">ErikaEvent</td><td>事件载荷。</td></tr>
+          <tr><td class="m">ErikaPresenterStats</td><td>渲染统计，全部计数器字段。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>枚举</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>类型</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td class="m">ErikaStatus / ErikaState / ErikaEventKind</td><td>见上方各节。</td></tr>
+          <tr><td class="m">ErikaTrackKind</td><td>视频 / 音频 / 字幕。</td></tr>
+          <tr><td class="m">ErikaTrackSource</td><td>嵌入 / 外挂。</td></tr>
+          <tr><td class="m">ErikaWgpuSurfaceKind</td><td>wgpu 表面类型，8 种。</td></tr>
+          <tr><td class="m">ErikaFlutterTextureKind</td><td>Flutter 纹理类型，5 种。</td></tr>
+          <tr><td class="m">ErikaPresenterOutputMode</td><td>SDR / Apple EDR / extended-linear / Auto。</td></tr>
+          <tr><td class="m">ErikaActiveOutputEncoding</td><td>SDR sRGB / Apple EDR / Android scRGB / HDR10 PQ。</td></tr>
+          <tr><td class="m">ErikaOutputFallbackReason</td><td>HDR 回退原因，8 种。</td></tr>
+          <tr><td class="m">ErikaOutputSurfaceFormat</td><td>8-bit UNORM / 10-bit UNORM / 16-bit float。</td></tr>
+          <tr><td class="m">ErikaLumaUpscalerMode</td><td>Off / ArtCNN F16 / ArtCNN F32。</td></tr>
+          <tr><td class="m">ErikaUpscalerBackendStatus</td><td>超分后端状态，5 种。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="doc-foot">
+    <span>Erika <b>v0.1.5</b></span>
+    <span>Section <b>Reference</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="../kernel/clock.html"><span class="dir">Prev</span>时钟与调度</a>
+    <a class="nx" href="capi-handle.html"><span class="dir">Next</span>ErikaHandle 参考</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>零拷贝导入 — Erika 开发者文档</title>
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><span class="n">Erika</span><span class="v">v0.1.5</span></div>
+  <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <nav>
+    <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.html">快速开始</a></li>
+      <li><a href="../guide/rust.html">Rust 嵌入</a></li>
+      <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/flutter.html">Flutter 嵌入</a></li>
+    </ul>
+    <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="architecture.html">架构总览</a></li>
+      <li><a href="decode.html">硬件解码</a></li>
+      <li><a href="zero-copy.html" aria-current="page">零拷贝导入</a></li>
+      <li><a href="render.html">渲染管线</a></li>
+      <li><a href="hdr.html">高动态范围</a></li>
+      <li><a href="upscale.html">神经超分</a></li>
+      <li><a href="subtitle-danmaku.html">字幕与弹幕</a></li>
+      <li><a href="clock.html">时钟与调度</a></li>
+    </ul>
+    <h2><span class="no">三</span>项目 <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.html">构建与依赖</a></li>
+      <li><a href="../project/releasing.html">发布与产物</a></li>
+      <li><a href="../project/contributing.html">贡献指南</a></li>
+      <li><a href="../project/changelog.html">更新日志</a></li>
+    </ul>
+    <h2><span class="no">四</span>参考 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.html">C ABI 总览</a></li>
+      <li><a href="../reference/capi-handle.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>零拷贝导入</p>
+  <h1>零拷贝导入</h1>
+  <p class="kicker">Zero-copy Import</p>
+  <p class="lead">硬件解码器的输出以原生纹理或 buffer 句柄的形式直接导入渲染器，中间不经过 CPU 拷贝。每条导入路径都有一一对应的回退：无法导入时走 CPU upload，帧计数如实反映两条路径的使用比例。</p>
+
+  <ul class="meta-strip">
+    <li>导入路径 <b>4</b> 条</li>
+    <li>回退 <b>CPU upload</b></li>
+    <li>计数 <b>zero_copy / cpu_fallback</b></li>
+  </ul>
+
+  <section id="paths">
+    <h2>各平台导入路径<span class="jp">取り込み経路</span><a class="anchor" href="#paths">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>平台</th><th>解码输出</th><th>导入目标</th><th>机制</th></tr></thead>
+        <tbody>
+          <tr><td class="p">macOS / iOS / tvOS</td><td class="m">CVPixelBuffer</td><td class="m">MTLTexture</td><td>Metal 直接持有 pixel buffer 的纹理，按 iosurface 或共享内存零拷贝引用。</td></tr>
+          <tr><td class="p">Windows</td><td class="m">D3D11VA 纹理</td><td class="m">D3D11 纹理</td><td>解码器纹理与渲染器纹理互操作，渲染 pass 直接采样解码输出。</td></tr>
+          <tr><td class="p">Android</td><td class="m">MediaCodec Surface</td><td class="m">AHardwareBuffer → Vulkan</td><td>surface 帧经 <code>AHardwareBuffer</code> 句柄导入 wgpu/Vulkan，映射为 VkImage。</td></tr>
+          <tr><td class="p">HarmonyOS</td><td class="m">AVCodec Surface</td><td class="m">OHNativeBuffer → Vulkan</td><td>OHNativeBuffer 零拷贝导入，经 wgpu/Vulkan 呈现。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="fallback">
+    <h2>回退与计数<span class="jp">フォールバック</span><a class="anchor" href="#fallback">#</a></h2>
+    <p>导入失败的帧退回 CPU upload：解码输出经 <code>avcodec</code> 拷贝到 CPU 侧内存，再作为普通纹理上传。渲染器不区分帧的来源，两条路径走同一套渲染管线。</p>
+    <p>回退的原因包括句柄获取失败、格式不兼容、显存分配失败等。帧计数将两条路径分开统计：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>字段</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">zero_copy_video_frames</td><td>零拷贝导入成功的帧数。</td></tr>
+          <tr><td class="m">direct_zero_copy_video_frames</td><td>直接引用解码输出的帧数（不复制）。</td></tr>
+          <tr><td class="m">shared_handle_video_frames</td><td>经共享句柄（AHardwareBuffer / OHNativeBuffer 等）导入的帧数。</td></tr>
+          <tr><td class="m">cpu_video_frame_fallbacks</td><td>退回 CPU upload 的帧数。</td></tr>
+          <tr><td class="m">import_failures</td><td>导入失败的次数，包含失败后成功回退的情况。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>用 <code>zero_copy_video_frames / (zero_copy_video_frames + cpu_video_frame_fallbacks)</code> 可以得到一段时间内的零拷贝命中率，<code>macos_native_demo --smoke-seconds 3</code> 会在退出前打印这些计数器。</p>
+    <div class="note">
+      <p><b>导入失败不回滚播放。</b> 单帧导入失败只触发该帧的 CPU 回退，不中断播放。持续失败多见于显存不足或驱动异常，反映在 <code>import_failures</code> 的增长上。</p>
+    </div>
+  </section>
+
+  <footer class="doc-foot">
+    <span>Erika <b>v0.1.5</b></span>
+    <span>Section <b>Kernel</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="decode.html"><span class="dir">Prev</span>硬件解码</a>
+    <a class="nx" href="render.html"><span class="dir">Next</span>渲染管线</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

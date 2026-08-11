@@ -1,0 +1,434 @@
+<title>Erika — 可嵌入播放内核</title>
+<style>
+  :root{
+    --washi:#F3F1EA;
+    --washi-2:#EAE7DD;
+    --card:#FBFAF6;
+    --sumi:#15130F;
+    --sumi-2:#3D3931;
+    --sumi-3:#726C5F;
+    --sumi-4:#9A9488;
+    --shu:#B7332A;
+    --ai:#2C4A63;
+    --rule:#D6D2C5;
+    --rule-hair:#E4E1D7;
+    --ok:#2F6B4A;
+    --wait:#8A6A22;
+    --mincho:"Hiragino Mincho ProN","Yu Mincho","Songti SC","STSong","Source Han Serif SC",serif;
+    --latin:"Iowan Old Style",Charter,"Palatino Linotype",Palatino,Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:20px}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{
+    margin:0;background:var(--washi);color:var(--sumi);
+    font-family:var(--mincho);font-size:16px;line-height:1.85;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.45;
+    background:
+      radial-gradient(1px 1px at 12% 22%, rgba(21,19,15,.10) 50%, transparent 51%),
+      radial-gradient(1px 1px at 68% 8%,  rgba(21,19,15,.07) 50%, transparent 51%),
+      radial-gradient(1px 1px at 34% 76%, rgba(21,19,15,.08) 50%, transparent 51%),
+      radial-gradient(1px 1px at 88% 58%, rgba(21,19,15,.06) 50%, transparent 51%);
+    background-size:190px 190px,250px 250px,210px 210px,270px 270px;
+  }
+  .wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 clamp(20px,5vw,48px)}
+  a{color:var(--ai);text-decoration:none}
+  a:hover{text-decoration:underline;text-underline-offset:3px}
+  :focus-visible{outline:2px solid var(--shu);outline-offset:3px}
+  button{font-family:inherit;cursor:pointer}
+  code{font-family:var(--mono);font-size:.84em}
+  .tate{writing-mode:vertical-rl;text-orientation:mixed}
+
+  /* ── 扉 hero ───────────────────────────────── */
+  .hero{
+    display:grid;grid-template-columns:minmax(0,1fr) auto;gap:clamp(28px,6vw,72px);
+    min-height:100vh;min-height:100svh;align-content:center;
+    padding:clamp(72px,12vh,140px) 0;align-items:start;
+  }
+  .mark .eyebrow{
+    margin:0 0 22px;font-family:var(--sans);font-size:11px;letter-spacing:.32em;
+    text-transform:uppercase;color:var(--sumi-3);
+  }
+  .mark h1{
+    margin:0;font-family:var(--latin);font-weight:400;
+    font-size:clamp(60px,10.5vw,126px);line-height:.9;letter-spacing:-.02em;
+  }
+  .mark .kana{
+    margin:14px 0 0;font-size:15px;letter-spacing:.5em;color:var(--sumi-3);
+  }
+  .mark .thesis{
+    margin:34px 0 0;font-size:clamp(17px,2.05vw,20px);line-height:1.82;
+    color:var(--sumi-2);max-width:40em;
+  }
+  .acts{display:flex;gap:12px;margin-top:34px;flex-wrap:wrap}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;padding:11px 22px;
+    font-family:var(--sans);font-size:13.5px;letter-spacing:.02em;
+    border:1px solid var(--sumi);color:var(--sumi);background:transparent;
+    transition:background .22s,color .22s;
+  }
+  .btn:hover{background:var(--sumi);color:var(--washi);text-decoration:none}
+  .btn.ink{background:var(--sumi);color:var(--washi)}
+  .btn.ink:hover{background:var(--sumi-2)}
+
+  /* right: vertical spine + seal */
+  .spine{
+    display:flex;align-items:stretch;gap:clamp(16px,2.4vw,30px);
+    padding-top:6px;
+  }
+  .spine .rule{width:1px;background:var(--rule);min-height:340px}
+  .spine .col{display:flex;flex-direction:column;align-items:flex-end;gap:clamp(20px,3.4vh,34px)}
+  .spine .lines{display:flex;align-items:flex-start;gap:clamp(12px,1.8vw,22px)}
+  .spine .jp{
+    height:clamp(300px,46vh,430px);font-size:16.5px;line-height:2.2;letter-spacing:.1em;
+    color:var(--sumi-2);margin:0;
+  }
+  .spine .jp.red{color:var(--shu);height:clamp(220px,34vh,320px)}
+  .spine .kick{
+    height:clamp(180px,28vh,240px);margin:0;font-family:var(--sans);
+    font-size:10.5px;letter-spacing:.3em;color:var(--sumi-4);
+  }
+  .seal{
+    flex:none;width:72px;height:72px;border:2.5px solid var(--shu);border-radius:3px;
+    display:grid;place-content:center;padding:6px;color:var(--shu);
+    background:rgba(183,51,42,.05);font-size:18px;line-height:1.1;text-align:center;
+    letter-spacing:.04em;transform:rotate(-2.5deg);
+    transition:transform .3s cubic-bezier(.2,.9,.2,1),background .3s;
+  }
+  .seal:hover{transform:rotate(0) scale(1.05);background:rgba(183,51,42,.11)}
+  .seal span{display:block}
+  @media (max-width:820px){
+    .hero{grid-template-columns:1fr;gap:34px}
+    .spine{order:-1}
+    .spine .rule{display:none}
+    .spine .jp{height:clamp(240px,40vh,300px)}
+  }
+
+  /* ── section frame ─────────────────────────── */
+  section{padding:clamp(64px,11vh,124px) 0 0}
+  .head{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin-bottom:8px}
+  .head h2{margin:0;font-size:clamp(23px,3vw,31px);font-weight:400;letter-spacing:.06em}
+  .head .jpsub{font-size:13px;color:var(--sumi-4);letter-spacing:.16em}
+  .head .line{flex:1;height:1px;background:var(--rule-hair);min-width:40px}
+  .intro{margin:14px 0 0;font-size:16px;line-height:1.92;color:var(--sumi-2);max-width:60ch}
+  .intro code{background:var(--washi-2);padding:1.5px 5px;border-radius:2px;color:var(--sumi)}
+  .fine{font-family:var(--sans);font-size:13px;line-height:1.75;color:var(--sumi-3)}
+
+  /* ── quick start ───────────────────────────── */
+  .inset{
+    margin-top:30px;background:var(--card);border:1px solid var(--rule-hair);
+  }
+  .inset .bar{display:flex;border-bottom:1px solid var(--rule-hair);overflow-x:auto;background:var(--washi-2)}
+  .inset .bar button{
+    font-family:var(--sans);font-size:12.5px;padding:10px 16px;border:0;background:transparent;
+    color:var(--sumi-3);white-space:nowrap;border-bottom:2px solid transparent;
+  }
+  .inset .bar button[aria-selected="true"]{color:var(--sumi);background:var(--card);border-bottom-color:var(--shu)}
+  .inset .bar button:hover{color:var(--sumi)}
+  .pane{display:none;position:relative}
+  .pane[data-on="1"]{display:block}
+  pre{
+    margin:0;padding:18px 20px;overflow-x:auto;
+    font-family:var(--mono);font-size:12.5px;line-height:1.78;color:var(--sumi);
+  }
+  pre .c{color:var(--sumi-4)}
+  pre .k{color:var(--ai)}
+  pre .s{color:var(--ok)}
+  .pane .cap{
+    margin:0;padding:11px 20px 14px;border-top:1px solid var(--rule-hair);
+    font-family:var(--sans);font-size:12.5px;color:var(--sumi-3);
+  }
+  .copy{
+    position:absolute;right:10px;top:10px;font-family:var(--mono);font-size:10px;
+    padding:4px 8px;border:1px solid var(--rule);background:var(--washi);color:var(--sumi-3);
+  }
+  .copy:hover{color:var(--sumi);border-color:var(--sumi-3)}
+
+  /* ── table ─────────────────────────────────── */
+  .tw{overflow-x:auto;margin-top:30px}
+  table{border-collapse:collapse;width:100%;min-width:580px;font-family:var(--sans);font-size:13.5px}
+  th{
+    text-align:left;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--sumi-3);font-weight:600;padding:9px 16px 9px 0;
+    border-bottom:1px solid var(--sumi);white-space:nowrap;
+  }
+  td{padding:12px 16px 12px 0;border-bottom:1px solid var(--rule-hair);color:var(--sumi-2);vertical-align:baseline}
+  tbody tr:hover td{background:rgba(183,51,42,.026)}
+  td.p{color:var(--sumi);font-weight:550;white-space:nowrap}
+  td.m{font-family:var(--mono);font-size:12px}
+  .st{white-space:nowrap;font-size:12.5px}
+  .st.ok{color:var(--ok)}
+  .st.ok::before{content:"■ ";font-size:8px;vertical-align:2px}
+  .st.wait{color:var(--wait)}
+  .st.wait::before{content:"□ ";font-size:8px;vertical-align:2px}
+
+  /* ── docs ──────────────────────────────────── */
+  .docs{
+    display:grid;grid-template-columns:repeat(2,1fr);
+    gap:0 clamp(24px,4vw,48px);margin-top:30px;
+  }
+  .docs .dhead{
+    grid-column:1/-1;display:flex;align-items:baseline;gap:12px;
+    margin:34px 0 0;padding:20px 0 2px;border-top:1px solid var(--rule-hair);
+    font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.22em;
+    color:var(--sumi-2);
+  }
+  .docs .dhead:first-child{margin-top:0;border-top:0;padding-top:0}
+  .docs .dhead span{font-size:10px;letter-spacing:.26em;color:var(--sumi-4);text-transform:uppercase}
+  .docs .d{
+    padding:13px 0;border-bottom:1px solid var(--rule-hair);
+  }
+  .docs .d a{font-size:16px;color:var(--sumi)}
+  .docs .d a:hover{color:var(--ai)}
+  @media (max-width:720px){
+    .docs{grid-template-columns:1fr}
+  }
+
+  /* ── 奥付 colophon ─────────────────────────── */
+  .colophon{
+    margin-top:clamp(64px,11vh,120px);padding:clamp(30px,5vw,44px) 0 clamp(60px,10vh,104px);
+    border-top:1px solid var(--sumi);
+    display:flex;flex-direction:row-reverse;justify-content:space-between;gap:34px;flex-wrap:wrap;
+  }
+  .colophon .kotoba{
+    height:min(30vh,264px);margin:0;font-size:14.5px;line-height:2.15;letter-spacing:.06em;
+    color:var(--sumi-2);
+  }
+  .colophon .kotoba em{font-style:normal;color:var(--shu)}
+  .colophon .west{max-width:46ch}
+  .colophon .west blockquote{
+    margin:0 0 18px;padding:0 0 0 18px;border-left:2px solid var(--rule);
+    font-size:14.5px;line-height:1.9;color:var(--sumi-2);
+  }
+  .colophon .west blockquote p{margin:0 0 6px}
+  .colophon .west blockquote p:last-child{margin:0}
+  .colophon .meta{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--sumi-4);
+    display:flex;flex-direction:column;gap:5px;text-transform:uppercase;margin-top:20px;
+  }
+  .colophon .meta b{color:var(--sumi-2);font-weight:400}
+  @media (prefers-reduced-motion:no-preference){
+    .fade{opacity:0;transform:translateY(12px);transition:opacity .85s ease,transform .85s cubic-bezier(.2,.9,.2,1)}
+    .fade.in{opacity:1;transform:none}
+  }
+</style>
+
+<div class="wrap">
+
+  <!-- ── 扉 ─────────────────────────────────── -->
+  <section class="hero">
+    <div class="mark">
+      <p class="eyebrow">NipaPlay · Embeddable Playback Kernel</p>
+      <h1>Erika</h1>
+      <p class="kana">ヱリカ</p>
+      <p class="thesis">你只需递出一块画布,一切都在内核之内。</p>
+      <div class="acts">
+        <a class="btn ink" href="#start">开始接入</a>
+        <a class="btn" href="https://github.com/AimesSoft/Erika">GitHub</a>
+        <a class="btn" href="docs/index.html">文档</a>
+      </div>
+    </div>
+
+    <div class="spine">
+      <span class="rule"></span>
+      <div class="col">
+        <div class="lines">
+          <p class="tate kick">RUST · MPL-2.0 · v0.1.5</p>
+          <p class="tate jp red">すべては核の内側で。</p>
+          <p class="tate jp">宿主は、ただ一枚の描画面を差し出せばよい。</p>
+        </div>
+        <div class="seal" role="img" aria-label="朱印:再生核"><span>再生</span><span>核</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 接入 ───────────────────────────────── -->
+  <section class="fade" id="start">
+    <div class="head">
+      <h2>开始接入</h2>
+      <span class="jpsub">嵌入</span>
+      <span class="line"></span>
+    </div>
+    <p class="intro">尚未发布到 crates.io 与 pub.dev。推荐直接用 GitHub Releases 的预编译归档:原生依赖(FFmpeg、libass、FreeType、HarfBuzz、FriBidi、zlib、dav1d)已经过 <code>lgpl</code> profile 静态链接,除操作系统框架外自包含。</p>
+
+    <div class="inset">
+      <div class="bar" role="tablist">
+        <button role="tab" aria-selected="true" data-t="t1">预编译产物</button>
+        <button role="tab" aria-selected="false" data-t="t2">Rust</button>
+        <button role="tab" aria-selected="false" data-t="t3">Flutter</button>
+        <button role="tab" aria-selected="false" data-t="t4">C · Presenter</button>
+      </div>
+      <div class="pane" data-on="1" id="t1" role="tabpanel">
+        <button class="copy">复制</button>
+<pre><span class="c"># github.com/AimesSoft/Erika/releases</span>
+erika-capi-macos-universal.zip     liberika_capi.dylib / .a
+erika-capi-windows-x64.zip         erika_capi.dll / .dll.lib / .lib
+erika-capi-ios.zip                 erika_capi.xcframework
+erika-capi-tvos.zip                erika_capi.xcframework
+erika-capi-android.zip             4 ABI + libc++_shared.so
+erika-capi-openharmony-arm64.zip   liberika_capi.so + N-API 桥</pre>
+        <p class="cap">每个归档含 <code>include/erika.h</code>、许可证文本与记录 tag/commit 的 <code>MANIFEST.txt</code>。Linux 暂未发布。</p>
+      </div>
+      <div class="pane" id="t2" role="tabpanel">
+        <button class="copy">复制</button>
+<pre><span class="c"># Cargo.toml</span>
+[dependencies]
+erika = { git = <span class="s">"https://github.com/AimesSoft/Erika"</span>, tag = <span class="s">"v0.1.5"</span> }</pre>
+        <p class="cap">从源码构建前需先用 <code>cargo run -p xtask -- deps build --all --profile lgpl</code> 准备原生依赖。</p>
+      </div>
+      <div class="pane" id="t3" role="tabpanel">
+        <button class="copy">复制</button>
+<pre><span class="c"># pubspec.yaml</span>
+dependencies:
+  erika_flutter:
+    git:
+      url: https://github.com/AimesSoft/Erika
+      path: packages/erika_flutter
+
+<span class="k">export</span> ERIKA_PREBUILT=1   <span class="c"># 用预编译运行时,下载失败回退源码构建</span></pre>
+        <p class="cap">插件覆盖 macOS / iOS / tvOS / Windows / Android / HarmonyOS 六个目标。</p>
+      </div>
+      <div class="pane" id="t4" role="tabpanel">
+        <button class="copy">复制</button>
+<pre>#include <span class="s">"erika.h"</span>
+
+ErikaPresenterHandle *p = erika_presenter_create();
+erika_presenter_attach_metal_layer(p, (uint64_t)layer, w, h, scale);
+erika_presenter_open(p, <span class="s">"/path/to/video.mp4"</span>);
+erika_presenter_play(p);
+
+<span class="c">/* 每个显示帧 */</span>
+ErikaPresenterStats stats;
+erika_presenter_render_tick(p, host_time, &amp;stats);</pre>
+        <p class="cap"><code>ErikaPresenterHandle</code> 由内核托管完整播放栈;若宿主想自己拥有渲染循环,改用 <code>ErikaHandle</code> 自行拉取帧数据。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 平台 ───────────────────────────────── -->
+  <section class="fade" id="platforms">
+    <div class="head">
+      <h2>平台</h2>
+      <span class="jpsub">対応環境</span>
+      <span class="line"></span>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>平台</th><th>最低</th><th>解码</th><th>渲染</th><th>音频</th><th>状态</th></tr></thead>
+        <tbody>
+          <tr><td class="p">macOS</td><td class="m">14</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">CoreAudio</td><td class="st ok">可用</td></tr>
+          <tr><td class="p">iOS</td><td class="m">16</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">AudioQueue</td><td class="st ok">可用</td></tr>
+          <tr><td class="p">tvOS</td><td class="m">13</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">AudioQueue</td><td class="st ok">可用</td></tr>
+          <tr><td class="p">Windows</td><td class="m">10</td><td class="m">D3D11VA</td><td class="m">Direct3D 11</td><td class="m">WASAPI</td><td class="st ok">可用</td></tr>
+          <tr><td class="p">Android</td><td class="m">8</td><td class="m">MediaCodec / 软解</td><td class="m">wgpu · Vulkan+GLES</td><td class="m">AAudio</td><td class="st ok">可用</td></tr>
+          <tr><td class="p">HarmonyOS</td><td class="m">API 18</td><td class="m">AVCodec / 软解</td><td class="m">wgpu · Vulkan</td><td class="m">OHAudio</td><td class="st ok">可用</td></tr>
+          <tr><td class="p">Linux</td><td class="m">—</td><td class="m">—</td><td class="m">wgpu</td><td class="m">—</td><td class="st wait">规划中</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="fine" style="margin-top:14px">Android 以 NDK r29 在 API 26 交叉构建,提供 arm64-v8a / armeabi-v7a / x86_64 / x86 四个 ABI,需一并打包同 ABI 的 <code>libc++_shared.so</code>。HarmonyOS 硬解覆盖 H.264 / HEVC,构建于 OpenHarmony 5.1.0 native SDK。</p>
+  </section>
+
+  <!-- ── 文档 ───────────────────────────────── -->
+  <section class="fade" id="docs">
+    <div class="head">
+      <h2>文档</h2>
+      <span class="jpsub">目次</span>
+      <span class="line"></span>
+    </div>
+    <div class="docs">
+      <h3 class="dhead">接入指南<span>Guide</span></h3>
+      <div class="d"><a href="docs/guide/quickstart.html">快速开始</a></div>
+      <div class="d"><a href="docs/guide/rust.html">Rust 嵌入</a></div>
+      <div class="d"><a href="docs/guide/c.html">C ABI 嵌入</a></div>
+      <div class="d"><a href="docs/guide/flutter.html">Flutter 嵌入</a></div>
+      <h3 class="dhead">内核原理<span>Kernel</span></h3>
+      <div class="d"><a href="docs/kernel/architecture.html">架构总览</a></div>
+      <div class="d"><a href="docs/kernel/decode.html">硬件解码</a></div>
+      <div class="d"><a href="docs/kernel/zero-copy.html">零拷贝导入</a></div>
+      <div class="d"><a href="docs/kernel/render.html">渲染管线</a></div>
+      <div class="d"><a href="docs/kernel/hdr.html">高动态范围</a></div>
+      <div class="d"><a href="docs/kernel/upscale.html">神经超分</a></div>
+      <div class="d"><a href="docs/kernel/subtitle-danmaku.html">字幕与弹幕</a></div>
+      <div class="d"><a href="docs/kernel/clock.html">时钟与调度</a></div>
+      <h3 class="dhead">参考<span>Reference</span></h3>
+      <div class="d"><a href="docs/reference/capi.html">C ABI 总览</a></div>
+      <div class="d"><a href="docs/reference/capi-handle.html">ErikaHandle</a></div>
+      <div class="d"><a href="docs/reference/capi-presenter.html">ErikaPresenterHandle</a></div>
+      <div class="d"><a href="docs/reference/capi-json.html">JSON bridge</a></div>
+      <h3 class="dhead">项目<span>Project</span></h3>
+      <div class="d"><a href="docs/project/building.html">构建与依赖</a></div>
+      <div class="d"><a href="docs/project/releasing.html">发布与产物</a></div>
+      <div class="d"><a href="docs/project/contributing.html">贡献指南</a></div>
+      <div class="d"><a href="docs/project/changelog.html">更新日志</a></div>
+    </div>
+  </section>
+
+  <!-- ── 奥付 ───────────────────────────────── -->
+  <footer class="colophon">
+    <p class="tate kotoba">
+      名は『うみねこのなく頃に』の探偵、<em>古戸ヱリカ</em>より。<br>
+      一つは表の再生器、一つは裏の機関。
+    </p>
+    <div class="west">
+      <blockquote>
+        <p>「GOOD！我是 Erika,是 NipaPlay 里继 mdk、video player、libmpv、media kit 之后的第五个播放器内核。」</p>
+        <p>「即便算上你,也只有四个播放器内核！」</p>
+      </blockquote>
+      <p class="fine">名字取自《海猫鸣泣之时》的侦探古戸ヱリカ(古户绘梨花)。<a href="https://github.com/AimesSoft/NipaPlay-Reload">NipaPlay</a> 取自《寒蝉鸣泣之时》古手梨花的口癖「にぱー☆」。一个是台前的播放器,一个是幕后的引擎。</p>
+      <div class="meta">
+        <span>ERIKA · PLAYBACK KERNEL</span>
+        <span>VERSION <b>0.1.5</b></span>
+        <span>AIMESSOFT / NIPAPLAY</span>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll('.inset').forEach(function (box) {
+    var btns = box.querySelectorAll('.bar button');
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        btns.forEach(function (x) { x.setAttribute('aria-selected', 'false'); });
+        b.setAttribute('aria-selected', 'true');
+        box.querySelectorAll('.pane').forEach(function (p) { p.removeAttribute('data-on'); });
+        var t = box.querySelector('#' + b.dataset.t);
+        if (t) t.setAttribute('data-on', '1');
+      });
+    });
+  });
+
+  document.querySelectorAll('.copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var pre = btn.parentElement.querySelector('pre');
+      if (!pre || !navigator.clipboard) return;
+      navigator.clipboard.writeText(pre.innerText).then(function () {
+        var old = btn.textContent;
+        btn.textContent = '已复制';
+        setTimeout(function () { btn.textContent = old; }, 1400);
+      });
+    });
+  });
+
+  var fades = document.querySelectorAll('.fade');
+  if (reduce || !('IntersectionObserver' in window)) {
+    fades.forEach(function (f) { f.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.1 });
+  fades.forEach(function (f) { io.observe(f); });
+})();
+</script>

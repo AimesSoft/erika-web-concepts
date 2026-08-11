@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>渲染管线 — Erika 开发者文档</title>
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><span class="n">Erika</span><span class="v">v0.1.5</span></div>
+  <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <nav>
+    <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.html">快速开始</a></li>
+      <li><a href="../guide/rust.html">Rust 嵌入</a></li>
+      <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/flutter.html">Flutter 嵌入</a></li>
+    </ul>
+    <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="architecture.html">架构总览</a></li>
+      <li><a href="decode.html">硬件解码</a></li>
+      <li><a href="zero-copy.html">零拷贝导入</a></li>
+      <li><a href="render.html" aria-current="page">渲染管线</a></li>
+      <li><a href="hdr.html">高动态范围</a></li>
+      <li><a href="upscale.html">神经超分</a></li>
+      <li><a href="subtitle-danmaku.html">字幕与弹幕</a></li>
+      <li><a href="clock.html">时钟与调度</a></li>
+    </ul>
+    <h2><span class="no">三</span>项目 <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.html">构建与依赖</a></li>
+      <li><a href="../project/releasing.html">发布与产物</a></li>
+      <li><a href="../project/contributing.html">贡献指南</a></li>
+      <li><a href="../project/changelog.html">更新日志</a></li>
+    </ul>
+    <h2><span class="no">四</span>参考 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.html">C ABI 总览</a></li>
+      <li><a href="../reference/capi-handle.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>渲染管线</p>
+  <h1>渲染管线</h1>
+  <p class="kicker">Render Pipeline</p>
+  <p class="lead">视频、字幕与弹幕在同一张 pass 图里完成采样、色彩转换、tone mapping、缩放与合成，一次 render pass 上屏。pass 图由 <code>pipeline::build_graph</code> 按源与目标的色彩状态条件化构建。</p>
+
+  <ul class="meta-strip">
+    <li>pass 类型 <b>11</b> 种</li>
+    <li>后端 <b>Metal / D3D11 / wgpu</b></li>
+    <li>几何 <b>aspect_fit 居中</b></li>
+  </ul>
+
+  <section id="passes">
+    <h2>pass 图<span class="jp">パスグラフ</span><a class="anchor" href="#passes">#</a></h2>
+    <p><code>RenderPassKind</code> 定义了全部 11 种 pass。渲染一帧时，<code>build_graph</code> 从导入帧到输出变换按序组合，条件不满足的 pass 被跳过：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>pass</th><th>职责</th></tr></thead>
+        <tbody>
+          <tr><td class="m">ImportFrame</td><td>解码帧导入为 GPU 纹理（零拷贝或 CPU upload）。</td></tr>
+          <tr><td class="m">NeuralUpscale</td><td>ArtCNN 亮度 2× 超分，仅在启用且后端支持时插入。</td></tr>
+          <tr><td class="m">PlaneSampling</td><td>YCbCr 平面采样，uv 上采样与色度重建。</td></tr>
+          <tr><td class="m">ChromaReconstruction</td><td>色度平面重建。</td></tr>
+          <tr><td class="m">TransferDecode</td><td>传输函数解码，从编码格式还原线性光。</td></tr>
+          <tr><td class="m">GamutMap</td><td>色域映射，源与目标原色不同时插入。</td></tr>
+          <tr><td class="m">ToneMap</td><td>tone mapping，源为 HDR 且峰值超过目标约 1.05 倍时插入。</td></tr>
+          <tr><td class="m">Scale</td><td>缩放至输出尺寸。</td></tr>
+          <tr><td class="m">OverlayComposite</td><td>字幕、弹幕与宿主 overlay 的合成。</td></tr>
+          <tr><td class="m">Dither</td><td>输出位深降低时的抖动。</td></tr>
+          <tr><td class="m">OutputTransform</td><td>编码到输出格式（SDR / EDR / HDR10 PQ / scRGB）。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>两个条件插入的规则来自 <code>SourceColorState</code> 与 <code>TargetColorState</code> 的比较：tone map 仅当源是 HDR 且峰值超过目标约 5% 时插入，色域映射仅当源与目标原色不同时插入。SDR 内容在 SDR 目标上直接走采样与输出变换。</p>
+  </section>
+
+  <section id="backends">
+    <h2>后端实现<span class="jp">バックエンド</span><a class="anchor" href="#backends">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>后端</th><th>平台</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Metal</td><td class="m">macOS / iOS / tvOS</td><td>原生实现。YCbCr 采样、色彩转换、tone mapping、overlay 合成。ArtCNN 走 simdgroup matrix。</td></tr>
+          <tr><td class="k">Direct3D 11</td><td class="m">Windows</td><td>原生实现。D3D11VA 纹理互操作、HDR10 输出、overlay 合成。</td></tr>
+          <tr><td class="k">wgpu</td><td class="m">Android / HarmonyOS</td><td>Vulkan 后端，GLES 与恢复路径可用。HarmonyOS 经 OHNativeWindow 呈现。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>渲染后端由 presenter 配置决定，与表面附着方式无关。色彩决策统一走 <code>pipeline</code> 模块，三个后端共享同一套 pass 图描述。</p>
+  </section>
+
+  <section id="compositing">
+    <h2>合成与几何<span class="jp">合成</span><a class="anchor" href="#compositing">#</a></h2>
+    <p>字幕与弹幕在 <code>OverlayComposite</code> pass 中合成。合成发生在视频视口内：弹幕与字幕相对视频内容定位，跟随视频的 aspect-fit 几何。</p>
+    <p>视频内容以 <code>aspect_fit</code> 居中放置在输出表面内，letterbox 区域保持透明或填充，取决于表面配置。合成顺序为视频、字幕、弹幕、宿主 overlay。</p>
+    <p>HDR 内容的渲染链与截图链共用同一张 pass 图。截图的颜色空间与表面一致，合成内容包含视频、字幕与弹幕。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>Erika <b>v0.1.5</b></span>
+    <span>Section <b>Kernel</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="zero-copy.html"><span class="dir">Prev</span>零拷贝导入</a>
+    <a class="nx" href="hdr.html"><span class="dir">Next</span>高动态范围</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

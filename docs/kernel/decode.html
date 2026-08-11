@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>硬件解码 — Erika 开发者文档</title>
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><span class="n">Erika</span><span class="v">v0.1.5</span></div>
+  <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <nav>
+    <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.html">快速开始</a></li>
+      <li><a href="../guide/rust.html">Rust 嵌入</a></li>
+      <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/flutter.html">Flutter 嵌入</a></li>
+    </ul>
+    <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="architecture.html">架构总览</a></li>
+      <li><a href="decode.html" aria-current="page">硬件解码</a></li>
+      <li><a href="zero-copy.html">零拷贝导入</a></li>
+      <li><a href="render.html">渲染管线</a></li>
+      <li><a href="hdr.html">高动态范围</a></li>
+      <li><a href="upscale.html">神经超分</a></li>
+      <li><a href="subtitle-danmaku.html">字幕与弹幕</a></li>
+      <li><a href="clock.html">时钟与调度</a></li>
+    </ul>
+    <h2><span class="no">三</span>项目 <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.html">构建与依赖</a></li>
+      <li><a href="../project/releasing.html">发布与产物</a></li>
+      <li><a href="../project/contributing.html">贡献指南</a></li>
+      <li><a href="../project/changelog.html">更新日志</a></li>
+    </ul>
+    <h2><span class="no">四</span>参考 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.html">C ABI 总览</a></li>
+      <li><a href="../reference/capi-handle.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>硬件解码</p>
+  <h1>硬件解码</h1>
+  <p class="kicker">Decoding</p>
+  <p class="lead">解码统一走 FFmpeg 的 <code>avcodec</code> 接口，通过 <code>DecoderBackend</code> 选择软件或硬件后端。硬件路径不可用时回退软解，切换经 <code>VideoDecoderChanged</code> 事件上报宿主。</p>
+
+  <ul class="meta-strip">
+    <li>后端 <b>5</b> 种</li>
+    <li>硬件 4 / 软件 1</li>
+    <li>切换事件 <b>VideoDecoderChanged</b></li>
+  </ul>
+
+  <section id="backends">
+    <h2>解码后端<span class="jp">デコーダ</span><a class="anchor" href="#backends">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>后端</th><th>平台</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Software</td><td class="m">所有</td><td>FFmpeg 软解，任何平台的回退目标。</td></tr>
+          <tr><td class="k">VideoToolbox</td><td class="m">macOS / iOS / tvOS</td><td>Apple 硬件解码。</td></tr>
+          <tr><td class="k">D3d11va</td><td class="m">Windows</td><td>Direct3D 11 视频加速。</td></tr>
+          <tr><td class="k">MediaCodec</td><td class="m">Android</td><td>surface 模式为主，失败回退 ByteBuffer 模式。</td></tr>
+          <tr><td class="k">AvCodec</td><td class="m">HarmonyOS</td><td>AVCodec 硬件解码，覆盖 H.264 / HEVC。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>平台默认选择由 <code>VideoDecodePreference</code> 决定：Apple 系默认 VideoToolbox，Windows 默认 D3D11VA，Android 默认 MediaCodec，HarmonyOS 默认 AVCodec，其余平台使用软件解码。</p>
+  </section>
+
+  <section id="hardware">
+    <h2>硬件路径<span class="jp">ハードウェア経路</span><a class="anchor" href="#hardware">#</a></h2>
+    <p>硬件后端的选择发生在 <code>open_raw</code>：按后端选择 codec，经 <code>avcodec_get_hw_config</code> 查询硬件配置，再用 <code>av_hwdevice_ctx_create</code> 创建设备上下文。设备创建失败会沿回退链降到软件解码。</p>
+    <p>MediaCodec 是其中最特殊的路径。surface 模式下解码器绑定 <code>AVMediaCodecDeviceContext.native_window</code>，并设置 <code>ndk_codec=1</code>、<code>delay_flush=1</code>、<code>erika_nonblocking=1</code> 三个选项。surface 创建或绑定失败时，播放线程以 ByteBuffer 模式重建解码器并重开，整个过程对宿主表现为一次 <code>VideoDecoderChanged</code> 事件。</p>
+    <div class="note">
+      <p><b>回退是显式的。</b> 每次后端切换都发布 <code>VideoDecoderChanged</code> 事件。宿主可以用它更新诊断界面，也可以只记录日志。统计字段 <code>hardware_video_frames</code> 与 <code>software_video_frames</code> 分别累计两种路径的解码帧数。</p>
+    </div>
+  </section>
+
+  <section id="queues">
+    <h2>帧队列<span class="jp">フレームキュー</span><a class="anchor" href="#queues">#</a></h2>
+    <p>解码输出进入有界队列，播放线程与渲染侧经队列解耦。队列深度可在 <code>PlayerConfig</code> 中调整：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>队列</th><th>默认容量</th><th>配置字段</th></tr></thead>
+        <tbody>
+          <tr><td class="k">视频帧</td><td class="m">3</td><td class="m">video_frame_queue_capacity</td></tr>
+          <tr><td class="k">音频帧</td><td class="m">192</td><td class="m">audio_frame_queue_capacity</td></tr>
+          <tr><td class="k">字幕帧</td><td class="m">16</td><td class="m">subtitle_frame_queue_capacity</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>队列满时新帧被丢弃，统计字段 <code>video_frame_backpressure_drops</code> 累计视频帧的丢弃次数。音频帧队列由音频时钟消费，容量配置由 <code>AudioSyncConfig</code> 决定。</p>
+  </section>
+
+  <section id="stats">
+    <h2>相关统计<span class="jp">統計</span><a class="anchor" href="#stats">#</a></h2>
+    <p><code>ErikaPresenterStats</code> 中与解码相关的字段：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>字段</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">decoded_video_frames</td><td>解码出的视频帧总数。</td></tr>
+          <tr><td class="m">hardware_video_frames</td><td>硬件解码帧数。</td></tr>
+          <tr><td class="m">software_video_frames</td><td>软件解码帧数。</td></tr>
+          <tr><td class="m">zero_copy_video_frames</td><td>零拷贝导入渲染器的帧数。</td></tr>
+          <tr><td class="m">cpu_video_frame_fallbacks</td><td>零拷贝失败、退回 CPU upload 的帧数。</td></tr>
+          <tr><td class="m">import_failures</td><td>解码器输出导入 GPU 失败的次数。</td></tr>
+          <tr><td class="m">video_frame_backpressure_drops</td><td>队列满导致的丢帧次数。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>零拷贝导入的具体路径见<a href="zero-copy.html">零拷贝导入</a>。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>Erika <b>v0.1.5</b></span>
+    <span>Section <b>Kernel</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="architecture.html"><span class="dir">Prev</span>架构总览</a>
+    <a class="nx" href="zero-copy.html"><span class="dir">Next</span>零拷贝导入</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

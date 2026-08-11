@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>高动态范围 — Erika 开发者文档</title>
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><span class="n">Erika</span><span class="v">v0.1.5</span></div>
+  <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <nav>
+    <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.html">快速开始</a></li>
+      <li><a href="../guide/rust.html">Rust 嵌入</a></li>
+      <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/flutter.html">Flutter 嵌入</a></li>
+    </ul>
+    <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="architecture.html">架构总览</a></li>
+      <li><a href="decode.html">硬件解码</a></li>
+      <li><a href="zero-copy.html">零拷贝导入</a></li>
+      <li><a href="render.html">渲染管线</a></li>
+      <li><a href="hdr.html" aria-current="page">高动态范围</a></li>
+      <li><a href="upscale.html">神经超分</a></li>
+      <li><a href="subtitle-danmaku.html">字幕与弹幕</a></li>
+      <li><a href="clock.html">时钟与调度</a></li>
+    </ul>
+    <h2><span class="no">三</span>项目 <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.html">构建与依赖</a></li>
+      <li><a href="../project/releasing.html">发布与产物</a></li>
+      <li><a href="../project/contributing.html">贡献指南</a></li>
+      <li><a href="../project/changelog.html">更新日志</a></li>
+    </ul>
+    <h2><span class="no">四</span>参考 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.html">C ABI 总览</a></li>
+      <li><a href="../reference/capi-handle.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>高动态范围</p>
+  <h1>高动态范围</h1>
+  <p class="kicker">HDR / EDR Output</p>
+  <p class="lead">Erika 按平台协商输出编码：Apple EDR、Windows HDR10 PQ、Android extended-linear scRGB。协商失败时回退 SDR，回退原因与计数经 <code>ErikaOutputStatus</code> 上报，不静默降级。</p>
+
+  <ul class="meta-strip">
+    <li>输出模式 <b>4</b> 种</li>
+    <li>活跃编码 <b>4</b> 种</li>
+    <li>回退原因 <b>8</b> 种</li>
+  </ul>
+
+  <section id="modes">
+    <h2>输出模式<span class="jp">出力モード</span><a class="anchor" href="#modes">#</a></h2>
+    <p>宿主在创建 presenter 时经 <code>ErikaPresenterConfig.output_mode</code> 声明请求：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>模式</th><th>值</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Sdr</td><td class="m">0</td><td>固定 SDR 输出。</td></tr>
+          <tr><td class="k">AppleEdr</td><td class="m">1</td><td>Apple EDR，按 headroom 扩展。</td></tr>
+          <tr><td class="k">ExtendedLinear</td><td class="m">2</td><td>extended-linear 输出（Android scRGB 路径）。</td></tr>
+          <tr><td class="k">Auto</td><td class="m">3</td><td>按内容与表面能力自动选择。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>实际生效的编码记录在 <code>ErikaOutputStatus.active_encoding</code>：<code>SdrSrgb</code>、<code>AppleEdr</code>、<code>AndroidExtendedLinearScRgb</code>、<code>Hdr10Pq</code>。请求模式与活跃编码可以不同，差异即回退。</p>
+  </section>
+
+  <section id="headroom">
+    <h2>Headroom 协商<span class="jp">ヘッドルーム</span><a class="anchor" href="#headroom">#</a></h2>
+    <p>EDR 与 scRGB 路径按显示器的峰值亮度协商动态范围。宿主用 <code>set_output_headroom</code> 提供期望 headroom 与是否已知的标志，渲染器按表面的实际能力收敛到可用值。</p>
+    <p>协商过程中的状态字段：</p>
+    <ul class="body">
+      <li><code>requested_headroom</code> — 宿主请求值。</li>
+      <li><code>active_headroom</code> / <code>active_headroom_known</code> — 当前生效值及有效性。</li>
+      <li><code>headroom_updates</code> — 生效值变更次数。</li>
+      <li><code>extended_linear_frames</code> — 以 extended-linear 编码输出的帧数。</li>
+    </ul>
+  </section>
+
+  <section id="fallback">
+    <h2>回退<span class="jp">フォールバック</span><a class="anchor" href="#fallback">#</a></h2>
+    <p>回退原因枚举 <code>ErikaOutputFallbackReason</code> 覆盖 8 种情况：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>原因</th><th>值</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">None</td><td class="m">0</td><td>无回退。</td></tr>
+          <tr><td class="m">DisplayHdrUnsupported</td><td class="m">1</td><td>显示器不支持 HDR。</td></tr>
+          <tr><td class="m">HybridCompositionRequired</td><td class="m">2</td><td>需要混合合成。</td></tr>
+          <tr><td class="m">WgpuBackendNotVulkan</td><td class="m">3</td><td>wgpu 后端不是 Vulkan。</td></tr>
+          <tr><td class="m">Rgba16FloatSurfaceFormatUnavailable</td><td class="m">4</td><td>表面不支持 RGBA16F。</td></tr>
+          <tr><td class="m">NativeWindowDataSpaceApiUnavailable</td><td class="m">5</td><td>native window 缺少 data space API。</td></tr>
+          <tr><td class="m">ScrgbDataSpaceVerificationFailed</td><td class="m">6</td><td>scRGB data space 校验失败。</td></tr>
+          <tr><td class="m">SurfaceConfigureFailed</td><td class="m">7</td><td>表面配置失败。</td></tr>
+          <tr><td class="m">LegacyAppleEdrUnsupported</td><td class="m">8</td><td>旧版 Apple EDR 路径不可用。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><code>fallback_count</code> 累计回退次数，<code>data_space_failures</code> 单独累计 data space 协商失败次数。宿主可以用这两项判断目标设备的 HDR 支持是否稳定。</p>
+    <div class="note warn">
+      <p><b>Android extended-linear 的验证状态。</b> Android 的 FP16 extended-linear scRGB 输出在当前实现中已验证 SDR 播放与显式 SDR 回退。在 API 35 真机以 <code>Rgba16Float + SCRGB_LINEAR</code> 通过完整验收前，不应将 Android extended-linear 标记为真机已验证。</p>
+    </div>
+  </section>
+
+  <section id="stats">
+    <h2>HDR 统计<span class="jp">統計</span><a class="anchor" href="#stats">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>字段</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">hdr_source_frames</td><td>HDR 源内容的帧数。</td></tr>
+          <tr><td class="m">hdr10_output_frames</td><td>以 HDR10 PQ 输出的帧数。</td></tr>
+          <tr><td class="m">sdr_tonemap_frames</td><td>HDR 源经 tone map 到 SDR 输出的帧数。</td></tr>
+          <tr><td class="m">hdr10_metadata_updates</td><td>HDR10 元数据更新次数。</td></tr>
+          <tr><td class="m">hdr10_metadata_failures</td><td>元数据生成失败次数。</td></tr>
+          <tr><td class="m">hdr10_output_failures</td><td>HDR10 输出失败次数。</td></tr>
+          <tr><td class="m">hdr10_output_active</td><td>当前是否以 HDR10 输出。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>HDR 内容的 tone mapping 与输出变换在渲染管线内完成，见<a href="render.html">渲染管线</a>。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>Erika <b>v0.1.5</b></span>
+    <span>Section <b>Kernel</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="render.html"><span class="dir">Prev</span>渲染管线</a>
+    <a class="nx" href="upscale.html"><span class="dir">Next</span>神经超分</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>
