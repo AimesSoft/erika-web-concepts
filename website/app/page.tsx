@@ -108,8 +108,8 @@ export default function Home() {
           </div>
           <p className="hero-kicker">NipaPlay 自研 · 跨平台播放内核</p>
           <h1>
-            让每一帧，
-            <span className="title-accent">抵达真相。</span>
+            <span className="title-line">让每一帧，</span>
+            <span className="title-line title-accent">抵达真相。</span>
           </h1>
           <p className="hero-lead">
             从硬件解码、音画同步到 HDR 渲染、字幕与弹幕合成，
