@@ -83,27 +83,40 @@
     });
   }
 
-  Promise.all([
-    fetch(releaseApi, { headers: { Accept: "application/vnd.github+json" }, cache: "default" }),
-    fetch(changelogRaw, { cache: "default" })
-  ]).then(function (responses) {
-    if (!responses[0].ok || !responses[1].ok) throw new Error("GitHub unavailable");
-    return Promise.all([responses[0].json(), responses[1].text()]);
-  }).then(function (result) {
-    var release = result[0];
-    var markdown = result[1];
-    var version = release.tag_name;
-    var sections = parseChangelog(markdown, version);
+  function syncRelease() {
+    Promise.all([
+      fetch(releaseApi, { headers: { Accept: "application/vnd.github+json" }, cache: "default" }),
+      fetch(changelogRaw, { cache: "default" })
+    ]).then(function (responses) {
+      if (!responses[0].ok || !responses[1].ok) throw new Error("GitHub unavailable");
+      return Promise.all([responses[0].json(), responses[1].text()]);
+    }).then(function (result) {
+      var release = result[0];
+      var markdown = result[1];
+      var version = release.tag_name;
+      var sections = parseChangelog(markdown, version);
 
-    setText("[data-release-version]", version);
-    setText("[data-release-date]", (release.published_at || "").slice(0, 10));
-    setText("[data-release-assets]", String((release.assets || []).length));
-    setText("[data-release-source]", "RELEASE");
-    document.querySelectorAll("[data-release-url]").forEach(function (link) {
-      link.setAttribute("href", release.html_url);
+      setText("[data-release-version]", version);
+      setText("[data-release-date]", (release.published_at || "").slice(0, 10));
+      setText("[data-release-assets]", String((release.assets || []).length));
+      setText("[data-release-source]", "RELEASE");
+      document.querySelectorAll("[data-release-url]").forEach(function (link) {
+        link.setAttribute("href", release.html_url);
+      });
+      renderSections(sections);
+    }).catch(function () {
+      // The complete static snapshot remains visible when GitHub is unavailable.
     });
-    renderSections(sections);
-  }).catch(function () {
-    // The complete static snapshot remains visible when GitHub is unavailable.
-  });
+  }
+
+  function scheduleSync() {
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(syncRelease, { timeout: 1500 });
+    } else {
+      window.setTimeout(syncRelease, 250);
+    }
+  }
+
+  if (document.readyState === "complete") scheduleSync();
+  else window.addEventListener("load", scheduleSync, { once: true });
 })();
