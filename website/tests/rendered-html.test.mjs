@@ -42,22 +42,27 @@ test("server-renders the Erika official project site", async () => {
   assert.match(html, /VERSION INTEL/);
   assert.match(html, /版本情报/);
   assert.match(html, /更新日志/);
-  assert.match(html, /\/api\/version/);
+  assert.match(html, /version-sync\.js/);
+  assert.match(html, /api\.github\.com\/repos\/AimesSoft\/Erika\/releases\/latest/);
+  assert.doesNotMatch(html, /\/api\/version/);
   assert.match(html, /https:\/\/github\.com\/AimesSoft\/Erika/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|Building your site/);
 });
 
-test("exposes the latest release as structured JSON", async () => {
-  const response = await render("/api/version");
-  assert.equal(response.status, 200);
-  assert.match(response.headers.get("content-type") ?? "", /^application\/json\b/i);
-  assert.match(response.headers.get("cache-control") ?? "", /s-maxage=1800/);
+test("exports a backend-free static site", async () => {
+  const staticHtml = await readFile(new URL("../static-site/index.html", import.meta.url), "utf8");
+  assert.match(staticHtml, /<html lang="zh-CN">/);
+  assert.match(staticHtml, /VERSION INTEL/);
+  assert.match(staticHtml, /<script src="\.\/version-sync\.js" defer><\/script>/);
+  assert.match(staticHtml, /href="\.\/_next\/static\/css\//);
+  assert.doesNotMatch(staticHtml, /<script[^>]+\/_next\//);
+  assert.doesNotMatch(staticHtml, /signin-with-chatgpt|oai-authenticated-user|\/api\/version/);
 
-  const release = await response.json();
-  assert.match(release.version, /^v\d+\.\d+\.\d+$/);
-  assert.match(release.releasedAt, /^\d{4}-\d{2}-\d{2}$/);
-  assert.ok(Array.isArray(release.sections));
-  assert.ok(release.sections.length > 0);
+  await Promise.all([
+    access(new URL("../static-site/og.png", import.meta.url)),
+    access(new URL("../static-site/version-sync.js", import.meta.url)),
+    access(new URL("../static-site/.nojekyll", import.meta.url)),
+  ]);
 });
 
 test("ships site-specific metadata, artwork, and source", async () => {
@@ -70,8 +75,10 @@ test("ships site-specific metadata, artwork, and source", async () => {
   assert.match(page, /让每一帧/);
   assert.match(page, /古戸ヱリカ/);
   assert.match(layout, /Erika — 让每一帧，抵达真相/);
-  assert.match(layout, /\$\{origin\}\/og\.png/);
+  assert.match(layout, /version-sync\.js/);
+  assert.doesNotMatch(layout, /headers\(\)|generateMetadata/);
   assert.match(packageJson, /"name": "erika-project-site"/);
+  assert.match(packageJson, /"build:static"/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 
   await access(new URL("../public/og.png", import.meta.url));

@@ -1,4 +1,4 @@
-import { getReleaseIntel } from "../lib/release-intel";
+import { releaseSnapshot } from "../lib/release-intel";
 
 const features = [
   {
@@ -71,8 +71,8 @@ function Arrow() {
   return <span aria-hidden="true">↗</span>;
 }
 
-export default async function Home() {
-  const release = await getReleaseIntel();
+export default function Home() {
+  const release = releaseSnapshot;
 
   return (
     <main>
@@ -302,27 +302,27 @@ export default async function Home() {
               <span>LATEST STABLE</span>
               <span>CASE / RELEASE</span>
             </div>
-            <strong className="version-number">{release.version}</strong>
+            <strong className="version-number" data-release-version>{release.version}</strong>
             <div className="version-meta">
-              <div><small>RELEASED</small><time dateTime={release.releasedAt}>{release.releasedAt}</time></div>
-              <div><small>ASSETS</small><span>{release.assetCount || "—"}</span></div>
-              <div><small>SOURCE</small><span>{release.source === "github-release" ? "RELEASE" : "CHANGELOG"}</span></div>
+              <div><small>RELEASED</small><time dateTime={release.releasedAt} data-release-date>{release.releasedAt}</time></div>
+              <div><small>ASSETS</small><span data-release-assets>{release.assetCount || "—"}</span></div>
+              <div><small>SOURCE</small><span data-release-source>SNAPSHOT</span></div>
             </div>
             <div className="version-actions">
-              <a className="button button-primary" href={release.releaseUrl} target="_blank" rel="noreferrer">
+              <a className="button button-primary" href={release.releaseUrl} target="_blank" rel="noreferrer" data-release-url>
                 获取此版本 <Arrow />
               </a>
-              <a className="version-api" href="/api/version">JSON API <span aria-hidden="true">→</span></a>
+              <a className="version-api" href="https://api.github.com/repos/AimesSoft/Erika/releases/latest" target="_blank" rel="noreferrer">GITHUB API <span aria-hidden="true">→</span></a>
             </div>
             <span className="version-watermark" aria-hidden="true">V</span>
           </div>
 
           <div className="changelog-card">
             <div className="changelog-head">
-              <div><span>CHANGELOG</span><strong>{release.version} 更新日志</strong></div>
+              <div><span>CHANGELOG</span><strong><span data-release-version>{release.version}</span> 更新日志</strong></div>
               <a href={release.changelogUrl} target="_blank" rel="noreferrer">完整记录 <Arrow /></a>
             </div>
-            <div className="change-list">
+            <div className="change-list" data-change-list>
               {release.sections.map((section, index) => (
                 <details key={section.title} open={index === 0}>
                   <summary>
