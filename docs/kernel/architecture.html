@@ -199,5 +199,24 @@
 </main>
 
 </div>
+<script>
+(function () {
+  document.querySelectorAll('.code').forEach(function (box) {
+    if (!box.querySelector('pre')) return;
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'copy'; btn.textContent = '复制';
+    box.appendChild(btn);
+    btn.addEventListener('click', function () {
+      var pre = box.querySelector('pre');
+      if (!pre || !navigator.clipboard) return;
+      navigator.clipboard.writeText(pre.innerText).then(function () {
+        var old = btn.textContent;
+        btn.textContent = '已复制';
+        setTimeout(function () { btn.textContent = old; }, 1400);
+      });
+    });
+  });
+})();
+</script>
 </body>
 </html>
