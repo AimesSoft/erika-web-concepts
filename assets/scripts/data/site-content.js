@@ -27,7 +27,6 @@ app.siteContent = {
     facts: [
       { value: 'Rust', label: '内核语言' },
       { value: '6', label: '已支持平台' },
-      { value: '1', label: '宿主画布' },
     ],
   },
   features: {
