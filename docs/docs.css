@@ -211,12 +211,13 @@ dl.params dd{
 .crow{
   display:grid;grid-template-columns:24px minmax(130px,170px) minmax(0,1fr);
   gap:clamp(14px,2.4vw,32px);padding:18px 0;border-bottom:1px solid var(--rule-hair);
-  align-items:baseline;
+  align-items:baseline;position:relative;
 }
 .crow:hover{background:var(--shu-soft)}
 .crow .no{font-family:var(--mincho);font-size:13px;color:var(--shu);opacity:.9}
 .crow .ttl a{font-family:var(--mincho);font-size:16px;color:var(--sumi);letter-spacing:.06em}
 .crow .ttl a:hover{color:var(--shu);text-decoration:none}
+.crow .ttl a::after{content:"";position:absolute;inset:0}
 .crow .ttl .en{
   display:block;margin-top:4px;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;
   text-transform:uppercase;color:var(--sumi-4);
