@@ -213,6 +213,7 @@ a {
 .features-heading h2,
 .pipeline-copy h2,
 .platform-heading h2,
+.release-heading h2,
 .start-heading h2,
 .final-cta h2 {
   font-family: Impact, "Arial Black", "Noto Sans SC", sans-serif;
@@ -1062,6 +1063,324 @@ a {
 
 .linux-note span { color: var(--yellow); }
 
+.release-section {
+  background:
+    linear-gradient(rgba(21, 19, 27, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(21, 19, 27, 0.04) 1px, transparent 1px),
+    var(--paper);
+  background-size: 28px 28px;
+  padding: 130px 6vw 140px;
+  position: relative;
+}
+
+.release-section::before {
+  background: var(--yellow);
+  border: 2px solid var(--ink);
+  content: "LATEST / LATEST / LATEST";
+  font-family: monospace;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  padding: 8px 42px;
+  position: absolute;
+  right: -34px;
+  top: 38px;
+  transform: rotate(8deg);
+}
+
+.release-heading {
+  align-items: end;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 62px;
+}
+
+.release-heading h2 {
+  font-size: clamp(56px, 7vw, 104px);
+  line-height: 0.94;
+}
+
+.release-sync {
+  align-items: center;
+  border: 2px solid var(--ink);
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.release-sync div {
+  display: flex;
+  flex-direction: column;
+}
+
+.release-sync strong,
+.release-sync small {
+  font-family: monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+
+.release-sync small {
+  color: #706a74;
+  font-size: 8px;
+  margin-top: 2px;
+}
+
+.sync-light {
+  animation: blink 1.8s step-end infinite;
+  background: var(--berry);
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(231, 22, 91, 0.16);
+  height: 12px;
+  width: 12px;
+}
+
+.release-dossier {
+  align-items: start;
+  display: grid;
+  gap: 26px;
+  grid-template-columns: minmax(320px, 0.72fr) minmax(440px, 1.28fr);
+}
+
+.version-card {
+  background: var(--ink);
+  border: 3px solid var(--ink);
+  box-shadow: 10px 10px 0 var(--berry);
+  color: white;
+  min-height: 510px;
+  overflow: hidden;
+  padding: 28px;
+  position: sticky;
+  top: 100px;
+}
+
+.version-card::after {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  content: "";
+  inset: 10px;
+  pointer-events: none;
+  position: absolute;
+}
+
+.version-card-top {
+  display: flex;
+  font-family: monospace;
+  font-size: 8px;
+  font-weight: 900;
+  justify-content: space-between;
+  letter-spacing: 0.14em;
+  position: relative;
+  z-index: 2;
+}
+
+.version-card-top span:first-child {
+  color: var(--cyan);
+}
+
+.version-number {
+  color: var(--paper-strong);
+  display: block;
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: clamp(74px, 8vw, 120px);
+  letter-spacing: -0.06em;
+  line-height: 0.88;
+  margin: 76px 0 66px;
+  position: relative;
+  z-index: 2;
+}
+
+.version-number::after {
+  background: var(--berry);
+  bottom: -9px;
+  content: "";
+  height: 8px;
+  left: 0;
+  position: absolute;
+  transform: rotate(-1deg);
+  width: 82%;
+}
+
+.version-meta {
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  border-top: 1px solid rgba(255,255,255,0.2);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  position: relative;
+  z-index: 2;
+}
+
+.version-meta div {
+  border-right: 1px solid rgba(255,255,255,0.2);
+  display: flex;
+  flex-direction: column;
+  padding: 15px 10px 15px 0;
+}
+
+.version-meta div:last-child {
+  border-right: 0;
+  padding-left: 10px;
+}
+
+.version-meta div:nth-child(2) { padding-left: 10px; }
+
+.version-meta small {
+  color: var(--cyan);
+  font-family: monospace;
+  font-size: 7px;
+  letter-spacing: 0.13em;
+}
+
+.version-meta time,
+.version-meta span {
+  font-family: monospace;
+  font-size: 10px;
+  font-weight: 900;
+  margin-top: 5px;
+}
+
+.version-actions {
+  align-items: center;
+  display: flex;
+  gap: 22px;
+  margin-top: 30px;
+  position: relative;
+  z-index: 2;
+}
+
+.version-actions .button:hover {
+  box-shadow: 5px 5px 0 var(--cyan);
+}
+
+.version-api {
+  border-bottom: 1px solid var(--cyan);
+  font-family: monospace;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  padding-bottom: 5px;
+}
+
+.version-watermark {
+  bottom: -78px;
+  color: rgba(255,255,255,0.035);
+  font-family: Georgia, serif;
+  font-size: 320px;
+  font-style: italic;
+  font-weight: 900;
+  line-height: 1;
+  position: absolute;
+  right: -20px;
+}
+
+.changelog-card {
+  background: var(--paper-strong);
+  border: 3px solid var(--ink);
+  box-shadow: 10px 10px 0 var(--ink);
+}
+
+.changelog-head {
+  align-items: center;
+  background: var(--cyan);
+  border-bottom: 3px solid var(--ink);
+  display: flex;
+  justify-content: space-between;
+  padding: 22px 24px;
+}
+
+.changelog-head div {
+  display: flex;
+  flex-direction: column;
+}
+
+.changelog-head span {
+  font-family: monospace;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+}
+
+.changelog-head strong {
+  font-size: 22px;
+  margin-top: 4px;
+}
+
+.changelog-head a {
+  border-bottom: 2px solid var(--ink);
+  font-size: 11px;
+  font-weight: 900;
+  padding-bottom: 4px;
+}
+
+.change-list details {
+  border-bottom: 2px solid var(--ink);
+}
+
+.change-list details:last-child { border-bottom: 0; }
+
+.change-list summary {
+  align-items: center;
+  cursor: pointer;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 42px 1fr 24px;
+  list-style: none;
+  padding: 24px;
+  transition: background 160ms ease;
+}
+
+.change-list summary::-webkit-details-marker { display: none; }
+.change-list summary:hover { background: rgba(255, 216, 77, 0.25); }
+
+.change-list summary > span {
+  color: var(--berry);
+  font-family: Impact, sans-serif;
+  font-size: 22px;
+}
+
+.change-list summary strong {
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+
+.change-list summary i {
+  font-size: 22px;
+  font-style: normal;
+  transition: transform 160ms ease;
+}
+
+.change-list details[open] summary {
+  background: rgba(255, 216, 77, 0.28);
+}
+
+.change-list details[open] summary i { transform: rotate(45deg); }
+
+.change-list ul {
+  border-top: 1px dashed rgba(21, 19, 27, 0.34);
+  list-style: none;
+  margin: 0 24px;
+  padding: 22px 22px 26px 58px;
+}
+
+.change-list li {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.75;
+  margin-bottom: 11px;
+  position: relative;
+}
+
+.change-list li:last-child { margin-bottom: 0; }
+
+.change-list li::before {
+  color: var(--berry);
+  content: "◆";
+  font-size: 7px;
+  left: -18px;
+  position: absolute;
+  top: 5px;
+}
+
 .start-section {
   background: var(--ink);
   color: white;
@@ -1287,6 +1606,7 @@ section[id] { scroll-margin-top: 74px; }
 
   .feature-grid { grid-template-columns: repeat(2, 1fr); }
   .platform-grid { grid-template-columns: repeat(2, 1fr); }
+  .release-dossier { grid-template-columns: minmax(300px, 0.8fr) minmax(400px, 1.2fr); }
   .pipeline-section { gap: 5vw; padding-left: 5vw; padding-right: 5vw; }
   .cta-seal { opacity: 0.26; }
 }
@@ -1345,11 +1665,14 @@ section[id] { scroll-margin-top: 74px; }
 
   .features-section,
   .platform-section,
+  .release-section,
   .start-section { padding: 96px 20px; }
   .features-heading,
   .platform-heading,
+  .release-heading,
   .start-heading { align-items: start; flex-direction: column; gap: 26px; }
   .features-heading h2,
+  .release-heading h2,
   .start-heading h2 { font-size: 58px; }
   .features-aside { align-self: flex-end; }
   .feature-grid { grid-template-columns: 1fr; }
@@ -1363,6 +1686,21 @@ section[id] { scroll-margin-top: 74px; }
   .platform-heading h2 span { -webkit-text-stroke-width: 1px; }
   .platform-grid { grid-template-columns: 1fr; }
   .platform-card { min-height: 165px; }
+
+  .release-section::before { display: none; }
+  .release-sync { align-self: flex-end; }
+  .release-dossier { grid-template-columns: 1fr; }
+  .version-card { min-height: 470px; position: relative; top: auto; }
+  .version-number { font-size: 80px; margin: 66px 0 58px; }
+  .version-actions { align-items: stretch; flex-direction: column; }
+  .version-actions .button { width: 100%; }
+  .version-api { align-self: flex-start; }
+  .changelog-head { align-items: flex-start; gap: 18px; }
+  .changelog-head strong { font-size: 18px; }
+  .changelog-head a { white-space: nowrap; }
+  .change-list summary { gap: 10px; grid-template-columns: 34px 1fr 20px; padding: 20px 16px; }
+  .change-list summary strong { font-size: 13px; }
+  .change-list ul { margin: 0 16px; padding: 18px 12px 22px 38px; }
 
   .code-grid { grid-template-columns: 1fr; }
   .code-card pre { font-size: 10px; padding: 22px 18px; }

@@ -1,3 +1,5 @@
+import { getReleaseIntel } from "../lib/release-intel";
+
 const features = [
   {
     mark: "01",
@@ -69,7 +71,9 @@ function Arrow() {
   return <span aria-hidden="true">↗</span>;
 }
 
-export default function Home() {
+export default async function Home() {
+  const release = await getReleaseIntel();
+
   return (
     <main>
       <header className="topbar">
@@ -81,6 +85,7 @@ export default function Home() {
         <nav aria-label="主导航">
           <a href="#case">案件卷宗</a>
           <a href="#features">能力证据</a>
+          <a href="#release">版本情报</a>
           <a href="#start">开始接入</a>
         </nav>
         <a
@@ -277,6 +282,62 @@ export default function Home() {
           ))}
         </div>
         <p className="linux-note"><span>＋</span> Linux / wgpu 支持正在规划中</p>
+      </section>
+
+      <section className="release-section" id="release">
+        <div className="release-heading">
+          <div>
+            <p className="section-label">VERSION INTEL / 版本情报</p>
+            <h2>最新证词，<br />自动归档。</h2>
+          </div>
+          <div className="release-sync">
+            <span className="sync-light" aria-hidden="true" />
+            <div><strong>GITHUB SYNCED</strong><small>每 30 分钟自动更新</small></div>
+          </div>
+        </div>
+
+        <div className="release-dossier">
+          <div className="version-card">
+            <div className="version-card-top">
+              <span>LATEST STABLE</span>
+              <span>CASE / RELEASE</span>
+            </div>
+            <strong className="version-number">{release.version}</strong>
+            <div className="version-meta">
+              <div><small>RELEASED</small><time dateTime={release.releasedAt}>{release.releasedAt}</time></div>
+              <div><small>ASSETS</small><span>{release.assetCount || "—"}</span></div>
+              <div><small>SOURCE</small><span>{release.source === "github-release" ? "RELEASE" : "CHANGELOG"}</span></div>
+            </div>
+            <div className="version-actions">
+              <a className="button button-primary" href={release.releaseUrl} target="_blank" rel="noreferrer">
+                获取此版本 <Arrow />
+              </a>
+              <a className="version-api" href="/api/version">JSON API <span aria-hidden="true">→</span></a>
+            </div>
+            <span className="version-watermark" aria-hidden="true">V</span>
+          </div>
+
+          <div className="changelog-card">
+            <div className="changelog-head">
+              <div><span>CHANGELOG</span><strong>{release.version} 更新日志</strong></div>
+              <a href={release.changelogUrl} target="_blank" rel="noreferrer">完整记录 <Arrow /></a>
+            </div>
+            <div className="change-list">
+              {release.sections.map((section, index) => (
+                <details key={section.title} open={index === 0}>
+                  <summary>
+                    <span>0{index + 1}</span>
+                    <strong>{section.title}</strong>
+                    <i aria-hidden="true">＋</i>
+                  </summary>
+                  <ul>
+                    {section.items.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
+                </details>
+              ))}
+            </div>
+          </div>
+        </div>
       </section>
 
       <section className="start-section" id="start">

@@ -2,13 +2,13 @@ import assert from "node:assert/strict";
 import { access, readFile, readdir } from "node:fs/promises";
 import test from "node:test";
 
-async function render() {
+async function render(pathname = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
   const { default: worker } = await import(workerUrl.href);
 
   return worker.fetch(
-    new Request("https://erika.example/", {
+    new Request(`https://erika.example${pathname}`, {
       headers: {
         accept: "text/html",
         host: "erika.example",
@@ -39,8 +39,25 @@ test("server-renders the Erika official project site", async () => {
   assert.match(html, /让每一帧/);
   assert.match(html, /NipaPlay 自研/);
   assert.match(html, /硬解，不绕路/);
+  assert.match(html, /VERSION INTEL/);
+  assert.match(html, /版本情报/);
+  assert.match(html, /更新日志/);
+  assert.match(html, /\/api\/version/);
   assert.match(html, /https:\/\/github\.com\/AimesSoft\/Erika/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|Building your site/);
+});
+
+test("exposes the latest release as structured JSON", async () => {
+  const response = await render("/api/version");
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("content-type") ?? "", /^application\/json\b/i);
+  assert.match(response.headers.get("cache-control") ?? "", /s-maxage=1800/);
+
+  const release = await response.json();
+  assert.match(release.version, /^v\d+\.\d+\.\d+$/);
+  assert.match(release.releasedAt, /^\d{4}-\d{2}-\d{2}$/);
+  assert.ok(Array.isArray(release.sections));
+  assert.ok(release.sections.length > 0);
 });
 
 test("ships site-specific metadata, artwork, and source", async () => {
