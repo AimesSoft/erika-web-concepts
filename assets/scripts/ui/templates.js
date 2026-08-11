@@ -157,6 +157,7 @@ function renderClosing(content) {
       <div class="shell footer-inner">
         <a class="brand footer-brand" href="#top"><img class="brand-mark" src="assets/images/favicon.svg" alt="" width="64" height="64"><span class="brand-name">${escapeHTML(brand.name)}</span></a>
         <p>${escapeHTML(brand.descriptor)} · ${escapeHTML(brand.version)} · MPL-2.0</p>
+        <p class="footer-org">© 2026 AIMESSOFT</p>
         <a href="${brand.repoUrl}" target="_blank" rel="noreferrer">GitHub ${icon('arrow')}</a>
       </div>
     </footer>`;
