@@ -91,7 +91,19 @@
     <div class="code">
 <pre>{ "ok": false, "status": 3, "error": "human readable message" }</pre>
     </div>
-    <p>只检查 <code>ok</code> 字段。错误消息与 C 面的线程局部错误一致；panic 被捕获并映射为相同形状的错误响应。</p>
+    <p>只检查 <code>ok</code> 字段。错误消息与 C 面的线程局部错误一致；panic 被捕获并映射为相同形状的错误响应。注意:任何 C 层非 Ok 状态(包括 NullPointer)都统一映射为 <code>status: 3</code>。</p>
+  </section>
+
+  <section id="events">
+    <h2>事件返回形状<span class="jp">イベント</span><a class="anchor" href="#events">#</a></h2>
+    <p><code>poll_event_json</code> 的事件对象字段与 <code>ErikaEvent</code> 一一对应,kind 为整数(0–12,见<a href="capi.html#events">C ABI 总览</a>的事件表):</p>
+    <div class="code">
+<pre>{ "kind": 1, "status": 0, "state": 2, "durationMicros": 0,
+  "positionMicros": 0, "buffering": false,
+  "video": { "width": 0, "height": 0, "primaries": 0, "transfer": 0 },
+  "tracks": { "video": 0, "audio": 0, "subtitle": 0 } }</pre>
+    </div>
+    <p>三个 kind 附带额外字段:<code>Error</code>(9)附 <code>error</code> 字符串;<code>VideoDecoderChanged</code>(11)附 <code>decoder</code> 与 <code>message</code>;<code>AudioOutputChanged</code>(12)附 <code>audio</code> 与 <code>message</code>。队列为空时返回 NULL。</p>
   </section>
 
   <section id="methods">
@@ -101,15 +113,15 @@
     <h3>播放控制</h3>
     <div class="tw">
       <table>
-        <thead><tr><th>方法</th><th>参数</th><th>返回</th></tr></thead>
+        <thead><tr><th>方法</th><th>参数</th><th>返回</th><th>对应 C 函数</th></tr></thead>
         <tbody>
-          <tr><td class="k">open</td><td class="m">uri，[headers]</td><td class="m">null</td></tr>
-          <tr><td class="k">play / pause / stop / close</td><td class="m">—</td><td class="m">null</td></tr>
-          <tr><td class="k">seek</td><td class="m">positionMicros</td><td class="m">null</td></tr>
-          <tr><td class="k">setPlaybackRate</td><td class="m">rate</td><td class="m">null</td></tr>
-          <tr><td class="k">setVolume</td><td class="m">volume</td><td class="m">null</td></tr>
-          <tr><td class="k">setUpscaler</td><td class="m">mode</td><td class="m">null</td></tr>
-          <tr><td class="k">setSubtitleScale</td><td class="m">scale</td><td class="m">null</td></tr>
+          <tr><td class="k">open</td><td class="m">uri，[httpHeaders]</td><td class="m">null</td><td class="m">erika_presenter_open_with_headers</td></tr>
+          <tr><td class="k">play / pause / stop / close</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_play / pause / stop / close</td></tr>
+          <tr><td class="k">seek</td><td class="m">positionMicros</td><td class="m">null</td><td class="m">erika_presenter_seek</td></tr>
+          <tr><td class="k">setPlaybackRate</td><td class="m">rate</td><td class="m">null</td><td class="m">erika_presenter_set_playback_rate</td></tr>
+          <tr><td class="k">setVolume</td><td class="m">volume</td><td class="m">null</td><td class="m">erika_presenter_set_volume</td></tr>
+          <tr><td class="k">setUpscaler</td><td class="m">mode</td><td class="m">null</td><td class="m">erika_presenter_set_upscaler</td></tr>
+          <tr><td class="k">setSubtitleScale</td><td class="m">scale</td><td class="m">null</td><td class="m">erika_presenter_set_subtitle_scale</td></tr>
         </tbody>
       </table>
     </div>
@@ -117,12 +129,12 @@
     <h3>轨道</h3>
     <div class="tw">
       <table>
-        <thead><tr><th>方法</th><th>参数</th><th>返回</th></tr></thead>
+        <thead><tr><th>方法</th><th>参数</th><th>返回</th><th>对应 C 函数</th></tr></thead>
         <tbody>
-          <tr><td class="k">tracks</td><td class="m">—</td><td class="m">轨道数组</td></tr>
-          <tr><td class="k">addExternalSubtitle</td><td class="m">uri</td><td class="m">trackId</td></tr>
-          <tr><td class="k">removeSubtitleTrack</td><td class="m">trackId</td><td class="m">null</td></tr>
-          <tr><td class="k">selectAudioTrack / selectSubtitleTrack</td><td class="m">[trackId]，默认 -1</td><td class="m">null</td></tr>
+          <tr><td class="k">tracks</td><td class="m">—</td><td class="m">轨道数组</td><td class="m">erika_presenter_tracks</td></tr>
+          <tr><td class="k">addExternalSubtitle</td><td class="m">uri</td><td class="m">trackId</td><td class="m">erika_presenter_add_external_subtitle</td></tr>
+          <tr><td class="k">removeSubtitleTrack</td><td class="m">trackId（有符号）</td><td class="m">null</td><td class="m">erika_presenter_remove_subtitle_track</td></tr>
+          <tr><td class="k">selectAudioTrack / selectSubtitleTrack</td><td class="m">[trackId]，默认 -1</td><td class="m">null</td><td class="m">erika_presenter_select_audio_track / select_subtitle_track</td></tr>
         </tbody>
       </table>
     </div>
@@ -130,11 +142,11 @@
     <h3>内存字体</h3>
     <div class="tw">
       <table>
-        <thead><tr><th>方法</th><th>参数</th><th>返回</th></tr></thead>
+        <thead><tr><th>方法</th><th>参数</th><th>返回</th><th>对应 C 函数</th></tr></thead>
         <tbody>
-          <tr><td class="k">selectSubtitleMemoryFonts</td><td class="m">fontIds</td><td class="m">null</td></tr>
-          <tr><td class="k">clearSubtitleMemoryFonts</td><td class="m">—</td><td class="m">null</td></tr>
-          <tr><td class="k">getSubtitleMemoryFontStatus</td><td class="m">—</td><td class="m">字体注册状态</td></tr>
+          <tr><td class="k">selectSubtitleMemoryFonts</td><td class="m">fontIds</td><td class="m">null</td><td class="m">erika_presenter_select_subtitle_memory_fonts</td></tr>
+          <tr><td class="k">clearSubtitleMemoryFonts</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_clear_subtitle_memory_fonts</td></tr>
+          <tr><td class="k">getSubtitleMemoryFontStatus</td><td class="m">—</td><td class="m">registeredCount、registeredBytes、selectedCount、generation、selectedIds</td><td class="m">erika_presenter_get_subtitle_memory_font_status</td></tr>
         </tbody>
       </table>
     </div>
@@ -142,33 +154,33 @@
     <h3>弹幕</h3>
     <div class="tw">
       <table>
-        <thead><tr><th>方法</th><th>参数</th><th>返回</th></tr></thead>
+        <thead><tr><th>方法</th><th>参数</th><th>返回</th><th>对应 C 函数</th></tr></thead>
         <tbody>
-          <tr><td class="k">loadDanmakuFile</td><td class="m">uri</td><td class="m">null</td></tr>
-          <tr><td class="k">loadDanmakuJson</td><td class="m">json</td><td class="m">null</td></tr>
-          <tr><td class="k">addDanmakuTrackFile</td><td class="m">uri，[name]，[offsetMicros]</td><td class="m">trackId</td></tr>
-          <tr><td class="k">addDanmakuTrackJson</td><td class="m">json，[name]，[offsetMicros]</td><td class="m">trackId</td></tr>
-          <tr><td class="k">removeDanmakuTrack</td><td class="m">trackId</td><td class="m">null</td></tr>
-          <tr><td class="k">setDanmakuTrackEnabled</td><td class="m">trackId，[enabled]，默认 true</td><td class="m">null</td></tr>
-          <tr><td class="k">setDanmakuTrackOffset</td><td class="m">trackId，[offsetMicros]</td><td class="m">null</td></tr>
-          <tr><td class="k">setDanmakuGlobalOffset</td><td class="m">[offsetMicros]</td><td class="m">null</td></tr>
-          <tr><td class="k">danmakuTracks</td><td class="m">—</td><td class="m">弹幕轨数组</td></tr>
-          <tr><td class="k">clearDanmaku</td><td class="m">—</td><td class="m">null</td></tr>
-          <tr><td class="k">setDanmakuEnabled</td><td class="m">[enabled]，默认 true</td><td class="m">null</td></tr>
-          <tr><td class="k">setDanmakuConfig</td><td class="m">部分覆盖字段</td><td class="m">null</td></tr>
+          <tr><td class="k">loadDanmakuFile</td><td class="m">uri</td><td class="m">null</td><td class="m">erika_presenter_load_danmaku_file</td></tr>
+          <tr><td class="k">loadDanmakuJson</td><td class="m">json</td><td class="m">null</td><td class="m">erika_presenter_load_danmaku_json</td></tr>
+          <tr><td class="k">addDanmakuTrackFile</td><td class="m">uri，[name]，[offsetMicros]</td><td class="m">trackId</td><td class="m">erika_presenter_add_danmaku_track_file</td></tr>
+          <tr><td class="k">addDanmakuTrackJson</td><td class="m">json，[name]，[offsetMicros]</td><td class="m">trackId</td><td class="m">erika_presenter_add_danmaku_track_json</td></tr>
+          <tr><td class="k">removeDanmakuTrack</td><td class="m">trackId（无符号）</td><td class="m">null</td><td class="m">erika_presenter_remove_danmaku_track</td></tr>
+          <tr><td class="k">setDanmakuTrackEnabled</td><td class="m">trackId，[enabled]，默认 true</td><td class="m">null</td><td class="m">erika_presenter_set_danmaku_track_enabled</td></tr>
+          <tr><td class="k">setDanmakuTrackOffset</td><td class="m">trackId，[offsetMicros]</td><td class="m">null</td><td class="m">erika_presenter_set_danmaku_track_offset</td></tr>
+          <tr><td class="k">setDanmakuGlobalOffset</td><td class="m">[offsetMicros]</td><td class="m">null</td><td class="m">erika_presenter_set_danmaku_global_offset</td></tr>
+          <tr><td class="k">danmakuTracks</td><td class="m">—</td><td class="m">弹幕轨数组（id、enabled、offsetMicros、itemCount、name、source）</td><td class="m">erika_presenter_danmaku_tracks</td></tr>
+          <tr><td class="k">clearDanmaku</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_clear_danmaku</td></tr>
+          <tr><td class="k">setDanmakuEnabled</td><td class="m">[enabled]，默认 true</td><td class="m">null</td><td class="m">erika_presenter_set_danmaku_enabled</td></tr>
+          <tr><td class="k">setDanmakuConfig</td><td class="m">部分覆盖字段</td><td class="m">null</td><td class="m">erika_presenter_get_danmaku_config + set_danmaku_config（读-改-写）</td></tr>
         </tbody>
       </table>
     </div>
-    <p><code>setDanmakuConfig</code> 只覆盖传入的字段，未提供的字段保持当前值。可用的字段名与 <code>ErikaDanmakuConfig</code> 一致：<code>enabled</code>、<code>fontSize</code>、<code>opacity</code>、<code>displayArea</code> 等。</p>
+    <p><code>setDanmakuConfig</code> 是读-改-写:只覆盖传入的键,未提供的字段保持当前值。布尔键:<code>enabled</code>、<code>mergeDuplicates</code>、<code>allowStacking</code>、<code>allowScrollOverwrite</code>、<code>blockTop</code>、<code>blockBottom</code>、<code>blockScroll</code>;数值键:<code>fontSize</code>、<code>opacity</code>、<code>displayArea</code>、<code>scrollDurationSeconds</code>、<code>scrollSpeedFactor</code>、<code>trackGapRatio</code>、<code>outlineWidth</code>、<code>shadowOffsetX</code>、<code>shadowOffsetY</code>、<code>maxQuantity</code>、<code>maxLinesPerMode</code>、<code>shadowStyle</code>。另有两个条件键:<code>customFontFamily</code> 或 <code>customFontFilePath</code> 出现时走 <code>erika_presenter_set_danmaku_font</code>,<code>blockWordsJson</code> 出现时走 <code>erika_presenter_set_danmaku_block_words_json</code>。</p>
 
     <h3>状态查询</h3>
     <div class="tw">
       <table>
-        <thead><tr><th>方法</th><th>参数</th><th>返回</th></tr></thead>
+        <thead><tr><th>方法</th><th>参数</th><th>返回</th><th>对应 C 函数</th></tr></thead>
         <tbody>
-          <tr><td class="k">getUpscalerStatus</td><td class="m">—</td><td class="m">超分状态</td></tr>
-          <tr><td class="k">getOutputStatus</td><td class="m">—</td><td class="m">输出状态</td></tr>
-          <tr><td class="k">getPresenterStats</td><td class="m">—</td><td class="m">渲染统计</td></tr>
+          <tr><td class="k">getUpscalerStatus</td><td class="m">—</td><td class="m">超分状态</td><td class="m">erika_presenter_get_upscaler_status</td></tr>
+          <tr><td class="k">getOutputStatus</td><td class="m">—</td><td class="m">输出状态</td><td class="m">erika_presenter_get_output_status</td></tr>
+          <tr><td class="k">getPresenterStats</td><td class="m">—</td><td class="m">渲染统计</td><td class="m">erika_presenter_get_stats</td></tr>
         </tbody>
       </table>
     </div>
@@ -183,10 +195,10 @@ char *out = erika_presenter_invoke_json(p,
 <span class="c">// {"ok":true,"status":0,"value":null}</span>
 erika_string_free(out);
 
-<span class="c">// 打开并附带请求头</span>
+<span class="c">// 打开并附带请求头:httpHeaders 是"名称:值"对象,不是数组</span>
 out = erika_presenter_invoke_json(p, <span class="s">"open"</span>,
     <span class="s">"{ \"uri\": \"https://example.com/v.mp4\", "</span>
-    <span class="s">"\"headers\": [{\"name\":\"Referer\",\"value\":\"https://example.com\"}] }"</span>);
+    <span class="s">"\"httpHeaders\": { \"Referer\": \"https://example.com\" } }"</span>);
 erika_string_free(out);
 
 <span class="c">// 事件轮询：队列为空时返回 NULL</span>

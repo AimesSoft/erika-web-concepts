@@ -178,7 +178,7 @@
 
     <div class="api" id="erika_presenter_set_subtitle_style">
       <p class="sig"><b>ErikaStatus erika_presenter_set_subtitle_style</b>(ErikaPresenterHandle *handle, ErikaSubtitleStyle style)</p>
-      <p class="desc">应用字幕样式覆盖。覆盖粒度由 <code>style.override_mask</code> 的位标志控制。</p>
+      <p class="desc">应用字幕样式覆盖。覆盖粒度由 <code>style.override_mask</code> 的位标志控制,各字段的取值与钳制范围见<a href="capi.html#types">C ABI 总览</a>的类型节。</p>
     </div>
   </section>
 
@@ -385,7 +385,7 @@
 
     <div class="api" id="erika_presenter_poll_event">
       <p class="sig"><b>ErikaStatus erika_presenter_poll_event</b>(ErikaPresenterHandle *handle, ErikaEvent *out_event)</p>
-      <p class="desc">非阻塞轮询事件队列。队列为空时返回 <code>NoEvent</code>。</p>
+      <p class="desc">非阻塞轮询事件队列。队列为空时返回 <code>NoEvent</code>。事件种类、<code>ErikaEvent</code> 各事件的载荷字段见<a href="capi.html#events">C ABI 总览</a>的事件表。</p>
     </div>
   </section>
 

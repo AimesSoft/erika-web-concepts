@@ -118,23 +118,24 @@
 
   <section id="events">
     <h2>ErikaEventKind<span class="jp">イベント</span><a class="anchor" href="#events">#</a></h2>
+    <p>事件经 <code>poll_event</code> 取出。队列无界:不轮询的宿主只是堆积事件、不再观察状态,不会丢包。<code>ErikaEvent</code> 中的字段只有一列有效,由 <code>kind</code> 决定。<code>VideoDecoderChanged</code> 与 <code>AudioOutputChanged</code> 没有载荷字段,但会把结构化消息写入线程局部错误槽,可从 <code>erika_last_error_message</code> 读取。</p>
     <div class="tw">
       <table>
-        <thead><tr><th>值</th><th>名称</th><th>含义</th></tr></thead>
+        <thead><tr><th>值</th><th>名称</th><th>含义</th><th>有效载荷</th></tr></thead>
         <tbody>
-          <tr><td class="m">0</td><td class="k">None</td><td>无事件。</td></tr>
-          <tr><td class="m">1</td><td class="k">StateChanged</td><td>播放状态变化。</td></tr>
-          <tr><td class="m">2</td><td class="k">DurationChanged</td><td>时长确定或变化。</td></tr>
-          <tr><td class="m">3</td><td class="k">PositionChanged</td><td>播放位置推进。</td></tr>
-          <tr><td class="m">4</td><td class="k">TracksChanged</td><td>轨道列表变化。</td></tr>
-          <tr><td class="m">5</td><td class="k">BufferingChanged</td><td>缓冲状态切换。</td></tr>
-          <tr><td class="m">6</td><td class="k">VideoParamsChanged</td><td>视频参数变化。</td></tr>
-          <tr><td class="m">7</td><td class="k">SurfaceAttached</td><td>表面已附着。</td></tr>
-          <tr><td class="m">8</td><td class="k">SurfaceDetached</td><td>表面已分离。</td></tr>
-          <tr><td class="m">9</td><td class="k">Error</td><td>错误。</td></tr>
-          <tr><td class="m">10</td><td class="k">TrackSelectionChanged</td><td>选中轨道变化。</td></tr>
-          <tr><td class="m">11</td><td class="k">VideoDecoderChanged</td><td>视频解码后端切换。</td></tr>
-          <tr><td class="m">12</td><td class="k">AudioOutputChanged</td><td>音频输出状态变化。</td></tr>
+          <tr><td class="m">0</td><td class="k">None</td><td>无事件。</td><td class="m">—</td></tr>
+          <tr><td class="m">1</td><td class="k">StateChanged</td><td>播放状态变化。</td><td class="m">state</td></tr>
+          <tr><td class="m">2</td><td class="k">DurationChanged</td><td>时长确定或变化。</td><td class="m">duration_micros</td></tr>
+          <tr><td class="m">3</td><td class="k">PositionChanged</td><td>播放位置推进,播放中约每 100ms 一次;seek / play / EOF 时另发。</td><td class="m">position_micros</td></tr>
+          <tr><td class="m">4</td><td class="k">TracksChanged</td><td>轨道列表变化。</td><td class="m">tracks;此后重新查询轨道</td></tr>
+          <tr><td class="m">5</td><td class="k">BufferingChanged</td><td>缓冲状态切换。</td><td class="m">buffering</td></tr>
+          <tr><td class="m">6</td><td class="k">VideoParamsChanged</td><td>视频参数变化。</td><td class="m">video</td></tr>
+          <tr><td class="m">7</td><td class="k">SurfaceAttached</td><td>表面已附着。</td><td class="m">—</td></tr>
+          <tr><td class="m">8</td><td class="k">SurfaceDetached</td><td>表面已分离。</td><td class="m">—</td></tr>
+          <tr><td class="m">9</td><td class="k">Error</td><td>错误。</td><td class="m">status;同线程的 <code>last_error_message</code> 可取详情</td></tr>
+          <tr><td class="m">10</td><td class="k">TrackSelectionChanged</td><td>选中轨道变化。</td><td class="m">—</td></tr>
+          <tr><td class="m">11</td><td class="k">VideoDecoderChanged</td><td>视频解码后端切换。</td><td class="m">—</td></tr>
+          <tr><td class="m">12</td><td class="k">AudioOutputChanged</td><td>音频输出状态变化。</td><td class="m">—</td></tr>
         </tbody>
       </table>
     </div>
@@ -142,7 +143,7 @@
 
   <section id="types">
     <h2>类型清单<span class="jp">型</span><a class="anchor" href="#types">#</a></h2>
-    <p>33 个类型定义全部位于 <code>erika.h</code>。结构与枚举的字段含义在函数条目中按需说明。</p>
+    <p>33 个类型定义全部位于 <code>erika.h</code>。结构体字段见下方各表;枚举的成员值也在本节列出。</p>
     <h3>句柄</h3>
     <ul class="body">
       <li><code>ErikaHandle</code> — pull 模型句柄。</li>
@@ -167,10 +168,313 @@
           <tr><td class="m">ErikaVideoParams</td><td>视频尺寸与原色 / 传输。</td></tr>
           <tr><td class="m">ErikaTrackCounts / Selection / Info</td><td>轨道数量、当前选择、轨道信息。</td></tr>
           <tr><td class="m">ErikaEvent</td><td>事件载荷。</td></tr>
-          <tr><td class="m">ErikaPresenterStats</td><td>渲染统计，全部计数器字段。</td></tr>
+          <tr><td class="m">ErikaPresenterStats</td><td>渲染统计，字段见下表。</td></tr>
         </tbody>
       </table>
     </div>
+
+    <h3>结构体字段</h3>
+    <p>下表给出每个结构体的字段、类型与语义。字段名与 <code>erika.h</code> 一致。</p>
+
+    <h4>ErikaSubtitleStyle</h4>
+    <p>字幕回退外观:颜色默认不透明白正文(<code>0xFFFFFFFF</code>)加半透明黑描边(<code>0x0000007F</code>)。数值度量越界被钳制而非拒绝;<code>border_style</code> 与 <code>alignment</code> 越界时替换为默认值(1 / 2)。生效方式按字幕类型二分:容器 ASS 轨上,<code>override_mask</code> 为 0 时这些字段不生效(仅字体族回退),置位对应位后字段覆盖 ASS 对白声明的样式;纯文本(SRT/WebVTT)字幕的样式由 Erika 生成的 ASS 头整体烘焙,与 <code>override_mask</code> 无关。所有尺寸是 ASS 脚本单位,受 <code>set_subtitle_scale</code> 相乘。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>语义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">font_family</td><td class="m">const char*</td><td>NULL 或空串保持平台默认。</td></tr>
+          <tr><td class="m">font_file_path</td><td class="m">const char*</td><td>字体文件路径。</td></tr>
+          <tr><td class="m">primary_color_rgba</td><td class="m">uint32_t</td><td>正文色，0xRRGGBBAA。</td></tr>
+          <tr><td class="m">outline_color_rgba</td><td class="m">uint32_t</td><td>描边色，0xRRGGBBAA。</td></tr>
+          <tr><td class="m">font_size</td><td class="m">double</td><td>8..400，默认 48。</td></tr>
+          <tr><td class="m">outline_width</td><td class="m">double</td><td>0..32，默认 2。</td></tr>
+          <tr><td class="m">bold / italic / underline / strike_out</td><td class="m">bool</td><td>字形属性。</td></tr>
+          <tr><td class="m">spacing</td><td class="m">double</td><td>-100..100。</td></tr>
+          <tr><td class="m">scale_x_percent / scale_y_percent</td><td class="m">double</td><td>1..1000，100 = 不缩放。</td></tr>
+          <tr><td class="m">border_style</td><td class="m">int32_t</td><td>1 = 描边 + 阴影，3 = 不透明色块。</td></tr>
+          <tr><td class="m">shadow_depth</td><td class="m">double</td><td>0..32。</td></tr>
+          <tr><td class="m">blur</td><td class="m">double</td><td>0..100。</td></tr>
+          <tr><td class="m">alignment</td><td class="m">int32_t</td><td>1..9，数字键盘布局，2 = 底部居中。</td></tr>
+          <tr><td class="m">margin_left / margin_right / margin_vertical</td><td class="m">int32_t</td><td>边距，钳制 0..10000。</td></tr>
+          <tr><td class="m">override_mask</td><td class="m">uint32_t</td><td>覆盖位掩码，见下方位表。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">覆盖位打开时,尺寸保持分辨率无关——<code>font_size</code> 48 无论脚本声明什么 <code>PlayResY</code> 都落在相同像素。边距例外:容器 ASS 轨上随脚本 <code>PlayResY</code> 缩放,纯文本字幕上按像素(其脚本由 Erika 按帧尺寸生成)。掩码为 0 时所有字段保持纯回退:容器轨上不生效,<code>erika_presenter_set_subtitle_style</code> 只参与字体选择。</p>
+
+    <h4>ErikaDanmakuConfig</h4>
+    <p class="muted">滚动时长公式:过屏毫秒 = <code>scroll_duration_seconds</code> × <code>clamp(逻辑宽 / 1280, 0.9, 1.3)</code> × 1000 / <code>scroll_speed_factor</code>;速度 = (视口宽 + 文本宽) / 时长。<code>max_quantity</code> 是滚动窗口内的同时在屏密度过滤,只作用于滚动弹幕;<code>max_lines_per_mode</code> 的"每类"指滚动左、滚动右、顶部、底部四个方向各一个上限。<code>set_danmaku_config</code> 替换 C 可见字段,<code>block_words</code> 与自定义字体字段从当前配置继承。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>默认</th><th>语义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">enabled</td><td class="m">bool</td><td>true</td><td>弹幕总开关。</td></tr>
+          <tr><td class="m">font_size</td><td class="m">float</td><td>30</td><td>NipaPlay/Flutter 逻辑字号，按 surface scale 换算字形像素。</td></tr>
+          <tr><td class="m">opacity</td><td class="m">float</td><td>1.0</td><td>不透明度。</td></tr>
+          <tr><td class="m">display_area</td><td class="m">float</td><td>1.0</td><td>弹幕区占视口高度的比例，钳制 0.1..1.0。</td></tr>
+          <tr><td class="m">scroll_duration_seconds</td><td class="m">float</td><td>10.0</td><td>滚动弹幕过屏时长基准，钳制 1..60 秒。</td></tr>
+          <tr><td class="m">scroll_speed_factor</td><td class="m">float</td><td>1.0</td><td>滚动速度系数，钳制 0.2..4.0，越大越快。</td></tr>
+          <tr><td class="m">track_gap_ratio</td><td class="m">float</td><td>0.15</td><td>轨道行距 = 弹幕高度 × 此比例，钳制 0..2。</td></tr>
+          <tr><td class="m">outline_width</td><td class="m">float</td><td>1.0</td><td>描边宽度。</td></tr>
+          <tr><td class="m">shadow_offset_x / shadow_offset_y</td><td class="m">float</td><td>1.0 / 1.0</td><td>阴影偏移。</td></tr>
+          <tr><td class="m">merge_duplicates</td><td class="m">bool</td><td>false</td><td>合并重复弹幕。</td></tr>
+          <tr><td class="m">allow_stacking</td><td class="m">bool</td><td>false</td><td>允许同轨堆叠。</td></tr>
+          <tr><td class="m">allow_scroll_overwrite</td><td class="m">bool</td><td>true</td><td>允许滚动弹幕覆盖。</td></tr>
+          <tr><td class="m">max_quantity</td><td class="m">uint32_t</td><td>0</td><td>滚动弹幕密度上限，0 = 不限制。</td></tr>
+          <tr><td class="m">max_lines_per_mode</td><td class="m">uint32_t</td><td>0</td><td>每类弹幕的最大行数，0 = 不限制。</td></tr>
+          <tr><td class="m">block_top / block_bottom / block_scroll</td><td class="m">bool</td><td>false</td><td>屏蔽顶部 / 底部 / 滚动弹幕。</td></tr>
+          <tr><td class="m">shadow_style</td><td class="m">int32_t</td><td>3</td><td>0 None / 1 Soft / 2 Medium / 3 Strong，未知值回退 3。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaPresenterConfig</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>语义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">output_mode</td><td class="m">int32_t</td><td><code>ErikaPresenterOutputMode</code>。</td></tr>
+          <tr><td class="m">edr_headroom</td><td class="m">float</td><td>EDR headroom，0 = 自动。</td></tr>
+          <tr><td class="m">luma_upscaler</td><td class="m">int32_t</td><td><code>ErikaLumaUpscalerMode</code>。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaSurfaceOutputCapabilities</h4>
+    <p>宿主在 attach 时提供的显示/表面探测结果。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>语义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">extended_linear</td><td class="m">bool</td><td>表面支持 extended-linear。</td></tr>
+          <tr><td class="m">direct_composition</td><td class="m">bool</td><td>支持直接合成。</td></tr>
+          <tr><td class="m">desired_headroom</td><td class="m">float</td><td>期望 headroom，0 = 系统自动。</td></tr>
+          <tr><td class="m">fallback_reason</td><td class="m">int32_t</td><td><code>ErikaOutputFallbackReason</code>。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaUpscalerStatus</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>语义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">requested_mode</td><td class="m">int32_t</td><td>请求的模式，<code>ErikaLumaUpscalerMode</code>。</td></tr>
+          <tr><td class="m">active_backend</td><td class="m">int32_t</td><td>实际后端，<code>ErikaUpscalerBackendStatus</code>。</td></tr>
+          <tr><td class="m">fallback_count</td><td class="m">uint64_t</td><td>回退次数。</td></tr>
+          <tr><td class="m">upscaled_frames</td><td class="m">uint64_t</td><td>已超分帧数。</td></tr>
+          <tr><td class="m">last_encode_micros</td><td class="m">uint64_t</td><td>上次编码耗时。</td></tr>
+          <tr><td class="m">last_gpu_micros</td><td class="m">uint64_t</td><td>上次 GPU 耗时。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaOutputStatus</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>语义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">requested_mode</td><td class="m">int32_t</td><td><code>ErikaPresenterOutputMode</code>。</td></tr>
+          <tr><td class="m">active_encoding</td><td class="m">int32_t</td><td><code>ErikaActiveOutputEncoding</code>。</td></tr>
+          <tr><td class="m">surface_format</td><td class="m">int32_t</td><td><code>ErikaOutputSurfaceFormat</code>。</td></tr>
+          <tr><td class="m">native_data_space</td><td class="m">int32_t</td><td>原生 data-space 句柄。</td></tr>
+          <tr><td class="m">requested_headroom</td><td class="m">float</td><td>请求的 headroom。</td></tr>
+          <tr><td class="m">active_headroom</td><td class="m">float</td><td>实际生效的 headroom。</td></tr>
+          <tr><td class="m">active_headroom_known</td><td class="m">bool</td><td>headroom 是否已知。</td></tr>
+          <tr><td class="m">extended_linear_active</td><td class="m">bool</td><td>extended-linear 是否生效。</td></tr>
+          <tr><td class="m">fallback_reason</td><td class="m">int32_t</td><td><code>ErikaOutputFallbackReason</code>。</td></tr>
+          <tr><td class="m">fallback_count</td><td class="m">uint64_t</td><td>回退次数。</td></tr>
+          <tr><td class="m">data_space_failures</td><td class="m">uint64_t</td><td>data-space 失败次数。</td></tr>
+          <tr><td class="m">headroom_updates</td><td class="m">uint64_t</td><td>headroom 更新次数。</td></tr>
+          <tr><td class="m">extended_linear_frames</td><td class="m">uint64_t</td><td>extended-linear 帧数。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaPresenterResourceStatus</h4>
+    <p>渲染器内存快照。<code>device_current_allocated_bytes</code> 是 Metal 设备级进程计数器,可能包含其他 presenter 的分配。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>语义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">device_current_allocated_bytes</td><td class="m">uint64_t</td><td>设备当前分配字节。</td></tr>
+          <tr><td class="m">device_recommended_working_set_bytes</td><td class="m">uint64_t</td><td>设备建议工作集。</td></tr>
+          <tr><td class="m">drawable_estimated_bytes</td><td class="m">uint64_t</td><td>drawable 估算字节。</td></tr>
+          <tr><td class="m">video_frame_bytes</td><td class="m">uint64_t</td><td>视频帧字节。</td></tr>
+          <tr><td class="m">overlay_atlas_bytes</td><td class="m">uint64_t</td><td>字幕 atlas 字节。</td></tr>
+          <tr><td class="m">danmaku_atlas_bytes</td><td class="m">uint64_t</td><td>弹幕 atlas 字节。</td></tr>
+          <tr><td class="m">danmaku_vertex_buffer_bytes</td><td class="m">uint64_t</td><td>弹幕顶点缓冲字节。</td></tr>
+          <tr><td class="m">upscaler_bytes</td><td class="m">uint64_t</td><td>超分器字节。</td></tr>
+          <tr><td class="m">renderer_tracked_bytes</td><td class="m">uint64_t</td><td>渲染器跟踪总字节。</td></tr>
+          <tr><td class="m">presenter_cpu_danmaku_atlas_bytes</td><td class="m">uint64_t</td><td>presenter 侧 CPU 弹幕 atlas 字节。</td></tr>
+          <tr><td class="m">drawable_count</td><td class="m">uint32_t</td><td>drawable 数量。</td></tr>
+          <tr><td class="m">output_mode_switches</td><td class="m">uint64_t</td><td>输出模式切换次数。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaSubtitleMemoryFont*</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>类型</th><th>字段</th><th>类型</th><th>语义</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="5" class="m">Status</td><td class="m">registered_count</td><td class="m">uintptr_t</td><td>已注册字体数。</td></tr>
+          <tr><td class="m">registered_bytes</td><td class="m">uintptr_t</td><td>已注册总字节。</td></tr>
+          <tr><td class="m">selected_count</td><td class="m">uintptr_t</td><td>已选中字体数。</td></tr>
+          <tr><td class="m">generation</td><td class="m">uint64_t</td><td>注册代次，变化即注册表已更新。</td></tr>
+          <tr><td class="m">selected_ids</td><td class="m">uint64_t*</td><td>选中的字体 id 数组。</td></tr>
+          <tr><td rowspan="6" class="m">Face</td><td class="m">index</td><td class="m">uint32_t</td><td>字体集合内的索引。</td></tr>
+          <tr><td class="m">families_json</td><td class="m">char*</td><td>family 列表 JSON。</td></tr>
+          <tr><td class="m">post_script_name</td><td class="m">char*</td><td>PostScript 名。</td></tr>
+          <tr><td class="m">weight</td><td class="m">uint16_t</td><td>字重。</td></tr>
+          <tr><td class="m">italic</td><td class="m">bool</td><td>是否斜体。</td></tr>
+          <tr><td class="m">monospaced</td><td class="m">bool</td><td>是否等宽。</td></tr>
+          <tr><td rowspan="4" class="m">Info</td><td class="m">id</td><td class="m">uint64_t</td><td>字体 id。</td></tr>
+          <tr><td class="m">byte_len</td><td class="m">uintptr_t</td><td>字体数据字节数。</td></tr>
+          <tr><td class="m">faces</td><td class="m">Face*</td><td>face 数组。</td></tr>
+          <tr><td class="m">face_count</td><td class="m">uintptr_t</td><td>face 数量。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaDanmakuTrackInfo</h4>
+    <p>返回给调用方后,字符串归调用方所有,用 <code>erika_danmaku_track_info_free</code> 释放。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>语义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">id</td><td class="m">uint64_t</td><td>轨道 id。</td></tr>
+          <tr><td class="m">enabled</td><td class="m">bool</td><td>轨道是否启用。</td></tr>
+          <tr><td class="m">offset_micros</td><td class="m">int64_t</td><td>轨道时间偏移，微秒。</td></tr>
+          <tr><td class="m">item_count</td><td class="m">uintptr_t</td><td>弹幕条数。</td></tr>
+          <tr><td class="m">name</td><td class="m">char*</td><td>轨道名。</td></tr>
+          <tr><td class="m">source</td><td class="m">char*</td><td>来源描述。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaVideoParams</h4>
+    <p>视频尺寸与色彩元数据，经 <code>VideoParamsChanged</code> 事件上报。<code>primaries</code> 与 <code>transfer</code> 是项目自有枚举序号，由 FFmpeg 枚举转换而来，不是 FFmpeg 原始常量值。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>语义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">width / height</td><td class="m">uint32_t</td><td>视频像素尺寸。</td></tr>
+          <tr><td class="m">primaries</td><td class="m">uint32_t</td><td>0 Unknown / 1 Bt709 / 2 DisplayP3 / 3 Bt2020。</td></tr>
+          <tr><td class="m">transfer</td><td class="m">uint32_t</td><td>0 Unknown / 1 Srgb / 2 Bt1886 / 3 Pq / 4 Hlg。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">映射:BT.709 传输函数归入 Bt1886;未知值一律为 0。取值来自视频轨的 <code>AVCodecParameters</code> 级色彩信息。</p>
+
+    <h4>ErikaTrackCounts / ErikaTrackSelection</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>类型</th><th>字段</th><th>类型</th><th>语义</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="3" class="m">Counts</td><td class="m">video / audio / subtitle</td><td class="m">uint32_t</td><td>各类型轨道数。</td></tr>
+          <tr><td></td><td></td><td></td></tr>
+          <tr><td></td><td></td><td></td></tr>
+          <tr><td rowspan="3" class="m">Selection</td><td class="m">video / audio / subtitle</td><td class="m">int64_t</td><td>各类型选中轨道 id，-1 = 无。</td></tr>
+          <tr><td></td><td></td><td></td></tr>
+          <tr><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaTrackInfo</h4>
+    <p>六个字符串字段归调用方所有，用 <code>erika_track_info_free</code> 释放。视频轨额外提供 <code>bit_rate</code>（bit/s）与 <code>frame_rate_numerator / frame_rate_denominator</code>（0 = 未知）。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>语义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">id</td><td class="m">int64_t</td><td>轨道 id。</td></tr>
+          <tr><td class="m">kind</td><td class="m">ErikaTrackKind</td><td>视频 / 音频 / 字幕。</td></tr>
+          <tr><td class="m">source</td><td class="m">ErikaTrackSource</td><td>嵌入 / 外挂。</td></tr>
+          <tr><td class="m">selected</td><td class="m">bool</td><td>是否选中。</td></tr>
+          <tr><td class="m">can_remove</td><td class="m">bool</td><td>是否可移除（外挂轨为 true）。</td></tr>
+          <tr><td class="m">title</td><td class="m">char*</td><td>标题。</td></tr>
+          <tr><td class="m">language</td><td class="m">char*</td><td>语言代码。</td></tr>
+          <tr><td class="m">codec</td><td class="m">char*</td><td>编解码器名。</td></tr>
+          <tr><td class="m">width / height</td><td class="m">uint32_t</td><td>视频轨像素尺寸。</td></tr>
+          <tr><td class="m">sample_rate / channels</td><td class="m">uint32_t</td><td>音频轨采样率 / 声道数。</td></tr>
+          <tr><td class="m">pixel_format</td><td class="m">char*</td><td>视频像素格式。</td></tr>
+          <tr><td class="m">sample_format</td><td class="m">char*</td><td>音频采样格式。</td></tr>
+          <tr><td class="m">profile</td><td class="m">char*</td><td>编码 profile。</td></tr>
+          <tr><td class="m">level</td><td class="m">int32_t</td><td>编码 level。</td></tr>
+          <tr><td class="m">bit_rate</td><td class="m">uint64_t</td><td>比特率，bit/s。</td></tr>
+          <tr><td class="m">frame_rate_numerator / frame_rate_denominator</td><td class="m">uint32_t</td><td>帧率分数，0/0 = 未知。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaEvent</h4>
+    <p>按 <code>kind</code> 决定有效字段的联合结构，见<a href="#events">事件表</a>。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>语义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">kind</td><td class="m">ErikaEventKind</td><td>事件类型，决定其他字段的有效性。</td></tr>
+          <tr><td class="m">status</td><td class="m">ErikaStatus</td><td><code>Error</code> 事件携带的错误码。</td></tr>
+          <tr><td class="m">state</td><td class="m">ErikaState</td><td><code>StateChanged</code> 携带的新状态。</td></tr>
+          <tr><td class="m">duration_micros</td><td class="m">int64_t</td><td><code>DurationChanged</code> 携带的时长。</td></tr>
+          <tr><td class="m">position_micros</td><td class="m">uint64_t</td><td><code>PositionChanged</code> 携带的位置。</td></tr>
+          <tr><td class="m">buffering</td><td class="m">bool</td><td><code>BufferingChanged</code> 携带的缓冲状态。</td></tr>
+          <tr><td class="m">video</td><td class="m">ErikaVideoParams</td><td><code>VideoParamsChanged</code> 携带的参数。</td></tr>
+          <tr><td class="m">tracks</td><td class="m">ErikaTrackCounts</td><td><code>TracksChanged</code> 携带的计数。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaPresenterStats</h4>
+    <p>渲染管线计数器。解码/渲染/音频/叠加计数,软硬解与零拷贝分解,以及 HDR 与音频恢复的细分。<code>audio_recovery_state</code> 取值:0 稳定 / 1 断开 / 2 恢复中 / 3 失败。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>语义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">decoded_video_frames</td><td class="m">uint64_t</td><td>已解码视频帧。</td></tr>
+          <tr><td class="m">rendered_video_frames</td><td class="m">uint64_t</td><td>已渲染视频帧。</td></tr>
+          <tr><td class="m">rendered_test_frames</td><td class="m">uint64_t</td><td>测试帧。</td></tr>
+          <tr><td class="m">pushed_audio_frames</td><td class="m">uint64_t</td><td>已推入音频帧。</td></tr>
+          <tr><td class="m">overlay_frames</td><td class="m">uint64_t</td><td>字幕叠加帧。</td></tr>
+          <tr><td class="m">danmaku_frames / danmaku_items</td><td class="m">uint64_t</td><td>弹幕渲染帧 / 条数。</td></tr>
+          <tr><td class="m">import_failures / render_failures / audio_failures</td><td class="m">uint64_t</td><td>导入 / 渲染 / 音频失败次数。</td></tr>
+          <tr><td class="m">software_video_frames / hardware_video_frames</td><td class="m">uint64_t</td><td>软解 / 硬解帧。</td></tr>
+          <tr><td class="m">zero_copy_video_frames</td><td class="m">uint64_t</td><td>零拷贝帧。</td></tr>
+          <tr><td class="m">cpu_video_frame_fallbacks</td><td class="m">uint64_t</td><td>回退到 CPU 的帧数。</td></tr>
+          <tr><td class="m">last_render_micros / last_render_current_micros</td><td class="m">uint64_t</td><td>上次渲染耗时与时钟。</td></tr>
+          <tr><td class="m">audio_clock_read_frames / queued_frames / underflow_frames</td><td class="m">uint64_t</td><td>音频时钟读帧 / 排队 / 欠载。</td></tr>
+          <tr><td class="m">audio_recovery_state</td><td class="m">int32_t</td><td>0 稳定 / 1 断开 / 2 恢复中 / 3 失败。</td></tr>
+          <tr><td class="m">audio_last_error_code</td><td class="m">int32_t</td><td>上次音频错误码。</td></tr>
+          <tr><td class="m">audio_recovery_attempts / count / failures</td><td class="m">uint64_t</td><td>音频恢复尝试 / 成功 / 失败。</td></tr>
+          <tr><td class="m">direct_zero_copy_video_frames / shared_handle_video_frames</td><td class="m">uint64_t</td><td>直接零拷贝 / 共享句柄帧。</td></tr>
+          <tr><td class="m">hdr_source_frames / hdr10_output_frames / sdr_tonemap_frames</td><td class="m">uint64_t</td><td>HDR 源 / HDR10 输出 / SDR 色调映射帧。</td></tr>
+          <tr><td class="m">hdr10_metadata_updates / failures / output_failures</td><td class="m">uint64_t</td><td>HDR10 元数据更新 / 失败 / 输出失败。</td></tr>
+          <tr><td class="m">hdr10_output_active</td><td class="m">bool</td><td>HDR10 输出是否生效。</td></tr>
+          <tr><td class="m">video_frame_backpressure_drops</td><td class="m">uint64_t</td><td>背压丢弃帧数。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">平台差异:wgpu 后端 <code>last_gpu_micros</code> 与 <code>direct_zero_copy_video_frames</code> 恒为 0(仅 Metal 上报 GPU 耗时,直连计数仅 D3D11 递增);<code>shared_handle_video_frames</code> 只在 wgpu(Android / OpenHarmony)递增;<code>hdr10_output_frames</code> 只在 D3D11 递增。<code>decoded_video_frames</code> 是已送渲染器上传的解码帧,<code>rendered_video_frames</code> 是成功绘制到表面的帧,两者之差是未呈现的部分。</p>
+    <h3>字幕样式覆盖掩码</h3>
+    <p><code>override_mask</code> 是 <code>ERIKA_SUBTITLE_OVERRIDE_*</code> 的位或,镜像 libass 的 <code>ASS_OVERRIDE_BIT_*</code> 值。置位使对应字段不再作为 fallback,而是替换 ASS 对话事件请求的样式;0 使全部字段保持 fallback。未知位被丢弃。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>宏</th><th>位</th><th>覆盖的字段</th></tr></thead>
+        <tbody>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_FONT_SIZE_FIELDS</td><td class="m">1u&lt;&lt;2</td><td>font_size、spacing、scale_x_percent、scale_y_percent</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_FONT_NAME</td><td class="m">1u&lt;&lt;3</td><td>font_family</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_COLORS</td><td class="m">1u&lt;&lt;4</td><td>primary_color_rgba、outline_color_rgba</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_ATTRIBUTES</td><td class="m">1u&lt;&lt;5</td><td>bold、italic、underline、strike_out</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_BORDER</td><td class="m">1u&lt;&lt;6</td><td>border_style、outline_width、shadow_depth</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_ALIGNMENT</td><td class="m">1u&lt;&lt;7</td><td>alignment</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_MARGINS</td><td class="m">1u&lt;&lt;8</td><td>margin_left、margin_right、margin_vertical</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_BLUR</td><td class="m">1u&lt;&lt;11</td><td>blur</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_ALL</td><td class="m">全部位</td><td>以上全部</td></tr>
+        </tbody>
+      </table>
+    </div>
+
     <h3>枚举</h3>
     <div class="tw">
       <table>
@@ -179,14 +483,104 @@
           <tr><td class="m">ErikaStatus / ErikaState / ErikaEventKind</td><td>见上方各节。</td></tr>
           <tr><td class="m">ErikaTrackKind</td><td>视频 / 音频 / 字幕。</td></tr>
           <tr><td class="m">ErikaTrackSource</td><td>嵌入 / 外挂。</td></tr>
-          <tr><td class="m">ErikaWgpuSurfaceKind</td><td>wgpu 表面类型，8 种。</td></tr>
-          <tr><td class="m">ErikaFlutterTextureKind</td><td>Flutter 纹理类型，5 种。</td></tr>
+          <tr><td class="m">ErikaWgpuSurfaceKind</td><td>wgpu 表面类型，9 个成员。</td></tr>
+          <tr><td class="m">ErikaFlutterTextureKind</td><td>Flutter 纹理类型，6 个成员。</td></tr>
           <tr><td class="m">ErikaPresenterOutputMode</td><td>SDR / Apple EDR / extended-linear / Auto。</td></tr>
           <tr><td class="m">ErikaActiveOutputEncoding</td><td>SDR sRGB / Apple EDR / Android scRGB / HDR10 PQ。</td></tr>
-          <tr><td class="m">ErikaOutputFallbackReason</td><td>HDR 回退原因，8 种。</td></tr>
+          <tr><td class="m">ErikaOutputFallbackReason</td><td>HDR 回退原因，9 个成员。</td></tr>
           <tr><td class="m">ErikaOutputSurfaceFormat</td><td>8-bit UNORM / 10-bit UNORM / 16-bit float。</td></tr>
           <tr><td class="m">ErikaLumaUpscalerMode</td><td>Off / ArtCNN F16 / ArtCNN F32。</td></tr>
           <tr><td class="m">ErikaUpscalerBackendStatus</td><td>超分后端状态，5 种。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaTrackKind / ErikaTrackSource</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>值</th><th>TrackKind</th><th>值</th><th>TrackSource</th></tr></thead>
+        <tbody>
+          <tr><td class="m">0</td><td>Video</td><td class="m">0</td><td>Embedded(容器内)</td></tr>
+          <tr><td class="m">1</td><td>Audio</td><td class="m">1</td><td>External(外挂)</td></tr>
+          <tr><td class="m">2</td><td>Subtitle</td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaWgpuSurfaceKind</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>值</th><th>名称</th><th>平台</th></tr></thead>
+        <tbody>
+          <tr><td class="m">0</td><td class="m">Unknown</td><td>未知。</td></tr>
+          <tr><td class="m">1</td><td class="m">MacOsNsView</td><td>macOS NSView。</td></tr>
+          <tr><td class="m">2</td><td class="m">MacOsCaMetalLayer</td><td>macOS CAMetalLayer。</td></tr>
+          <tr><td class="m">3</td><td class="m">IosUiView</td><td>iOS UIView。</td></tr>
+          <tr><td class="m">4</td><td class="m">WindowsHwnd</td><td>Windows HWND。</td></tr>
+          <tr><td class="m">5</td><td class="m">XlibWindow</td><td>X11(Xlib)窗口。</td></tr>
+          <tr><td class="m">6</td><td class="m">WaylandSurface</td><td>Wayland 表面。</td></tr>
+          <tr><td class="m">7</td><td class="m">AndroidNativeWindow</td><td>Android ANativeWindow。</td></tr>
+          <tr><td class="m">8</td><td class="m">OhosNativeWindow</td><td>OpenHarmony 原生窗口。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaFlutterTextureKind</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>值</th><th>名称</th><th>平台</th></tr></thead>
+        <tbody>
+          <tr><td class="m">0</td><td class="m">Unknown</td><td>未知。</td></tr>
+          <tr><td class="m">1</td><td class="m">MacOsTextureRegistrar</td><td>macOS Flutter 纹理注册器。</td></tr>
+          <tr><td class="m">2</td><td class="m">IosTextureRegistrar</td><td>iOS Flutter 纹理注册器。</td></tr>
+          <tr><td class="m">3</td><td class="m">AndroidSurfaceTexture</td><td>Android SurfaceTexture。</td></tr>
+          <tr><td class="m">4</td><td class="m">WindowsTextureRegistrar</td><td>Windows Flutter 纹理注册器。</td></tr>
+          <tr><td class="m">5</td><td class="m">LinuxTextureRegistrar</td><td>Linux Flutter 纹理注册器。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaPresenterOutputMode / ErikaActiveOutputEncoding</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>值</th><th>PresenterOutputMode</th><th>值</th><th>ActiveOutputEncoding</th></tr></thead>
+        <tbody>
+          <tr><td class="m">0</td><td>Sdr</td><td class="m">0</td><td>SdrSrgb</td></tr>
+          <tr><td class="m">1</td><td>AppleEdr</td><td class="m">1</td><td>AppleEdr</td></tr>
+          <tr><td class="m">2</td><td>ExtendedLinear</td><td class="m">2</td><td>AndroidExtendedLinearScRgb</td></tr>
+          <tr><td class="m">3</td><td>Auto</td><td class="m">3</td><td>Hdr10Pq</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaOutputFallbackReason</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>值</th><th>名称</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td class="m">0</td><td class="m">None</td><td>无回退。</td></tr>
+          <tr><td class="m">1</td><td class="m">DisplayHdrUnsupported</td><td>显示器不支持 HDR。</td></tr>
+          <tr><td class="m">2</td><td class="m">HybridCompositionRequired</td><td>需要混合合成。</td></tr>
+          <tr><td class="m">3</td><td class="m">WgpuBackendNotVulkan</td><td>wgpu 后端不是 Vulkan。</td></tr>
+          <tr><td class="m">4</td><td class="m">Rgba16FloatSurfaceFormatUnavailable</td><td>RGBA16F 表面格式不可用。</td></tr>
+          <tr><td class="m">5</td><td class="m">NativeWindowDataSpaceApiUnavailable</td><td>原生窗口 data-space API 不可用。</td></tr>
+          <tr><td class="m">6</td><td class="m">ScrgbDataSpaceVerificationFailed</td><td>scRGB data-space 验证失败。</td></tr>
+          <tr><td class="m">7</td><td class="m">SurfaceConfigureFailed</td><td>表面配置失败。</td></tr>
+          <tr><td class="m">8</td><td class="m">LegacyAppleEdrUnsupported</td><td>旧式 Apple EDR 不支持。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaOutputSurfaceFormat / ErikaLumaUpscalerMode / ErikaUpscalerBackendStatus</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>值</th><th>OutputSurfaceFormat</th><th>值</th><th>LumaUpscalerMode</th><th>值</th><th>UpscalerBackendStatus</th></tr></thead>
+        <tbody>
+          <tr><td class="m">0</td><td>EightBitUnorm</td><td class="m">0</td><td>Off</td><td class="m">0</td><td>Off</td></tr>
+          <tr><td class="m">1</td><td>TenBitUnorm</td><td class="m">1</td><td>ArtCnnC4F16</td><td class="m">1</td><td>Inactive(后端不执行 ArtCNN，保留原生亮度采样)</td></tr>
+          <tr><td class="m">2</td><td>SixteenBitFloat</td><td class="m">2</td><td>ArtCnnC4F32</td><td class="m">2</td><td>Building</td></tr>
+          <tr><td></td><td></td><td></td><td></td><td class="m">3</td><td>Scalar</td></tr>
+          <tr><td></td><td></td><td></td><td></td><td class="m">4</td><td>SimdgroupMatrix</td></tr>
         </tbody>
       </table>
     </div>
