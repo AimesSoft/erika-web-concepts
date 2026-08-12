@@ -101,7 +101,10 @@ function renderQuickStart(quickStart) {
               <button type="button" data-copy aria-label="复制 ${escapeHTML(tab.label)} 代码">${icon('copy')}<span>复制</span></button>
             </div>
             <pre><code>${escapeHTML(tab.code)}</code></pre>
-            <p class="code-note"><span>NOTE</span>${escapeHTML(tab.note)}</p>
+            <div class="code-note">
+              <p><span>NOTE</span>${escapeHTML(tab.note)}</p>
+              ${tab.action ? `<a href="${tab.action.url}" target="_blank" rel="noreferrer">${escapeHTML(tab.action.label)} ${icon('arrow')}</a>` : ''}
+            </div>
           </section>`).join('')}
       </div>
     </section>`;

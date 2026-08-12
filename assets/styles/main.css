@@ -788,21 +788,48 @@ noscript {
 
 .code-note {
   display: flex;
-  align-items: baseline;
+  align-items: center;
+  justify-content: space-between;
   gap: 14px;
-  margin: 0;
   padding: 16px 20px;
   border-top: 1px solid var(--line);
   color: var(--ink-soft);
   font-size: 12px;
 }
 
-.code-note span {
+.code-note p {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin: 0;
+}
+
+.code-note p span {
   color: var(--pink);
   font-family: var(--mono);
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.14em;
+}
+
+.code-note > a {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  color: var(--pink);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.code-note > a svg {
+  width: 13px;
+  height: 13px;
+  transition: transform 160ms ease;
+}
+
+.code-note > a:hover svg {
+  transform: translateX(3px);
 }
 
 /* Platforms */
@@ -1369,6 +1396,7 @@ noscript {
 
   .code-note {
     align-items: flex-start;
+    flex-direction: column;
     padding: 14px;
   }
 

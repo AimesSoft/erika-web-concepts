@@ -75,6 +75,10 @@ erika-capi-tvos.zip
 erika-capi-android.zip
 erika-capi-openharmony-arm64.zip`,
         note: '每个归档都包含 include/erika.h、许可证文本与 MANIFEST.txt。',
+        action: {
+          label: '查看 GitHub Releases',
+          url: 'https://github.com/AimesSoft/Erika/releases',
+        },
       },
       {
         id: 'rust',
