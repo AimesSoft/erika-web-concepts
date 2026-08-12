@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.5</span></a></div>
+  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.6</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -48,7 +48,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.1.6<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
@@ -67,8 +67,8 @@
     <h2>触发<span class="jp">トリガー</span><a class="anchor" href="#trigger">#</a></h2>
     <p>推入 <code>v*</code> 标签触发正式发布，构建完成后发布到 GitHub Releases。workflow_dispatch 手动运行只构建不发布，用于发布前检查。发布前先在本机执行 <a href="building.html">构建流程</a> 验证。</p>
     <div class="code">
-<pre>git tag v0.1.5
-git push origin v0.1.5</pre>
+<pre>git tag v0.1.6
+git push origin v0.1.6</pre>
     </div>
   </section>
 
@@ -82,7 +82,7 @@ git push origin v0.1.5</pre>
           <tr><td class="k">macOS 通用</td><td class="m">erika-capi-macos-universal</td><td>lipo 合并的通用 dylib 与静态库。</td></tr>
           <tr><td class="k">iOS</td><td class="m">erika-capi-ios</td><td><code>erika_capi.xcframework</code>，真机 + 模拟器。</td></tr>
           <tr><td class="k">tvOS</td><td class="m">erika-capi-tvos</td><td><code>erika_capi.xcframework</code>。</td></tr>
-          <tr><td class="k">Windows</td><td class="m">erika-capi-windows-x86_64<br>erika-capi-windows-aarch64</td><td>DLL 与导入库。</td></tr>
+          <tr><td class="k">Windows</td><td class="m">erika-capi-windows-x64<br>erika-capi-windows-arm64</td><td>DLL 与导入库。</td></tr>
           <tr><td class="k">Android</td><td class="m">erika-capi-android</td><td>arm64 / armv7 / x86_64 / x86 四个 ABI 合一。</td></tr>
           <tr><td class="k">OpenHarmony</td><td class="m">erika-capi-openharmony-arm64</td><td>运行时库与 Flutter 插件桥。</td></tr>
         </tbody>
@@ -113,14 +113,14 @@ git push origin v0.1.5</pre>
     <div class="code">
 <pre>flutter build macos --dart-define=... <span class="c"># 或构建前导出：</span>
 export ERIKA_PREBUILT=1                <span class="c"># 启用预编译下载</span>
-export ERIKA_PREBUILT_TAG=v0.1.5       <span class="c"># 版本标签，默认当前版本</span></pre>
+export ERIKA_PREBUILT_TAG=v0.1.6       <span class="c"># 版本标签，默认当前版本</span></pre>
     </div>
     <p>构建脚本按平台从 <code>github.com/AimesSoft/Erika/releases/download/&lt;tag&gt;/</code> 下载对应 bundle 并解包。下载失败自动回退源码构建，回退与失败都会输出明确日志。</p>
     <p>native 宿主的消费方式：把 bundle 解包，<code>include/erika.h</code> 作为唯一头文件，<code>lib/</code> 内的库链接进宿主，见<a href="../guide/c.html">C ABI 嵌入</a>。</p>
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.5</b></span>
+    <span>Erika <b>v0.1.6</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

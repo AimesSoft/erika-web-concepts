@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.5</span></a></div>
+  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.6</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -48,7 +48,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.1.6<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
@@ -60,7 +60,7 @@
   <ul class="meta-strip">
     <li>输出模式 <b>4</b> 种</li>
     <li>活跃编码 <b>4</b> 种</li>
-    <li>回退原因 <b>8</b> 种</li>
+    <li>回退原因 <b>8</b> 种（另有 <code>None</code> 表示未回退）</li>
   </ul>
 
   <section id="modes">
@@ -94,7 +94,7 @@
 
   <section id="fallback">
     <h2>回退<span class="jp">フォールバック</span><a class="anchor" href="#fallback">#</a></h2>
-    <p>回退原因枚举 <code>ErikaOutputFallbackReason</code> 覆盖 8 种情况：</p>
+    <p>回退原因枚举 <code>ErikaOutputFallbackReason</code> 含 <code>None</code>（表示未发生回退）在内共 9 个值，其中 8 种是实际回退原因：</p>
     <div class="tw">
       <table>
         <thead><tr><th>原因</th><th>值</th><th>含义</th></tr></thead>
@@ -137,7 +137,7 @@
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.5</b></span>
+    <span>Erika <b>v0.1.6</b></span>
     <span>Section <b>Kernel</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.5</span></a></div>
+  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.6</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -48,7 +48,7 @@
       <li><a href="capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.1.6<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
@@ -221,7 +221,7 @@
           <tr><td class="m">shadow_offset_x / shadow_offset_y</td><td class="m">float</td><td>1.0 / 1.0</td><td>阴影偏移。</td></tr>
           <tr><td class="m">merge_duplicates</td><td class="m">bool</td><td>false</td><td>合并重复弹幕。</td></tr>
           <tr><td class="m">allow_stacking</td><td class="m">bool</td><td>false</td><td>允许同轨堆叠。</td></tr>
-          <tr><td class="m">allow_scroll_overwrite</td><td class="m">bool</td><td>true</td><td>允许滚动弹幕覆盖。</td></tr>
+          <tr><td class="m">allow_scroll_overwrite</td><td class="m">bool</td><td>false</td><td>允许滚动弹幕覆盖。</td></tr>
           <tr><td class="m">max_quantity</td><td class="m">uint32_t</td><td>0</td><td>滚动弹幕密度上限，0 = 不限制。</td></tr>
           <tr><td class="m">max_lines_per_mode</td><td class="m">uint32_t</td><td>0</td><td>每类弹幕的最大行数，0 = 不限制。</td></tr>
           <tr><td class="m">block_top / block_bottom / block_scroll</td><td class="m">bool</td><td>false</td><td>屏蔽顶部 / 底部 / 滚动弹幕。</td></tr>
@@ -385,7 +385,7 @@
     </div>
 
     <h4>ErikaTrackInfo</h4>
-    <p>六个字符串字段归调用方所有，用 <code>erika_track_info_free</code> 释放。视频轨额外提供 <code>bit_rate</code>（bit/s）与 <code>frame_rate_numerator / frame_rate_denominator</code>（0 = 未知）。</p>
+    <p>六个字符串字段归调用方所有，用 <code>erika_track_info_free</code> 释放。<code>bit_rate</code>（bit/s）对所有轨道类型填充；帧率字段仅视频轨提供（<code>frame_rate_numerator / frame_rate_denominator</code>，0 = 未知）。</p>
     <div class="tw">
       <table>
         <thead><tr><th>字段</th><th>类型</th><th>语义</th></tr></thead>
@@ -589,7 +589,7 @@
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.5</b></span>
+    <span>Erika <b>v0.1.6</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

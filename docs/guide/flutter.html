@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.5</span></a></div>
+  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.6</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -48,14 +48,14 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.1.6<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Flutter 嵌入</p>
   <h1>Flutter 嵌入</h1>
   <p class="kicker">Flutter Embedding</p>
-  <p class="lead">插件 <code>erika_flutter</code> 覆盖 macOS / iOS / tvOS / Windows / Android / HarmonyOS 六个目标。播放器 API 与原生侧一一对应，视图提供两条路径：platform view 用于兼容与诊断，原生 window overlay 是桌面端的推荐路径。</p>
+  <p class="lead">插件 <code>erika_flutter</code> 覆盖 macOS / iOS / tvOS / Windows / Android / HarmonyOS 六个目标。播放器 API 与原生侧一一对应，视图提供两条路径：platform view 用于兼容与诊断，原生 window overlay 是 macOS / iOS / tvOS 的推荐路径。</p>
 
   <ul class="meta-strip">
     <li>目标 <b>6</b> 平台</li>
@@ -113,8 +113,8 @@
       <table>
         <thead><tr><th>组件</th><th>机制</th><th>适用</th></tr></thead>
         <tbody>
-          <tr><td class="k">ErikaVideoView</td><td>Flutter platform view 或 Texture。</td><td>兼容与诊断路径，所有平台可用。</td></tr>
-          <tr><td class="k">ErikaWindowOverlayVideoView</td><td>原生 window overlay（桌面）或挖空路径。</td><td>macOS / iOS / tvOS 推荐路径，完整播放器 UI。</td></tr>
+          <tr><td class="k">ErikaVideoView</td><td>Flutter platform view（Android 为原生 <code>TextureView</code> / <code>SurfaceView</code>）或外部纹理（HarmonyOS）。</td><td>兼容与诊断路径，所有平台可用。</td></tr>
+          <tr><td class="k">ErikaWindowOverlayVideoView</td><td>原生 window overlay（Apple / Windows）。</td><td>macOS / iOS / tvOS 推荐路径，完整播放器 UI。</td></tr>
         </tbody>
       </table>
     </div>
@@ -137,14 +137,14 @@
   <section id="platforms">
     <h2>平台差异<span class="jp">プラットフォーム</span><a class="anchor" href="#platforms">#</a></h2>
     <ul class="body">
-      <li>Android 与 HarmonyOS 的 surface 策略不同：Android 走 <code>SurfaceTexture</code> / Texture，HarmonyOS 走原生视图。插件内部按平台选择，宿主代码一致。</li>
-      <li>tvOS 无 window overlay 概念，走 platform view。</li>
+      <li>Android 与 HarmonyOS 的 surface 策略不同：Android 使用 Flutter platform view 内的原生 <code>TextureView</code>（SDR 路径，HDR 路径改用 <code>SurfaceView</code>），HarmonyOS 使用 Flutter 外部纹理（<code>TextureRegistry</code>）。插件内部按平台选择，宿主代码一致。</li>
+      <li>tvOS 插件实现了 window overlay（与 iOS 同族的原生 <code>ErikaWindowOverlayView</code>）；Dart 侧没有独立的 <code>TargetPlatform.tvOS</code>，沿用 iOS 平台语义。</li>
       <li>系统媒体控制（Now Playing）在 iOS、tvOS、macOS、Android、Windows、HarmonyOS 六平台可用。</li>
     </ul>
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.5</b></span>
+    <span>Erika <b>v0.1.6</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

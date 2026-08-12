@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.5</span></a></div>
+  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.6</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -48,7 +48,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.1.6<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
@@ -94,14 +94,14 @@
         </tbody>
       </table>
     </div>
-    <p>用 <code>zero_copy_video_frames / (zero_copy_video_frames + cpu_video_frame_fallbacks)</code> 可以得到一段时间内的零拷贝命中率，<code>macos_native_demo --smoke-seconds 3</code> 会在退出前打印这些计数器。</p>
+    <p>用 <code>zero_copy_video_frames / (zero_copy_video_frames + cpu_video_frame_fallbacks)</code> 可以得到一段时间内的零拷贝命中率，<code>windows_native_demo --smoke-seconds 3</code> 会在退出前打印这些计数器（macOS 的 <code>macos_native_demo</code> smoke 模式只设定运行时长，不打印计数器）。</p>
     <div class="note">
       <p><b>导入失败不回滚播放。</b> 单帧导入失败只触发该帧的 CPU 回退，不中断播放。持续失败多见于显存不足或驱动异常，反映在 <code>import_failures</code> 的增长上。</p>
     </div>
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.5</b></span>
+    <span>Erika <b>v0.1.6</b></span>
     <span>Section <b>Kernel</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

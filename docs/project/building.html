@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.5</span></a></div>
+  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.6</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -48,7 +48,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.1.6<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
@@ -119,7 +119,7 @@ cargo run -p xtask -- deps build                <span class="c"># 构建 host �
           <tr><td class="k">--profile</td><td>lgpl / gpl-full</td><td>lgpl</td></tr>
           <tr><td class="k">--target</td><td>见下方 target 表</td><td>host</td></tr>
           <tr><td class="k">--force</td><td>—</td><td>跳过已完成的构建</td></tr>
-          <tr><td class="k">--all</td><td>fetch 时下载全部 target 的源码</td><td>只取当前 target</td></tr>
+          <tr><td class="k">--all</td><td>额外构建字幕栈：libass + FreeType + HarfBuzz + FriBidi（fetch 时同时抓取这四者源码）</td><td>只构建视频栈</td></tr>
           <tr><td class="k">--jobs</td><td>并行度</td><td>自动</td></tr>
         </tbody>
       </table>
@@ -137,11 +137,11 @@ cargo run -p xtask -- deps build                <span class="c"># 构建 host �
           <tr><td class="m">host</td><td>当前机器。</td></tr>
           <tr><td class="m">aarch64-apple-darwin / x86_64-apple-darwin</td><td>macOS。</td></tr>
           <tr><td class="m">aarch64-apple-ios</td><td>iOS 真机。</td></tr>
-          <tr><td class="m">aarch64-apple-ios-sim / x86_64-apple-ios-sim</td><td>iOS 模拟器。</td></tr>
-          <tr><td class="m">aarch64-apple-tvos / aarch64-apple-tvos-sim / x86_64-apple-tvos-sim</td><td>tvOS。</td></tr>
+          <tr><td class="m">aarch64-apple-ios-sim / x86_64-apple-ios</td><td>iOS 模拟器。</td></tr>
+          <tr><td class="m">aarch64-apple-tvos / aarch64-apple-tvos-sim / x86_64-apple-tvos</td><td>tvOS。</td></tr>
           <tr><td class="m">x86_64-pc-windows-msvc / aarch64-pc-windows-msvc</td><td>Windows。</td></tr>
           <tr><td class="m">aarch64-linux-android / armv7-linux-androideabi / x86_64-linux-android / i686-linux-android</td><td>Android。</td></tr>
-          <tr><td class="m">aarch64-unknown-ohos</td><td>OpenHarmony。</td></tr>
+          <tr><td class="m">aarch64-unknown-linux-ohos</td><td>OpenHarmony。</td></tr>
         </tbody>
       </table>
     </div>
@@ -163,7 +163,7 @@ cargo test --workspace</pre>
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.5</b></span>
+    <span>Erika <b>v0.1.6</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

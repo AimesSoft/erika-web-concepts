@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.5</span></a></div>
+  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.6</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -48,17 +48,17 @@
       <li><a href="capi-json.html" aria-current="page">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.1.6<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>JSON bridge</p>
   <h1>JSON bridge</h1>
   <p class="kicker">JSON Bridge Reference</p>
-  <p class="lead">三个 JSON 变体函数与 33 个命名方法。供已用平台通道序列化结构化参数的宿主使用，例如 Dart FFI 宿主的 <code>MethodChannel</code> 一侧。方法与 presenter 的 C 函数一一对应，参数经 JSON 对象传入。</p>
+  <p class="lead">三个 JSON 变体函数与 34 个命名方法。供已用平台通道序列化结构化参数的宿主使用，例如 Dart FFI 宿主的 <code>MethodChannel</code> 一侧。方法与 presenter 的 C 函数一一对应，参数经 JSON 对象传入。</p>
 
   <ul class="meta-strip">
-    <li>方法 <b>33</b> 个</li>
+    <li>方法 <b>34</b> 个</li>
     <li>命名 <b>camelCase</b></li>
   </ul>
 
@@ -183,6 +183,7 @@
           <tr><td class="k">getUpscalerStatus</td><td class="m">—</td><td class="m">超分状态</td><td class="m">erika_presenter_get_upscaler_status</td></tr>
           <tr><td class="k">getOutputStatus</td><td class="m">—</td><td class="m">输出状态</td><td class="m">erika_presenter_get_output_status</td></tr>
           <tr><td class="k">getPresenterStats</td><td class="m">—</td><td class="m">渲染统计</td><td class="m">erika_presenter_get_stats</td></tr>
+          <tr><td class="k">getResourceStatus</td><td class="m">—</td><td class="m">资源状态</td><td class="m">erika_presenter_get_resource_status</td></tr>
         </tbody>
       </table>
     </div>
@@ -210,7 +211,7 @@ char *ev = erika_presenter_poll_event_json(p);
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.5</b></span>
+    <span>Erika <b>v0.1.6</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

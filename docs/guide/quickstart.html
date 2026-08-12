@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.5</span></a></div>
+  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.6</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -48,7 +48,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.1.6<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
@@ -88,7 +88,7 @@
       <p class="lbl">Cargo.toml</p>
 <pre><span class="c"># 或使用预编译归档的 .a / .dylib 与 erika.h（经 FFI 调用）</span>
 [dependencies]
-erika = { git = <span class="s">"https://github.com/AimesSoft/Erika"</span>, tag = <span class="s">"v0.1.5"</span> }</pre>
+erika = { git = <span class="s">"https://github.com/AimesSoft/Erika"</span>, tag = <span class="s">"v0.1.6"</span> }</pre>
     </div>
     <p>从源码构建前，先用 xtask 准备原生依赖：</p>
     <div class="code">
@@ -99,8 +99,8 @@ erika = { git = <span class="s">"https://github.com/AimesSoft/Erika"</span>, tag
       <p class="lbl">src/main.rs</p>
 <pre><span class="k">use</span> erika::{Player, PlayerConfig, MediaRequest};
 
-<span class="k">let</span> player = Player::new(PlayerConfig::default())?;
-player.open(MediaRequest::file(<span class="s">"/path/to/video.mp4"</span>))?;
+<span class="k">let</span> player = Player::new(PlayerConfig::default());
+player.open(MediaRequest::new(<span class="s">"/path/to/video.mp4"</span>))?;
 player.play()?;</pre>
     </div>
     <p>完整 API 见<a href="rust.html">Rust 嵌入</a>。</p>
@@ -167,7 +167,7 @@ erika_presenter_render_tick(p, host_time, &amp;stats);</pre>
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.5</b></span>
+    <span>Erika <b>v0.1.6</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

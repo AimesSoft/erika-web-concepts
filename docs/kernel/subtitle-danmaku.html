@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.5</span></a></div>
+  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.6</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -48,7 +48,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.1.6<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
@@ -86,7 +86,7 @@
     </div>
     <p><code>ERIKA_SUBTITLE_OVERRIDE_ALL</code> 是以上各位的组合。容器 ASS 脚本保留自己的字体，除非宿主通过字体名覆盖位强制替换。</p>
     <h3>内存字体</h3>
-    <p>0.1.5 引入内存字体注册表。宿主可以注册字体数据（不写盘）、查询字体的 faces、选择有序回退集合、替换字体数据并清空注册表。已激活字幕轨在字体替换后立即使用新数据，渲染器缓存自动失效。</p>
+    <p>0.1.5 引入内存字体注册表。宿主可以注册字体数据（不写盘）、查询字体的 faces、选择有序回退集合、替换字体数据并清空注册表。渲染器按字体的选中代际重建缓存：被选中集合内的字体在替换后立即对激活的字幕轨生效；仅注册而未选中的字体不会触发渲染器重建。</p>
   </section>
 
   <section id="danmaku">
@@ -119,7 +119,7 @@
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.5</b></span>
+    <span>Erika <b>v0.1.6</b></span>
     <span>Section <b>Kernel</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

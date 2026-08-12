@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.5</span></a></div>
+  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.6</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -48,7 +48,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.5<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.1.6<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
@@ -78,7 +78,7 @@
           <tr><td class="m">GamutMap</td><td>色域映射，源与目标原色不同时插入。</td></tr>
           <tr><td class="m">ToneMap</td><td>tone mapping，源为 HDR 且峰值超过目标约 1.05 倍时插入。</td></tr>
           <tr><td class="m">Scale</td><td>缩放至输出尺寸。</td></tr>
-          <tr><td class="m">OverlayComposite</td><td>字幕、弹幕与宿主 overlay 的合成。</td></tr>
+          <tr><td class="m">OverlayComposite</td><td>字幕层（内核内部 overlay）与弹幕的合成。</td></tr>
           <tr><td class="m">Dither</td><td>输出位深降低时的抖动。</td></tr>
           <tr><td class="m">OutputTransform</td><td>编码到输出格式（SDR / EDR / HDR10 PQ / scRGB）。</td></tr>
         </tbody>
@@ -105,12 +105,12 @@
   <section id="compositing">
     <h2>合成与几何<span class="jp">合成</span><a class="anchor" href="#compositing">#</a></h2>
     <p>字幕与弹幕在 <code>OverlayComposite</code> pass 中合成。合成发生在视频视口内：弹幕与字幕相对视频内容定位，跟随视频的 aspect-fit 几何。</p>
-    <p>视频内容以 <code>aspect_fit</code> 居中放置在输出表面内，letterbox 区域保持透明或填充，取决于表面配置。合成顺序为视频、字幕、弹幕、宿主 overlay。</p>
+    <p>视频内容以 <code>aspect_fit</code> 居中放置在输出表面内，letterbox 区域由清屏色填充（当前后端统一为黑色）。合成顺序为视频、字幕、弹幕。</p>
     <p>HDR 内容的渲染链与截图链共用同一张 pass 图。截图的颜色空间与表面一致，合成内容包含视频、字幕与弹幕。</p>
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.5</b></span>
+    <span>Erika <b>v0.1.6</b></span>
     <span>Section <b>Kernel</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
