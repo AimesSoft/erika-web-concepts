@@ -83,21 +83,27 @@ erika-capi-openharmony-arm64.zip`,
       {
         id: 'rust',
         label: 'Rust',
-        language: 'TOML',
-        code: `[dependencies]
-erika = { git = "https://github.com/AimesSoft/Erika", tag = "v0.1.5" }`,
-        note: '源码构建前需准备 FFmpeg、libass 与其他原生依赖。',
+        language: 'RUST',
+        code: `use erika::{MediaRequest, Player, PlayerConfig};
+
+let player = Player::new(PlayerConfig::default());
+player.open(MediaRequest::new("/path/to/video.mp4"))?;
+player.play()?;`,
+        note: 'Cargo.toml：erika = { git = "https://github.com/AimesSoft/Erika" }',
       },
       {
         id: 'flutter',
         label: 'Flutter',
-        language: 'YAML',
-        code: `dependencies:
-  erika_flutter:
-    git:
-      url: https://github.com/AimesSoft/Erika
-      path: packages/erika_flutter`,
-        note: '插件覆盖 macOS、iOS、tvOS、Windows、Android 与 HarmonyOS。',
+        language: 'DART',
+        code: `import 'package:erika_flutter/erika_flutter.dart';
+
+final player = ErikaPlayer();
+await player.open('/path/to/video.mp4');
+await player.play();
+
+// 放入 Widget 树
+ErikaVideoView(player: player)`,
+        note: '在 pubspec.yaml 中通过 Git 引入仓库内的 packages/erika_flutter。',
       },
       {
         id: 'c-api',
@@ -106,10 +112,15 @@ erika = { git = "https://github.com/AimesSoft/Erika", tag = "v0.1.5" }`,
         code: `#include "erika.h"
 
 ErikaPresenterHandle *player = erika_presenter_create();
-erika_presenter_attach_metal_layer(player, layer, w, h, scale);
+erika_presenter_attach_metal_layer(
+    player, (uint64_t)(uintptr_t)layer, width, height, scale);
 erika_presenter_open(player, "/path/to/video.mp4");
-erika_presenter_play(player);`,
-        note: 'Presenter 由内核托管完整播放栈，也可使用 ErikaHandle 自行拉取帧数据。',
+erika_presenter_play(player);
+
+// 在每个显示帧回调中调用
+ErikaPresenterStats stats;
+erika_presenter_render_tick(player, host_time, &stats);`,
+        note: '示例为 Apple Metal；Windows、Android 与 HarmonyOS 使用对应的 surface 接口。',
       },
     ],
   },
