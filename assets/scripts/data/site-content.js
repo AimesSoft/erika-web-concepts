@@ -178,5 +178,9 @@ erika_presenter_play(player);`,
     note:
       '名字取自《海猫鸣泣之时》的侦探古戸ヱリカ（古户绘梨花）。一个是台前的播放器，一个是幕后的引擎。',
   },
+  artworkCredit: {
+    label: '角色插画：w栗子w · 经作者授权使用',
+    url: 'https://www.pixiv.net/artworks/134321283',
+  },
 };
 })(window.ErikaApp = window.ErikaApp || {});

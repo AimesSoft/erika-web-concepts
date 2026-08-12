@@ -1052,13 +1052,29 @@ noscript {
   display: none;
 }
 
-.footer-inner p {
+.footer-statements {
+  display: grid;
+  gap: 6px;
   margin: 0 auto;
+  text-align: center;
+}
+
+.footer-inner p,
+.footer-statements a {
+  margin: 0;
   color: var(--ink-faint);
   font-family: var(--mono);
   font-size: 9px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+.footer-statements a {
+  transition: color 160ms ease;
+}
+
+.footer-statements a:hover {
+  color: var(--pink);
 }
 
 .footer-inner > a:last-child {
@@ -1384,7 +1400,7 @@ noscript {
     flex-wrap: wrap;
   }
 
-  .footer-inner p {
+  .footer-statements {
     order: 3;
     width: 100%;
   }

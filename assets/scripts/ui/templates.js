@@ -142,7 +142,7 @@ function renderDocs(docs) {
 }
 
 function renderClosing(content) {
-  const { brand, closing } = content;
+  const { brand, closing, artworkCredit } = content;
   return `
     <section class="closing shell reveal" aria-labelledby="closing-title">
       <div class="closing-dots" aria-hidden="true"></div>
@@ -156,8 +156,11 @@ function renderClosing(content) {
     <footer class="site-footer">
       <div class="shell footer-inner">
         <a class="brand footer-brand" href="#top"><img class="brand-mark" src="assets/images/favicon.svg" alt="" width="64" height="64"><span class="brand-name">${escapeHTML(brand.name)}</span></a>
-        <p>${escapeHTML(brand.descriptor)} · ${escapeHTML(brand.version)} · MPL-2.0</p>
-        <p class="footer-org">© 2026 AIMESSOFT</p>
+        <div class="footer-statements">
+          <p>${escapeHTML(brand.descriptor)} · ${escapeHTML(brand.version)} · MPL-2.0</p>
+          <a href="${artworkCredit.url}" target="_blank" rel="noreferrer">${escapeHTML(artworkCredit.label)}</a>
+          <p>© 2026 AIMESSOFT</p>
+        </div>
         <a href="${brand.repoUrl}" target="_blank" rel="noreferrer">GitHub ${icon('arrow')}</a>
       </div>
     </footer>`;
