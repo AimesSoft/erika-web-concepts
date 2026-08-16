@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.6</span></a></div>
+  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.7</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -48,14 +48,14 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.6<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.1.7<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>快速开始</p>
   <h1>快速开始</h1>
   <p class="kicker">Quickstart</p>
-  <p class="lead">Erika 尚未发布到 crates.io 与 pub.dev。接入方式有两种：直接使用 GitHub Releases 的预编译归档，或以 git 依赖从源码构建。两种方式都按宿主语言选择入口。</p>
+  <p class="lead">Erika 尚未发布到 crates.io；Flutter 插件 <code>erika_flutter</code> 已发布到 pub.dev。接入方式有三种：直接使用 GitHub Releases 的预编译归档、以 git 依赖从源码构建，或 Flutter 项目经 pub.dev 安装插件。</p>
 
   <ul class="meta-strip">
     <li>预编译 <b>6 平台</b></li>
@@ -88,7 +88,7 @@
       <p class="lbl">Cargo.toml</p>
 <pre><span class="c"># 或使用预编译归档的 .a / .dylib 与 erika.h（经 FFI 调用）</span>
 [dependencies]
-erika = { git = <span class="s">"https://github.com/AimesSoft/Erika"</span>, tag = <span class="s">"v0.1.6"</span> }</pre>
+erika = { git = <span class="s">"https://github.com/AimesSoft/Erika"</span>, tag = <span class="s">"v0.1.7"</span> }</pre>
     </div>
     <p>从源码构建前，先用 xtask 准备原生依赖：</p>
     <div class="code">
@@ -130,14 +130,11 @@ erika_presenter_render_tick(p, host_time, &amp;stats);</pre>
     <div class="code">
       <p class="lbl">pubspec.yaml</p>
 <pre>dependencies:
-  erika_flutter:
-    git:
-      url: https://github.com/AimesSoft/Erika
-      path: packages/erika_flutter</pre>
+  erika_flutter: ^0.1.7   <span class="c"># 或 flutter pub add erika_flutter</span></pre>
     </div>
     <div class="code">
       <p class="lbl">shell</p>
-<pre><span class="k">export</span> ERIKA_PREBUILT=1   <span class="c"># 使用预编译运行时，下载失败回退源码构建</span></pre>
+<pre><span class="k">export</span> ERIKA_FORCE_SOURCE_BUILD=1   <span class="c"># 默认下载预编译运行时；此变量改为从源码构建</span></pre>
     </div>
     <div class="code">
       <p class="lbl">lib/main.dart</p>
@@ -167,7 +164,7 @@ erika_presenter_render_tick(p, host_time, &amp;stats);</pre>
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.6</b></span>
+    <span>Erika <b>v0.1.7</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

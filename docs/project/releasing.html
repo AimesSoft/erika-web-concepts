@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.6</span></a></div>
+  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.7</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -48,7 +48,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.6<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.1.7<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
@@ -67,8 +67,8 @@
     <h2>触发<span class="jp">トリガー</span><a class="anchor" href="#trigger">#</a></h2>
     <p>推入 <code>v*</code> 标签触发正式发布，构建完成后发布到 GitHub Releases。workflow_dispatch 手动运行只构建不发布，用于发布前检查。发布前先在本机执行 <a href="building.html">构建流程</a> 验证。</p>
     <div class="code">
-<pre>git tag v0.1.6
-git push origin v0.1.6</pre>
+<pre>git tag v0.1.7
+git push origin v0.1.7</pre>
     </div>
   </section>
 
@@ -109,18 +109,17 @@ git push origin v0.1.6</pre>
 
   <section id="consume">
     <h2>预编译消费<span class="jp">プレビルト利用</span><a class="anchor" href="#consume">#</a></h2>
-    <p>Flutter 插件以 <code>ERIKA_PREBUILT=1</code> 切换到预编译运行时，跳过源码构建：</p>
+    <p>Flutter 插件构建时默认下载预编译运行时（<code>erika_flutter</code> 的 pub.dev 版本自带校验与缓存）；需要从源码构建时显式导出：</p>
     <div class="code">
-<pre>flutter build macos --dart-define=... <span class="c"># 或构建前导出：</span>
-export ERIKA_PREBUILT=1                <span class="c"># 启用预编译下载</span>
-export ERIKA_PREBUILT_TAG=v0.1.6       <span class="c"># 版本标签，默认当前版本</span></pre>
+<pre><span class="k">export</span> ERIKA_FORCE_SOURCE_BUILD=1    <span class="c"># 改为源码构建（需 ERIKA_REPO_ROOT 指向仓库检出）</span>
+<span class="k">export</span> ERIKA_PREBUILT_TAG=v0.1.7       <span class="c"># 自定义预编译版本标签，默认匹配当前版本</span></pre>
     </div>
-    <p>构建脚本按平台从 <code>github.com/AimesSoft/Erika/releases/download/&lt;tag&gt;/</code> 下载对应 bundle 并解包。下载失败自动回退源码构建，回退与失败都会输出明确日志。</p>
+    <p>构建脚本按平台从 <code>github.com/AimesSoft/Erika/releases/download/&lt;tag&gt;/</code> 下载对应 bundle 并解包，并按发布级 <code>SHA256SUMS</code> 校验摘要。</p>
     <p>native 宿主的消费方式：把 bundle 解包，<code>include/erika.h</code> 作为唯一头文件，<code>lib/</code> 内的库链接进宿主，见<a href="../guide/c.html">C ABI 嵌入</a>。</p>
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.6</b></span>
+    <span>Erika <b>v0.1.7</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
