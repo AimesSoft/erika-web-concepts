@@ -416,7 +416,7 @@
 
     <div class="api" id="erika_presenter_capture_frame_rgba">
       <p class="sig"><b>ErikaStatus erika_presenter_capture_frame_rgba</b>(ErikaPresenterHandle *handle, uint32_t width, uint32_t height, uint8_t *out_rgba, uintptr_t out_capacity)</p>
-      <p class="desc">离屏渲染当前合成帧（视频 + 字幕 + 弹幕）到调用方分配的 RGBA8 缓冲。<code>out_capacity</code> 必须 ≥ width × height × 4。无可用帧时失败。</p>
+      <p class="desc">离屏渲染当前合成帧（视频 + 字幕，不含弹幕与 debug HUD）到调用方分配的 RGBA8 缓冲。<code>out_capacity</code> 必须 ≥ width × height × 4。无可用帧时失败。</p>
     </div>
   </section>
 

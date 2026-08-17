@@ -106,7 +106,7 @@
     <h2>合成与几何<span class="jp">合成</span><a class="anchor" href="#compositing">#</a></h2>
     <p>字幕与弹幕在 <code>OverlayComposite</code> pass 中合成。合成发生在视频视口内：弹幕与字幕相对视频内容定位，跟随视频的 aspect-fit 几何。</p>
     <p>视频内容以 <code>aspect_fit</code> 居中放置在输出表面内，letterbox 区域由清屏色填充（当前后端统一为黑色）。合成顺序为视频、字幕、弹幕。</p>
-    <p>HDR 内容的渲染链与截图链共用同一张 pass 图。截图的颜色空间与表面一致，合成内容包含视频、字幕与弹幕。</p>
+    <p>HDR 内容的渲染链与截图链共用同一张 pass 图；截图渲染到与表面相同像素格式的离屏目标，读回时转为 RGBA8（HDR 值钳制到 SDR 范围）。截图只合成视频与字幕，不含弹幕与 debug HUD。</p>
   </section>
 
   <footer class="doc-foot">
