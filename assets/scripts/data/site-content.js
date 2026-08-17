@@ -4,7 +4,7 @@ app.siteContent = {
     name: 'Erika',
     kana: '古戸ヱリカ',
     descriptor: 'Playback Kernel',
-    version: 'v0.1.6',
+    version: 'v0.1.7',
     repoUrl: 'https://github.com/AimesSoft/Erika',
   },
   navigation: [
