@@ -61,7 +61,7 @@ app.siteContent = {
   quickStart: {
     eyebrow: 'Evidence / 02',
     title: '留下最少的接入痕迹',
-    lead: '选择宿主环境，复制最短的开始方式。当前推荐使用 GitHub Releases 的预编译产物。',
+    lead: '选择宿主环境，复制最短的开始方式。Flutter 走 pub.dev，原生宿主走 GitHub Releases 预编译产物。',
     tabs: [
       {
         id: 'release',
@@ -103,7 +103,7 @@ await player.play();
 
 // 放入 Widget 树
 ErikaVideoView(player: player)`,
-        note: '在 pubspec.yaml 中通过 Git 引入仓库内的 packages/erika_flutter。',
+        note: '已发布到 pub.dev：flutter pub add erika_flutter。',
       },
       {
         id: 'c-api',
@@ -129,8 +129,8 @@ erika_presenter_render_tick(player, host_time, &stats);`,
     title: '六个平台，同一种行为',
     lead: '平台能力留在内核里，产品逻辑留在宿主里。',
     items: [
-      { name: 'macOS', minimum: '14+', render: 'Metal', decode: 'VideoToolbox', status: 'ready' },
-      { name: 'iOS', minimum: '16+', render: 'Metal', decode: 'VideoToolbox', status: 'ready' },
+      { name: 'macOS', minimum: '11+', render: 'Metal', decode: 'VideoToolbox', status: 'ready' },
+      { name: 'iOS', minimum: '13+', render: 'Metal', decode: 'VideoToolbox', status: 'ready' },
       { name: 'tvOS', minimum: '13+', render: 'Metal', decode: 'VideoToolbox', status: 'ready' },
       { name: 'Windows', minimum: '10+', render: 'D3D11', decode: 'D3D11VA', status: 'ready' },
       { name: 'Android', minimum: '8+', render: 'wgpu', decode: 'MediaCodec', status: 'ready' },
