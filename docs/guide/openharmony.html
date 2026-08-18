@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OpenHarmony / OHPM 接入 — Erika 开发者文档</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.7</span></a></div>
+  <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <nav>
+    <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="quickstart.html">快速开始</a></li>
+      <li><a href="rust.html">Rust 嵌入</a></li>
+      <li><a href="c.html">C ABI 嵌入</a></li>
+      <li><a href="flutter.html">Flutter 嵌入</a></li>
+      <li><a href="openharmony.html" aria-current="page">OpenHarmony / OHPM</a></li>
+    </ul>
+    <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.html">架构总览</a></li>
+      <li><a href="../kernel/decode.html">硬件解码</a></li>
+      <li><a href="../kernel/zero-copy.html">零拷贝导入</a></li>
+      <li><a href="../kernel/render.html">渲染管线</a></li>
+      <li><a href="../kernel/hdr.html">高动态范围</a></li>
+      <li><a href="../kernel/upscale.html">神经超分</a></li>
+      <li><a href="../kernel/subtitle-danmaku.html">字幕与弹幕</a></li>
+      <li><a href="../kernel/clock.html">时钟与调度</a></li>
+    </ul>
+    <h2><span class="no">三</span>项目 <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.html">构建与依赖</a></li>
+      <li><a href="../project/releasing.html">发布与产物</a></li>
+      <li><a href="../project/contributing.html">贡献指南</a></li>
+      <li><a href="../project/changelog.html">更新日志</a></li>
+    </ul>
+    <h2><span class="no">四</span>参考 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.html">C ABI 总览</a></li>
+      <li><a href="../reference/capi-handle.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">Erika v0.1.7<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>OpenHarmony / OHPM</p>
+  <h1>OpenHarmony / OHPM 接入</h1>
+  <p class="kicker">Native ArkTS SDK</p>
+  <p class="lead"><code>erika</code> 是独立的 OpenHarmony 原生 ArkTS SDK，不依赖 Flutter。应用通过 <code>XComponent</code> 提供呈现表面，使用 <code>ErikaPlayer</code> 驱动播放、生命周期和每帧渲染。</p>
+
+  <ul class="meta-strip">
+    <li>包 <b>erika 0.1.7</b></li>
+    <li>目标 <b>arm64</b></li>
+    <li>最低 API <b>18</b></li>
+    <li>依赖 Flutter <b>无</b></li>
+  </ul>
+
+  <section id="install">
+    <h2>安装<span class="jp">インストール</span><a class="anchor" href="#install">#</a></h2>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>ohpm install erika</pre>
+    </div>
+    <p>包详情见 <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM</a>；源码包说明见仓库的 <a href="https://github.com/AimesSoft/Erika/blob/main/packages/erika_ohos/README.md">packages/erika_ohos/README.md</a>。</p>
+  </section>
+
+  <section id="surface">
+    <h2>表面生命周期<span class="jp">サーフェスのライフサイクル</span><a class="anchor" href="#surface">#</a></h2>
+    <p><code>ErikaPlayer</code> 不创建 ArkUI 组件。宿主在 <code>XComponentController</code> 回调中附着、调整大小和释放原生 surface：</p>
+    <div class="code">
+      <p class="lbl">ErikaSurfaceController.ets</p>
+<pre>import { ErikaNativeResponse, ErikaPlayer } from 'erika';
+
+class ErikaSurfaceController extends XComponentController {
+  private readonly player: ErikaPlayer = new ErikaPlayer();
+  private attached: boolean = false;
+  private pendingUri: string = '';
+
+  onSurfaceCreated(surfaceId: string): void {
+    console.info(`Erika XComponent surface created: ${surfaceId}`);
+  }
+
+  onSurfaceChanged(surfaceId: string, rect: SurfaceRect): void {
+    if (!this.attached) {
+      this.player.attachSurface({
+        surfaceId: BigInt(surfaceId),
+        width: rect.surfaceWidth,
+        height: rect.surfaceHeight,
+        scale: 1.0,
+      });
+      this.attached = true;
+    } else {
+      this.player.resizeSurface(rect.surfaceWidth, rect.surfaceHeight);
+    }
+    this.startPendingUri();
+  }
+
+  onSurfaceDestroyed(_surfaceId: string): void {
+    if (this.attached) {
+      this.player.detachSurface();
+      this.attached = false;
+    }
+    this.player.dispose();
+  }
+
+  open(uri: string): void {
+    this.pendingUri = uri;
+    this.startPendingUri();
+  }
+
+  renderFrame(timeSeconds: number): ErikaNativeResponse {
+    return this.player.renderTick(timeSeconds);
+  }
+
+  private startPendingUri(): void {
+    if (!this.attached || this.pendingUri.length === 0) {
+      return;
+    }
+    const uri: string = this.pendingUri;
+    this.pendingUri = '';
+    this.player.open(uri);
+    this.player.play();
+  }
+}</pre>
+    </div>
+  </section>
+
+  <section id="player">
+    <h2>播放控制<span class="jp">再生制御</span><a class="anchor" href="#player">#</a></h2>
+    <p>在 surface 可用后调用播放器方法。<code>open()</code> 发起打开请求，随后调用 <code>play()</code>；状态和错误通过返回值或异常检查。示例控制器会在 <code>onSurfaceChanged()</code> 完成 attach 后启动缓存的 URI，因此 <code>onLoad</code> 早于 surface 回调也不会抢跑。</p>
+    <div class="code">
+      <p class="lbl">ArkTS</p>
+<pre>this.player.open('https://example.com/video.mp4');
+this.player.play();
+
+this.player.pause();
+this.player.seek(positionMicros);</pre>
+    </div>
+  </section>
+
+  <section id="render">
+    <h2>帧调度<span class="jp">フレームスケジューリング</span><a class="anchor" href="#render">#</a></h2>
+    <p>宿主负责把显示帧回调传给 <code>renderTick()</code>。该方法返回 <code>ErikaNativeResponse</code>，可用于读取本帧的状态和诊断信息；不需要视频 surface 时改用 <code>audioOnlyTick()</code>。</p>
+    <div class="code">
+      <p class="lbl">host frame scheduler</p>
+<pre>renderFrame(timeSeconds: number): ErikaNativeResponse {
+  return this.player.renderTick(timeSeconds);
+}
+
+// 在宿主的 display-frame callback 中调用
+controller.renderFrame(frameTimeSeconds);</pre>
+    </div>
+  </section>
+
+  <section id="arkui">
+    <h2>放入 ArkUI 页面<span class="jp">ArkUI への組み込み</span><a class="anchor" href="#arkui">#</a></h2>
+    <div class="code">
+      <p class="lbl">Index.ets</p>
+<pre>@Entry
+@Component
+struct VideoPage {
+  private readonly surfaceController: ErikaSurfaceController =
+    new ErikaSurfaceController();
+
+  build() {
+    XComponent({
+      id: 'erika-surface',
+      type: XComponentType.SURFACE,
+      controller: this.surfaceController,
+    })
+      .width('100%')
+      .height('100%')
+      .onLoad(() =&gt; {
+        this.surfaceController.open('https://example.com/video.mp4');
+      });
+  }
+}</pre>
+    </div>
+    <p>真实应用应在页面销毁时让控制器完成 <code>detachSurface()</code> 和 <code>dispose()</code>，并把自己的 display-frame callback 接到 <code>renderTick()</code>。</p>
+  </section>
+
+  <section id="api">
+    <h2>核心 API<span class="jp">主要 API</span><a class="anchor" href="#api">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>分组</th><th>方法</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td class="k">播放</td><td class="m">open / play / pause / stop / close / seek / setPlaybackRate / setVolume</td><td>播放控制。</td></tr>
+          <tr><td class="k">表面</td><td class="m">attachSurface / resizeSurface / detachSurface</td><td>XComponent surface 生命周期。</td></tr>
+          <tr><td class="k">调度</td><td class="m">renderTick / audioOnlyTick / pollEvent</td><td>显示帧、音频帧和事件消费。</td></tr>
+          <tr><td class="k">输出</td><td class="m">captureFrame / getOutputStatus / getResourceStatus</td><td>截图、输出状态和资源诊断。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="doc-foot">
+    <span>Erika <b>v0.1.7</b></span>
+    <span>Section <b>Guide</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="quickstart.html"><span class="dir">Prev</span>快速开始</a>
+    <a class="nx" href="../kernel/architecture.html"><span class="dir">Next</span>架构总览</a>
+  </nav>
+</main>
+
+</div>
+<script>
+(function () {
+  document.querySelectorAll('.code').forEach(function (box) {
+    if (!box.querySelector('pre')) return;
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'copy'; btn.textContent = '复制';
+    box.appendChild(btn);
+    btn.addEventListener('click', function () {
+      var pre = box.querySelector('pre');
+      if (!pre || !navigator.clipboard) return;
+      navigator.clipboard.writeText(pre.innerText).then(function () {
+        var old = btn.textContent;
+        btn.textContent = '已复制';
+        setTimeout(function () { btn.textContent = old; }, 1400);
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

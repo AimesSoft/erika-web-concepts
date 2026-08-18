@@ -21,6 +21,7 @@
       <li><a href="../guide/rust.html">Rust 嵌入</a></li>
       <li><a href="../guide/c.html">C ABI 嵌入</a></li>
       <li><a href="../guide/flutter.html">Flutter 嵌入</a></li>
+      <li><a href="../guide/openharmony.html">OpenHarmony / OHPM</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -71,6 +72,11 @@
       <li>Android 按 ABI 拆分运行时归档：应用构建只下载所需架构，不再附带 native-embedder 静态库。</li>
       <li>每个发布新增覆盖全部原生归档的 <code>SHA256SUMS</code> 清单。</li>
       <li>六个平台各自的 GitHub Actions 消费构建独立化，package 构建不再依赖 monorepo。</li>
+    </ul>
+    <h3>OpenHarmony 原生包发布</h3>
+    <ul class="body">
+      <li>新增独立的 OpenHarmony ArkTS / OHPM 包 <code>erika</code>，面向 arm64、API 18+，不依赖 Flutter。</li>
+      <li>提供 <code>XComponent</code> surface 生命周期、播放控制、<code>renderTick()</code> 帧调度、事件与截图 API，并补充独立接入指南。</li>
     </ul>
   </section>
 

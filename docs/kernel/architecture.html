@@ -21,6 +21,7 @@
       <li><a href="../guide/rust.html">Rust 嵌入</a></li>
       <li><a href="../guide/c.html">C ABI 嵌入</a></li>
       <li><a href="../guide/flutter.html">Flutter 嵌入</a></li>
+      <li><a href="../guide/openharmony.html">OpenHarmony / OHPM</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -74,6 +75,7 @@
           <tr><td class="k">crates/erika_capi</td><td>C ABI 导出层。全部导出以 <code>include/erika.h</code> 为准。</td></tr>
           <tr><td class="k">crates/erika_ffmpeg_sys</td><td>FFmpeg bindgen 绑定。</td></tr>
           <tr><td class="k">packages/erika_flutter</td><td>Flutter 插件，覆盖 macOS / iOS / tvOS / Windows / Android / HarmonyOS。</td></tr>
+          <tr><td class="k">packages/erika_ohos</td><td>独立的 OpenHarmony ArkTS / OHPM 原生 SDK，提供 <code>ErikaPlayer</code> 与 XComponent surface bridge。</td></tr>
           <tr><td class="k">examples/</td><td>验证、冒烟与演示程序。<code>macos_native_demo</code>、<code>windows_native_demo</code> 为端到端示例。</td></tr>
           <tr><td class="k">xtask/</td><td>原生依赖构建编排。<code>deps plan / fetch / status / build</code>。</td></tr>
         </tbody>

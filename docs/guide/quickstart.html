@@ -21,6 +21,7 @@
       <li><a href="rust.html">Rust 嵌入</a></li>
       <li><a href="c.html">C ABI 嵌入</a></li>
       <li><a href="flutter.html">Flutter 嵌入</a></li>
+      <li><a href="openharmony.html">OpenHarmony / OHPM</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -147,22 +148,12 @@ erika_presenter_render_tick(p, host_time, &amp;stats);</pre>
 
   <section id="ohpm">
     <h2>OpenHarmony / OHPM<span class="jp">OpenHarmony</span><a class="anchor" href="#ohpm">#</a></h2>
-    <p>原生 ArkTS 包 <code>erika</code> 0.1.7 已发布到 <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM</a>，目标为 OpenHarmony arm64，最低兼容 API 18。它独立于 Flutter，宿主通过 <code>XComponent</code> surface 使用 <code>ErikaPlayer</code>。</p>
+    <p>原生 ArkTS 包 <code>erika</code> 0.1.7 已发布到 <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM</a>，目标为 OpenHarmony arm64，最低兼容 API 18。它是独立于 Flutter 的原生 SDK，宿主通过 <code>XComponent</code> surface 使用 <code>ErikaPlayer</code>。</p>
     <div class="code">
       <p class="lbl">shell</p>
 <pre>ohpm install erika</pre>
     </div>
-    <div class="code">
-      <p class="lbl">ArkTS</p>
-<pre>import { ErikaPlayer } from 'erika';
-
-const player = new ErikaPlayer();
-const surfaceId = BigInt(xComponentController.getXComponentSurfaceId());
-player.attachSurface({ surfaceId, width, height, scale: 1.0 });
-player.open('https://example.com/video.mp4');
-player.play();</pre>
-    </div>
-    <p>完整的接口说明与表面生命周期见仓库中的 <a href="https://github.com/AimesSoft/Erika/blob/main/packages/erika_ohos/README.md">OpenHarmony package guide</a>。</p>
+    <p>完整的 ArkTS 宿主代码、<code>XComponent</code> 表面生命周期和 <code>renderTick()</code> 帧调度见 <a href="openharmony.html">OpenHarmony 接入指南</a>；包的发布信息见 <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM 详情页</a>。</p>
   </section>
 
   <section id="platforms">

@@ -108,17 +108,16 @@ ErikaVideoView(player: player)`,
       {
         id: 'ohpm',
         label: 'OpenHarmony · OHPM',
-        language: 'SHELL',
-        code: `# OpenHarmony arm64 / API 18+
-ohpm install erika
+        language: 'ARKTS',
+        code: `import { ErikaPlayer } from 'erika';
 
-# ArkTS
-import { ErikaPlayer } from 'erika';
-const player = new ErikaPlayer();`,
-        note: 'erika 0.1.7 已发布到 OHPM；该原生 ArkTS 包独立于 Flutter。',
+const player = new ErikaPlayer();
+player.open('https://example.com/video.mp4');
+player.play();`,
+        note: '先运行 ohpm install erika；视频 surface 生命周期和 renderTick() 见 OpenHarmony 接入指南。',
         action: {
-          label: '查看 OHPM 包详情',
-          url: 'https://ohpm.openharmony.cn/#/cn/detail/erika',
+          label: '查看 OpenHarmony 接入指南',
+          url: 'docs/guide/openharmony.html',
         },
       },
       {
@@ -168,6 +167,7 @@ erika_presenter_render_tick(player, host_time, &stats);`,
           ['Rust 嵌入', 'docs/guide/rust.html'],
           ['C ABI 嵌入', 'docs/guide/c.html'],
           ['Flutter 嵌入', 'docs/guide/flutter.html'],
+          ['OpenHarmony / OHPM', 'docs/guide/openharmony.html'],
         ],
       },
       {
