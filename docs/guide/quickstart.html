@@ -55,7 +55,7 @@
   <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>快速开始</p>
   <h1>快速开始</h1>
   <p class="kicker">Quickstart</p>
-  <p class="lead">Erika 尚未发布到 crates.io；Flutter 插件 <code>erika_flutter</code> 已发布到 pub.dev。接入方式有三种：直接使用 GitHub Releases 的预编译归档、以 git 依赖从源码构建，或 Flutter 项目经 pub.dev 安装插件。</p>
+  <p class="lead">Erika 尚未发布到 crates.io；Flutter 插件 <code>erika_flutter</code> 已发布到 pub.dev，OpenHarmony 原生 ArkTS 包 <code>erika</code> 已发布到 OHPM。接入方式包括 GitHub Releases 的预编译归档、以 git 依赖从源码构建、Flutter 项目经 pub.dev 安装插件，或 OpenHarmony 项目经 OHPM 安装。</p>
 
   <ul class="meta-strip">
     <li>预编译 <b>6 平台</b></li>
@@ -143,6 +143,26 @@ erika_presenter_render_tick(p, host_time, &amp;stats);</pre>
 <span class="k">await</span> player.play();</pre>
     </div>
     <p>插件覆盖 macOS / iOS / tvOS / Windows / Android / HarmonyOS 六个目标。视图路径与完整 API 见<a href="flutter.html">Flutter 嵌入</a>。</p>
+  </section>
+
+  <section id="ohpm">
+    <h2>OpenHarmony / OHPM<span class="jp">OpenHarmony</span><a class="anchor" href="#ohpm">#</a></h2>
+    <p>原生 ArkTS 包 <code>erika</code> 0.1.7 已发布到 <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM</a>，目标为 OpenHarmony arm64，最低兼容 API 18。它独立于 Flutter，宿主通过 <code>XComponent</code> surface 使用 <code>ErikaPlayer</code>。</p>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>ohpm install erika</pre>
+    </div>
+    <div class="code">
+      <p class="lbl">ArkTS</p>
+<pre>import { ErikaPlayer } from 'erika';
+
+const player = new ErikaPlayer();
+const surfaceId = BigInt(xComponentController.getXComponentSurfaceId());
+player.attachSurface({ surfaceId, width, height, scale: 1.0 });
+player.open('https://example.com/video.mp4');
+player.play();</pre>
+    </div>
+    <p>完整的接口说明与表面生命周期见仓库中的 <a href="https://github.com/AimesSoft/Erika/blob/main/packages/erika_ohos/README.md">OpenHarmony package guide</a>。</p>
   </section>
 
   <section id="platforms">

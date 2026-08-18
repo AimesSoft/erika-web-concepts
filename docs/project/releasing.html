@@ -91,6 +91,16 @@ git push origin v0.1.7</pre>
     <p>原生依赖（FFmpeg、dav1d、libass 等）以 lgpl profile 静态链接进库，运行时不依赖系统安装。</p>
   </section>
 
+  <section id="ohpm">
+    <h2>OpenHarmony OHPM 包<span class="jp">OHPM パッケージ</span><a class="anchor" href="#ohpm">#</a></h2>
+    <p>OpenHarmony arm64 的原生 ArkTS 包 <code>erika</code> 0.1.7 已发布到 <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM</a>，最低兼容 API 18。它独立于 Flutter，使用时直接安装包：</p>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>ohpm install erika</pre>
+    </div>
+    <p>包内含 N-API bridge 与匹配的 <code>liberika_capi.so</code>，接口与 <code>XComponent</code> surface 生命周期见 <a href="https://github.com/AimesSoft/Erika/blob/main/packages/erika_ohos/README.md">OpenHarmony package guide</a>。</p>
+  </section>
+
   <section id="layout">
     <h2>bundle 结构<span class="jp">構成</span><a class="anchor" href="#layout">#</a></h2>
     <p>所有 bundle 由 <code>packaging/bundle.sh</code> 生成，结构一致：</p>

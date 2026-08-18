@@ -61,7 +61,7 @@ app.siteContent = {
   quickStart: {
     eyebrow: 'Evidence / 02',
     title: '留下最少的接入痕迹',
-    lead: '选择宿主环境，复制最短的开始方式。Flutter 走 pub.dev，原生宿主走 GitHub Releases 预编译产物。',
+    lead: '选择宿主环境，复制最短的开始方式。Flutter 走 pub.dev，OpenHarmony ArkTS 应用可直接从 OHPM 安装，其他原生宿主走 GitHub Releases 预编译产物。',
     tabs: [
       {
         id: 'release',
@@ -104,6 +104,22 @@ await player.play();
 // 放入 Widget 树
 ErikaVideoView(player: player)`,
         note: '已发布到 pub.dev：flutter pub add erika_flutter。',
+      },
+      {
+        id: 'ohpm',
+        label: 'OpenHarmony · OHPM',
+        language: 'SHELL',
+        code: `# OpenHarmony arm64 / API 18+
+ohpm install erika
+
+# ArkTS
+import { ErikaPlayer } from 'erika';
+const player = new ErikaPlayer();`,
+        note: 'erika 0.1.7 已发布到 OHPM；该原生 ArkTS 包独立于 Flutter。',
+        action: {
+          label: '查看 OHPM 包详情',
+          url: 'https://ohpm.openharmony.cn/#/cn/detail/erika',
+        },
       },
       {
         id: 'c-api',
