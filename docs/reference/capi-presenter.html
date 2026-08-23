@@ -255,7 +255,7 @@
 
     <div class="api" id="erika_presenter_load_danmaku_json">
       <p class="sig"><b>ErikaStatus erika_presenter_load_danmaku_json</b>(ErikaPresenterHandle *handle, const char *json)</p>
-      <p class="desc">从内联 JSON 加载弹幕，替换为一条匿名轨。</p>
+      <p class="desc">从内联 JSON 加载弹幕，替换为一条匿名轨。数据格式与字段规范详见<a href="../kernel/subtitle-danmaku.html#json-schema">弹幕 JSON 契约规范</a>。</p>
     </div>
 
     <div class="api" id="erika_presenter_add_danmaku_track_file">
@@ -265,7 +265,7 @@
 
     <div class="api" id="erika_presenter_add_danmaku_track_json">
       <p class="sig"><b>ErikaStatus erika_presenter_add_danmaku_track_json</b>(ErikaPresenterHandle *handle, const char *json, const char *name, int64_t offset_micros, uint64_t *out_track_id)</p>
-      <p class="desc">添加命名弹幕轨（内联 JSON），可带时间线偏移，输出轨道 id。</p>
+      <p class="desc">添加命名弹幕轨（内联 JSON），可带时间线偏移，输出轨道 id。数据格式与字段规范详见<a href="../kernel/subtitle-danmaku.html#json-schema">弹幕 JSON 契约规范</a>。</p>
     </div>
 
     <div class="api" id="erika_presenter_remove_danmaku_track">

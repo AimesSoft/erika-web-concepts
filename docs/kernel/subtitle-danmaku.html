@@ -118,6 +118,48 @@
       </table>
     </div>
     <p>屏蔽词经 <code>set_danmaku_block_words_json</code> 提供，JSON 数组格式，逐条匹配弹幕文本。</p>
+
+    <h3 id="json-schema">弹幕 JSON 契约规范</h3>
+    <p><code>load_danmaku_json</code> 与 <code>add_danmaku_track_json</code> 接受内联 JSON。输入根节点支持两类结构：</p>
+    <ul class="body">
+      <li><b>Item 数组：</b> <code>[ { ... }, { ... } ]</code></li>
+      <li><b>包装对象：</b> 包含 <code>comments</code>、<code>danmaku</code> 或 <code>items</code> 数组的对象，例如 <code>{ "comments": [ ... ] }</code>。同时也兼容按行分割的 JSON Lines (JSONL)。</li>
+    </ul>
+
+    <p>每个弹幕 item 的支持字段如下（括号内为兼容别名）：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>字段名</th><th>类型</th><th>默认值</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="m">content<br><span class="en">(text, c)</span></td><td class="k">String</td><td class="m">—</td><td>弹幕正文。缺失或仅含空白字符的条目会被自动跳过。</td></tr>
+          <tr><td class="m">time<br><span class="en">(t)</span></td><td class="k">Number / String</td><td class="m">0.0</td><td>弹幕呈现时间（秒），支持浮点秒数（如 <code>12.45</code>）。</td></tr>
+          <tr><td class="m">type<br><span class="en">(mode, y)</span></td><td class="k">String / Number</td><td class="m">"scroll"</td><td>弹幕类型：<code>scroll</code> / <code>1</code>（滚动）、<code>bottom</code> / <code>4</code>（底部固定）、<code>top</code> / <code>5</code>（顶部固定）、<code>reverse</code> / <code>6</code>（逆向滚动）、<code>special</code> / <code>7</code>（高级特殊）。亦可使用数值字段 <code>type_code</code> / <code>mode_code</code>。</td></tr>
+          <tr><td class="m">color<br><span class="en">(r)</span></td><td class="k">Number / String</td><td class="m">白色</td><td>弹幕颜色：支持十进制 RGB 整数（如 <code>16777215</code>）、十六进制字符串（如 <code>"#FFFFFF"</code> 或 <code>"#FFF"</code>）或 CSS <code>rgb(255,255,255)</code>。</td></tr>
+          <tr><td class="m">font_size<br><span class="en">(fontSize, size, s)</span></td><td class="k">Number / String</td><td class="m">全局默认 (25)</td><td>自定义字号（单位为逻辑点）。</td></tr>
+          <tr><td class="m">opacity<br><span class="en">(alpha, a)</span></td><td class="k">Number / String</td><td class="m">1.0</td><td>自定义不透明度（<code>0.0</code> ~ <code>1.0</code>）。</td></tr>
+          <tr><td class="m">is_me<br><span class="en">(isMe, self, mine)</span></td><td class="k">Boolean / Number</td><td class="m">false</td><td>是否为当前用户自发弹幕（优先展示与样式增强）。</td></tr>
+          <tr><td class="m">id</td><td class="k">u64 / String</td><td class="m">顺序分配</td><td>业务 ID。支持任意大整数或十进制字符串。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>核心规范与行为约定：</p>
+    <ul class="body">
+      <li><b><code>id</code> 可省略：</b> 省略时 Erika 会按其在整份输入中的自然位置顺序分配序号。</li>
+      <li><b>精确 <code>u64</code> 整数：</b> 接受原生的 64 位无符号整数或十进制字符串（如 <code>"18446744073709551615"</code>），内核在解析阶段直接按精确整数处理，杜绝浮点双精度精度丢失。</li>
+      <li><b>业务 ID 与布局解耦：</b> 业务 ID 允许很大、重复或在多轨合并时产生跨源冲突。调用方<b>不应拼接 track ID</b>，也<b>不需要为了排版唯一性而合成特殊 ID</b>。</li>
+      <li><b>跨滑窗连贯性保证：</b> 弹幕会话（Session）在合并多轨后会为当前版本独立生成内部布局身份。连续时间滑窗会严格继承历史准入和轨道分配决定，对外承诺<b>“弹幕不会在滑窗刷新后半途出现或换轨”</b>。</li>
+      <li><b>未知字段安全忽略：</b> 携带 <code>cid</code>、<code>danmakuId</code>、<code>user_hash</code> 等业务私有字段的标准数据对象可直接传入，无需调用方预先清洗。</li>
+    </ul>
+
+    <div class="code">
+      <p class="lbl">标准弹幕 JSON 样例</p>
+<pre>[
+  { <span class="s">"time"</span>: 1.5, <span class="s">"content"</span>: <span class="s">"前方高能预警"</span>, <span class="s">"type"</span>: <span class="s">"scroll"</span>, <span class="s">"color"</span>: <span class="s">"#FF0000"</span> },
+  { <span class="s">"t"</span>: 2.0, <span class="s">"c"</span>: <span class="s">"名场面打卡"</span>, <span class="s">"mode"</span>: 5, <span class="s">"color"</span>: 16777215, <span class="s">"id"</span>: <span class="s">"9007199254740993"</span> },
+  { <span class="s">"time"</span>: 4.8, <span class="s">"content"</span>: <span class="s">"弹幕合影"</span>, <span class="s">"is_me"</span>: <span class="k">true</span>, <span class="s">"opacity"</span>: 0.9 }
+]</pre>
+    </div>
   </section>
 
   <footer class="doc-foot">

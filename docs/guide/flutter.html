@@ -146,7 +146,7 @@
         <tbody>
           <tr><td class="k">播放控制</td><td class="m">open / play / pause / stop / close / seek / setPlaybackRate / setVolume</td><td>核心播放与进度、音量、倍速控制。</td></tr>
           <tr><td class="k">音轨与字幕</td><td class="m">tracks / selectAudioTrack / selectSubtitleTrack / addExternalSubtitle / removeSubtitleTrack / setSubtitleStyle / registerSubtitleMemoryFont</td><td>音轨切换、外挂 SRT/ASS 字幕、字体样式与内存字体注入。</td></tr>
-          <tr><td class="k">弹幕系统</td><td class="m">loadDanmakuJson / loadDanmakuFile / addDanmakuTrackFile / danmakuTracks / setDanmakuEnabled / setDanmakuConfig / clearDanmaku</td><td>DFM+ 碰撞布局、多轨弹幕、屏蔽词与字体大小/透明度调节。</td></tr>
+          <tr><td class="k">弹幕系统</td><td class="m">loadDanmakuJson / addDanmakuTrackJson / loadDanmakuFile / addDanmakuTrackFile / danmakuTracks / setDanmakuEnabled / setDanmakuConfig / clearDanmaku</td><td>DFM+ 碰撞布局、多轨弹幕、屏蔽词与样式配置。JSON 字符串遵循统一的<a href="../kernel/subtitle-danmaku.html#json-schema">弹幕 JSON 契约规范</a>。</td></tr>
           <tr><td class="k">图像与超分</td><td class="m">setUpscaler / getUpscalerStatus / screenshot / getPresenterStats / setDebugHudEnabled</td><td>ArtCNN 神经网络 2× 超分、无缝截图与实时渲染性能统计。</td></tr>
           <tr><td class="k">事件流</td><td class="m">events (Stream&lt;ErikaPlayerEvent&gt;)</td><td>监听播放状态、缓冲、时长变化与报错。</td></tr>
         </tbody>

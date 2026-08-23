@@ -64,6 +64,16 @@
     <li>发布 <b>2026-08-16</b></li>
   </ul>
 
+  <section id="unreleased">
+    <h2>Unreleased<span class="jp">未リリース</span><a class="anchor" href="#unreleased">#</a></h2>
+    <h3>弹幕连贯性与 JSON 契约 (#121)</h3>
+    <ul class="body">
+      <li>保持连续规划滑窗间的轨道分配与准入决定稳定，防止已丢弃弹幕中途重现或迫使可见弹幕换轨。</li>
+      <li>将宿主传入的弹幕业务 ID 与内核内部布局身份解耦，支持将可选的 JSON ID 解析为精确 <code>u64</code> 或十进制字符串，避免浮点双精度舍入导致 ID 截断。</li>
+      <li>正式规范并文档化内联弹幕 JSON 契约，支持标准数组与 <code>comments</code> / <code>danmaku</code> / <code>items</code> 根对象。</li>
+    </ul>
+  </section>
+
   <section id="v017">
     <h2>0.1.7<span class="jp">バージョン</span><a class="anchor" href="#v017">#</a></h2>
     <h3>Flutter 包发布</h3>

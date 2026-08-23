@@ -175,6 +175,7 @@
         </tbody>
       </table>
     </div>
+    <p>注：<code>loadDanmakuJson</code> 与 <code>addDanmakuTrackJson</code> 的 <code>json</code> 参数遵循统一的<a href="../kernel/subtitle-danmaku.html#json-schema">弹幕 JSON 契约规范</a>，可直接传入标准 item 数组、包含 <code>comments</code> / <code>danmaku</code> / <code>items</code> 数组的根对象或 JSON Lines 字符串。</p>
     <p><code>setDanmakuConfig</code> 是读-改-写:只覆盖传入的键,未提供的字段保持当前值。布尔键:<code>enabled</code>、<code>mergeDuplicates</code>、<code>allowStacking</code>、<code>allowScrollOverwrite</code>、<code>blockTop</code>、<code>blockBottom</code>、<code>blockScroll</code>;数值键:<code>fontSize</code>、<code>opacity</code>、<code>displayArea</code>、<code>scrollDurationSeconds</code>、<code>scrollSpeedFactor</code>、<code>trackGapRatio</code>、<code>outlineWidth</code>、<code>shadowOffsetX</code>、<code>shadowOffsetY</code>、<code>maxQuantity</code>、<code>maxLinesPerMode</code>、<code>shadowStyle</code>。另有两个条件键:<code>customFontFamily</code> 或 <code>customFontFilePath</code> 出现时走 <code>erika_presenter_set_danmaku_font</code>,<code>blockWordsJson</code> 出现时走 <code>erika_presenter_set_danmaku_block_words_json</code>。</p>
 
     <h3>状态查询</h3>
