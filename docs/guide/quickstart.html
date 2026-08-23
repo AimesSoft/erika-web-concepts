@@ -72,7 +72,7 @@
       <table>
         <thead><tr><th>产物归档</th><th>包含内容</th><th>支持架构</th></tr></thead>
         <tbody>
-          <tr><td class="m">CErika.xcframework.zip</td><td>Apple 统一框架（macOS / iOS / tvOS）</td><td>arm64 / x86_64</td></tr>
+          <tr><td class="m">erika-swift-core-0.1.7.xcframework.zip</td><td>Apple XCFramework 核心运行时（macOS / iOS / tvOS）</td><td>arm64 / x86_64</td></tr>
           <tr><td class="m">erika-capi-macos-universal.zip</td><td>liberika_capi.dylib / .a</td><td>arm64 / x86_64</td></tr>
           <tr><td class="m">erika-capi-windows-x64.zip</td><td>erika_capi.dll / .lib</td><td>x86_64</td></tr>
           <tr><td class="m">erika-capi-android.zip</td><td>4 个 ABI 的 so 库</td><td>arm64-v8a / armeabi-v7a / x86_64 / x86</td></tr>
@@ -92,7 +92,8 @@
     <div class="code">
       <p class="lbl">lib/main.dart</p>
 <pre><span class="k">final</span> player = ErikaPlayer();
-<span class="k">await</span> player.open(<span class="s">'/path/to/video.mp4'</span>, play: <span class="k">true</span>);</pre>
+<span class="k">await</span> player.open(<span class="s">'/path/to/video.mp4'</span>);
+<span class="k">await</span> player.play();</pre>
     </div>
     <p>插件覆盖 macOS / iOS / tvOS / Windows / Android / HarmonyOS 六个平台，详见 <a href="flutter.html">Flutter 嵌入指南</a>。</p>
   </section>
@@ -102,13 +103,13 @@
     <p>在 Xcode 项目中添加 SwiftPM 依赖 <code>https://github.com/AimesSoft/ErikaSwift</code>，通过 Metal 渲染与系统硬解快速起步：</p>
     <div class="code">
       <p class="lbl">Swift 示例</p>
-<pre><span class="k">import</span> ErikaSwift
+<pre><span class="k">import</span> Erika
 
-<span class="k">let</span> player = ErikaPlayer()
+<span class="k">let</span> player = <span class="k">try</span> ErikaPlayer()
 <span class="k">try</span> player.open(<span class="s">"https://example.com/video.mp4"</span>)
 <span class="k">try</span> player.play()</pre>
     </div>
-    <p>详细的 SwiftUI 图层包装与生命周期见 <a href="swift.html">Swift 接入指南</a>。</p>
+    <p>原生视图 <code>ErikaPlayerView</code> 与生命周期详见 <a href="swift.html">Swift 接入指南</a>。</p>
   </section>
 
   <section id="ohpm">

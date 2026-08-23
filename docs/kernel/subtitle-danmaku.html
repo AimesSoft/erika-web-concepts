@@ -133,23 +133,23 @@
         <tbody>
           <tr><td class="m">content<br><span class="en">(text, c)</span></td><td class="k">String</td><td class="m">—</td><td>弹幕正文。缺失或仅含空白字符的条目会被自动跳过。</td></tr>
           <tr><td class="m">time<br><span class="en">(t)</span></td><td class="k">Number / String</td><td class="m">0.0</td><td>弹幕呈现时间（秒），支持浮点秒数（如 <code>12.45</code>）。</td></tr>
-          <tr><td class="m">type<br><span class="en">(mode, y)</span></td><td class="k">String / Number</td><td class="m">"scroll"</td><td>弹幕类型：<code>scroll</code> / <code>1</code>（滚动）、<code>bottom</code> / <code>4</code>（底部固定）、<code>top</code> / <code>5</code>（顶部固定）、<code>reverse</code> / <code>6</code>（逆向滚动）、<code>special</code> / <code>7</code>（高级特殊）。亦可使用数值字段 <code>type_code</code> / <code>mode_code</code>。</td></tr>
-          <tr><td class="m">color<br><span class="en">(r)</span></td><td class="k">Number / String</td><td class="m">白色</td><td>弹幕颜色：支持十进制 RGB 整数（如 <code>16777215</code>）、十六进制字符串（如 <code>"#FFFFFF"</code> 或 <code>"#FFF"</code>）或 CSS <code>rgb(255,255,255)</code>。</td></tr>
-          <tr><td class="m">font_size<br><span class="en">(fontSize, size, s)</span></td><td class="k">Number / String</td><td class="m">全局默认 (25)</td><td>自定义字号（单位为逻辑点）。</td></tr>
+          <tr><td class="m">type<br><span class="en">(mode, y)</span></td><td class="k">String / Number</td><td class="m">"scroll"</td><td>弹幕类型：<code>scroll</code> / <code>1</code>（滚动）、<code>bottom</code> / <code>4</code>（底部固定）、<code>top</code> / <code>5</code>（顶部固定）、<code>reverse</code> / <code>6</code>（逆向滚动）、<code>special</code> / <code>7</code>（高级特殊，当前解析后不进入布局渲染）。亦可使用数值字段 <code>type_code</code> / <code>mode_code</code>。</td></tr>
+          <tr><td class="m">color<br><span class="en">(r)</span></td><td class="k">Number / String</td><td class="m">白色</td><td>弹幕颜色：支持十进制 RGB 整数（如 <code>16777215</code>）、完整的 <code>#RRGGBB</code> 十六进制字符串（如 <code>"#FFFFFF"</code>）或 CSS <code>rgb(r,g,b)</code>。注：不应使用 <code>#FFF</code> 等 3 位缩写（会按 16 进制直接解析为 <code>0x000FFF</code>）。</td></tr>
+          <tr><td class="m">font_size<br><span class="en">(fontSize, size, s)</span></td><td class="k">Number / String</td><td class="m">25.0</td><td>源参考字号（点）。最终呈现字号还会相对全局配置与表面 scale 缩放。</td></tr>
           <tr><td class="m">opacity<br><span class="en">(alpha, a)</span></td><td class="k">Number / String</td><td class="m">1.0</td><td>自定义不透明度（<code>0.0</code> ~ <code>1.0</code>）。</td></tr>
-          <tr><td class="m">is_me<br><span class="en">(isMe, self, mine)</span></td><td class="k">Boolean / Number</td><td class="m">false</td><td>是否为当前用户自发弹幕（优先展示与样式增强）。</td></tr>
-          <tr><td class="m">id</td><td class="k">u64 / String</td><td class="m">顺序分配</td><td>业务 ID。支持任意大整数或十进制字符串。</td></tr>
+          <tr><td class="m">is_me<br><span class="en">(isMe, self, mine)</span></td><td class="k">Boolean / Number</td><td class="m">false</td><td>是否为当前用户自发弹幕（具备布局排版优先权，避免被防堆叠策略过滤）。</td></tr>
+          <tr><td class="m">id</td><td class="k">u64 / String</td><td class="m">顺序分配</td><td>业务 ID。支持 <code>u64</code> 范围内的无符号整数或十进制字符串；<code>0</code> 视为未提供。</td></tr>
         </tbody>
       </table>
     </div>
 
-    <p>核心规范与行为约定：</p>
+    <p>解析与行为约定：</p>
     <ul class="body">
-      <li><b><code>id</code> 可省略：</b> 省略时 Erika 会按其在整份输入中的自然位置顺序分配序号。</li>
-      <li><b>精确 <code>u64</code> 整数：</b> 接受原生的 64 位无符号整数或十进制字符串（如 <code>"18446744073709551615"</code>），内核在解析阶段直接按精确整数处理，杜绝浮点双精度精度丢失。</li>
-      <li><b>业务 ID 与布局解耦：</b> 业务 ID 允许很大、重复或在多轨合并时产生跨源冲突。调用方<b>不应拼接 track ID</b>，也<b>不需要为了排版唯一性而合成特殊 ID</b>。</li>
-      <li><b>跨滑窗连贯性保证：</b> 弹幕会话（Session）在合并多轨后会为当前版本独立生成内部布局身份。连续时间滑窗会严格继承历史准入和轨道分配决定，对外承诺<b>“弹幕不会在滑窗刷新后半途出现或换轨”</b>。</li>
-      <li><b>未知字段安全忽略：</b> 携带 <code>cid</code>、<code>danmakuId</code>、<code>user_hash</code> 等业务私有字段的标准数据对象可直接传入，无需调用方预先清洗。</li>
+      <li><b><code>id</code> 可省略：</b> 省略、为 0、非法或越界时，Erika 会按其在整份输入中的自然位置顺序分配序号。</li>
+      <li><b>精确 <code>u64</code> 解析：</b> 支持 <code>0</code> 到 <code>18446744073709551615</code>（<code>u64::MAX</code>）范围内的无符号整数或十进制字符串，解析时不经过浮点转换，杜绝 JS/JSON 双精度浮点精度截断。</li>
+      <li><b>业务 ID 与布局身份解耦：</b> 业务 ID 允许重复或在多轨合并时产生跨源冲突。调用方<b>不应拼接 track ID</b>，也<b>不需要为了排版唯一性而合成特殊 ID</b>。</li>
+      <li><b>跨滑窗连贯性保证：</b> 弹幕会话在多轨合并后为当前内容版本独立分配内部布局身份。在连续同一会话中，连续时间滑窗会严格继承历史准入和轨道分配决定，对外承诺<b>“弹幕不会在滑窗刷新后半途出现或换轨”</b>（viewport 尺寸变化、时间线内容变更或布局配置调整时除外）。</li>
+      <li><b>容错机制：</b> 根节点格式错误直接返回失败；单条 item 若缺少正文或正文为空白会被跳过，不中断整批解析；非法可选字段回退为默认值；未知业务字段（如 <code>cid</code>、<code>danmakuId</code>）安全忽略。</li>
     </ul>
 
     <div class="code">

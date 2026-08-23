@@ -146,6 +146,23 @@
 @Component
 <span class="k">struct</span> VideoPlayerPage {
   <span class="k">private readonly</span> controller: ErikaSurfaceController = <span class="k">new</span> ErikaSurfaceController();
+  <span class="k">private</span> timerId: number = -1;
+
+  aboutToAppear(): <span class="k">void</span> {
+    <span class="c">/* 启动显示帧调度时钟 (60fps) */</span>
+    <span class="k">let</span> startTime = Date.now();
+    <span class="k">this</span>.timerId = setInterval(() =&gt; {
+      <span class="k">const</span> nowSeconds = (Date.now() - startTime) / 1000.0;
+      <span class="k">this</span>.controller.renderFrame(nowSeconds);
+    }, 16);
+  }
+
+  aboutToDisappear(): <span class="k">void</span> {
+    <span class="k">if</span> (<span class="k">this</span>.timerId !== -1) {
+      clearInterval(<span class="k">this</span>.timerId);
+      <span class="k">this</span>.timerId = -1;
+    }
+  }
 
   build() {
     Column() {

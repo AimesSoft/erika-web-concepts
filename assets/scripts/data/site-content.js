@@ -68,7 +68,7 @@ app.siteContent = {
         label: '预编译产物',
         language: 'SHELL',
         code: `# github.com/AimesSoft/Erika/releases
-CErika.xcframework.zip
+erika-swift-core-0.1.7.xcframework.zip
 erika-capi-macos-universal.zip
 erika-capi-windows-x64.zip
 erika-capi-android.zip
@@ -86,19 +86,20 @@ erika-capi-openharmony-arm64.zip`,
         code: `import 'package:erika_flutter/erika_flutter.dart';
 
 final player = ErikaPlayer();
-await player.open('/path/to/video.mp4', play: true);
+await player.open('/path/to/video.mp4');
+await player.play();
 
 // 放入 Widget 树
-ErikaWindowOverlayVideoView(player: player)`,
+ErikaVideoView(player: player)`,
         note: '已发布到 pub.dev：flutter pub add erika_flutter。',
       },
       {
         id: 'swift',
         label: 'Swift · SwiftPM',
         language: 'SWIFT',
-        code: `import ErikaSwift
+        code: `import Erika
 
-let player = ErikaPlayer()
+let player = try ErikaPlayer()
 try player.open("https://example.com/video.mp4")
 try player.play()`,
         note: '在 Xcode 中添加 Package: https://github.com/AimesSoft/ErikaSwift',

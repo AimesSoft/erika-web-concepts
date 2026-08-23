@@ -102,12 +102,14 @@
 <span class="k">#include</span> <span class="s">&lt;stdint.h&gt;</span>
 <span class="k">#include</span> <span class="s">"erika.h"</span>
 
-<span class="c">/* 辅助函数：安全检查并打印错误 */</span>
-<span class="k">static void</span> check_status(ErikaStatus status, <span class="k">const char</span> *action) {
-    <span class="k">if</span> (status != ErikaStatus_Ok && status != ErikaStatus_NoEvent) {
-        <span class="k">char</span> *msg = erika_last_error_message();
-        fprintf(stderr, <span class="s">"[Erika Error] %s failed (%d): %s\n"</span>, action, status, msg ? msg : <span class="s">"unknown"</span>);
-        <span class="k">if</span> (msg) erika_string_free(msg);
+<span class="c">/* 辅助函数：读取并打印线程局部错误信息 */</span>
+<span class="k">static void</span> print_last_error(<span class="k">const char</span> *action, ErikaStatus status) {
+    <span class="k">char</span> *msg = erika_last_error_message();
+    fprintf(stderr, <span class="s">"[Erika Error] %s failed (status=%d): %s
+"</span>,
+            action, status, msg ? msg : <span class="s">"unknown"</span>);
+    <span class="k">if</span> (msg) {
+        erika_string_free(msg);
     }
 }
 
@@ -115,42 +117,62 @@
     <span class="c">/* 1. 创建 Presenter 句柄 */</span>
     ErikaPresenterHandle *p = erika_presenter_create();
     <span class="k">if</span> (!p) {
-        fprintf(stderr, <span class="s">"创建 Erika Presenter 失败\n"</span>);
+        fprintf(stderr, <span class="s">"创建 Erika Presenter 失败
+"</span>);
         <span class="k">return</span>;
     }
 
     <span class="c">/* 2. 绑定原生渲染表面 (以 Apple CAMetalLayer 为例) */</span>
     ErikaStatus st = erika_presenter_attach_metal_layer(
         p, (uint64_t)(uintptr_t)metal_layer, pixel_w, pixel_h, scale);
-    check_status(st, <span class="s">"attach_metal_layer"</span>);
+    <span class="k">if</span> (st != ErikaStatus_Ok) {
+        print_last_error(<span class="s">"attach_metal_layer"</span>, st);
+        erika_presenter_destroy(p);
+        <span class="k">return</span>;
+    }
 
-    <span class="c">/* 3. 同步打开媒体并就绪 */</span>
+    <span class="c">/* 3. 同步打开媒体（完成流探测与轨道解析，进入 Ready 状态） */</span>
     st = erika_presenter_open(p, <span class="s">"https://example.com/video.mp4"</span>);
-    check_status(st, <span class="s">"open"</span>);
+    <span class="k">if</span> (st != ErikaStatus_Ok) {
+        print_last_error(<span class="s">"open"</span>, st);
+        erika_presenter_detach_surface(p);
+        erika_presenter_destroy(p);
+        <span class="k">return</span>;
+    }
 
-    <span class="c">/* 4. 启动异步解码与播放 */</span>
+    <span class="c">/* 4. 启动异步解码与播放呈现 */</span>
     st = erika_presenter_play(p);
-    check_status(st, <span class="s">"play"</span>);
+    <span class="k">if</span> (st != ErikaStatus_Ok) {
+        print_last_error(<span class="s">"play"</span>, st);
+    }
 
-    <span class="c">/* 5. 显示时钟回调循环 (通常由 CADisplayLink 或 CVDisplayLink 驱动) */</span>
-    <span class="k">double</span> host_time_seconds = 1000.0; <span class="c">/* 宿主显示时钟时间戳 */</span>
+    <span class="c">/* 5. 显示时钟驱动回调 (通常由 CADisplayLink / CVDisplayLink 驱动) */</span>
+    <span class="k">double</span> host_time_seconds = 1000.0;
     ErikaPresenterStats stats;
     erika_presenter_render_tick(p, host_time_seconds, &amp;stats);
 
-    <span class="c">/* 6. 消费事件 */</span>
+    <span class="c">/* 6. 消费事件 (ErikaEvent 是平铺结构) */</span>
     ErikaEvent ev;
     <span class="k">while</span> (erika_presenter_poll_event(p, &amp;ev) == ErikaStatus_Ok) {
         <span class="k">if</span> (ev.kind == ErikaEventKind_StateChanged) {
-            printf(<span class="s">"状态迁移: %d\n"</span>, ev.data.state_changed.state);
+            printf(<span class="s">"状态迁移: %d
+"</span>, ev.state);
         } <span class="k">else if</span> (ev.kind == ErikaEventKind_DurationChanged) {
-            printf(<span class="s">"媒体时长: %llu us\n"</span>, (unsigned long long)ev.data.duration_changed.duration_micros);
+            printf(<span class="s">"媒体总时长: %lld us
+"</span>, (<span class="k">long long</span>)ev.duration_micros);
+        } <span class="k">else if</span> (ev.kind == ErikaEventKind_PositionChanged) {
+            printf(<span class="s">"当前进度: %llu us
+"</span>, (<span class="k">unsigned long long</span>)ev.position_micros);
+        } <span class="k">else if</span> (ev.kind == ErikaEventKind_Error) {
+            print_last_error(<span class="s">"event_error"</span>, ev.status);
         }
     }
 
-    <span class="c">/* 7. 安全退出与资源释放：先 detach 表面，再 destroy 句柄 */</span>
+    <span class="c">/* 7. 安全退出：先分离渲染表面，再销毁句柄 */</span>
     erika_presenter_detach_surface(p);
     erika_presenter_destroy(p);
-}</pre>
+}
+</pre>
     </div>
   </section>
 

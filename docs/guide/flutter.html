@@ -83,7 +83,7 @@
         <thead><tr><th>视图组件</th><th>底层机制</th><th>推荐场景</th></tr></thead>
         <tbody>
           <tr><td class="k">ErikaWindowOverlayVideoView</td><td>原生子窗口 / 原生 Overlay 图层</td><td>macOS / iOS / tvOS / Windows 推荐，原生 60/120fps 极低开销与高帧率。</td></tr>
-          <tr><td class="k">ErikaVideoView</td><td>Flutter PlatformView / 外部纹理（TextureView / SurfaceProducer）</td><td>通用兼容模式，或需要被 Flutter 复杂控件（如透明遮罩、翻转动画）裁剪时使用。</td></tr>
+          <tr><td class="k">ErikaVideoView</td><td>统一跨平台视图：macOS/iOS PlatformView、Windows Overlay、Android TextureView/SurfaceView、HarmonyOS 外部纹理。</td><td><b>全部 6 平台可用</b>。开箱即用，支持被 Flutter 复杂控件（如圆角裁剪、半透明蒙层）正常层叠。</td></tr>
         </tbody>
       </table>
     </div>
@@ -109,12 +109,13 @@
   }
 
   <span class="k">Future</span>&lt;<span class="k">void</span>&gt; _initPlayer() <span class="k">async</span> {
-    <span class="c">/* 打开媒体并自动播放 */</span>
+    <span class="c">/* 1. 同步打开媒体（解析轨道与时长，状态置为 Ready） */</span>
     <span class="k">await</span> _player.open(
       <span class="s">'https://example.com/movie.mp4'</span>,
-      headers: {<span class="s">'User-Agent'</span>: <span class="s">'FlutterApp/1.0'</span>},
-      play: <span class="k">true</span>,
+      httpHeaders: {<span class="s">'User-Agent'</span>: <span class="s">'FlutterApp/1.0'</span>},
     );
+    <span class="c">/* 2. 启动异步解码与播放 */</span>
+    <span class="k">await</span> _player.play();
   }
 
   <span class="k">@override</span>
@@ -129,7 +130,7 @@
       body: Center(
         child: AspectRatio(
           aspectRatio: 16 / 9,
-          child: ErikaWindowOverlayVideoView(player: _player),
+          child: ErikaVideoView(player: _player),
         ),
       ),
     );
@@ -159,17 +160,17 @@
     <div class="code">
       <p class="lbl">监听播放器事件流</p>
 <pre>_player.events.listen((event) {
-  <span class="k">switch</span> (event) {
-    <span class="k">case</span> ErikaStateChangedEvent(:<span class="k">final</span> state):
-      debugPrint(<span class="s">'播放状态: $state'</span>);
-    <span class="k">case</span> ErikaDurationChangedEvent(:<span class="k">final</span> duration):
-      debugPrint(<span class="s">'总时长: $duration'</span>);
-    <span class="k">case</span> ErikaPositionChangedEvent(:<span class="k">final</span> position):
-      debugPrint(<span class="s">'当前进度: $position'</span>);
-    <span class="k">case</span> ErikaBufferingChangedEvent(:<span class="k">final</span> isBuffering):
-      debugPrint(<span class="s">'缓冲状态: $isBuffering'</span>);
-    <span class="k">case</span> ErikaErrorEvent(:<span class="k">final</span> message):
-      debugPrint(<span class="s">'播放错误: $message'</span>);
+  <span class="k">switch</span> (event.kind) {
+    <span class="k">case</span> ErikaEventKind.stateChanged:
+      debugPrint(<span class="s">'播放状态: ${event.state}'</span>);
+    <span class="k">case</span> ErikaEventKind.durationChanged:
+      debugPrint(<span class="s">'总时长: ${event.duration}'</span>);
+    <span class="k">case</span> ErikaEventKind.positionChanged:
+      debugPrint(<span class="s">'当前进度: ${event.position}'</span>);
+    <span class="k">case</span> ErikaEventKind.bufferingChanged:
+      debugPrint(<span class="s">'缓冲状态: ${event.buffering}'</span>);
+    <span class="k">case</span> ErikaEventKind.error:
+      debugPrint(<span class="s">'播放错误: ${event.error ?? event.message}'</span>);
     <span class="k">default</span>:
       <span class="k">break</span>;
   }

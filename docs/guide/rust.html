@@ -96,7 +96,7 @@ cargo build -p erika</pre>
     <span class="c">/* 2. 启动后台解码与时钟驱动 */</span>
     player.play()?;
 
-    <span class="c">/* 3. 播放控制 */</span>
+    <span class="c">/* 3. 播放控制：seek 向工作线程投递命令并立即返回 */</span>
     player.pause()?;
     player.seek(Duration::from_millis(1500))?;
     player.set_playback_rate(1.25)?;
@@ -109,10 +109,10 @@ cargo build -p erika</pre>
     </div>
     <p>方法语义要点：</p>
     <ul class="body">
-      <li><b><code>open</code> 是同步完成探测的。</b> <code>Player::open()</code> 会同步执行媒体解封装、流信息探测与轨道提取，并在返回 <code>Ok(())</code> 前发布 <code>DurationChanged</code>、<code>TracksChanged</code> 等初始事件并将状态置为 <code>Ready</code>。</li>
-      <li><b><code>play</code> 启动异步播放循环。</b> <code>play()</code> 唤醒后台工作线程开始解码与音视频时钟同步，播放状态迁移至 <code>Playing</code>。</li>
-      <li><b><code>seek</code> 传入 <code>std::time::Duration</code>。</b> 暂停期间 seek 会同步解码并更新目标位置附近的关键帧画面，播放时钟保持暂停。</li>
-      <li><b><code>close</code> 保证安全回收。</b> <code>close()</code> 等待后台解码线程安全退出后返回，之后可安全丢弃 <code>Player</code> 实例。</li>
+      <li><b><code>open</code> 是同步完成探测的：</b> <code>Player::open()</code> 会同步执行媒体解封装、流信息探测与轨道提取，并在返回 <code>Ok(())</code> 前发布 <code>DurationChanged</code>、<code>TracksChanged</code> 等初始事件并将状态置为 <code>Ready</code>。</li>
+      <li><b><code>play</code> 启动异步播放循环：</b> <code>play()</code> 唤醒后台工作线程开始解码与音视频时钟同步，播放状态迁移至 <code>Playing</code>。</li>
+      <li><b><code>seek</code> 是非阻塞投递：</b> <code>seek()</code> 将跳转目标时间投递至命令队列后立即返回，后台线程在暂停或播放状态下完成关键帧定位。</li>
+      <li><b><code>close</code> 保证安全回收：</b> <code>close()</code> 等待后台解码线程安全退出后返回，之后可安全丢弃 <code>Player</code> 实例。</li>
     </ul>
     <p><code>MediaRequest</code> 支持 HTTP(S) URL 与自定义请求头：</p>
     <div class="code">
@@ -166,7 +166,7 @@ player.open(request)?;</pre>
   </section>
 
   <section id="frames">
-    <h2>原始帧数据拉取<span class="jp">フレーム購読</span><a class="anchor" href="#frames">#</a></h2>
+    <h2>帧订阅与 Presenter 托管<span class="jp">フレーム購読</span><a class="anchor" href="#frames">#</a></h2>
     <p>自建渲染管线的 Rust 宿主可直接订阅解码后的数据帧：</p>
     <div class="code">
       <p class="lbl">订阅音视频与字幕帧</p>
@@ -182,7 +182,18 @@ player.open(request)?;</pre>
     <span class="c">/* audio_frame: PCM 采样数据与声道参数 */</span>
 }</pre>
     </div>
-    <p>帧订阅通道具备背压控制机制，队列满时会按照丢帧策略丢弃旧帧以保证播放流畅度。需要整套原生呈现与音频时钟的宿主，推荐直接使用 <code>PresenterRuntime</code>。</p>
+    <p>帧订阅通道具备背压控制机制，队列满时会丢弃当前待发送的新帧以保证播放流畅。需要内核托管整套 GPU 呈现（Metal / D3D11 / wgpu）与音频时钟的宿主，推荐直接使用 <code>PresenterRuntime</code>：</p>
+    <div class="code">
+      <p class="lbl">PresenterRuntime 托管呈现</p>
+<pre><span class="k">use</span> erika::presenter::{PresenterConfig, PresenterRuntime};
+
+<span class="k">let mut</span> presenter = PresenterRuntime::new(PresenterConfig::default())?;
+presenter.open(MediaRequest::new(<span class="s">"/path/to/video.mp4"</span>))?;
+presenter.play()?;
+
+<span class="c">/* 在显示时钟驱动回调中调用 */</span>
+<span class="k">let</span> stats = presenter.render_tick(host_time_seconds)?;</pre>
+    </div>
   </section>
 
   <section id="config">
@@ -193,6 +204,7 @@ player.open(request)?;</pre>
         <tbody>
           <tr><td class="m">name</td><td class="m">"Erika"</td><td>播放器实例名称，用于多实例日志标识。</td></tr>
           <tr><td class="m">event_channel_capacity</td><td class="m">1024</td><td>内部播放控制命令队列容量。</td></tr>
+          <tr><td class="m">playback</td><td class="m">PlaybackSessionConfig</td><td>解码器与播放会话底层配置（硬件加速偏好、缓冲深度等）。</td></tr>
           <tr><td class="m">renderer</td><td class="m">Auto</td><td>渲染后端偏好设置。</td></tr>
           <tr><td class="m">video_frame_queue_capacity</td><td class="m">3</td><td>视频输出帧队列缓冲深度。</td></tr>
           <tr><td class="m">audio_frame_queue_capacity</td><td class="m">192</td><td>音频输出帧队列深度。</td></tr>
