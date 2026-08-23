@@ -18,6 +18,7 @@
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
     <ul>
       <li><a href="quickstart.html" aria-current="page">快速开始</a></li>
+      <li><a href="swift.html">Swift 接入</a></li>
       <li><a href="rust.html">Rust 嵌入</a></li>
       <li><a href="c.html">C ABI 嵌入</a></li>
       <li><a href="flutter.html">Flutter 嵌入</a></li>
@@ -56,45 +57,59 @@
   <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>快速开始</p>
   <h1>快速开始</h1>
   <p class="kicker">Quickstart</p>
-  <p class="lead">Erika 尚未发布到 crates.io；Flutter 插件 <code>erika_flutter</code> 已发布到 pub.dev，OpenHarmony 原生 ArkTS 包 <code>erika</code> 已发布到 OHPM。接入方式包括 GitHub Releases 的预编译归档、以 git 依赖从源码构建、Flutter 项目经 pub.dev 安装插件，或 OpenHarmony 项目经 OHPM 安装。</p>
+  <p class="lead">Erika 提供了面向多种技术栈的接入方式：SwiftPM 包 <code>ErikaSwift</code>、Flutter 插件 <code>erika_flutter</code>、OpenHarmony ArkTS 原生包 <code>erika</code>、Rust 原生 crate 以及标准 C ABI 动态/静态库。</p>
 
   <ul class="meta-strip">
-    <li>预编译 <b>6 平台</b></li>
+    <li>预编译 <b>6 大平台</b></li>
     <li>源码 <b>Rust 1.92+</b></li>
-    <li>原生依赖 <b>静态链接</b></li>
+    <li>原生依赖 <b>静态封装</b></li>
   </ul>
 
-  <section id="prebuilt">
-    <h2>预编译产物<span class="jp">プリビルト</span><a class="anchor" href="#prebuilt">#</a></h2>
-    <p>GitHub Releases（<code>github.com/AimesSoft/Erika/releases</code>）按平台提供归档。原生依赖（FFmpeg、libass、FreeType、HarfBuzz、FriBidi、zlib、dav1d）已经以 <code>lgpl</code> profile 静态链接，除操作系统框架外自包含。</p>
-    <div class="tw">
-      <table>
-        <thead><tr><th>归档</th><th>内容</th></tr></thead>
-        <tbody>
-          <tr><td class="m">erika-capi-macos-universal.zip</td><td>liberika_capi.dylib / .a</td></tr>
-          <tr><td class="m">erika-capi-windows-x64.zip</td><td>erika_capi.dll / .dll.lib / .lib</td></tr>
-          <tr><td class="m">erika-capi-ios.zip</td><td>erika_capi.xcframework</td></tr>
-          <tr><td class="m">erika-capi-tvos.zip</td><td>erika_capi.xcframework</td></tr>
-          <tr><td class="m">erika-capi-android.zip</td><td>4 个 ABI 的库 + libc++_shared.so</td></tr>
-          <tr><td class="m">erika-capi-openharmony-arm64.zip</td><td>liberika_capi.so + N-API 桥</td></tr>
-        </tbody>
-      </table>
+  <section id="swift">
+    <h2>Swift / Apple 原生接入<span class="jp">Swift</span><a class="anchor" href="#swift">#</a></h2>
+    <p>在 Xcode 项目中添加 SwiftPM 依赖 <code>https://github.com/AimesSoft/ErikaSwift</code>，通过 Metal 渲染与系统硬解快速起步：</p>
+    <div class="code">
+      <p class="lbl">Swift 示例</p>
+<pre><span class="k">import</span> ErikaSwift
+
+<span class="k">let</span> player = ErikaPlayer()
+<span class="k">try</span> player.open(<span class="s">"https://example.com/video.mp4"</span>)
+<span class="k">try</span> player.play()</pre>
     </div>
-    <p>每个归档含 <code>include/erika.h</code>、许可证文本与记录 tag/commit 的 <code>MANIFEST.txt</code>。Linux 暂未发布。归档的消费方式见<a href="../project/releasing.html">发布与产物</a>。</p>
+    <p>详细的 SwiftUI 图层包装与生命周期见 <a href="swift.html">Swift 接入指南</a>。</p>
+  </section>
+
+  <section id="flutter">
+    <h2>Flutter 接入<span class="jp">Flutter</span><a class="anchor" href="#flutter">#</a></h2>
+    <div class="code">
+      <p class="lbl">pubspec.yaml</p>
+<pre>dependencies:
+  erika_flutter: ^0.1.7</pre>
+    </div>
+    <div class="code">
+      <p class="lbl">lib/main.dart</p>
+<pre><span class="k">final</span> player = ErikaPlayer();
+<span class="k">await</span> player.open(<span class="s">'/path/to/video.mp4'</span>, play: <span class="k">true</span>);</pre>
+    </div>
+    <p>插件覆盖 macOS / iOS / tvOS / Windows / Android / HarmonyOS 六个平台，详见 <a href="flutter.html">Flutter 嵌入指南</a>。</p>
+  </section>
+
+  <section id="ohpm">
+    <h2>OpenHarmony / ArkTS<span class="jp">OpenHarmony</span><a class="anchor" href="#ohpm">#</a></h2>
+    <p>通过 OHPM 安装原生 ArkTS 包，结合 <code>XComponent</code> 表面驱动播放：</p>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>ohpm install erika</pre>
+    </div>
+    <p>详细的 ArkTS 页面生命周期与帧调度参见 <a href="openharmony.html">OpenHarmony 接入指南</a>。</p>
   </section>
 
   <section id="rust">
     <h2>Rust 接入<span class="jp">Rust</span><a class="anchor" href="#rust">#</a></h2>
     <div class="code">
       <p class="lbl">Cargo.toml</p>
-<pre><span class="c"># 或使用预编译归档的 .a / .dylib 与 erika.h（经 FFI 调用）</span>
-[dependencies]
+<pre>[dependencies]
 erika = { git = <span class="s">"https://github.com/AimesSoft/Erika"</span>, tag = <span class="s">"v0.1.7"</span> }</pre>
-    </div>
-    <p>从源码构建前，先用 xtask 准备原生依赖：</p>
-    <div class="code">
-      <p class="lbl">shell</p>
-<pre>cargo run -p xtask -- deps build --all --profile lgpl</pre>
     </div>
     <div class="code">
       <p class="lbl">src/main.rs</p>
@@ -104,71 +119,58 @@ erika = { git = <span class="s">"https://github.com/AimesSoft/Erika"</span>, tag
 player.open(MediaRequest::new(<span class="s">"/path/to/video.mp4"</span>))?;
 player.play()?;</pre>
     </div>
-    <p>完整 API 见<a href="rust.html">Rust 嵌入</a>。</p>
+    <p>完整 API 与通道订阅见 <a href="rust.html">Rust 嵌入</a>。</p>
   </section>
 
   <section id="c">
-    <h2>C 接入<span class="jp">C ABI</span><a class="anchor" href="#c">#</a></h2>
-    <p>使用预编译归档中的 <code>erika.h</code> 与 <code>liberika_capi</code>。push 模型的最小示例：</p>
+    <h2>C / C++ ABI 接入<span class="jp">C ABI</span><a class="anchor" href="#c">#</a></h2>
+    <p>通过 <code>erika.h</code> 与预编译 <code>liberika_capi</code> 接入。推荐使用内核托管渲染与音频的 <code>ErikaPresenterHandle</code>：</p>
     <div class="code">
       <p class="lbl">main.c</p>
 <pre><span class="k">#include</span> <span class="s">"erika.h"</span>
 
 ErikaPresenterHandle *p = erika_presenter_create();
 erika_presenter_attach_metal_layer(p, (uint64_t)layer, w, h, scale);
-erika_presenter_open(p, <span class="s">"/path/to/video.mp4"</span>);
+erika_presenter_open(p, <span class="s">"https://example.com/video.mp4"</span>);
 erika_presenter_play(p);
 
-<span class="c">/* 每个显示帧 */</span>
+<span class="c">/* 在显示时钟回调中每帧驱动 */</span>
 ErikaPresenterStats stats;
 erika_presenter_render_tick(p, host_time, &amp;stats);</pre>
     </div>
-    <p><code>ErikaPresenterHandle</code> 由内核托管完整播放栈。宿主自行管理渲染循环时改用 <code>ErikaHandle</code> 拉取帧数据。完整对比与约定见<a href="c.html">C ABI 嵌入</a>。</p>
+    <p>完整规范与无头 <code>ErikaHandle</code> 对比见 <a href="c.html">C ABI 嵌入</a>。</p>
   </section>
 
-  <section id="flutter">
-    <h2>Flutter 接入<span class="jp">Flutter</span><a class="anchor" href="#flutter">#</a></h2>
-    <div class="code">
-      <p class="lbl">pubspec.yaml</p>
-<pre>dependencies:
-  erika_flutter: ^0.1.7   <span class="c"># 或 flutter pub add erika_flutter</span></pre>
+  <section id="prebuilt">
+    <h2>预编译二进制产物<span class="jp">プリビルト</span><a class="anchor" href="#prebuilt">#</a></h2>
+    <p>GitHub Releases（<code>github.com/AimesSoft/Erika/releases</code>）为各大平台提供预编译归档：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>产物归档</th><th>包含内容</th><th>支持架构</th></tr></thead>
+        <tbody>
+          <tr><td class="m">CErika.xcframework.zip</td><td>Apple 统一框架（macOS / iOS / tvOS）</td><td>arm64 / x86_64</td></tr>
+          <tr><td class="m">erika-capi-macos-universal.zip</td><td>liberika_capi.dylib / .a</td><td>arm64 / x86_64</td></tr>
+          <tr><td class="m">erika-capi-windows-x64.zip</td><td>erika_capi.dll / .lib</td><td>x86_64</td></tr>
+          <tr><td class="m">erika-capi-android.zip</td><td>4 个 ABI 的 so 库</td><td>arm64-v8a / armeabi-v7a / x86_64 / x86</td></tr>
+          <tr><td class="m">erika-capi-openharmony-arm64.zip</td><td>liberika_capi.so + N-API 模块</td><td>arm64</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="code">
-      <p class="lbl">shell</p>
-<pre><span class="k">export</span> ERIKA_FORCE_SOURCE_BUILD=1   <span class="c"># 默认下载预编译运行时；此变量改为从源码构建</span></pre>
-    </div>
-    <div class="code">
-      <p class="lbl">lib/main.dart</p>
-<pre><span class="k">final</span> player = ErikaPlayer();
-<span class="k">await</span> player.open(<span class="s">'/path/to/video.mp4'</span>);
-<span class="k">await</span> player.play();</pre>
-    </div>
-    <p>插件覆盖 macOS / iOS / tvOS / Windows / Android / HarmonyOS 六个目标。视图路径与完整 API 见<a href="flutter.html">Flutter 嵌入</a>。</p>
-  </section>
-
-  <section id="ohpm">
-    <h2>OpenHarmony / OHPM<span class="jp">OpenHarmony</span><a class="anchor" href="#ohpm">#</a></h2>
-    <p>原生 ArkTS 包 <code>erika</code> 0.1.7 已发布到 <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM</a>，目标为 OpenHarmony arm64，最低兼容 API 18。宿主通过 <code>XComponent</code> surface 使用 <code>ErikaPlayer</code>。</p>
-    <div class="code">
-      <p class="lbl">shell</p>
-<pre>ohpm install erika</pre>
-    </div>
-    <p>完整的 ArkTS 宿主代码、<code>XComponent</code> 表面生命周期和 <code>renderTick()</code> 帧调度见 <a href="openharmony.html">OpenHarmony 接入指南</a>；包的发布信息见 <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM 详情页</a>。</p>
   </section>
 
   <section id="platforms">
-    <h2>平台支持<span class="jp">対応環境</span><a class="anchor" href="#platforms">#</a></h2>
+    <h2>平台矩阵<span class="jp">対応環境</span><a class="anchor" href="#platforms">#</a></h2>
     <div class="tw">
       <table>
-        <thead><tr><th>平台</th><th>最低</th><th>解码</th><th>渲染</th><th>音频</th><th>状态</th></tr></thead>
+        <thead><tr><th>平台</th><th>最低版本</th><th>硬件解码</th><th>渲染管线</th><th>音频输出</th><th>支持状态</th></tr></thead>
         <tbody>
-          <tr><td class="p">macOS</td><td class="m">14</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">CoreAudio</td><td class="st ok">可用</td></tr>
-          <tr><td class="p">iOS</td><td class="m">16</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">AudioQueue</td><td class="st ok">可用</td></tr>
-          <tr><td class="p">tvOS</td><td class="m">13</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">AudioQueue</td><td class="st ok">可用</td></tr>
-          <tr><td class="p">Windows</td><td class="m">10</td><td class="m">D3D11VA</td><td class="m">Direct3D 11</td><td class="m">WASAPI</td><td class="st ok">可用</td></tr>
-          <tr><td class="p">Android</td><td class="m">8</td><td class="m">MediaCodec / 软解</td><td class="m">wgpu · Vulkan+GLES</td><td class="m">AAudio</td><td class="st ok">可用</td></tr>
-          <tr><td class="p">HarmonyOS</td><td class="m">API 18</td><td class="m">AVCodec / 软解</td><td class="m">wgpu · Vulkan</td><td class="m">OHAudio</td><td class="st ok">可用</td></tr>
-          <tr><td class="p">Linux</td><td class="m">—</td><td class="m">—</td><td class="m">wgpu</td><td class="m">—</td><td class="st wait">规划中</td></tr>
+          <tr><td class="p">macOS</td><td class="m">macOS 11</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">CoreAudio</td><td class="st ok">正式支持</td></tr>
+          <tr><td class="p">iOS</td><td class="m">iOS 13</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">AudioQueue</td><td class="st ok">正式支持</td></tr>
+          <tr><td class="p">tvOS</td><td class="m">tvOS 13</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">AudioQueue</td><td class="st ok">正式支持</td></tr>
+          <tr><td class="p">Windows</td><td class="m">Windows 10</td><td class="m">D3D11VA</td><td class="m">Direct3D 11</td><td class="m">WASAPI</td><td class="st ok">正式支持</td></tr>
+          <tr><td class="p">Android</td><td class="m">Android 8.0</td><td class="m">MediaCodec</td><td class="m">wgpu (Vulkan / GLES)</td><td class="m">AAudio</td><td class="st ok">正式支持</td></tr>
+          <tr><td class="p">OpenHarmony</td><td class="m">API 18</td><td class="m">AVCodec</td><td class="m">wgpu (Vulkan)</td><td class="m">OHAudio</td><td class="st ok">正式支持</td></tr>
+          <tr><td class="p">Linux</td><td class="m">—</td><td class="m">VAAPI</td><td class="m">wgpu (Vulkan)</td><td class="m">PipeWire</td><td class="st wait">规划中</td></tr>
         </tbody>
       </table>
     </div>
@@ -182,29 +184,10 @@ erika_presenter_render_tick(p, host_time, &amp;stats);</pre>
 
   <nav class="pager">
     <a href="../index.html"><span class="dir">Prev</span>文档目录</a>
-    <a class="nx" href="rust.html"><span class="dir">Next</span>Rust 嵌入</a>
+    <a class="nx" href="swift.html"><span class="dir">Next</span>Swift 接入</a>
   </nav>
 </main>
 
 </div>
-<script>
-(function () {
-  document.querySelectorAll('.code').forEach(function (box) {
-    if (!box.querySelector('pre')) return;
-    var btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'copy'; btn.textContent = '复制';
-    box.appendChild(btn);
-    btn.addEventListener('click', function () {
-      var pre = box.querySelector('pre');
-      if (!pre || !navigator.clipboard) return;
-      navigator.clipboard.writeText(pre.innerText).then(function () {
-        var old = btn.textContent;
-        btn.textContent = '已复制';
-        setTimeout(function () { btn.textContent = old; }, 1400);
-      });
-    });
-  });
-})();
-</script>
 </body>
 </html>

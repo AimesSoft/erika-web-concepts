@@ -18,6 +18,7 @@
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
     <ul>
       <li><a href="quickstart.html">快速开始</a></li>
+      <li><a href="swift.html">Swift 接入</a></li>
       <li><a href="rust.html">Rust 嵌入</a></li>
       <li><a href="c.html">C ABI 嵌入</a></li>
       <li><a href="flutter.html" aria-current="page">Flutter 嵌入</a></li>
@@ -56,88 +57,124 @@
   <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Flutter 嵌入</p>
   <h1>Flutter 嵌入</h1>
   <p class="kicker">Flutter Embedding</p>
-  <p class="lead">插件 <code>erika_flutter</code> 覆盖 macOS / iOS / tvOS / Windows / Android / HarmonyOS 六个目标。播放器 API 与原生侧一一对应，视图提供两条路径：platform view 用于兼容与诊断，原生 window overlay 是 macOS / iOS / tvOS 的推荐路径。</p>
+  <p class="lead"><code>erika_flutter</code> 是 Erika 的官方 Flutter 插件，支持 macOS、iOS、tvOS、Windows、Android 与 HarmonyOS 六个平台。插件提供完整的播放控制、多轨管理、弹幕与字幕渲染、ArtCNN 超分以及两种视图呈现方案。</p>
 
   <ul class="meta-strip">
-    <li>目标 <b>6</b> 平台</li>
-    <li>视图路径 <b>2</b> 条</li>
-    <li>Dart SDK <b>≥3.5</b></li>
+    <li>目标平台 <b>6</b> 个</li>
+    <li>视图组件 <b>2</b> 款</li>
+    <li>Dart SDK <b>≥ 3.5</b></li>
   </ul>
 
   <section id="setup">
-    <h2>依赖<span class="jp">依存</span><a class="anchor" href="#setup">#</a></h2>
+    <h2>依赖与安装<span class="jp">インストール</span><a class="anchor" href="#setup">#</a></h2>
     <div class="code">
-      <p class="lbl">shell</p>
-<pre>flutter pub add erika_flutter   <span class="c"># 等价于 pubspec.yaml 加 erika_flutter: ^0.1.7</span></pre>
+      <p class="lbl">pubspec.yaml</p>
+<pre>dependencies:
+  erika_flutter: ^0.1.7</pre>
     </div>
-    <p>环境要求：Dart SDK ≥ 3.5.0，Flutter ≥ 3.24.0。构建时默认下载与版本匹配的预编译原生运行时；设置 <code>ERIKA_FORCE_SOURCE_BUILD=1</code>（配合 <code>ERIKA_REPO_ROOT</code> 指向仓库检出）改为从源码构建。仍在用 git 依赖的宿主可继续引用 <code>github.com/AimesSoft/Erika</code> 的 <code>packages/erika_flutter</code> 路径。Android 按 ABI 只下载所需归档，见<a href="../project/releasing.html">发布与产物</a>。</p>
-  </section>
-
-  <section id="player">
-    <h2>播放器 API<span class="jp">プレイヤー API</span><a class="anchor" href="#player">#</a></h2>
-    <div class="code">
-      <p class="lbl">lib/main.dart</p>
-<pre><span class="k">final</span> player = ErikaPlayer();
-<span class="k">await</span> player.open(<span class="s">'/path/to/video.mp4'</span>);
-<span class="k">await</span> player.play();
-
-<span class="k">await</span> player.seek(Duration(seconds: 30));
-<span class="k">await</span> player.setPlaybackRate(1.25);
-<span class="k">await</span> player.setVolume(0.8);
-
-<span class="k">await</span> player.dispose();</pre>
-    </div>
-    <p>方法与 C ABI 的 presenter 面一一对应：</p>
-    <div class="tw">
-      <table>
-        <thead><tr><th>分组</th><th>方法</th></tr></thead>
-        <tbody>
-          <tr><td class="k">播放控制</td><td class="m">open / play / pause / stop / close / seek / setPlaybackRate / setVolume</td></tr>
-          <tr><td class="k">字幕</td><td class="m">addExternalSubtitle / removeSubtitleTrack / selectSubtitleTrack / setSubtitleScale / setSubtitleStyle / registerSubtitleMemoryFont / selectSubtitleMemoryFonts / clearSubtitleMemoryFonts / getSubtitleMemoryFontStatus</td></tr>
-          <tr><td class="k">弹幕</td><td class="m">loadDanmakuFile / loadDanmakuJson / addDanmakuTrackFile / addDanmakuTrackJson / removeDanmakuTrack / setDanmakuTrackEnabled / setDanmakuTrackOffset / setDanmakuGlobalOffset / clearDanmaku / setDanmakuEnabled / setDanmakuConfig</td></tr>
-          <tr><td class="k">输出</td><td class="m">setUpscaler / getUpscalerStatus / getOutputStatus / getResourceStatus / getPresenterStats / setDebugHudEnabled</td></tr>
-          <tr><td class="k">系统媒体</td><td class="m">setMediaMetadata / setSystemMediaNavigation</td></tr>
-          <tr><td class="k">视图</td><td class="m">attachView / detachView / createTextureSurface / resizeTextureSurface / releaseTextureSurface / attachWindowOverlay / detachWindowOverlay / setWindowOverlayFrame</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p><code>ErikaMediaMetadata</code> 携带标题、艺术家、专辑与封面，经系统媒体控制（Now Playing）呈现。后台音频播放时挂起视频解码，见<a href="../project/changelog.html">更新日志</a> 0.1.5。</p>
+    <p>运行 <code>flutter pub get</code> 即可。构建时插件会自动下载与当前平台匹配的预编译原生二进制。若需要从本地源码构建，设置环境变量 <code>ERIKA_FORCE_SOURCE_BUILD=1</code> 并指定 <code>ERIKA_REPO_ROOT</code> 即可。</p>
   </section>
 
   <section id="views">
-    <h2>视图路径<span class="jp">ビュー</span><a class="anchor" href="#views">#</a></h2>
+    <h2>视图选择<span class="jp">ビューの選択</span><a class="anchor" href="#views">#</a></h2>
+    <p>插件提供两个渲染视图组件：</p>
     <div class="tw">
       <table>
-        <thead><tr><th>组件</th><th>机制</th><th>适用</th></tr></thead>
+        <thead><tr><th>视图组件</th><th>底层机制</th><th>推荐场景</th></tr></thead>
         <tbody>
-          <tr><td class="k">ErikaVideoView</td><td>Flutter platform view（Android 为原生 <code>TextureView</code> / <code>SurfaceView</code>）或外部纹理（HarmonyOS）。</td><td>兼容与诊断路径，所有平台可用。</td></tr>
-          <tr><td class="k">ErikaWindowOverlayVideoView</td><td>原生 window overlay（Apple / Windows）。</td><td>macOS / iOS / tvOS 推荐路径，完整播放器 UI。</td></tr>
+          <tr><td class="k">ErikaWindowOverlayVideoView</td><td>原生子窗口 / 原生 Overlay 图层</td><td>macOS / iOS / tvOS / Windows 推荐，原生 60/120fps 极低开销与高帧率。</td></tr>
+          <tr><td class="k">ErikaVideoView</td><td>Flutter PlatformView / 外部纹理（TextureView / SurfaceProducer）</td><td>通用兼容模式，或需要被 Flutter 复杂控件（如透明遮罩、翻转动画）裁剪时使用。</td></tr>
         </tbody>
       </table>
     </div>
     <div class="code">
-      <p class="lbl">推荐：原生 overlay 路径</p>
-<pre>ErikaWindowOverlayVideoView(player: player)</pre>
+      <p class="lbl">基础使用示例</p>
+<pre><span class="k">import</span> <span class="s">'package:flutter/material.dart'</span>;
+<span class="k">import</span> <span class="s">'package:erika_flutter/erika_flutter.dart'</span>;
+
+<span class="k">class</span> VideoScreen <span class="k">extends</span> StatefulWidget {
+  <span class="k">const</span> VideoScreen({<span class="k">super</span>.key});
+
+  <span class="k">@override</span>
+  State&lt;VideoScreen&gt; createState() =&gt; _VideoScreenState();
+}
+
+<span class="k">class</span> _VideoScreenState <span class="k">extends</span> State&lt;VideoScreen&gt; {
+  <span class="k">final</span> _player = ErikaPlayer();
+
+  <span class="k">@override</span>
+  <span class="k">void</span> initState() {
+    <span class="k">super</span>.initState();
+    _initPlayer();
+  }
+
+  <span class="k">Future</span>&lt;<span class="k">void</span>&gt; _initPlayer() <span class="k">async</span> {
+    <span class="c">/* 打开媒体并自动播放 */</span>
+    <span class="k">await</span> _player.open(
+      <span class="s">'https://example.com/movie.mp4'</span>,
+      headers: {<span class="s">'User-Agent'</span>: <span class="s">'FlutterApp/1.0'</span>},
+      play: <span class="k">true</span>,
+    );
+  }
+
+  <span class="k">@override</span>
+  <span class="k">void</span> dispose() {
+    _player.dispose();
+    <span class="k">super</span>.dispose();
+  }
+
+  <span class="k">@override</span>
+  Widget build(BuildContext context) {
+    <span class="k">return</span> Scaffold(
+      body: Center(
+        child: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: ErikaWindowOverlayVideoView(player: _player),
+        ),
+      ),
+    );
+  }
+}</pre>
     </div>
-    <div class="code">
-      <p class="lbl">兼容 / 诊断：platform view 路径</p>
-<pre>ErikaVideoView(player: player)</pre>
+  </section>
+
+  <section id="apis">
+    <h2>API 能力概览<span class="jp">機能一覧</span><a class="anchor" href="#apis">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>类别</th><th>方法 / 属性</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="k">播放控制</td><td class="m">open / play / pause / stop / close / seek / setPlaybackRate / setVolume</td><td>核心播放与进度、音量、倍速控制。</td></tr>
+          <tr><td class="k">音轨与字幕</td><td class="m">tracks / selectAudioTrack / selectSubtitleTrack / addExternalSubtitle / removeSubtitleTrack / setSubtitleStyle / registerSubtitleMemoryFont</td><td>音轨切换、外挂 SRT/ASS 字幕、字体样式与内存字体注入。</td></tr>
+          <tr><td class="k">弹幕系统</td><td class="m">loadDanmakuJson / loadDanmakuFile / addDanmakuTrackFile / danmakuTracks / setDanmakuEnabled / setDanmakuConfig / clearDanmaku</td><td>DFM+ 碰撞布局、多轨弹幕、屏蔽词与字体大小/透明度调节。</td></tr>
+          <tr><td class="k">图像与超分</td><td class="m">setUpscaler / getUpscalerStatus / screenshot / getPresenterStats / setDebugHudEnabled</td><td>ArtCNN 神经网络 2× 超分、无缝截图与实时渲染性能统计。</td></tr>
+          <tr><td class="k">事件流</td><td class="m">events (Stream&lt;ErikaPlayerEvent&gt;)</td><td>监听播放状态、缓冲、时长变化与报错。</td></tr>
+        </tbody>
+      </table>
     </div>
-    <p>desktop 的 overlay API 支持多窗口与次窗口定位，播放器在宿主窗口间迁移时保持表面、可见性、代际与 aspect-fit 状态。</p>
   </section>
 
   <section id="events">
-    <h2>事件<span class="jp">イベント</span><a class="anchor" href="#events">#</a></h2>
-    <p>播放器状态经 <code>ErikaPlayerEvent</code> 发布，与原生事件一一对应：状态、时长、位置、轨道、缓冲、视频参数、解码器、音频输出、错误等。事件载荷类型（<code>ErikaTrackInfo</code>、<code>ErikaVideoParams</code>、<code>ErikaVideoDecoderInfo</code> 等）镜像 <code>erika.h</code> 的结构体。</p>
-  </section>
-
-  <section id="platforms">
-    <h2>平台差异<span class="jp">プラットフォーム</span><a class="anchor" href="#platforms">#</a></h2>
-    <ul class="body">
-      <li>Android 与 HarmonyOS 的 surface 策略不同：Android 使用 Flutter platform view 内的原生 <code>TextureView</code>（SDR 路径，HDR 路径改用 <code>SurfaceView</code>），HarmonyOS 使用 Flutter 外部纹理（<code>TextureRegistry</code>）。插件内部按平台选择，宿主代码一致。</li>
-      <li>tvOS 插件实现了 window overlay（与 iOS 同族的原生 <code>ErikaWindowOverlayView</code>）；Dart 侧没有独立的 <code>TargetPlatform.tvOS</code>，沿用 iOS 平台语义。</li>
-      <li>系统媒体控制（Now Playing）在 iOS、tvOS、macOS、Android、Windows、HarmonyOS 六平台可用。</li>
-    </ul>
+    <h2>事件监听<span class="jp">イベント購読</span><a class="anchor" href="#events">#</a></h2>
+    <div class="code">
+      <p class="lbl">监听播放器事件流</p>
+<pre>_player.events.listen((event) {
+  <span class="k">switch</span> (event) {
+    <span class="k">case</span> ErikaStateChangedEvent(:<span class="k">final</span> state):
+      debugPrint(<span class="s">'播放状态: $state'</span>);
+    <span class="k">case</span> ErikaDurationChangedEvent(:<span class="k">final</span> duration):
+      debugPrint(<span class="s">'总时长: $duration'</span>);
+    <span class="k">case</span> ErikaPositionChangedEvent(:<span class="k">final</span> position):
+      debugPrint(<span class="s">'当前进度: $position'</span>);
+    <span class="k">case</span> ErikaBufferingChangedEvent(:<span class="k">final</span> isBuffering):
+      debugPrint(<span class="s">'缓冲状态: $isBuffering'</span>);
+    <span class="k">case</span> ErikaErrorEvent(:<span class="k">final</span> message):
+      debugPrint(<span class="s">'播放错误: $message'</span>);
+    <span class="k">default</span>:
+      <span class="k">break</span>;
+  }
+});</pre>
+    </div>
   </section>
 
   <footer class="doc-foot">
@@ -148,29 +185,10 @@
 
   <nav class="pager">
     <a href="c.html"><span class="dir">Prev</span>C ABI 嵌入</a>
-    <a class="nx" href="../kernel/architecture.html"><span class="dir">Next</span>架构总览</a>
+    <a class="nx" href="openharmony.html"><span class="dir">Next</span>OpenHarmony / OHPM</a>
   </nav>
 </main>
 
 </div>
-<script>
-(function () {
-  document.querySelectorAll('.code').forEach(function (box) {
-    if (!box.querySelector('pre')) return;
-    var btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'copy'; btn.textContent = '复制';
-    box.appendChild(btn);
-    btn.addEventListener('click', function () {
-      var pre = box.querySelector('pre');
-      if (!pre || !navigator.clipboard) return;
-      navigator.clipboard.writeText(pre.innerText).then(function () {
-        var old = btn.textContent;
-        btn.textContent = '已复制';
-        setTimeout(function () { btn.textContent = old; }, 1400);
-      });
-    });
-  });
-})();
-</script>
 </body>
 </html>

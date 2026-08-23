@@ -18,6 +18,7 @@
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
     <ul>
       <li><a href="quickstart.html">快速开始</a></li>
+      <li><a href="swift.html">Swift 接入</a></li>
       <li><a href="rust.html">Rust 嵌入</a></li>
       <li><a href="c.html">C ABI 嵌入</a></li>
       <li><a href="flutter.html">Flutter 嵌入</a></li>
@@ -56,148 +57,126 @@
   <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>OpenHarmony / OHPM</p>
   <h1>OpenHarmony / OHPM 接入</h1>
   <p class="kicker">Native ArkTS SDK</p>
-  <p class="lead"><code>erika</code> 是 OpenHarmony 原生 ArkTS SDK。应用通过 <code>XComponent</code> 提供呈现表面，使用 <code>ErikaPlayer</code> 驱动播放、生命周期和每帧渲染。</p>
+  <p class="lead"><code>erika</code> 是 OpenHarmony 原生 ArkTS SDK。应用通过 <code>XComponent</code> 获取原生 surface，使用 <code>ErikaPlayer</code> 驱动播放控制、事件处理与每帧渲染调度。</p>
 
   <ul class="meta-strip">
     <li>包 <b>erika 0.1.7</b></li>
-    <li>目标 <b>arm64</b></li>
-    <li>最低 API <b>18</b></li>
+    <li>目标架构 <b>arm64</b></li>
+    <li>最低 API <b>API 18</b></li>
   </ul>
 
   <section id="install">
-    <h2>安装<span class="jp">インストール</span><a class="anchor" href="#install">#</a></h2>
+    <h2>安装与引入<span class="jp">インストール</span><a class="anchor" href="#install">#</a></h2>
+    <p>在 DevEco Studio 项目根目录执行 ohpm 命令：</p>
     <div class="code">
       <p class="lbl">shell</p>
 <pre>ohpm install erika</pre>
     </div>
-    <p>包详情见 <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM</a>；源码包说明见仓库的 <a href="https://github.com/AimesSoft/Erika/blob/main/packages/erika_ohos/README.md">packages/erika_ohos/README.md</a>。</p>
+    <p>包详情见 <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM 详情页</a>；源码模块参见官方仓库的 <code>packages/erika_ohos</code> 目录。</p>
   </section>
 
   <section id="surface">
-    <h2>表面生命周期<span class="jp">サーフェスのライフサイクル</span><a class="anchor" href="#surface">#</a></h2>
-    <p><code>ErikaPlayer</code> 不创建 ArkUI 组件。宿主在 <code>XComponentController</code> 回调中附着、调整大小和释放原生 surface：</p>
+    <h2>表面生命周期与控制器<span class="jp">サーフェス制御</span><a class="anchor" href="#surface">#</a></h2>
+    <p><code>ErikaPlayer</code> 封装了底层 Presenter 实例。宿主在 <code>XComponentController</code> 回调中绑定原生 surface 并进行尺寸同步：</p>
     <div class="code">
       <p class="lbl">ErikaSurfaceController.ets</p>
-<pre>import { ErikaNativeResponse, ErikaPlayer } from 'erika';
+<pre><span class="k">import</span> { ErikaNativeResponse, ErikaPlayer } <span class="k">from</span> <span class="s">'erika'</span>;
 
-class ErikaSurfaceController extends XComponentController {
-  private readonly player: ErikaPlayer = new ErikaPlayer();
-  private attached: boolean = false;
-  private pendingUri: string = '';
+<span class="k">export class</span> ErikaSurfaceController <span class="k">extends</span> XComponentController {
+  <span class="k">private readonly</span> player: ErikaPlayer = <span class="k">new</span> ErikaPlayer();
+  <span class="k">private</span> attached: boolean = <span class="k">false</span>;
+  <span class="k">private</span> pendingUri: string = <span class="s">''</span>;
 
-  onSurfaceCreated(surfaceId: string): void {
-    console.info(`Erika XComponent surface created: ${surfaceId}`);
+  onSurfaceCreated(surfaceId: string): <span class="k">void</span> {
+    <span class="c">/* 记录表面创建 */</span>
   }
 
-  onSurfaceChanged(surfaceId: string, rect: SurfaceRect): void {
-    if (!this.attached) {
-      this.player.attachSurface({
+  onSurfaceChanged(surfaceId: string, rect: SurfaceRect): <span class="k">void</span> {
+    <span class="k">if</span> (!<span class="k">this</span>.attached) {
+      <span class="k">this</span>.player.attachSurface({
         surfaceId: BigInt(surfaceId),
         width: rect.surfaceWidth,
         height: rect.surfaceHeight,
         scale: 1.0,
       });
-      this.attached = true;
-    } else {
-      this.player.resizeSurface(rect.surfaceWidth, rect.surfaceHeight);
+      <span class="k">this</span>.attached = <span class="k">true</span>;
+    } <span class="k">else</span> {
+      <span class="k">this</span>.player.resizeSurface(rect.surfaceWidth, rect.surfaceHeight, 1.0);
     }
-    this.startPendingUri();
+    <span class="k">this</span>.startPendingPlay();
   }
 
-  onSurfaceDestroyed(_surfaceId: string): void {
-    if (this.attached) {
-      this.player.detachSurface();
-      this.attached = false;
+  onSurfaceDestroyed(_surfaceId: string): <span class="k">void</span> {
+    <span class="k">if</span> (<span class="k">this</span>.attached) {
+      <span class="k">this</span>.player.detachSurface();
+      <span class="k">this</span>.attached = <span class="k">false</span>;
     }
-    this.player.dispose();
+    <span class="k">this</span>.player.dispose();
   }
 
-  open(uri: string): void {
-    this.pendingUri = uri;
-    this.startPendingUri();
+  openAndPlay(uri: string): <span class="k">void</span> {
+    <span class="k">this</span>.pendingUri = uri;
+    <span class="k">this</span>.startPendingPlay();
   }
 
   renderFrame(timeSeconds: number): ErikaNativeResponse {
-    return this.player.renderTick(timeSeconds);
+    <span class="k">return</span> <span class="k">this</span>.player.renderTick(timeSeconds);
   }
 
-  private startPendingUri(): void {
-    if (!this.attached || this.pendingUri.length === 0) {
-      return;
+  <span class="k">private</span> startPendingPlay(): <span class="k">void</span> {
+    <span class="k">if</span> (!<span class="k">this</span>.attached || <span class="k">this</span>.pendingUri.length === 0) {
+      <span class="k">return</span>;
     }
-    const uri: string = this.pendingUri;
-    this.pendingUri = '';
-    this.player.open(uri);
-    this.player.play();
+    <span class="k">const</span> uri: string = <span class="k">this</span>.pendingUri;
+    <span class="k">this</span>.pendingUri = <span class="s">''</span>;
+    <span class="k">this</span>.player.open(uri);
+    <span class="k">this</span>.player.play();
   }
 }</pre>
-    </div>
-  </section>
-
-  <section id="player">
-    <h2>播放控制<span class="jp">再生制御</span><a class="anchor" href="#player">#</a></h2>
-    <p>在 surface 可用后调用播放器方法。<code>open()</code> 发起打开请求，随后调用 <code>play()</code>；状态和错误通过返回值或异常检查。示例控制器会在 <code>onSurfaceChanged()</code> 完成 attach 后启动缓存的 URI，因此 <code>onLoad</code> 早于 surface 回调也不会抢跑。</p>
-    <div class="code">
-      <p class="lbl">ArkTS</p>
-<pre>this.player.open('https://example.com/video.mp4');
-this.player.play();
-
-this.player.pause();
-this.player.seek(positionMicros);</pre>
-    </div>
-  </section>
-
-  <section id="render">
-    <h2>帧调度<span class="jp">フレームスケジューリング</span><a class="anchor" href="#render">#</a></h2>
-    <p>宿主负责把显示帧回调传给 <code>renderTick()</code>。该方法返回 <code>ErikaNativeResponse</code>，可用于读取本帧的状态和诊断信息；不需要视频 surface 时改用 <code>audioOnlyTick()</code>。</p>
-    <div class="code">
-      <p class="lbl">host frame scheduler</p>
-<pre>renderFrame(timeSeconds: number): ErikaNativeResponse {
-  return this.player.renderTick(timeSeconds);
-}
-
-// 在宿主的 display-frame callback 中调用
-controller.renderFrame(frameTimeSeconds);</pre>
     </div>
   </section>
 
   <section id="arkui">
-    <h2>放入 ArkUI 页面<span class="jp">ArkUI への組み込み</span><a class="anchor" href="#arkui">#</a></h2>
+    <h2>在 ArkUI 页面中使用<span class="jp">ArkUI 連携</span><a class="anchor" href="#arkui">#</a></h2>
     <div class="code">
       <p class="lbl">Index.ets</p>
-<pre>@Entry
+<pre><span class="k">import</span> { ErikaSurfaceController } <span class="k">from</span> <span class="s">'./ErikaSurfaceController'</span>;
+
+@Entry
 @Component
-struct VideoPage {
-  private readonly surfaceController: ErikaSurfaceController =
-    new ErikaSurfaceController();
+<span class="k">struct</span> VideoPlayerPage {
+  <span class="k">private readonly</span> controller: ErikaSurfaceController = <span class="k">new</span> ErikaSurfaceController();
 
   build() {
-    XComponent({
-      id: 'erika-surface',
-      type: XComponentType.SURFACE,
-      controller: this.surfaceController,
-    })
-      .width('100%')
-      .height('100%')
-      .onLoad(() =&gt; {
-        this.surfaceController.open('https://example.com/video.mp4');
-      });
+    Column() {
+      XComponent({
+        id: <span class="s">'erika_video_surface'</span>,
+        type: XComponentType.SURFACE,
+        controller: <span class="k">this</span>.controller,
+      })
+        .width(<span class="s">'100%'</span>)
+        .aspectRatio(1.777)
+        .onLoad(() =&gt; {
+          <span class="k">this</span>.controller.openAndPlay(<span class="s">'https://example.com/stream.mp4'</span>);
+        })
+    }
+    .width(<span class="s">'100%'</span>)
+    .height(<span class="s">'100%'</span>)
   }
 }</pre>
     </div>
-    <p>真实应用应在页面销毁时让控制器完成 <code>detachSurface()</code> 和 <code>dispose()</code>，并把自己的 display-frame callback 接到 <code>renderTick()</code>。</p>
   </section>
 
   <section id="api">
-    <h2>核心 API<span class="jp">主要 API</span><a class="anchor" href="#api">#</a></h2>
+    <h2>ArkTS ErikaPlayer 公开 API<span class="jp">公開 API</span><a class="anchor" href="#api">#</a></h2>
     <div class="tw">
       <table>
-        <thead><tr><th>分组</th><th>方法</th><th>用途</th></tr></thead>
+        <thead><tr><th>分类</th><th>方法</th><th>功能说明</th></tr></thead>
         <tbody>
-          <tr><td class="k">播放</td><td class="m">open / play / pause / stop / close / seek / setPlaybackRate / setVolume</td><td>播放控制。</td></tr>
-          <tr><td class="k">表面</td><td class="m">attachSurface / resizeSurface / detachSurface</td><td>XComponent surface 生命周期。</td></tr>
-          <tr><td class="k">调度</td><td class="m">renderTick / audioOnlyTick / pollEvent</td><td>显示帧、音频帧和事件消费。</td></tr>
-          <tr><td class="k">输出</td><td class="m">captureFrame / getOutputStatus / getResourceStatus</td><td>截图、输出状态和资源诊断。</td></tr>
+          <tr><td class="k">播放控制</td><td class="m">open(uri) / play() / pause() / stop() / close() / seek(positionMicros) / setPlaybackRate(rate) / setVolume(volume)</td><td>打开媒体源、播放、暂停、跳转进度（微秒）、调节倍速与音量。</td></tr>
+          <tr><td class="k">表面管理</td><td class="m">attachSurface(options) / resizeSurface(w, h, scale) / detachSurface()</td><td>绑定 XComponent 原生表面，同步像素尺寸，释放表面。</td></tr>
+          <tr><td class="k">渲染调度</td><td class="m">renderTick(timeSeconds) / audioOnlyTick() / pollEvent()</td><td>驱动显示时钟渲染帧、音频无画面调度与轮询状态事件。</td></tr>
+          <tr><td class="k">附加能力</td><td class="m">captureFrame(w, h) / registerSubtitleMemoryFont(bytes) / dispose()</td><td>抓取当前帧像素、注册内存字幕字体与销毁播放器实例。</td></tr>
         </tbody>
       </table>
     </div>
@@ -210,30 +189,11 @@ struct VideoPage {
   </footer>
 
   <nav class="pager">
-    <a href="quickstart.html"><span class="dir">Prev</span>快速开始</a>
+    <a href="flutter.html"><span class="dir">Prev</span>Flutter 嵌入</a>
     <a class="nx" href="../kernel/architecture.html"><span class="dir">Next</span>架构总览</a>
   </nav>
 </main>
 
 </div>
-<script>
-(function () {
-  document.querySelectorAll('.code').forEach(function (box) {
-    if (!box.querySelector('pre')) return;
-    var btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'copy'; btn.textContent = '复制';
-    box.appendChild(btn);
-    btn.addEventListener('click', function () {
-      var pre = box.querySelector('pre');
-      if (!pre || !navigator.clipboard) return;
-      navigator.clipboard.writeText(pre.innerText).then(function () {
-        var old = btn.textContent;
-        btn.textContent = '已复制';
-        setTimeout(function () { btn.textContent = old; }, 1400);
-      });
-    });
-  });
-})();
-</script>
 </body>
 </html>

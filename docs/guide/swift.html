@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Swift 接入 — Erika 开发者文档</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.7</span></a></div>
+  <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <nav>
+    <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="quickstart.html">快速开始</a></li>
+      <li><a href="swift.html" aria-current="page">Swift 接入</a></li>
+      <li><a href="rust.html">Rust 嵌入</a></li>
+      <li><a href="c.html">C ABI 嵌入</a></li>
+      <li><a href="flutter.html">Flutter 嵌入</a></li>
+      <li><a href="openharmony.html">OpenHarmony / OHPM</a></li>
+    </ul>
+    <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.html">架构总览</a></li>
+      <li><a href="../kernel/decode.html">硬件解码</a></li>
+      <li><a href="../kernel/zero-copy.html">零拷贝导入</a></li>
+      <li><a href="../kernel/render.html">渲染管线</a></li>
+      <li><a href="../kernel/hdr.html">高动态范围</a></li>
+      <li><a href="../kernel/upscale.html">神经超分</a></li>
+      <li><a href="../kernel/subtitle-danmaku.html">字幕与弹幕</a></li>
+      <li><a href="../kernel/clock.html">时钟与调度</a></li>
+    </ul>
+    <h2><span class="no">三</span>项目 <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.html">构建与依赖</a></li>
+      <li><a href="../project/releasing.html">发布与产物</a></li>
+      <li><a href="../project/contributing.html">贡献指南</a></li>
+      <li><a href="../project/changelog.html">更新日志</a></li>
+    </ul>
+    <h2><span class="no">四</span>参考 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.html">C ABI 总览</a></li>
+      <li><a href="../reference/capi-handle.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">Erika v0.1.7<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Swift 接入</p>
+  <h1>Swift 接入</h1>
+  <p class="kicker">Swift &amp; Apple Platforms</p>
+  <p class="lead"><code>ErikaSwift</code> 是面向 Apple 平台（macOS、iOS、tvOS）的原生 Swift 接入库。内核经由 VideoToolbox 硬解、Metal 渲染与 CoreAudio / AudioQueue 输出，宿主通过 SwiftPM 引入，以清晰的生命周期驱动视频画面与事件。</p>
+
+  <ul class="meta-strip">
+    <li>包 <b>ErikaSwift 0.1.7</b></li>
+    <li>支持 <b>macOS 11+ / iOS 13+ / tvOS 13+</b></li>
+    <li>渲染 <b>Metal (CAMetalLayer)</b></li>
+  </ul>
+
+  <section id="install">
+    <h2>安装与引入<span class="jp">インストール</span><a class="anchor" href="#install">#</a></h2>
+    <p>在 Xcode 项目中通过 Swift Package Manager 添加依赖：</p>
+    <div class="code">
+      <p class="lbl">Xcode Package URL</p>
+<pre>https://github.com/AimesSoft/ErikaSwift</pre>
+    </div>
+    <p>或在 <code>Package.swift</code> 中声明：</p>
+    <div class="code">
+      <p class="lbl">Package.swift</p>
+<pre><span class="k">dependencies</span>: [
+    .<span class="k">package</span>(url: <span class="s">"https://github.com/AimesSoft/ErikaSwift"</span>, from: <span class="s">"0.1.7"</span>)
+]</pre>
+    </div>
+    <p>SwiftPM 会自动下载包含了 macOS universal、iOS 设备/模拟器、tvOS 设备/模拟器预编译二进制的 <code>CErika.xcframework</code>。原生依赖已包含在内，无需单独配置 FFmpeg 或 libass。</p>
+  </section>
+
+  <section id="threading">
+    <h2>线程契约与对象持有<span class="jp">スレッドとライフタイム</span><a class="anchor" href="#threading">#</a></h2>
+    <p>在 Apple 平台接入 Erika 时，请务必注意两个关键设计契约：</p>
+    <ul class="body">
+      <li><b>强持有播放器。</b> 视图组件（如 <code>ErikaVideoView</code>）对 <code>ErikaPlayer</code> 采用 <code>weak</code> 弱引用设计，避免循环引用。宿主的 ViewModel 或 ViewController 必须以强引用持久持有 <code>ErikaPlayer</code> 实例，否则播放器会在进入页面后立即被释放。</li>
+      <li><b>线程串行化。</b> 底层 C 内核句柄没有内部同步锁，不可多线程并发调用。高层 <code>ErikaPlayer</code> 标记为 <code>@MainActor</code>，保证所有 UI 操作与生命周期调用在主线程串行执行。若自定义封装 C ABI，必须在调用点加锁或绑定固定执行线程。</li>
+    </ul>
+  </section>
+
+  <section id="surface">
+    <h2>画面承载与 Metal 图层<span class="jp">サーフェス描画</span><a class="anchor" href="#surface">#</a></h2>
+    <p>Erika 在 Apple 平台上以 <code>CAMetalLayer</code> 作为原生输出表面。视图层需要把 <code>CAMetalLayer</code> 的指针与物理像素尺寸告知内核：</p>
+    <div class="code">
+      <p class="lbl">SwiftUI 视图包装 (VideoSurfaceView.swift)</p>
+<pre><span class="k">import</span> SwiftUI
+<span class="k">import</span> QuartzCore
+<span class="k">import</span> ErikaSwift
+
+<span class="k">#if</span> os(macOS)
+<span class="k">public struct</span> VideoSurfaceView: NSViewRepresentable {
+    <span class="k">public let</span> player: ErikaPlayer
+
+    <span class="k">public init</span>(player: ErikaPlayer) {
+        <span class="k">self</span>.player = player
+    }
+
+    <span class="k">public func</span> makeNSView(context: Context) -&gt; ErikaMetalView {
+        ErikaMetalView(player: player)
+    }
+
+    <span class="k">public func</span> updateNSView(_ view: ErikaMetalView, context: Context) {
+        view.syncSurface()
+    }
+}
+<span class="k">#else</span>
+<span class="k">public struct</span> VideoSurfaceView: UIViewRepresentable {
+    <span class="k">public let</span> player: ErikaPlayer
+
+    <span class="k">public init</span>(player: ErikaPlayer) {
+        <span class="k">self</span>.player = player
+    }
+
+    <span class="k">public func</span> makeUIView(context: Context) -&gt; ErikaMetalView {
+        ErikaMetalView(player: player)
+    }
+
+    <span class="k">public func</span> updateUIView(_ view: ErikaMetalView, context: Context) {
+        view.syncSurface()
+    }
+}
+<span class="k">#endif</span></pre>
+    </div>
+    <p>原生视图的尺寸同步与图层附加：</p>
+    <div class="code">
+      <p class="lbl">AppKit / UIKit 图层宿主视图</p>
+<pre><span class="k">#if</span> os(macOS)
+<span class="k">final class</span> ErikaMetalView: NSView {
+    <span class="k">private let</span> player: ErikaPlayer
+    <span class="k">private var</span> attached = <span class="k">false</span>
+
+    <span class="k">init</span>(player: ErikaPlayer) {
+        <span class="k">self</span>.player = player
+        <span class="k">super</span>.init(frame: .zero)
+        wantsLayer = <span class="k">true</span>
+    }
+
+    <span class="k">required init?</span>(coder: NSCoder) { fatalError() }
+
+    <span class="k">override func</span> makeBackingLayer() -&gt; CALayer {
+        <span class="k">let</span> layer = CAMetalLayer()
+        layer.isOpaque = <span class="k">true</span>
+        layer.backgroundColor = NSColor.black.cgColor <span class="c">/* 垫黑防白闪 */</span>
+        <span class="k">return</span> layer
+    }
+
+    <span class="k">override func</span> layout() {
+        <span class="k">super</span>.layout()
+        syncSurface()
+    }
+
+    <span class="k">func</span> syncSurface() {
+        <span class="k">guard let</span> metalLayer = layer <span class="k">as?</span> CAMetalLayer, <span class="k">let</span> win = window <span class="k">else</span> { <span class="k">return</span> }
+        <span class="k">let</span> scale = win.backingScaleFactor
+        <span class="k">let</span> pixelWidth = Int((bounds.width * scale).rounded())
+        <span class="k">let</span> pixelHeight = Int((bounds.height * scale).rounded())
+        <span class="k">guard</span> pixelWidth &gt; 0, pixelHeight &gt; 0 <span class="k">else</span> { <span class="k">return</span> }
+
+        <span class="k">if</span> attached {
+            player.resizeSurface(width: pixelWidth, height: pixelHeight, scale: scale)
+        } <span class="k">else</span> {
+            player.attachMetalLayer(metalLayer, width: pixelWidth, height: pixelHeight, scale: scale)
+            attached = <span class="k">true</span>
+        }
+    }
+
+    <span class="k">func</span> teardown() {
+        <span class="k">guard</span> attached <span class="k">else</span> { <span class="k">return</span> }
+        attached = <span class="k">false</span>
+        player.detachSurface()
+    }
+}
+<span class="k">#endif</span></pre>
+    </div>
+  </section>
+
+  <section id="playback">
+    <h2>播放与生命周期<span class="jp">再生制御</span><a class="anchor" href="#playback">#</a></h2>
+    <p><code>open()</code> 方法会同步解封装并探测媒体（获取流信息、视频尺寸与轨道列表），将播放器置入 <code>Ready</code> 状态后返回；随后的解码与渲染在调用 <code>play()</code> 后由内核后台工作线程异步驱动。</p>
+    <div class="code">
+      <p class="lbl">播放控制示例</p>
+<pre><span class="k">import</span> ErikaSwift
+
+<span class="k">@MainActor</span>
+<span class="k">final class</span> PlayerViewModel: ObservableObject {
+    <span class="k">let</span> player = ErikaPlayer()
+
+    <span class="k">func</span> loadVideo(url: String) {
+        <span class="k">do</span> {
+            <span class="c">/* 支持 HTTP Headers 注入与本地路径 */</span>
+            <span class="k">try</span> player.open(url, headers: [<span class="s">"User-Agent"</span>: <span class="s">"MyApp/1.0"</span>])
+            <span class="k">try</span> player.play()
+        } <span class="k">catch</span> {
+            print(<span class="s">"打开媒体失败: \(error)"</span>)
+        }
+    }
+
+    <span class="k">func</span> seek(seconds: Double) {
+        <span class="k">let</span> micros = UInt64(seconds * 1_000_000)
+        <span class="k">try?</span> player.seek(positionMicros: micros)
+    }
+
+    <span class="k">func</span> setSpeed(_ speed: Double) {
+        <span class="k">try?</span> player.setPlaybackRate(speed)
+    }
+
+    <span class="k">func</span> setVolume(_ volume: Double) {
+        <span class="k">try?</span> player.setVolume(volume)
+    }
+
+    <span class="c">/* 页面退出时务必按顺序停止与解绑 */</span>
+    <span class="k">func</span> teardown() {
+        <span class="k">try?</span> player.pause()
+        <span class="k">try?</span> player.close()
+        player.detachSurface()
+    }
+}</pre>
+    </div>
+  </section>
+
+  <section id="events">
+    <h2>事件消费<span class="jp">イベント処理</span><a class="anchor" href="#events">#</a></h2>
+    <p>内核通过非阻塞事件队列发布播放状态、时长变化、缓冲指示、轨道变动与错误信息。在显示帧时钟（DisplayLink）或定时器中轮询 <code>pollEvent()</code>：</p>
+    <div class="code">
+      <p class="lbl">事件消费循环</p>
+<pre><span class="k">func</span> pollEvents() {
+    <span class="k">while let</span> event = player.pollEvent() {
+        <span class="k">switch</span> event {
+        <span class="k">case</span> .stateChanged(<span class="k">let</span> state):
+            <span class="c">/* state: .opening / .ready / .playing / .paused / .stopped / .ended / .error */</span>
+            <span class="k">self</span>.playbackState = state
+        <span class="k">case</span> .durationChanged(<span class="k">let</span> micros):
+            <span class="k">self</span>.duration = Double(micros) / 1_000_000.0
+        <span class="k">case</span> .positionChanged(<span class="k">let</span> micros):
+            <span class="k">self</span>.currentPosition = Double(micros) / 1_000_000.0
+        <span class="k">case</span> .bufferingChanged(<span class="k">let</span> isBuffering):
+            <span class="k">self</span>.isBuffering = isBuffering
+        <span class="k">case</span> .tracksChanged(<span class="k">let</span> tracks):
+            <span class="k">self</span>.availableTracks = tracks
+        <span class="k">case</span> .error(<span class="k">let</span> message):
+            <span class="k">self</span>.lastErrorMessage = message
+        <span class="k">default</span>:
+            <span class="k">break</span>
+        }
+    }
+}</pre>
+    </div>
+  </section>
+
+  <section id="features">
+    <h2>进阶能力<span class="jp">応用機能</span><a class="anchor" href="#features">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>功能</th><th>Swift API / 方式</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="k">音轨与字幕选择</td><td class="m">selectAudioTrack / selectSubtitleTrack</td><td>传入轨道 ID 或 <code>nil</code> 禁用。</td></tr>
+          <tr><td class="k">外挂字幕</td><td class="m">addExternalSubtitle / setSubtitleStyle</td><td>支持 SRT / ASS，可配置字体与样式覆盖。</td></tr>
+          <tr><td class="k">弹幕支持</td><td class="m">loadDanmakuJson / addDanmakuTrackFile</td><td>内置高性能 DFM+ 碰撞布局与 Metal 弹幕合批渲染。</td></tr>
+          <tr><td class="k">神经超分</td><td class="m">setUpscaler(.artCnnC4F16)</td><td>Apple Silicon 上经 Metal SIMD 指令执行 2× 动漫超分。</td></tr>
+          <tr><td class="k">无缝截图</td><td class="m">captureFrame(width:height:)</td><td>从当前渲染管线提取当前帧像素（RGBA 字节）。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="teardown">
+    <h2>销毁与释放顺序<span class="jp">破棄順序</span><a class="anchor" href="#teardown">#</a></h2>
+    <p>为避免 Metal 渲染管道与窗口层销毁时的竞争崩溃，页面退出时请遵循如下销毁顺序：</p>
+    <ol class="body">
+      <li><b>停止帧调度：</b> 停止 <code>CVDisplayLink</code> 或 <code>CADisplayLink</code>。</li>
+      <li><b>分离渲染表面：</b> 调用 <code>player.detachSurface()</code>，让内核释放绑定的 <code>CAMetalLayer</code> 与 drawable 资源。</li>
+      <li><b>关闭与释放：</b> 调用 <code>player.close()</code>，随后释放 <code>ErikaPlayer</code> 引用。</li>
+    </ol>
+  </section>
+
+  <footer class="doc-foot">
+    <span>Erika <b>v0.1.7</b></span>
+    <span>Section <b>Guide</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="quickstart.html"><span class="dir">Prev</span>快速开始</a>
+    <a class="nx" href="rust.html"><span class="dir">Next</span>Rust 嵌入</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

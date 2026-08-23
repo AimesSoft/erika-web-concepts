@@ -18,6 +18,7 @@
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
     <ul>
       <li><a href="quickstart.html">快速开始</a></li>
+      <li><a href="swift.html">Swift 接入</a></li>
       <li><a href="rust.html">Rust 嵌入</a></li>
       <li><a href="c.html" aria-current="page">C ABI 嵌入</a></li>
       <li><a href="flutter.html">Flutter 嵌入</a></li>
@@ -56,7 +57,7 @@
   <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>C ABI 嵌入</p>
   <h1>C ABI 嵌入</h1>
   <p class="kicker">C ABI Embedding</p>
-  <p class="lead">C / C++ / Swift / Dart FFI 宿主经 <code>erika.h</code> 接入。接口提供两个相互独立的入口族，按渲染所有权二选一。全部导出以头文件为准，本文给出选型依据与端到端流程。</p>
+  <p class="lead">C / C++ / 原生宿主经 <code>erika.h</code> 接入。接口提供两个入口族：标准应用接入使用由内核托管渲染与音频的 <code>ErikaPresenterHandle</code>；无头控制与轻量宿主可使用 <code>ErikaHandle</code>。</p>
 
   <ul class="meta-strip">
     <li>头文件 <b>crates/erika_capi/include/erika.h</b></li>
@@ -68,104 +69,135 @@
     <h2>入口选择<span class="jp">入口の選択</span><a class="anchor" href="#choice">#</a></h2>
     <div class="tw">
       <table>
-        <thead><tr><th></th><th>ErikaHandle</th><th>ErikaPresenterHandle</th></tr></thead>
+        <thead><tr><th></th><th>ErikaPresenterHandle（推荐）</th><th>ErikaHandle</th></tr></thead>
         <tbody>
-          <tr><td class="k">模型</td><td>pull。宿主渲染，拉取状态。</td><td>push。内核托管解码、时序、音频与渲染。</td></tr>
-          <tr><td class="k">宿主职责</td><td>渲染循环、帧数据消费。</td><td>提供表面，每帧调用 <code>render_tick</code>。</td></tr>
-          <tr><td class="k">适用</td><td>宿主已有渲染管线，或需要原始帧数据。</td><td>宿主只提供表面，其余交给内核。</td></tr>
-          <tr><td class="k">编译范围</td><td>所有目标。</td><td>macOS / iOS / Windows / Android / OpenHarmony；其他目标 <code>create</code> 返回 NULL。</td></tr>
+          <tr><td class="k">架构模型</td><td>推模型（Push）。内核托管硬解、音频输出、渲染管线、字幕与弹幕。</td><td>无头控制模型。提供状态机、传输控制与事件接收器。</td></tr>
+          <tr><td class="k">宿主职责</td><td>提供原生表面（CAMetalLayer / HWND / wgpu），并在显示时钟驱动 <code>render_tick</code>。</td><td>调用播放控制并轮询事件；无内置渲染与音频设备输出。</td></tr>
+          <tr><td class="k">适用场景</td><td>GUI 原生播放器、游戏引擎嵌入、桌面/移动应用。</td><td>无头播放器、后端服务控制或基础事件桥接。</td></tr>
+          <tr><td class="k">平台支持</td><td>macOS / iOS / tvOS / Windows / Android / OpenHarmony。</td><td>全部平台。</td></tr>
         </tbody>
       </table>
     </div>
-    <p>两者共享事件、状态与轨道 API。选择入口后不要混用两族的函数。</p>
+    <p>注：当前 C ABI 未导出裸像素帧拉取接口。如果需要在宿主原生窗口上显示视频画面，请使用 <code>ErikaPresenterHandle</code>。</p>
   </section>
 
   <section id="conventions">
     <h2>公共约定<span class="jp">共通規約</span><a class="anchor" href="#conventions">#</a></h2>
     <ul class="body">
-      <li><b>返回值。</b> 每个可能失败的调用返回 <code>ErikaStatus</code>。<code>Ok</code>（0）与 <code>NoEvent</code>（5）是仅有的非错误结果。panic 被捕获并映射为 <code>ErikaStatus_Panic</code>。</li>
-      <li><b>错误消息。</b> 非 Ok/NoEvent 结果的人读消息存放在线程局部槽位。在同一线程经 <code>erika_last_error_message()</code> 读取，用 <code>erika_string_free()</code> 释放。</li>
-      <li><b>所有权。</b> Erika 返回的 <code>char*</code> 归调用方所有。独立字符串用 <code>erika_string_free()</code>；<code>ErikaTrackInfo</code> / <code>ErikaDanmakuTrackInfo</code> 内的字符串用配套的 <code>*_info_free()</code>。</li>
-      <li><b>参数借用。</b> <code>const char*</code> 参数仅调用期间借用，必须是以 NUL 结尾的 UTF-8。</li>
-      <li><b>计数数组。</b> 列表查询使用 <code>(buf, capacity, &amp;len)</code> 惯用法：<code>len</code> 置为总数，最多写入 <code>capacity</code> 条；capacity 为 0 且 buf 为 NULL 时只查询数量。</li>
-      <li><b>像素单位。</b> attach 与 resize 的宽高是物理像素。scale 是 UI（弹幕等）使用的逻辑内容 / DPI 比例，不缩放表面范围。</li>
-      <li><b>线程。</b> 一个 handle 不提供内部同步，不得从多个线程并发调用。</li>
+      <li><b>返回值。</b> 每个可能失败的调用返回 <code>ErikaStatus</code>。<code>ErikaStatus_Ok</code>（0）表示成功；<code>ErikaStatus_NoEvent</code>（5）表示事件队列暂空。非零且非 5 的状态码均表示错误。</li>
+      <li><b>错误消息。</b> 发生错误时，内核会将详细的可读错误信息保存在<b>线程局部变量</b>中。必须在调用失败的同一线程中立即调用 <code>erika_last_error_message()</code> 读取，并使用 <code>erika_string_free()</code> 释放返回的指针。</li>
+      <li><b>所有权。</b> Erika 返回的 <code>char*</code> 堆内存归调用方所有。独立字符串使用 <code>erika_string_free()</code>；结构体（如 <code>ErikaTrackInfo</code>）内部包含的字符串使用配套的 <code>erika_track_info_free()</code>。</li>
+      <li><b>参数借用。</b> <code>const char*</code> 参数仅在函数调用期间被借用，必须是以 NUL 结尾的 UTF-8 字符串。</li>
+      <li><b>计数数组。</b> 列表查询采用 <code>(buf, capacity, &amp;len)</code> 模式：<code>len</code> 总是返回流中的实际总数量，而写入 <code>buf</code> 的数量最多为 <code>capacity</code>。遍历时应以 <code>min(len, capacity)</code> 为界，避免越界访问。</li>
+      <li><b>线程安全。</b> 单个 handle 内部不包含同步锁，禁止在多个线程中并发调用同一句柄的方法。</li>
     </ul>
   </section>
 
   <section id="presenter">
-    <h2>Presenter 端到端<span class="jp">Presenter の流れ</span><a class="anchor" href="#presenter">#</a></h2>
+    <h2>Presenter 端到端示例<span class="jp">Presenter の流れ</span><a class="anchor" href="#presenter">#</a></h2>
+    <p>在原生应用中使用 <code>ErikaPresenterHandle</code> 驱动完整播放链路：</p>
     <div class="code">
-      <p class="lbl">macOS / iOS（Metal 表面）</p>
-<pre><span class="k">#include</span> <span class="s">"erika.h"</span>
+      <p class="lbl">C / C++ 原生播放接入</p>
+<pre><span class="k">#include</span> <span class="s">&lt;stdio.h&gt;</span>
+<span class="k">#include</span> <span class="s">&lt;stdint.h&gt;</span>
+<span class="k">#include</span> <span class="s">"erika.h"</span>
 
-<span class="c">/* 1. 创建。config 可指定输出模式、EDR headroom 与超分模式 */</span>
-ErikaPresenterHandle *p = erika_presenter_create();
-<span class="k">if</span> (!p) { <span class="c">/* 读 erika_last_error_message() */</span> }
-
-<span class="c">/* 2. 附着表面。CAMetalLayer* 转为 uint64_t */</span>
-erika_presenter_attach_metal_layer(p, (uint64_t)layer, w, h, scale);
-
-<span class="c">/* 3. 打开与播放。open 是异步的，状态经 poll_event 到达 */</span>
-erika_presenter_open(p, <span class="s">"/path/to/video.mp4"</span>);
-erika_presenter_play(p);
-
-<span class="c">/* 4. 显示循环：每个显示帧调用一次 */</span>
-<span class="k">for</span> (;;) {
-  ErikaPresenterStats stats;
-  erika_presenter_render_tick(p, host_time, &amp;stats);
-
-  ErikaEvent ev;
-  <span class="k">while</span> (erika_presenter_poll_event(p, &amp;ev) != ErikaStatus_NoEvent) {
-    <span class="c">/* 处理 StateChanged / DurationChanged / Error 等 */</span>
-  }
+<span class="c">/* 辅助函数：安全检查并打印错误 */</span>
+<span class="k">static void</span> check_status(ErikaStatus status, <span class="k">const char</span> *action) {
+    <span class="k">if</span> (status != ErikaStatus_Ok && status != ErikaStatus_NoEvent) {
+        <span class="k">char</span> *msg = erika_last_error_message();
+        fprintf(stderr, <span class="s">"[Erika Error] %s failed (%d): %s\n"</span>, action, status, msg ? msg : <span class="s">"unknown"</span>);
+        <span class="k">if</span> (msg) erika_string_free(msg);
+    }
 }
 
-<span class="c">/* 5. 清理 */</span>
-erika_presenter_destroy(p);</pre>
+<span class="k">void</span> play_video(<span class="k">void</span> *metal_layer, <span class="k">int</span> pixel_w, <span class="k">int</span> pixel_h, <span class="k">double</span> scale) {
+    <span class="c">/* 1. 创建 Presenter 句柄 */</span>
+    ErikaPresenterHandle *p = erika_presenter_create();
+    <span class="k">if</span> (!p) {
+        fprintf(stderr, <span class="s">"创建 Erika Presenter 失败\n"</span>);
+        <span class="k">return</span>;
+    }
+
+    <span class="c">/* 2. 绑定原生渲染表面 (以 Apple CAMetalLayer 为例) */</span>
+    ErikaStatus st = erika_presenter_attach_metal_layer(
+        p, (uint64_t)(uintptr_t)metal_layer, pixel_w, pixel_h, scale);
+    check_status(st, <span class="s">"attach_metal_layer"</span>);
+
+    <span class="c">/* 3. 同步打开媒体并就绪 */</span>
+    st = erika_presenter_open(p, <span class="s">"https://example.com/video.mp4"</span>);
+    check_status(st, <span class="s">"open"</span>);
+
+    <span class="c">/* 4. 启动异步解码与播放 */</span>
+    st = erika_presenter_play(p);
+    check_status(st, <span class="s">"play"</span>);
+
+    <span class="c">/* 5. 显示时钟回调循环 (通常由 CADisplayLink 或 CVDisplayLink 驱动) */</span>
+    <span class="k">double</span> host_time_seconds = 1000.0; <span class="c">/* 宿主显示时钟时间戳 */</span>
+    ErikaPresenterStats stats;
+    erika_presenter_render_tick(p, host_time_seconds, &amp;stats);
+
+    <span class="c">/* 6. 消费事件 */</span>
+    ErikaEvent ev;
+    <span class="k">while</span> (erika_presenter_poll_event(p, &amp;ev) == ErikaStatus_Ok) {
+        <span class="k">if</span> (ev.kind == ErikaEventKind_StateChanged) {
+            printf(<span class="s">"状态迁移: %d\n"</span>, ev.data.state_changed.state);
+        } <span class="k">else if</span> (ev.kind == ErikaEventKind_DurationChanged) {
+            printf(<span class="s">"媒体时长: %llu us\n"</span>, (unsigned long long)ev.data.duration_changed.duration_micros);
+        }
+    }
+
+    <span class="c">/* 7. 安全退出与资源释放：先 detach 表面，再 destroy 句柄 */</span>
+    erika_presenter_detach_surface(p);
+    erika_presenter_destroy(p);
+}</pre>
     </div>
-    <p>要点：</p>
-    <ul class="body">
-      <li><code>render_tick</code> 的第一个参数是宿主显示时钟的时间（秒），内核用它做 vsync 量化调度。传入与表面刷新同步的时间。</li>
-      <li>表面尺寸或 scale 变化时调用 <code>resize_surface</code>，不要重建 presenter。</li>
-      <li><code>out_stats</code> 可为 NULL，不需要统计时省略。</li>
-      <li>Windows 用 <code>attach_windows_hwnd</code>（hwnd + hinstance），Android / HarmonyOS 用 <code>attach_wgpu_surface</code> 系列。渲染后端由 presenter 配置决定，与附着调用无关。</li>
-    </ul>
+  </section>
+
+  <section id="tracks">
+    <h2>安全查询媒体轨道<span class="jp">トラック情報取得</span><a class="anchor" href="#tracks">#</a></h2>
+    <p>查询音频与字幕轨道列表时，请使用安全的数组边界检查：</p>
+    <div class="code">
+      <p class="lbl">查询并释放轨道信息</p>
+<pre>ErikaTrackInfo tracks[16];
+uintptr_t total_count = 0;
+
+<span class="c">/* 最多填充 16 条，total_count 接收流中的实际总轨道数 */</span>
+ErikaStatus st = erika_presenter_tracks(p, tracks, 16, &amp;total_count);
+<span class="k">if</span> (st == ErikaStatus_Ok) {
+    uintptr_t available = total_count &lt; 16 ? total_count : 16;
+    <span class="k">for</span> (uintptr_t i = 0; i &lt; available; i++) {
+        printf(<span class="s">"轨道 #%lld: %s (语言: %s)\n"</span>,
+               (long long)tracks[i].id,
+               tracks[i].title ? tracks[i].title : <span class="s">"无标题"</span>,
+               tracks[i].language ? tracks[i].language : <span class="s">"未知"</span>);
+
+        <span class="c">/* 释放结构体内部的堆字符串 */</span>
+        erika_track_info_free(&amp;tracks[i]);
+    }
+}</pre>
+    </div>
   </section>
 
   <section id="handle">
-    <h2>Handle 模式<span class="jp">Handle の流れ</span><a class="anchor" href="#handle">#</a></h2>
-    <p>宿主自行渲染时，<code>ErikaHandle</code> 提供播放控制与状态查询，不含渲染循环：</p>
+    <h2>Handle 模式 (无头控制)<span class="jp">Handle 概要</span><a class="anchor" href="#handle">#</a></h2>
+    <p>仅需状态机与媒体控制、无需由 Erika 驱动上屏与音频的轻量级场景，可使用 <code>ErikaHandle</code>：</p>
     <div class="code">
-      <p class="lbl">pull 模型</p>
+      <p class="lbl">ErikaHandle 控制示例</p>
 <pre>ErikaHandle *h = erika_create();
 
-erika_open(h, <span class="s">"https://example.com/video.mp4"</span>);
+ErikaStatus st = erika_open(h, <span class="s">"https://example.com/video.mp4"</span>);
+<span class="k">if</span> (st == ErikaStatus_Ok) {
+    erika_play(h);
 
-<span class="c">/* 事件轮询 */</span>
-ErikaEvent ev;
-<span class="k">while</span> (erika_poll_event(h, &amp;ev) != ErikaStatus_NoEvent) {
-  <span class="c">/* 等 DurationChanged 后读取轨道等 */</span>
+    ErikaEvent ev;
+    <span class="k">while</span> (erika_poll_event(h, &amp;ev) == ErikaStatus_Ok) {
+        <span class="c">/* 处理就绪与播放事件 */</span>
+    }
 }
 
-ErikaTrackInfo tracks[16];
-uintptr_t count = 0;
-erika_tracks(h, tracks, 16, &amp;count);
-<span class="k">for</span> (uintptr_t i = 0; i &lt; count; i++) {
-  <span class="c">/* 读取 tracks[i]，完成后释放 */</span>
-  erika_track_info_free(&amp;tracks[i]);
-}</pre>
+erika_destroy(h);</pre>
     </div>
-    <p>帧数据的获取与渲染循环由宿主实现。Rust 侧的等价物见<a href="rust.html">Rust 嵌入</a>。</p>
-  </section>
-
-  <section id="ffi">
-    <h2>Swift 与 Dart FFI<span class="jp">Swift / Dart</span><a class="anchor" href="#ffi">#</a></h2>
-    <p>Swift 与 Dart 宿主经 FFI 声明导入同一组函数。注意两点：</p>
-    <ul class="body">
-      <li>错误消息的线程局部槽位按线程隔离。异步回调用宿主侧线程时，要在同一线程内读取 <code>last_error_message</code>，或把返回值复制出来。</li>
-      <li>结构体（<code>ErikaPresenterStats</code> 等）按值传入传出。跨语言时结构体布局必须与 <code>erika.h</code> 一致；Flutter 插件在 Swift 侧手写镜像结构体，改动 <code>erika.h</code> 结构体时同步更新。</li>
-    </ul>
   </section>
 
   <footer class="doc-foot">
@@ -181,24 +213,5 @@ erika_tracks(h, tracks, 16, &amp;count);
 </main>
 
 </div>
-<script>
-(function () {
-  document.querySelectorAll('.code').forEach(function (box) {
-    if (!box.querySelector('pre')) return;
-    var btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'copy'; btn.textContent = '复制';
-    box.appendChild(btn);
-    btn.addEventListener('click', function () {
-      var pre = box.querySelector('pre');
-      if (!pre || !navigator.clipboard) return;
-      navigator.clipboard.writeText(pre.innerText).then(function () {
-        var old = btn.textContent;
-        btn.textContent = '已复制';
-        setTimeout(function () { btn.textContent = old; }, 1400);
-      });
-    });
-  });
-})();
-</script>
 </body>
 </html>

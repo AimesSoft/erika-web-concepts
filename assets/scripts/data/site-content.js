@@ -61,35 +61,22 @@ app.siteContent = {
   quickStart: {
     eyebrow: 'Evidence / 02',
     title: '留下最少的接入痕迹',
-    lead: '选择宿主环境，复制最短的开始方式。Flutter 走 pub.dev，OpenHarmony ArkTS 应用可直接从 OHPM 安装，其他原生宿主走 GitHub Releases 预编译产物。',
+    lead: '选择宿主环境，复制最短的开始方式。Swift 走 SwiftPM，Flutter 走 pub.dev，OpenHarmony 走 OHPM，其他原生宿主走 GitHub Releases 预编译产物。',
     tabs: [
       {
-        id: 'release',
-        label: '预编译产物',
-        language: 'SHELL',
-        code: `# github.com/AimesSoft/Erika/releases
-erika-capi-macos-universal.zip
-erika-capi-windows-x64.zip
-erika-capi-ios.zip
-erika-capi-tvos.zip
-erika-capi-android.zip
-erika-capi-openharmony-arm64.zip`,
-        note: '每个归档都包含 include/erika.h、许可证文本与 MANIFEST.txt。',
-        action: {
-          label: '查看 GitHub Releases',
-          url: 'https://github.com/AimesSoft/Erika/releases',
-        },
-      },
-      {
-        id: 'rust',
-        label: 'Rust',
-        language: 'RUST',
-        code: `use erika::{MediaRequest, Player, PlayerConfig};
+        id: 'swift',
+        label: 'Swift · SwiftPM',
+        language: 'SWIFT',
+        code: `import ErikaSwift
 
-let player = Player::new(PlayerConfig::default());
-player.open(MediaRequest::new("/path/to/video.mp4"))?;
-player.play()?;`,
-        note: 'Cargo.toml：erika = { git = "https://github.com/AimesSoft/Erika" }',
+let player = ErikaPlayer()
+try player.open("https://example.com/video.mp4")
+try player.play()`,
+        note: '在 Xcode 中添加 Package: https://github.com/AimesSoft/ErikaSwift',
+        action: {
+          label: '查看 Swift 接入指南',
+          url: 'docs/guide/swift.html',
+        },
       },
       {
         id: 'flutter',
@@ -98,11 +85,10 @@ player.play()?;`,
         code: `import 'package:erika_flutter/erika_flutter.dart';
 
 final player = ErikaPlayer();
-await player.open('/path/to/video.mp4');
-await player.play();
+await player.open('/path/to/video.mp4', play: true);
 
 // 放入 Widget 树
-ErikaVideoView(player: player)`,
+ErikaWindowOverlayVideoView(player: player)`,
         note: '已发布到 pub.dev：flutter pub add erika_flutter。',
       },
       {
@@ -121,6 +107,17 @@ player.play();`,
         },
       },
       {
+        id: 'rust',
+        label: 'Rust',
+        language: 'RUST',
+        code: `use erika::{MediaRequest, Player, PlayerConfig};
+
+let player = Player::new(PlayerConfig::default());
+player.open(MediaRequest::new("/path/to/video.mp4"))?;
+player.play()?;`,
+        note: 'Cargo.toml：erika = { git = "https://github.com/AimesSoft/Erika" }',
+      },
+      {
         id: 'c-api',
         label: 'C · Presenter',
         language: 'C',
@@ -136,6 +133,22 @@ erika_presenter_play(player);
 ErikaPresenterStats stats;
 erika_presenter_render_tick(player, host_time, &stats);`,
         note: '示例为 Apple Metal；Windows、Android 与 HarmonyOS 使用对应的 surface 接口。',
+      },
+      {
+        id: 'release',
+        label: '预编译产物',
+        language: 'SHELL',
+        code: `# github.com/AimesSoft/Erika/releases
+CErika.xcframework.zip
+erika-capi-macos-universal.zip
+erika-capi-windows-x64.zip
+erika-capi-android.zip
+erika-capi-openharmony-arm64.zip`,
+        note: '每个归档都包含 include/erika.h、许可证文本与 MANIFEST.txt。',
+        action: {
+          label: '查看 GitHub Releases',
+          url: 'https://github.com/AimesSoft/Erika/releases',
+        },
       },
     ],
   },
@@ -164,6 +177,7 @@ erika_presenter_render_tick(player, host_time, &stats);`,
         english: 'Guide',
         links: [
           ['快速开始', 'docs/guide/quickstart.html'],
+          ['Swift 接入', 'docs/guide/swift.html'],
           ['Rust 嵌入', 'docs/guide/rust.html'],
           ['C ABI 嵌入', 'docs/guide/c.html'],
           ['Flutter 嵌入', 'docs/guide/flutter.html'],

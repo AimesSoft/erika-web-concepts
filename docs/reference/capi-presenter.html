@@ -18,6 +18,7 @@
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
     <ul>
       <li><a href="../guide/quickstart.html">快速开始</a></li>
+      <li><a href="../guide/swift.html">Swift 接入</a></li>
       <li><a href="../guide/rust.html">Rust 嵌入</a></li>
       <li><a href="../guide/c.html">C ABI 嵌入</a></li>
       <li><a href="../guide/flutter.html">Flutter 嵌入</a></li>
@@ -92,7 +93,7 @@
 
     <div class="api" id="erika_presenter_open">
       <p class="sig"><b>ErikaStatus erika_presenter_open</b>(ErikaPresenterHandle *handle, const char *uri)</p>
-      <p class="desc">打开媒体。<code>uri</code> 是本地路径或 HTTP(S) URL。open 是异步的，就绪状态经 <code>StateChanged</code> / <code>DurationChanged</code> 事件到达。</p>
+      <p class="desc">打开媒体。<code>uri</code> 是本地路径或 HTTP(S) URL。函数同步完成流信息探测与轨道解析并将状态置为 Ready，返回后调用播放函数开始异步解码与呈现。</p>
     </div>
 
     <div class="api" id="erika_presenter_open_with_headers">

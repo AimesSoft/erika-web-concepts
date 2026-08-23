@@ -18,6 +18,7 @@
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
     <ul>
       <li><a href="quickstart.html">快速开始</a></li>
+      <li><a href="swift.html">Swift 接入</a></li>
       <li><a href="rust.html" aria-current="page">Rust 嵌入</a></li>
       <li><a href="c.html">C ABI 嵌入</a></li>
       <li><a href="flutter.html">Flutter 嵌入</a></li>
@@ -56,10 +57,10 @@
   <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Rust 嵌入</p>
   <h1>Rust 嵌入</h1>
   <p class="kicker">Rust Embedding</p>
-  <p class="lead">Rust 宿主直接使用 <code>erika</code> crate 的 <code>Player</code>。播放器持有内部线程与状态机，宿主订阅事件通道感知状态变化，并按需订阅视频、音频与字幕帧。</p>
+  <p class="lead">Rust 宿主直接使用 <code>erika</code> crate 的 <code>Player</code> 或 <code>PresenterRuntime</code>。宿主通过事件通道感知状态变化，按需订阅解码后的视频帧、音频采样与字幕。</p>
 
   <ul class="meta-strip">
-    <li>入口 <b>Player</b></li>
+    <li>入口 <b>Player / PresenterRuntime</b></li>
     <li>事件 <b>12 种</b></li>
     <li>帧订阅 <b>3 通道</b></li>
   </ul>
@@ -71,7 +72,7 @@
 <pre>[dependencies]
 erika = { git = <span class="s">"https://github.com/AimesSoft/Erika"</span>, tag = <span class="s">"v0.1.7"</span> }</pre>
     </div>
-    <p>首次构建前准备原生依赖：</p>
+    <p>首次从源码构建前，需通过 xtask 编译预设的 LGPL 原生依赖（FFmpeg、libass、dav1d 等）：</p>
     <div class="code">
       <p class="lbl">shell</p>
 <pre>cargo run -p xtask -- deps build --all --profile lgpl
@@ -84,114 +85,121 @@ cargo build -p erika</pre>
     <div class="code">
       <p class="lbl">src/main.rs</p>
 <pre><span class="k">use</span> std::time::Duration;
-
 <span class="k">use</span> erika::{MediaRequest, Player, PlayerConfig, PlayerState};
 
-<span class="k">let</span> player = Player::new(PlayerConfig::default());
-player.open(MediaRequest::new(<span class="s">"/path/to/video.mp4"</span>))?;
-player.play()?;
-player.pause()?;
-player.seek(Duration::from_micros(1_500_000))?;
-player.set_playback_rate(1.5)?;
-player.stop()?;
-player.close()?;</pre>
+<span class="k">fn</span> main() -&gt; Result&lt;(), Box&lt;<span class="k">dyn</span> std::error::Error&gt;&gt; {
+    <span class="k">let</span> player = Player::new(PlayerConfig::default());
+
+    <span class="c">/* 1. 同步打开媒体：完成探测与轨道解析，返回时状态已为 Ready */</span>
+    player.open(MediaRequest::new(<span class="s">"/path/to/video.mp4"</span>))?;
+
+    <span class="c">/* 2. 启动后台解码与时钟驱动 */</span>
+    player.play()?;
+
+    <span class="c">/* 3. 播放控制 */</span>
+    player.pause()?;
+    player.seek(Duration::from_millis(1500))?;
+    player.set_playback_rate(1.25)?;
+    player.stop()?;
+
+    <span class="c">/* 4. 关闭播放器：安全终止后台工作线程 */</span>
+    player.close()?;
+    Ok(())
+}</pre>
     </div>
-    <p>方法语义：</p>
+    <p>方法语义要点：</p>
     <ul class="body">
-      <li><code>open</code> 是异步的。返回后媒体尚未就绪，就绪状态经事件通道发布（<code>DurationChanged</code>、<code>TracksChanged</code>、<code>VideoParamsChanged</code> 等）。打开失败时播放器转入 <code>Error</code> 状态。</li>
-      <li><code>play</code> 只投递命令。最终结果以 <code>StateChanged</code> 或 <code>Error</code> 事件为准。</li>
-      <li><code>seek</code> 接受 <code>std::time::Duration</code>(微秒整数是 C ABI 的 <code>position_micros</code> 约定)。暂停期间 seek 会解码并呈现目标位置附近的关键帧，时钟保持冻结。</li>
-      <li><code>close</code> 先结束内部线程再返回，之后可以安全丢弃播放器。</li>
+      <li><b><code>open</code> 是同步完成探测的。</b> <code>Player::open()</code> 会同步执行媒体解封装、流信息探测与轨道提取，并在返回 <code>Ok(())</code> 前发布 <code>DurationChanged</code>、<code>TracksChanged</code> 等初始事件并将状态置为 <code>Ready</code>。</li>
+      <li><b><code>play</code> 启动异步播放循环。</b> <code>play()</code> 唤醒后台工作线程开始解码与音视频时钟同步，播放状态迁移至 <code>Playing</code>。</li>
+      <li><b><code>seek</code> 传入 <code>std::time::Duration</code>。</b> 暂停期间 seek 会同步解码并更新目标位置附近的关键帧画面，播放时钟保持暂停。</li>
+      <li><b><code>close</code> 保证安全回收。</b> <code>close()</code> 等待后台解码线程安全退出后返回，之后可安全丢弃 <code>Player</code> 实例。</li>
     </ul>
-    <p><code>MediaRequest</code> 支持 HTTP(S) URL 与请求头。构造 <code>MediaRequest::new(uri)</code> 后用 <code>with_http_headers</code> 添加头。Debug 输出对 header 值打码。</p>
+    <p><code>MediaRequest</code> 支持 HTTP(S) URL 与自定义请求头：</p>
+    <div class="code">
+      <p class="lbl">网络媒体请求与 Headers</p>
+<pre><span class="k">let</span> request = MediaRequest::new(<span class="s">"https://example.com/stream.m3u8"</span>)
+    .with_http_headers(<span class="k">vec</span>![
+        (<span class="s">"User-Agent"</span>.into(), <span class="s">"CustomPlayer/1.0"</span>.into()),
+        (<span class="s">"Referer"</span>.into(), <span class="s">"https://example.com"</span>.into()),
+    ]);
+player.open(request)?;</pre>
+    </div>
   </section>
 
   <section id="events">
     <h2>事件订阅<span class="jp">イベント</span><a class="anchor" href="#events">#</a></h2>
+    <p>通过 <code>player.subscribe()</code> 获取无界事件接收通道：</p>
     <div class="code">
-      <p class="lbl">事件循环</p>
-<pre><span class="k">let</span> events = player.subscribe();
+      <p class="lbl">事件消费循环</p>
+<pre><span class="k">use</span> erika::{PlayerEvent, PlayerState};
 
-<span class="k">loop</span> {
-  <span class="k">match</span> events.recv() {
-    Ok(PlayerEvent::StateChanged(state)) =&gt; { <span class="c">/* 更新 UI */</span> }
-    Ok(PlayerEvent::BufferingChanged(b)) =&gt; { <span class="c">/* 缓冲指示 */</span> }
-    Ok(PlayerEvent::Error(e)) =&gt; { <span class="c">/* 错误处理 */</span> }
-    Ok(PlayerEvent::StateChanged(PlayerState::Closed)) =&gt; break,
-    _ =&gt; {}
-  }
+<span class="k">let</span> events = player.subscribe();
+
+<span class="k">while let</span> Ok(event) = events.recv() {
+    <span class="k">match</span> event {
+        PlayerEvent::StateChanged(PlayerState::Closed) =&gt; {
+            println!(<span class="s">"播放器已完全关闭"</span>);
+            <span class="k">break</span>;
+        }
+        PlayerEvent::StateChanged(state) =&gt; {
+            println!(<span class="s">"状态迁移: {:?}"</span>, state);
+        }
+        PlayerEvent::DurationChanged(duration) =&gt; {
+            println!(<span class="s">"总时长: {:?}"</span>, duration);
+        }
+        PlayerEvent::PositionChanged(pos) =&gt; {
+            println!(<span class="s">"当前进度: {:?}"</span>, pos);
+        }
+        PlayerEvent::BufferingChanged(is_buffering) =&gt; {
+            println!(<span class="s">"缓冲状态: {}"</span>, is_buffering);
+        }
+        PlayerEvent::TracksChanged(tracks) =&gt; {
+            println!(<span class="s">"可用轨道数: {}"</span>, tracks.len());
+        }
+        PlayerEvent::Error(err) =&gt; {
+            eprintln!(<span class="s">"播放器错误: {:?}"</span>, err);
+        }
+        _ =&gt; {}
+    }
 }</pre>
-    </div>
-    <p>事件通道为 unbounded，容量不受背压影响。事件类型与 C ABI 的 <code>ErikaEventKind</code> 一一对应：</p>
-    <div class="tw">
-      <table>
-        <thead><tr><th>事件</th><th>触发条件</th></tr></thead>
-        <tbody>
-          <tr><td class="m">StateChanged</td><td>播放状态机迁移。</td></tr>
-          <tr><td class="m">DurationChanged</td><td>时长确定或变化。</td></tr>
-          <tr><td class="m">PositionChanged</td><td>播放位置推进。</td></tr>
-          <tr><td class="m">TracksChanged</td><td>轨道列表变化。</td></tr>
-          <tr><td class="m">TrackSelectionChanged</td><td>选中轨道变化。</td></tr>
-          <tr><td class="m">BufferingChanged</td><td>缓冲状态切换。</td></tr>
-          <tr><td class="m">VideoParamsChanged</td><td>视频参数（尺寸、色彩）变化。</td></tr>
-          <tr><td class="m">VideoDecoderChanged</td><td>解码后端切换。</td></tr>
-          <tr><td class="m">AudioOutputChanged</td><td>音频输出状态变化。</td></tr>
-          <tr><td class="m">SurfaceAttached / SurfaceDetached</td><td>表面附着与分离。</td></tr>
-          <tr><td class="m">Error</td><td>错误发生。</td></tr>
-        </tbody>
-      </table>
     </div>
   </section>
 
   <section id="frames">
-    <h2>帧订阅<span class="jp">フレーム</span><a class="anchor" href="#frames">#</a></h2>
-    <p>宿主自行渲染时订阅帧通道。三个通道均为 bounded，容量取 <code>PlayerConfig</code> 中对应的队列配置：</p>
+    <h2>原始帧数据拉取<span class="jp">フレーム購読</span><a class="anchor" href="#frames">#</a></h2>
+    <p>自建渲染管线的 Rust 宿主可直接订阅解码后的数据帧：</p>
     <div class="code">
-      <p class="lbl">帧拉取</p>
-<pre><span class="k">let</span> video = player.subscribe_video_frames();
-<span class="k">let</span> audio = player.subscribe_audio_frames();
-<span class="k">let</span> subtitles = player.subscribe_subtitle_frames();
+      <p class="lbl">订阅音视频与字幕帧</p>
+<pre><span class="k">let</span> video_rx = player.subscribe_video_frames();
+<span class="k">let</span> audio_rx = player.subscribe_audio_frames();
+<span class="k">let</span> subtitle_rx = player.subscribe_subtitle_frames();
 
-<span class="k">loop</span> {
-  <span class="k">if</span> <span class="k">let</span> Ok(frame) = video.try_recv() {
-    <span class="c">/* 上传纹理并呈现 */</span>
-  }
-  <span class="c">/* 每 10 ms 轮询一次，或 select 多个通道 */</span>
+<span class="c">/* 在宿主渲染循环中非阻塞拉取 */</span>
+<span class="k">if let</span> Ok(video_frame) = video_rx.try_recv() {
+    <span class="c">/* video_frame: 像素格式、尺寸、PTS、纹理句柄或 CPU 内存块 */</span>
+}
+<span class="k">if let</span> Ok(audio_frame) = audio_rx.try_recv() {
+    <span class="c">/* audio_frame: PCM 采样数据与声道参数 */</span>
 }</pre>
     </div>
-    <p>队列满时新帧被丢弃，播放继续。需要推模型（内核托管渲染）时使用 presenter，Rust 侧入口为 <code>erika::presenter::PresenterRuntime</code>，C 宿主经 <code>ErikaPresenterHandle</code> 使用同一实现。</p>
+    <p>帧订阅通道具备背压控制机制，队列满时会按照丢帧策略丢弃旧帧以保证播放流畅度。需要整套原生呈现与音频时钟的宿主，推荐直接使用 <code>PresenterRuntime</code>。</p>
   </section>
 
   <section id="config">
     <h2>配置项<span class="jp">設定</span><a class="anchor" href="#config">#</a></h2>
-    <p><code>PlayerConfig</code> 的默认值与字段：</p>
     <div class="tw">
       <table>
-        <thead><tr><th>字段</th><th>默认</th><th>含义</th></tr></thead>
+        <thead><tr><th>字段</th><th>默认值</th><th>含义</th></tr></thead>
         <tbody>
-          <tr><td class="m">name</td><td class="m">"Erika"</td><td>播放器实例标识，用于区分多实例诊断输出。</td></tr>
-          <tr><td class="m">event_channel_capacity</td><td class="m">1024</td><td>事件通道容量。</td></tr>
-          <tr><td class="m">renderer</td><td class="m">Auto</td><td>渲染后端偏好。</td></tr>
-          <tr><td class="m">video_frame_queue_capacity</td><td class="m">3</td><td>视频帧队列深度。</td></tr>
-          <tr><td class="m">audio_frame_queue_capacity</td><td class="m">192</td><td>音频帧队列深度。</td></tr>
-          <tr><td class="m">subtitle_frame_queue_capacity</td><td class="m">16</td><td>字幕帧队列深度，带下限常量。</td></tr>
+          <tr><td class="m">name</td><td class="m">"Erika"</td><td>播放器实例名称，用于多实例日志标识。</td></tr>
+          <tr><td class="m">event_channel_capacity</td><td class="m">1024</td><td>内部播放控制命令队列容量。</td></tr>
+          <tr><td class="m">renderer</td><td class="m">Auto</td><td>渲染后端偏好设置。</td></tr>
+          <tr><td class="m">video_frame_queue_capacity</td><td class="m">3</td><td>视频输出帧队列缓冲深度。</td></tr>
+          <tr><td class="m">audio_frame_queue_capacity</td><td class="m">192</td><td>音频输出帧队列深度。</td></tr>
+          <tr><td class="m">subtitle_frame_queue_capacity</td><td class="m">16</td><td>字幕事件帧队列深度。</td></tr>
         </tbody>
       </table>
     </div>
-    <p><code>Player</code> 实现了 <code>Clone</code>，克隆体共享同一播放会话，可用于向多个持有者分发事件。</p>
-  </section>
-
-  <section id="errors">
-    <h2>错误处理<span class="jp">エラー</span><a class="anchor" href="#errors">#</a></h2>
-    <p>方法返回 <code>Result&lt;(), PlayerError&gt;</code>。错误共六个变体：</p>
-    <ul class="body">
-      <li><code>PlayerError::Closed</code> — 播放器已关闭，操作被拒绝。</li>
-      <li><code>PlayerError::InvalidStateTransition</code> — 在非法状态下调用。</li>
-      <li><code>PlayerError::Renderer</code> / <code>RendererBackpressure</code> — 渲染器错误与背压。</li>
-      <li><code>PlayerError::Source</code> — 媒体源错误。</li>
-      <li><code>PlayerError::Playback</code> — 播放会话错误。</li>
-    </ul>
-    <p>打开请求带序号与代际校验，过期的 open 返回 superseded 错误。播放过程中异步失败不通过返回值上报，经 <code>Error</code> 事件发布。</p>
   </section>
 
   <footer class="doc-foot">
@@ -201,30 +209,11 @@ player.close()?;</pre>
   </footer>
 
   <nav class="pager">
-    <a href="quickstart.html"><span class="dir">Prev</span>快速开始</a>
+    <a href="swift.html"><span class="dir">Prev</span>Swift 接入</a>
     <a class="nx" href="c.html"><span class="dir">Next</span>C ABI 嵌入</a>
   </nav>
 </main>
 
 </div>
-<script>
-(function () {
-  document.querySelectorAll('.code').forEach(function (box) {
-    if (!box.querySelector('pre')) return;
-    var btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'copy'; btn.textContent = '复制';
-    box.appendChild(btn);
-    btn.addEventListener('click', function () {
-      var pre = box.querySelector('pre');
-      if (!pre || !navigator.clipboard) return;
-      navigator.clipboard.writeText(pre.innerText).then(function () {
-        var old = btn.textContent;
-        btn.textContent = '已复制';
-        setTimeout(function () { btn.textContent = old; }, 1400);
-      });
-    });
-  });
-})();
-</script>
 </body>
 </html>

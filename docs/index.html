@@ -18,6 +18,7 @@
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
     <ul>
       <li><a href="guide/quickstart.html">快速开始</a></li>
+      <li><a href="guide/swift.html">Swift 接入</a></li>
       <li><a href="guide/rust.html">Rust 嵌入</a></li>
       <li><a href="guide/c.html">C ABI 嵌入</a></li>
       <li><a href="guide/flutter.html">Flutter 嵌入</a></li>
@@ -56,7 +57,7 @@
   <p class="crumb"><a href="../06-washi-home.html">主页</a><span class="sep">/</span>docs</p>
   <h1>开发者文档</h1>
   <p class="kicker">Developer Documentation</p>
-  <p class="lead">Erika 是 NipaPlay 的自研播放内核。本文档面向在应用中嵌入 Erika 的工程师，以及参与内核开发的贡献者。内容以 <b>v0.1.7</b> 源码为准。</p>
+  <p class="lead">Erika 是为现代跨平台音视频应用量身打造的高性能嵌入式播放内核。本文档面向在应用中接入 Erika 的工程团队，以及参与内核演进的开发者。内容以 <b>v0.1.7</b> 为准。</p>
 
   <ul class="meta-strip">
     <li>版本 <b>0.1.7</b></li>
@@ -67,128 +68,138 @@
 
   <section id="guide">
     <h2>接入指南<span class="jp">導入手引</span><a class="anchor" href="#guide">#</a></h2>
-    <p>从零开始把 Erika 接入你的应用。先读<a href="guide/quickstart.html">快速开始</a>，再按宿主语言选择对应的嵌入指南。OpenHarmony 原生 ArkTS SDK 见<a href="guide/openharmony.html">独立接入指南</a>。</p>
+    <p>从零开始把 Erika 接入你的应用。先读<a href="guide/quickstart.html">快速开始</a>，再按宿主平台与编程语言选择对应的指南。</p>
     <div class="cards">
       <div class="crow">
         <span class="no">01</span>
         <div class="ttl"><a href="guide/quickstart.html">快速开始</a><span class="en">Quickstart</span></div>
-        <div class="txt">五种接入方式概览：预编译产物、Rust、C ABI、Flutter、OpenHarmony / OHPM。十分钟跑通第一个播放。</div>
+        <div class="txt">主流接入方式概览：SwiftPM、Flutter、OpenHarmony OHPM、Rust 与 C ABI 预编译归档。</div>
       </div>
       <div class="crow">
         <span class="no">02</span>
-        <div class="ttl"><a href="guide/rust.html">Rust 嵌入</a><span class="en">Rust Embedding</span></div>
-        <div class="txt">使用 <code>erika</code> crate 的 <code>Player</code> API：媒体打开、播放控制、事件订阅与帧订阅。</div>
+        <div class="ttl"><a href="guide/swift.html">Swift 接入</a><span class="en">Swift &amp; Apple</span></div>
+        <div class="txt">macOS / iOS / tvOS 原生 SwiftPM 包 ErikaSwift：CAMetalLayer 图层绑定、事件轮询与生命周期管理。</div>
       </div>
       <div class="crow">
         <span class="no">03</span>
-        <div class="ttl"><a href="guide/c.html">C ABI 嵌入</a><span class="en">C ABI Embedding</span></div>
-        <div class="txt">经 <code>erika.h</code> 接入：pull 模型的 <code>ErikaHandle</code> 与 push 模型的 <code>ErikaPresenterHandle</code> 二选一。</div>
+        <div class="ttl"><a href="guide/rust.html">Rust 嵌入</a><span class="en">Rust Embedding</span></div>
+        <div class="txt">使用 <code>erika</code> crate 的 <code>Player</code> 与 <code>PresenterRuntime</code>：媒体打开、事件订阅与解码帧通道。</div>
       </div>
       <div class="crow">
         <span class="no">04</span>
+        <div class="ttl"><a href="guide/c.html">C ABI 嵌入</a><span class="en">C ABI Embedding</span></div>
+        <div class="txt">经 <code>erika.h</code> 接入：推荐托管渲染与音频的 <code>ErikaPresenterHandle</code>，以及轻量无头控制的 <code>ErikaHandle</code>。</div>
+      </div>
+      <div class="crow">
+        <span class="no">05</span>
         <div class="ttl"><a href="guide/flutter.html">Flutter 嵌入</a><span class="en">Flutter Embedding</span></div>
-        <div class="txt">插件覆盖 macOS / iOS / tvOS / Windows / Android / HarmonyOS 六个目标，两种视图路径。</div>
+        <div class="txt">官方插件覆盖 6 大平台，提供 Window Overlay 与 PlatformView 两款高性能视图。</div>
+      </div>
+      <div class="crow">
+        <span class="no">06</span>
+        <div class="ttl"><a href="guide/openharmony.html">OpenHarmony / OHPM</a><span class="en">ArkTS SDK</span></div>
+        <div class="txt">OpenHarmony 原生 ArkTS SDK：XComponent 原生表面绑定、DisplayLink 帧渲染与生命周期。</div>
       </div>
     </div>
   </section>
 
   <section id="kernel">
     <h2>内核原理<span class="jp">核の仕組み</span><a class="anchor" href="#kernel">#</a></h2>
-    <p>从 demux 到上屏的整条通路如何工作。先读<a href="kernel/architecture.html">架构总览</a>，再按子系统深入。</p>
+    <p>从媒体解封装、硬件解码到最终上屏呈现的完整架构与核心子系统实现。</p>
     <div class="cards">
       <div class="crow">
-        <span class="no">05</span>
-        <div class="ttl"><a href="kernel/architecture.html">架构总览</a><span class="en">Architecture</span></div>
-        <div class="txt">crate 分层、模块划分、线程模型与数据流。理解其余页面的起点。</div>
-      </div>
-      <div class="crow">
-        <span class="no">06</span>
-        <div class="ttl"><a href="kernel/decode.html">硬件解码</a><span class="en">Decoding</span></div>
-        <div class="txt">VideoToolbox、D3D11VA、MediaCodec、AVCodec 四条硬解通路，互操作不可用时回退软解。</div>
-      </div>
-      <div class="crow">
         <span class="no">07</span>
-        <div class="ttl"><a href="kernel/zero-copy.html">零拷贝导入</a><span class="en">Zero-copy Import</span></div>
-        <div class="txt">解码器输出直接成为 GPU 纹理：CVPixelBuffer、AHardwareBuffer、OHNativeBuffer 导入路径。</div>
+        <div class="ttl"><a href="kernel/architecture.html">架构总览</a><span class="en">Architecture</span></div>
+        <div class="txt">crate 分层、模块划分、线程模型与流水线数据流。</div>
       </div>
       <div class="crow">
         <span class="no">08</span>
-        <div class="ttl"><a href="kernel/render.html">渲染管线</a><span class="en">Render Pipeline</span></div>
-        <div class="txt">pass 图构建规则：色彩转换、tone mapping、字幕与弹幕合成，一次 render pass 完成。</div>
+        <div class="ttl"><a href="kernel/decode.html">硬件解码</a><span class="en">Decoding</span></div>
+        <div class="txt">VideoToolbox、D3D11VA、MediaCodec、AVCodec 硬件加速解码通路与自动回退。</div>
       </div>
       <div class="crow">
         <span class="no">09</span>
-        <div class="ttl"><a href="kernel/hdr.html">高动态范围</a><span class="en">HDR / EDR</span></div>
-        <div class="txt">Apple EDR、HDR10 PQ、extended-linear scRGB 输出协商，以及显式 SDR 回退。</div>
+        <div class="ttl"><a href="kernel/zero-copy.html">零拷贝导入</a><span class="en">Zero-copy Import</span></div>
+        <div class="txt">解码后直接导入 GPU 纹理：CVPixelBuffer、DirectX 共享句柄、AHardwareBuffer、OHNativeBuffer。</div>
       </div>
       <div class="crow">
         <span class="no">10</span>
-        <div class="ttl"><a href="kernel/upscale.html">神经超分</a><span class="en">Neural Upscaling</span></div>
-        <div class="txt">ArtCNN 动漫亮度 2× 超分：Metal simdgroup matrix 与 wgpu compute 两条执行路径。</div>
+        <div class="ttl"><a href="kernel/render.html">渲染管线</a><span class="en">Render Pipeline</span></div>
+        <div class="txt">单次 Render Pass 完成色彩空间转换、Tone Mapping、字幕与弹幕图层高效混合。</div>
       </div>
       <div class="crow">
         <span class="no">11</span>
-        <div class="ttl"><a href="kernel/subtitle-danmaku.html">字幕与弹幕</a><span class="en">Subtitle &amp; Danmaku</span></div>
-        <div class="txt">SRT / WebVTT / ASS 经 libass 渲染；弹幕走 DFM+ 碰撞避让布局与 glyph atlas。</div>
+        <div class="ttl"><a href="kernel/hdr.html">高动态范围</a><span class="en">HDR / EDR</span></div>
+        <div class="txt">Apple EDR、HDR10 PQ、Extended-linear scRGB 输出协商与动态 Headroom 调节。</div>
       </div>
       <div class="crow">
         <span class="no">12</span>
+        <div class="ttl"><a href="kernel/upscale.html">神经超分</a><span class="en">Neural Upscaling</span></div>
+        <div class="txt">ArtCNN 动漫超分算法：Metal SIMDGroup Matrix 与 wgpu Compute 硬件加速。</div>
+      </div>
+      <div class="crow">
+        <span class="no">13</span>
+        <div class="ttl"><a href="kernel/subtitle-danmaku.html">字幕与弹幕</a><span class="en">Subtitle &amp; Danmaku</span></div>
+        <div class="txt">libass 矢量特效字幕渲染与自研 DFM+ 碰撞避让弹幕排版引擎。</div>
+      </div>
+      <div class="crow">
+        <span class="no">14</span>
         <div class="ttl"><a href="kernel/clock.html">时钟与调度</a><span class="en">Clock &amp; Scheduling</span></div>
-        <div class="txt">音频主时钟、ring buffer、时钟修正参数、vsync 量化帧调度与丢帧策略。</div>
+        <div class="txt">高精度音频主时钟、Ring Buffer 缓冲、VSync 量化帧调度与智能丢帧控制。</div>
       </div>
     </div>
   </section>
 
   <section id="project">
-    <h2>项目<span class="jp">開発</span><a class="anchor" href="#project">#</a></h2>
-    <p>面向内核开发者的内容：构建、发布与贡献流程。</p>
+    <h2>项目与构建<span class="jp">開発</span><a class="anchor" href="#project">#</a></h2>
+    <p>面向内核开发者与深度定制者的工程指南：构建、发布与协同规范。</p>
     <div class="cards">
       <div class="crow">
-        <span class="no">13</span>
-        <div class="ttl"><a href="project/building.html">构建与依赖</a><span class="en">Building</span></div>
-        <div class="txt">xtask 编排原生依赖（FFmpeg、libass 等），交叉编译 target 清单，验证播放路径。</div>
-      </div>
-      <div class="crow">
-        <span class="no">14</span>
-        <div class="ttl"><a href="project/releasing.html">发布与产物</a><span class="en">Releasing</span></div>
-        <div class="txt">各平台预编译归档的内容与消费方式，发布流程与 CI。</div>
-      </div>
-      <div class="crow">
         <span class="no">15</span>
-        <div class="ttl"><a href="project/contributing.html">贡献指南</a><span class="en">Contributing</span></div>
-        <div class="txt">仓库布局、运行时模型、新增平台后端的三块工作、C ABI 契约与测试约定。</div>
+        <div class="ttl"><a href="project/building.html">构建与依赖</a><span class="en">Building</span></div>
+        <div class="txt">xtask 自动化管理 C/C++ 依赖，全平台交叉编译矩阵与本地冒烟验证。</div>
       </div>
       <div class="crow">
         <span class="no">16</span>
+        <div class="ttl"><a href="project/releasing.html">发布与产物</a><span class="en">Releasing</span></div>
+        <div class="txt">CI 流水线、各平台预编译归档分发与版本命名规范。</div>
+      </div>
+      <div class="crow">
+        <span class="no">17</span>
+        <div class="ttl"><a href="project/contributing.html">贡献指南</a><span class="en">Contributing</span></div>
+        <div class="txt">代码风格、C ABI 兼容性保证、平台后端实现约定与测试要求。</div>
+      </div>
+      <div class="crow">
+        <span class="no">18</span>
         <div class="ttl"><a href="project/changelog.html">更新日志</a><span class="en">Changelog</span></div>
-        <div class="txt">0.1.4 以来的用户可见变更，按版本与主题整理。</div>
+        <div class="txt">全版本演进历程与详细发布记录。</div>
       </div>
     </div>
   </section>
 
   <section id="reference">
-    <h2>参考<span class="jp">リファレンス</span><a class="anchor" href="#reference">#</a></h2>
-    <p>C ABI 全量参考。以 <code>crates/erika_capi/include/erika.h</code> 为准，本页为查询用索引。</p>
+    <h2>参考手册<span class="jp">リファレンス</span><a class="anchor" href="#reference">#</a></h2>
+    <p>C ABI 导出函数全量参考索引，签名与类型定义以 <code>erika.h</code> 为准。</p>
     <div class="cards">
       <div class="crow">
-        <span class="no">17</span>
-        <div class="ttl"><a href="reference/capi.html">C ABI 总览</a><span class="en">C ABI Overview</span></div>
-        <div class="txt">全局约定：状态码、错误消息、所有权、计数数组惯用法，以及全部类型定义。</div>
-      </div>
-      <div class="crow">
-        <span class="no">18</span>
-        <div class="ttl"><a href="reference/capi-handle.html">ErikaHandle 参考</a><span class="en">ErikaHandle Reference</span></div>
-        <div class="txt">pull 模型入口的全部导出函数，含通用辅助函数。</div>
-      </div>
-      <div class="crow">
         <span class="no">19</span>
-        <div class="ttl"><a href="reference/capi-presenter.html">ErikaPresenterHandle 参考</a><span class="en">ErikaPresenterHandle Reference</span></div>
-        <div class="txt">push 模型入口的全部导出函数：播放、字幕、弹幕、表面、渲染循环、截图。</div>
+        <div class="ttl"><a href="reference/capi.html">C ABI 总览</a><span class="en">C ABI Overview</span></div>
+        <div class="txt">状态码规范、线程局部错误机制、内存所有权与全部基础结构体定义。</div>
       </div>
       <div class="crow">
         <span class="no">20</span>
+        <div class="ttl"><a href="reference/capi-handle.html">ErikaHandle 参考</a><span class="en">ErikaHandle Reference</span></div>
+        <div class="txt">无头播放器控制、事件轮询与公共工具函数。</div>
+      </div>
+      <div class="crow">
+        <span class="no">21</span>
+        <div class="ttl"><a href="reference/capi-presenter.html">ErikaPresenterHandle 参考</a><span class="en">ErikaPresenterHandle Reference</span></div>
+        <div class="txt">全功能 Presenter 导出函数：表面绑定、渲染循环、音频控制、弹幕管理与截图。</div>
+      </div>
+      <div class="crow">
+        <span class="no">22</span>
         <div class="ttl"><a href="reference/capi-json.html">JSON bridge</a><span class="en">JSON Bridge</span></div>
-        <div class="txt"><code>invoke_json</code> / <code>render_tick_json</code> / <code>poll_event_json</code> 与 34 个方法签名。</div>
+        <div class="txt"><code>invoke_json</code> 与 <code>render_tick_json</code> 跨语言动态桥接协议。</div>
       </div>
     </div>
   </section>
@@ -201,24 +212,5 @@
 </main>
 
 </div>
-<script>
-(function () {
-  document.querySelectorAll('.code').forEach(function (box) {
-    if (!box.querySelector('pre')) return;
-    var btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'copy'; btn.textContent = '复制';
-    box.appendChild(btn);
-    btn.addEventListener('click', function () {
-      var pre = box.querySelector('pre');
-      if (!pre || !navigator.clipboard) return;
-      navigator.clipboard.writeText(pre.innerText).then(function () {
-        var old = btn.textContent;
-        btn.textContent = '已复制';
-        setTimeout(function () { btn.textContent = old; }, 1400);
-      });
-    });
-  });
-})();
-</script>
 </body>
 </html>
