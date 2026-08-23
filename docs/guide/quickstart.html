@@ -18,11 +18,11 @@
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
     <ul>
       <li><a href="quickstart.html" aria-current="page">快速开始</a></li>
+      <li><a href="flutter.html">Flutter 嵌入</a></li>
       <li><a href="swift.html">Swift 接入</a></li>
+      <li><a href="openharmony.html">OpenHarmony / OHPM</a></li>
       <li><a href="rust.html">Rust 嵌入</a></li>
       <li><a href="c.html">C ABI 嵌入</a></li>
-      <li><a href="flutter.html">Flutter 嵌入</a></li>
-      <li><a href="openharmony.html">OpenHarmony / OHPM</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -57,7 +57,7 @@
   <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>快速开始</p>
   <h1>快速开始</h1>
   <p class="kicker">Quickstart</p>
-  <p class="lead">Erika 提供了面向多种技术栈的接入方式：SwiftPM 包 <code>ErikaSwift</code>、Flutter 插件 <code>erika_flutter</code>、OpenHarmony ArkTS 原生包 <code>erika</code>、Rust 原生 crate 以及标准 C ABI 动态/静态库。</p>
+  <p class="lead">Erika 提供了面向多种技术栈的接入方式：Flutter 插件 <code>erika_flutter</code>、SwiftPM 包 <code>ErikaSwift</code>、OpenHarmony ArkTS 原生包 <code>erika</code>、Rust 原生 crate 以及标准 C ABI 动态/静态库。</p>
 
   <ul class="meta-strip">
     <li>预编译 <b>6 大平台</b></li>
@@ -65,18 +65,21 @@
     <li>原生依赖 <b>静态封装</b></li>
   </ul>
 
-  <section id="swift">
-    <h2>Swift / Apple 原生接入<span class="jp">Swift</span><a class="anchor" href="#swift">#</a></h2>
-    <p>在 Xcode 项目中添加 SwiftPM 依赖 <code>https://github.com/AimesSoft/ErikaSwift</code>，通过 Metal 渲染与系统硬解快速起步：</p>
-    <div class="code">
-      <p class="lbl">Swift 示例</p>
-<pre><span class="k">import</span> ErikaSwift
-
-<span class="k">let</span> player = ErikaPlayer()
-<span class="k">try</span> player.open(<span class="s">"https://example.com/video.mp4"</span>)
-<span class="k">try</span> player.play()</pre>
+  <section id="prebuilt">
+    <h2>预编译二进制产物<span class="jp">プリビルト</span><a class="anchor" href="#prebuilt">#</a></h2>
+    <p>GitHub Releases（<code>github.com/AimesSoft/Erika/releases</code>）为各大平台提供自包含预编译归档：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>产物归档</th><th>包含内容</th><th>支持架构</th></tr></thead>
+        <tbody>
+          <tr><td class="m">CErika.xcframework.zip</td><td>Apple 统一框架（macOS / iOS / tvOS）</td><td>arm64 / x86_64</td></tr>
+          <tr><td class="m">erika-capi-macos-universal.zip</td><td>liberika_capi.dylib / .a</td><td>arm64 / x86_64</td></tr>
+          <tr><td class="m">erika-capi-windows-x64.zip</td><td>erika_capi.dll / .lib</td><td>x86_64</td></tr>
+          <tr><td class="m">erika-capi-android.zip</td><td>4 个 ABI 的 so 库</td><td>arm64-v8a / armeabi-v7a / x86_64 / x86</td></tr>
+          <tr><td class="m">erika-capi-openharmony-arm64.zip</td><td>liberika_capi.so + N-API 模块</td><td>arm64</td></tr>
+        </tbody>
+      </table>
     </div>
-    <p>详细的 SwiftUI 图层包装与生命周期见 <a href="swift.html">Swift 接入指南</a>。</p>
   </section>
 
   <section id="flutter">
@@ -92,6 +95,20 @@
 <span class="k">await</span> player.open(<span class="s">'/path/to/video.mp4'</span>, play: <span class="k">true</span>);</pre>
     </div>
     <p>插件覆盖 macOS / iOS / tvOS / Windows / Android / HarmonyOS 六个平台，详见 <a href="flutter.html">Flutter 嵌入指南</a>。</p>
+  </section>
+
+  <section id="swift">
+    <h2>Swift / Apple 原生接入<span class="jp">Swift</span><a class="anchor" href="#swift">#</a></h2>
+    <p>在 Xcode 项目中添加 SwiftPM 依赖 <code>https://github.com/AimesSoft/ErikaSwift</code>，通过 Metal 渲染与系统硬解快速起步：</p>
+    <div class="code">
+      <p class="lbl">Swift 示例</p>
+<pre><span class="k">import</span> ErikaSwift
+
+<span class="k">let</span> player = ErikaPlayer()
+<span class="k">try</span> player.open(<span class="s">"https://example.com/video.mp4"</span>)
+<span class="k">try</span> player.play()</pre>
+    </div>
+    <p>详细的 SwiftUI 图层包装与生命周期见 <a href="swift.html">Swift 接入指南</a>。</p>
   </section>
 
   <section id="ohpm">
@@ -141,23 +158,6 @@ erika_presenter_render_tick(p, host_time, &amp;stats);</pre>
     <p>完整规范与无头 <code>ErikaHandle</code> 对比见 <a href="c.html">C ABI 嵌入</a>。</p>
   </section>
 
-  <section id="prebuilt">
-    <h2>预编译二进制产物<span class="jp">プリビルト</span><a class="anchor" href="#prebuilt">#</a></h2>
-    <p>GitHub Releases（<code>github.com/AimesSoft/Erika/releases</code>）为各大平台提供预编译归档：</p>
-    <div class="tw">
-      <table>
-        <thead><tr><th>产物归档</th><th>包含内容</th><th>支持架构</th></tr></thead>
-        <tbody>
-          <tr><td class="m">CErika.xcframework.zip</td><td>Apple 统一框架（macOS / iOS / tvOS）</td><td>arm64 / x86_64</td></tr>
-          <tr><td class="m">erika-capi-macos-universal.zip</td><td>liberika_capi.dylib / .a</td><td>arm64 / x86_64</td></tr>
-          <tr><td class="m">erika-capi-windows-x64.zip</td><td>erika_capi.dll / .lib</td><td>x86_64</td></tr>
-          <tr><td class="m">erika-capi-android.zip</td><td>4 个 ABI 的 so 库</td><td>arm64-v8a / armeabi-v7a / x86_64 / x86</td></tr>
-          <tr><td class="m">erika-capi-openharmony-arm64.zip</td><td>liberika_capi.so + N-API 模块</td><td>arm64</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
   <section id="platforms">
     <h2>平台矩阵<span class="jp">対応環境</span><a class="anchor" href="#platforms">#</a></h2>
     <div class="tw">
@@ -184,7 +184,7 @@ erika_presenter_render_tick(p, host_time, &amp;stats);</pre>
 
   <nav class="pager">
     <a href="../index.html"><span class="dir">Prev</span>文档目录</a>
-    <a class="nx" href="swift.html"><span class="dir">Next</span>Swift 接入</a>
+    <a class="nx" href="flutter.html"><span class="dir">Next</span>Flutter 嵌入</a>
   </nav>
 </main>
 
