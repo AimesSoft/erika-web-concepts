@@ -72,7 +72,7 @@
 <pre>dependencies:
   erika_flutter: ^0.1.7</pre>
     </div>
-    <p>运行 <code>flutter pub get</code> 即可。构建时插件会自动下载与当前平台匹配的预编译原生二进制。若需要从本地源码构建，设置环境变量 <code>ERIKA_FORCE_SOURCE_BUILD=1</code> 并指定 <code>ERIKA_REPO_ROOT</code> 即可。</p>
+    <p>运行 <code>flutter pub get</code> 即可。构建时插件会自动下载与当前平台匹配的预编译原生二进制。若需要从本地源码构建，设置环境变量 <code>ERIKA_FORCE_SOURCE_BUILD=1</code> 并指定 <code>ERIKA_REPO_ROOT</code> 即可。例外：在 Erika 仓库内使用 macOS 插件时，检测到 <code>crates/erika_capi</code> 会自动改走源码编译（无需 Rust 工具链的仓库内场景可设 <code>ERIKA_FORCE_PREBUILT=1</code> 强制使用预编译包）。</p>
   </section>
 
   <section id="views">
@@ -83,6 +83,7 @@
         <thead><tr><th>视图组件</th><th>底层机制</th><th>推荐场景</th></tr></thead>
         <tbody>
           <tr><td class="k">ErikaWindowOverlayVideoView</td><td>原生子窗口 / 原生 Overlay 图层</td><td>macOS / iOS / tvOS / Windows 推荐，原生 60/120fps 极低开销与高帧率。</td></tr>
+          <tr><td class="k">ErikaTextureVideoView</td><td>Flutter Texture：macOS 走 IOSurface + Metal 直写（无逐帧 CPU 回读），OpenHarmony 复用外部纹理；其余平台回退 ErikaVideoView。</td><td>macOS / OpenHarmony 上需要 <code>Opacity</code>、裁剪、变换、颜色滤镜等 Flutter 合成效果时使用。</td></tr>
           <tr><td class="k">ErikaVideoView</td><td>统一跨平台视图：macOS/iOS PlatformView、Windows Overlay、Android TextureView/SurfaceView、HarmonyOS 外部纹理。</td><td><b>全部 6 平台可用</b>。开箱即用，支持被 Flutter 复杂控件（如圆角裁剪、半透明蒙层）正常层叠。</td></tr>
         </tbody>
       </table>
@@ -139,13 +140,43 @@
     </div>
   </section>
 
+  <section id="transparent">
+    <h2>透明视频与混合模式<span class="jp">透明動画とブレンドモード</span><a class="anchor" href="#transparent">#</a></h2>
+    <p>透明视频按 player 请求：<code>ErikaVideoAlphaMode.packedAlphaRight</code> 要求左右分区的编码素材——左半是颜色、右半是灰度 alpha 蒙版。GPU 呈现着色器（Metal / wgpu / D3D11）会重建预乘 alpha 的画面，视频以编码宽度的一半呈现。未请求该模式的 player 仍按不透明解释画面，既有内容不受影响。混合与不透明度在视频 widget 上传入。</p>
+    <div class="code">
+      <p class="lbl">透明视频示例</p>
+<pre>final player = ErikaPlayer(
+  videoAlphaMode: ErikaVideoAlphaMode.packedAlphaRight,
+);
+
+ErikaTextureVideoView(
+  player: player,
+  blendMode: BlendMode.overlay,
+  opacity: 0.8,
+)</pre>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>平台与路径</th><th>blendMode</th><th>opacity</th></tr></thead>
+        <tbody>
+          <tr><td class="k">macOS · ErikaTextureVideoView（Flutter Texture）</td><td>仅 <code>srcOver</code>；其他值改走原生层由 Core Animation 混合</td><td>Flutter <code>Opacity</code></td></tr>
+          <tr><td class="k">macOS · 原生层（blendMode ≠ srcOver）</td><td>支持 <code>overlay</code>（背景感知）；其他值忽略</td><td>原生 CALayer opacity</td></tr>
+          <tr><td class="k">Windows · 窗口 Overlay（DirectComposition）</td><td><code>srcOver</code> / <code>overlay</code>；其他值抛插件错误</td><td>IDCompositionEffectGroup opacity</td></tr>
+          <tr><td class="k">Android / iOS / OpenHarmony</td><td>接受创建参数但不消费</td><td>Texture 路径上由 Flutter 侧应用</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Windows 透明/overlay 窗口 Overlay 视频不再使用独立不透明弹窗，而是通过绑定到 Flutter HWND 的预乘 alpha DirectComposition swap chain 直接合成，底层 Flutter 或游戏画面保持可见；HDR 片源会在 Erika 内部 tone map 到该 SDR 合成空间。不透明视频仍沿用原有子 HWND 路径。</p>
+  </section>
+
   <section id="apis">
     <h2>API 能力概览<span class="jp">機能一覧</span><a class="anchor" href="#apis">#</a></h2>
     <div class="tw">
       <table>
         <thead><tr><th>类别</th><th>方法 / 属性</th><th>说明</th></tr></thead>
         <tbody>
-          <tr><td class="k">播放控制</td><td class="m">open / play / pause / stop / close / seek / setPlaybackRate / setVolume</td><td>核心播放与进度、音量、倍速控制。</td></tr>
+          <tr><td class="k">播放控制</td><td class="m">open / play / pause / stop / close / seek / setPlaybackRate / setVolume</td><td>核心播放与进度、音量、倍速控制（倍速范围 0.25–16×）。</td></tr>
+          <tr><td class="k">透明视频</td><td class="m">ErikaVideoAlphaMode.packedAlphaRight / ErikaTextureVideoView(blendMode, opacity)</td><td>左右分区颜色/alpha 素材的透明呈现，支持 srcOver/overlay 混合与不透明度（支持范围因平台而异）。</td></tr>
           <tr><td class="k">音轨与字幕</td><td class="m">tracks / selectAudioTrack / selectSubtitleTrack / addExternalSubtitle / removeSubtitleTrack / setSubtitleStyle / registerSubtitleMemoryFont</td><td>音轨切换、外挂 SRT/ASS 字幕、字体样式与内存字体注入。</td></tr>
           <tr><td class="k">弹幕系统</td><td class="m">loadDanmakuJson / addDanmakuTrackJson / loadDanmakuFile / addDanmakuTrackFile / danmakuTracks / setDanmakuEnabled / setDanmakuConfig / clearDanmaku</td><td>DFM+ 碰撞布局、多轨弹幕、屏蔽词与样式配置。JSON 字符串遵循统一的<a href="../kernel/subtitle-danmaku.html#json-schema">弹幕 JSON 契约规范</a>。</td></tr>
           <tr><td class="k">图像与超分</td><td class="m">setUpscaler / getUpscalerStatus / screenshot / getPresenterStats / setDebugHudEnabled</td><td>ArtCNN 神经网络 2× 超分、无缝截图与实时渲染性能统计。</td></tr>

@@ -66,6 +66,14 @@
 
   <section id="unreleased">
     <h2>Unreleased<span class="jp">未リリース</span><a class="anchor" href="#unreleased">#</a></h2>
+    <h3>透明视频与跨平台原生 GPU 合成 (#124)</h3>
+    <ul class="body">
+      <li>新增 packed-alpha 视频呈现（<code>ErikaVideoAlphaMode.packedAlphaRight</code>）：左半颜色、右半 alpha 的素材在 GPU 中重建预乘 alpha，按编码宽度的一半呈现；未请求该模式的播放器行为不变。</li>
+      <li>macOS 新增 IOSurface + Metal 的 Flutter Texture 路径（<code>ErikaTextureVideoView</code>），无逐帧 CPU 回读即可获得 Flutter 不透明度、裁剪、变换与颜色滤镜；需要背景感知混合时切换到原生 <code>CAMetalLayer</code>（支持 <code>overlayBlendMode</code> 与图层不透明度）。</li>
+      <li>Windows 透明视频改走 DirectComposition 合成：预乘 alpha 的 Composition Swap Chain 直接绑定 Flutter HWND，替代原独立不透明弹窗；支持 <code>srcOver</code> / <code>overlay</code> 混合与不透明度，overlay 可采样同一 HWND 内的真实游戏背景。不透明视频保持原有 HWND 播放路径。</li>
+      <li>原生播放倍速上限从 4× 提升至 16×，支持短动画与特效素材加速播放。</li>
+      <li>C ABI 新增 <code>erika_presenter_create_with_output_mode_and_alpha</code>、<code>erika_presenter_attach_flutter_texture</code> / <code>erika_presenter_set_flutter_texture_buffer</code> 与 <code>erika_presenter_windows_composition_swapchain_iunknown</code>（AddRef/Release 所有权）。</li>
+    </ul>
     <h3>弹幕连贯性与 JSON 契约 (#121)</h3>
     <ul class="body">
       <li>保持连续规划滑窗间的轨道分配与准入决定稳定，防止已丢弃弹幕中途重现或迫使可见弹幕换轨。</li>

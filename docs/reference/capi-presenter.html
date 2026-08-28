@@ -82,6 +82,11 @@
       <p class="desc">以输出模式与 headroom 创建 presenter，等价于配置对应字段的 <code>create_with_config</code>。</p>
     </div>
 
+    <div class="api" id="erika_presenter_create_with_output_mode_and_alpha">
+      <p class="sig"><b>ErikaPresenterHandle *erika_presenter_create_with_output_mode_and_alpha</b>(int32_t output_mode, float edr_headroom, int32_t video_alpha_mode)</p>
+      <p class="desc">在 <code>create_with_output_mode</code> 基础上追加 <code>ErikaVideoAlphaMode</code>：<code>Opaque</code>（默认，画面完全不透明）或 <code>PackedAlphaRight</code>（左右分区素材：左半颜色、右半灰度 alpha，GPU 重建预乘 alpha 并以编码宽度的一半呈现）。</p>
+    </div>
+
     <div class="api" id="erika_presenter_destroy">
       <p class="sig"><b>void erika_presenter_destroy</b>(ErikaPresenterHandle *handle)</p>
       <p class="desc">销毁 presenter 并释放全部资源。</p>
@@ -128,7 +133,7 @@
 
     <div class="api" id="erika_presenter_set_playback_rate">
       <p class="sig"><b>ErikaStatus erika_presenter_set_playback_rate</b>(ErikaPresenterHandle *handle, double rate)</p>
-      <p class="desc">设置播放倍速。1.0 为正常速度。</p>
+      <p class="desc">设置播放倍速。1.0 为正常速度，钳制到 0.25–16×。</p>
     </div>
 
     <div class="api" id="erika_presenter_set_volume">
@@ -356,6 +361,21 @@
     <div class="api" id="erika_presenter_attach_windows_hwnd">
       <p class="sig"><b>ErikaStatus erika_presenter_attach_windows_hwnd</b>(ErikaPresenterHandle *handle, uint64_t hwnd, uint64_t hinstance, uint32_t width, uint32_t height, double scale)</p>
       <p class="desc">附着 Windows 表面。封装 <code>attach_wgpu_surface</code> 的 WindowsHwnd 变体：hwnd 为 HWND，hinstance 为 HINSTANCE。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_attach_flutter_texture">
+      <p class="sig"><b>ErikaStatus erika_presenter_attach_flutter_texture</b>(ErikaPresenterHandle *handle, ErikaFlutterTextureKind kind, int64_t texture_id, uint32_t width, uint32_t height, double scale)</p>
+      <p class="desc">绑定由 texture registrar 的 <code>texture_id</code> 标识的 Flutter 纹理表面（目前为 Apple 的 <code>MacOsTextureRegistrar</code>/<code>IosTextureRegistrar</code>）。pixel buffer 所有权始终在宿主侧。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_flutter_texture_buffer">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_flutter_texture_buffer</b>(ErikaPresenterHandle *handle, uint64_t raw_texture, uint32_t width, uint32_t height)</p>
+      <p class="desc">在每次 <code>render_tick</code> 之前，选定下一帧要渲染的宿主 GPU 纹理。Apple 上 <code>raw_texture</code> 是强转为 uint64_t 的 <code>id&lt;MTLTexture&gt;</code>，必须为 BGRA8Unorm 且尺寸与声明一致。纹理只在当帧内被借用，宿主在 render_tick 返回后可复用或释放。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_windows_composition_swapchain_iunknown">
+      <p class="sig"><b>ErikaStatus erika_presenter_windows_composition_swapchain_iunknown</b>(ErikaPresenterHandle *handle, void **out_swapchain)</p>
+      <p class="desc">仅限 Windows。以 <code>direct_composition</code> 能力附着、且以透明 alpha 模式或 overlay 混合播放时，返回 Erika 创建的预乘 alpha DirectComposition swap chain。返回的 IUnknown 已 AddRef，调用者拥有该 COM 引用并必须 Release；解码器或输出设备重建 swap chain 后需重新获取（指针未变说明没有重建）。</p>
     </div>
 
     <div class="api" id="erika_presenter_resize_surface">
