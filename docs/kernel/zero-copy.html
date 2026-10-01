@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -23,6 +23,7 @@
       <li><a href="../guide/openharmony.html">OpenHarmony / OHPM</a></li>
       <li><a href="../guide/rust.html">Rust 嵌入</a></li>
       <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/linux.html">Linux 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -50,11 +51,11 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.7<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
-  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>零拷贝导入</p>
+  <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>零拷贝导入</p>
   <h1>零拷贝导入</h1>
   <p class="kicker">Zero-copy Import</p>
   <p class="lead">硬件解码器的输出以原生纹理或 buffer 句柄的形式直接导入渲染器，中间不经过 CPU 拷贝。每条导入路径都有一一对应的回退：无法导入时走 CPU upload，帧计数如实反映两条路径的使用比例。</p>
@@ -102,8 +103,14 @@
     </div>
   </section>
 
+  <section id="linux">
+    <h2>Linux GPU 导入<a class="anchor" href="#linux">#</a></h2>
+    <p>Linux VA-API 可通过 FFmpeg <code>AV_HWFRAME_MAP_DIRECT</code> 将 NV12 / P010 映射到 Vulkan 图像，由 wgpu 直接采样；该实验性路径需要兼容设备及外部显存、信号量等能力。</p>
+    <p>普通 NVDEC / WSL OpenGL 路径使用 CPU 平面传递；可选 WSL D3D12 路径使用 GPU 复制。Wayland 原生视频层可减少 Flutter RGBA 读回，和解码帧是否零拷贝是两件事。构建步骤收录在 <a href="../guide/linux.html">Linux 接入</a>。</p>
+  </section>
+
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.7</b></span>
+    <span>Erika <b>v0.2.1</b></span>
     <span>Section <b>Kernel</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
@@ -115,24 +122,5 @@
 </main>
 
 </div>
-<script>
-(function () {
-  document.querySelectorAll('.code').forEach(function (box) {
-    if (!box.querySelector('pre')) return;
-    var btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'copy'; btn.textContent = '复制';
-    box.appendChild(btn);
-    btn.addEventListener('click', function () {
-      var pre = box.querySelector('pre');
-      if (!pre || !navigator.clipboard) return;
-      navigator.clipboard.writeText(pre.innerText).then(function () {
-        var old = btn.textContent;
-        btn.textContent = '已复制';
-        setTimeout(function () { btn.textContent = old; }, 1400);
-      });
-    });
-  });
-})();
-</script>
 </body>
 </html>

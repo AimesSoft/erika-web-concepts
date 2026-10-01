@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -23,6 +23,7 @@
       <li><a href="../guide/openharmony.html">OpenHarmony / OHPM</a></li>
       <li><a href="../guide/rust.html">Rust 嵌入</a></li>
       <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/linux.html">Linux 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -50,11 +51,11 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.7<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
-  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>project<span class="sep">/</span>构建与依赖</p>
+  <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>project<span class="sep">/</span>构建与依赖</p>
   <h1>构建与依赖</h1>
   <p class="kicker">Building and Dependencies</p>
   <p class="lead">Erika 的 Rust 代码直接以 cargo 构建；FFmpeg、dav1d、libass、HarfBuzz 等原生依赖以源码方式获取并在 <code>third_party/</code> 内构建，由 <code>xtask deps</code> 管理。构建脚本保证 CI 与本地产出一致。</p>
@@ -82,7 +83,7 @@
 
   <section id="deps">
     <h2>原生依赖<span class="jp">ネイティブ依存</span><a class="anchor" href="#deps">#</a></h2>
-    <p>全部依赖以固定版本从上游源码获取，构建脚本应用 <code>third_party/patches/</code> 内的补丁。</p>
+    <p>发布目标的依赖以固定版本从上游源码获取，构建脚本应用 <code>third_party/patches/</code> 内的补丁。</p>
     <div class="tw">
       <table>
         <thead><tr><th>组件</th><th>版本</th><th>说明</th></tr></thead>
@@ -120,14 +121,14 @@ cargo run -p xtask -- deps build                <span class="c"># 构建 host �
         <tbody>
           <tr><td class="k">--profile</td><td>lgpl / gpl-full</td><td>lgpl</td></tr>
           <tr><td class="k">--target</td><td>见下方 target 表</td><td>host</td></tr>
-          <tr><td class="k">--force</td><td>—</td><td>跳过已完成的构建</td></tr>
+          <tr><td class="k">--force</td><td>强制重建原生依赖</td><td>关闭；默认复用已完成产物</td></tr>
           <tr><td class="k">--all</td><td>额外构建字幕栈：libass + FreeType + HarfBuzz + FriBidi（fetch 时同时抓取这四者源码）</td><td>只构建视频栈</td></tr>
           <tr><td class="k">--jobs</td><td>并行度</td><td>自动</td></tr>
         </tbody>
       </table>
     </div>
     <p>两个 profile 的差异在 FFmpeg 的 configure 标志。lgpl 禁用 GPL 组件、禁用 network、只启用播放内核需要的 demuxer / parser / decoder；gpl-full 在此基础上启用 GPL 部分。默认 lgpl 满足发布需要。</p>
-    <p class="note">构建结果以目标文件时间戳为准。改动了 <code>xtask/src/main.rs</code> 或 <code>third_party/patches/</code> 之后需要 <code>deps build --force</code> 触发重建。</p>
+    <p class="note">构建结果按目标与 profile 保存构建标记；FFmpeg 和 dav1d 会核对版本、补丁及构建选项。改动了 <code>xtask/src/main.rs</code> 或 <code>third_party/patches/</code> 之后需要 <code>deps build --force</code> 触发重建。</p>
   </section>
 
   <section id="targets">
@@ -164,8 +165,19 @@ cargo test --workspace</pre>
     <p><code>macos_native_demo</code> 是完整的 presenter 端到端演示：打开、播放、Metal 渲染与系统媒体控制。其他示例按名称分工，<code>capi_smoke</code> 覆盖 C ABI 的主要调用路径，<code>playback_tick</code> / <code>player_tick</code> 覆盖 play / pull 两条入口的调度循环。</p>
   </section>
 
+  <section id="linux">
+    <h2>Linux 系统库构建<a class="anchor" href="#linux">#</a></h2>
+    <p>Linux 使用系统 FFmpeg 8 和 PulseAudio，另行构建 Erika 补丁版 libass，入口不同于 xtask 的发布目标：</p>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>bash scripts/build_linux_libass.sh
+cargo build --locked --release -p erika_capi -p linux_native_demo</pre>
+    </div>
+    <p>发行版依赖、Flutter 动态库路径与 X11 / Wayland 示例收录在 <a href="../guide/linux.html">Linux 接入</a>。系统 FFmpeg 的编解码器和许可证取决于发行版构建；设置 lgpl profile 不会改变系统库。</p>
+  </section>
+
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.7</b></span>
+    <span>Erika <b>v0.2.1</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
@@ -177,24 +189,5 @@ cargo test --workspace</pre>
 </main>
 
 </div>
-<script>
-(function () {
-  document.querySelectorAll('.code').forEach(function (box) {
-    if (!box.querySelector('pre')) return;
-    var btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'copy'; btn.textContent = '复制';
-    box.appendChild(btn);
-    btn.addEventListener('click', function () {
-      var pre = box.querySelector('pre');
-      if (!pre || !navigator.clipboard) return;
-      navigator.clipboard.writeText(pre.innerText).then(function () {
-        var old = btn.textContent;
-        btn.textContent = '已复制';
-        setTimeout(function () { btn.textContent = old; }, 1400);
-      });
-    });
-  });
-})();
-</script>
 </body>
 </html>

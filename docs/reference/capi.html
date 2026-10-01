@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -23,6 +23,7 @@
       <li><a href="../guide/openharmony.html">OpenHarmony / OHPM</a></li>
       <li><a href="../guide/rust.html">Rust 嵌入</a></li>
       <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/linux.html">Linux 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -50,18 +51,18 @@
       <li><a href="capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.7<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
-  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>C ABI 总览</p>
+  <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>C ABI 总览</p>
   <h1>C ABI 总览</h1>
   <p class="kicker">C ABI Overview</p>
-  <p class="lead">C ABI 的全局约定与类型定义。函数清单按入口族分页：<a href="capi-handle.html">ErikaHandle</a>（22 个）、<a href="capi-presenter.html">ErikaPresenterHandle</a>（63 个）、通用辅助函数（6 个）。以 <code>crates/erika_capi/include/erika.h</code> 为唯一权威。</p>
+  <p class="lead">C ABI 的全局约定与类型定义。函数清单按入口族分页：<a href="capi-handle.html">ErikaHandle</a>（23 个）、<a href="capi-presenter.html">ErikaPresenterHandle</a>（71 个）、通用与独立入口（7 个）。以 <code>crates/erika_capi/include/erika.h</code> 为唯一权威。</p>
 
   <ul class="meta-strip">
-    <li>导出函数 <b>91</b></li>
-    <li>类型 <b>33</b></li>
+    <li>导出函数 <b>101</b></li>
+    <li>类型 <b>38</b></li>
     <li>事件 <b>12</b> 种</li>
   </ul>
 
@@ -70,7 +71,7 @@
     <p>两个独立的入口族，一次集成二选一：</p>
     <ul class="body">
       <li><b>ErikaHandle</b> — pull 模型。宿主渲染并拉取状态。</li>
-      <li><b>ErikaPresenterHandle</b> — push 模型。内核托管解码、时序、音频与渲染；宿主提供表面并调用 <code>render_tick</code>。编译于 macOS / iOS / Windows / Android / OpenHarmony；其他目标 <code>create</code> 返回 NULL。</li>
+      <li><b>ErikaPresenterHandle</b> — push 模型。内核托管解码、时序、音频与渲染；宿主提供表面并调用 <code>render_tick</code>。编译于 macOS / iOS / tvOS / Windows / Android / OpenHarmony / Linux；其他目标 <code>create</code> 返回 NULL。</li>
     </ul>
     <p>全局约定：</p>
     <ul class="body">
@@ -147,7 +148,7 @@
 
   <section id="types">
     <h2>类型清单<span class="jp">型</span><a class="anchor" href="#types">#</a></h2>
-    <p>33 个类型定义全部位于 <code>erika.h</code>。结构体字段见下方各表;枚举的成员值也在本节列出。</p>
+    <p>38 个类型定义全部位于 <code>erika.h</code>。结构体字段见下方各表;枚举的成员值也在本节列出。</p>
     <h3>句柄</h3>
     <ul class="body">
       <li><code>ErikaHandle</code> — pull 模型句柄。</li>
@@ -159,7 +160,7 @@
         <thead><tr><th>类型</th><th>用途</th></tr></thead>
         <tbody>
           <tr><td class="m">ErikaHttpHeader</td><td>打开时的 HTTP 请求头（name / value）。</td></tr>
-          <tr><td class="m">ErikaPresenterConfig</td><td>输出模式、EDR headroom、超分模式。</td></tr>
+          <tr><td class="m">ErikaPresenterConfig</td><td>输出模式、EDR headroom、超分与视频 alpha 模式。</td></tr>
           <tr><td class="m">ErikaSubtitleStyle</td><td>字幕样式覆盖，含 override_mask。</td></tr>
           <tr><td class="m">ErikaSurfaceOutputCapabilities</td><td>表面输出能力（extended-linear、direct composition、headroom）。</td></tr>
           <tr><td class="m">ErikaUpscalerStatus</td><td>超分状态与帧计数。</td></tr>
@@ -240,6 +241,7 @@
           <tr><td class="m">output_mode</td><td class="m">int32_t</td><td><code>ErikaPresenterOutputMode</code>。</td></tr>
           <tr><td class="m">edr_headroom</td><td class="m">float</td><td>EDR headroom，0 = 自动。</td></tr>
           <tr><td class="m">luma_upscaler</td><td class="m">int32_t</td><td><code>ErikaLumaUpscalerMode</code>。</td></tr>
+          <tr><td class="m">video_alpha_mode</td><td class="m">int32_t</td><td><code>ErikaVideoAlphaMode</code>：0 = Opaque，1 = PackedAlphaRight。</td></tr>
         </tbody>
       </table>
     </div>
@@ -446,14 +448,14 @@
           <tr><td class="m">software_video_frames / hardware_video_frames</td><td class="m">uint64_t</td><td>软解 / 硬解帧。</td></tr>
           <tr><td class="m">zero_copy_video_frames</td><td class="m">uint64_t</td><td>零拷贝帧。</td></tr>
           <tr><td class="m">cpu_video_frame_fallbacks</td><td class="m">uint64_t</td><td>回退到 CPU 的帧数。</td></tr>
-          <tr><td class="m">last_render_micros / last_render_current_micros</td><td class="m">uint64_t</td><td>上次渲染耗时与时钟。</td></tr>
-          <tr><td class="m">audio_clock_read_frames / queued_frames / underflow_frames</td><td class="m">uint64_t</td><td>音频时钟读帧 / 排队 / 欠载。</td></tr>
+          <tr><td class="m">last_render_micros / last_render_current_micros</td><td class="m">uint64_t</td><td>上次完整 tick / 渲染器调用耗时，单位为微秒。</td></tr>
+          <tr><td class="m">audio_clock_read_frames / audio_clock_queued_frames / audio_clock_underflow_frames</td><td class="m">uint64_t</td><td>音频时钟读帧 / 排队 / 欠载。</td></tr>
           <tr><td class="m">audio_recovery_state</td><td class="m">int32_t</td><td>0 稳定 / 1 断开 / 2 恢复中 / 3 失败。</td></tr>
           <tr><td class="m">audio_last_error_code</td><td class="m">int32_t</td><td>上次音频错误码。</td></tr>
-          <tr><td class="m">audio_recovery_attempts / count / failures</td><td class="m">uint64_t</td><td>音频恢复尝试 / 成功 / 失败。</td></tr>
+          <tr><td class="m">audio_recovery_attempts / audio_recovery_count / audio_recovery_failures</td><td class="m">uint64_t</td><td>音频恢复尝试 / 成功 / 失败。</td></tr>
           <tr><td class="m">direct_zero_copy_video_frames / shared_handle_video_frames</td><td class="m">uint64_t</td><td>直接零拷贝 / 共享句柄帧。</td></tr>
           <tr><td class="m">hdr_source_frames / hdr10_output_frames / sdr_tonemap_frames</td><td class="m">uint64_t</td><td>HDR 源 / HDR10 输出 / SDR 色调映射帧。</td></tr>
-          <tr><td class="m">hdr10_metadata_updates / failures / output_failures</td><td class="m">uint64_t</td><td>HDR10 元数据更新 / 失败 / 输出失败。</td></tr>
+          <tr><td class="m">hdr10_metadata_updates / hdr10_metadata_failures / hdr10_output_failures</td><td class="m">uint64_t</td><td>HDR10 元数据更新 / 失败 / 输出失败。</td></tr>
           <tr><td class="m">hdr10_output_active</td><td class="m">bool</td><td>HDR10 输出是否生效。</td></tr>
           <tr><td class="m">video_frame_backpressure_drops</td><td class="m">uint64_t</td><td>背压丢弃帧数。</td></tr>
         </tbody>
@@ -490,10 +492,10 @@
           <tr><td class="m">ErikaWgpuSurfaceKind</td><td>wgpu 表面类型，9 个成员。</td></tr>
           <tr><td class="m">ErikaFlutterTextureKind</td><td>Flutter 纹理类型，6 个成员。</td></tr>
           <tr><td class="m">ErikaPresenterOutputMode</td><td>SDR / Apple EDR / extended-linear / Auto。</td></tr>
-          <tr><td class="m">ErikaActiveOutputEncoding</td><td>SDR sRGB / Apple EDR / Android scRGB / HDR10 PQ。</td></tr>
+          <tr><td class="m">ErikaActiveOutputEncoding</td><td>SDR sRGB / Apple EDR / Android scRGB / HDR10 PQ / Linux scRGB。</td></tr>
           <tr><td class="m">ErikaOutputFallbackReason</td><td>HDR 回退原因，9 个成员。</td></tr>
           <tr><td class="m">ErikaOutputSurfaceFormat</td><td>8-bit UNORM / 10-bit UNORM / 16-bit float。</td></tr>
-          <tr><td class="m">ErikaLumaUpscalerMode</td><td>Off / ArtCNN F16 / ArtCNN F32。</td></tr>
+          <tr><td class="m">ErikaLumaUpscalerMode</td><td>Off / ArtCNN F16 / ArtCNN F32 / ArtCNN F16 DS。</td></tr>
           <tr><td class="m">ErikaUpscalerBackendStatus</td><td>超分后端状态，5 种。</td></tr>
         </tbody>
       </table>
@@ -553,6 +555,7 @@
           <tr><td class="m">1</td><td>AppleEdr</td><td class="m">1</td><td>AppleEdr</td></tr>
           <tr><td class="m">2</td><td>ExtendedLinear</td><td class="m">2</td><td>AndroidExtendedLinearScRgb</td></tr>
           <tr><td class="m">3</td><td>Auto</td><td class="m">3</td><td>Hdr10Pq</td></tr>
+          <tr><td>—</td><td>—</td><td class="m">4</td><td>LinuxExtendedLinearScRgb</td></tr>
         </tbody>
       </table>
     </div>
@@ -583,15 +586,74 @@
           <tr><td class="m">0</td><td>EightBitUnorm</td><td class="m">0</td><td>Off</td><td class="m">0</td><td>Off</td></tr>
           <tr><td class="m">1</td><td>TenBitUnorm</td><td class="m">1</td><td>ArtCnnC4F16</td><td class="m">1</td><td>Inactive(后端不执行 ArtCNN，保留原生亮度采样)</td></tr>
           <tr><td class="m">2</td><td>SixteenBitFloat</td><td class="m">2</td><td>ArtCnnC4F32</td><td class="m">2</td><td>Building</td></tr>
-          <tr><td></td><td></td><td></td><td></td><td class="m">3</td><td>Scalar</td></tr>
+          <tr><td></td><td></td><td class="m">3</td><td>ArtCnnC4F16Ds</td><td class="m">3</td><td>Scalar</td></tr>
           <tr><td></td><td></td><td></td><td></td><td class="m">4</td><td>SimdgroupMatrix</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
+  <section id="open-and-export">
+    <h2>打开选项与 GIF 导出类型<a class="anchor" href="#open-and-export">#</a></h2>
+    <p>以下定义来自 0.2.1 的 <code>erika.h</code>。HTTP 窗口和 GIF 导出的完整字段如下：</p>
+    <h3>ErikaOpenOptions</h3>
+    <div class="code">
+<pre>typedef struct ErikaOpenOptions {
+  const ErikaHttpHeader *headers;
+  uintptr_t header_count;
+  uint64_t http_read_ahead_bytes;
+  uint64_t http_back_buffer_bytes;
+  uint64_t reserved[2];
+} ErikaOpenOptions;</pre>
+    </div>
+    <h3>ErikaVideoAlphaMode</h3>
+    <div class="code">
+<pre>typedef enum ErikaVideoAlphaMode {
+  ErikaVideoAlphaMode_Opaque = 0,
+  ErikaVideoAlphaMode_PackedAlphaRight = 1,
+} ErikaVideoAlphaMode;</pre>
+    </div>
+    <h3>ErikaGifExportQuality</h3>
+    <div class="code">
+<pre>typedef enum ErikaGifExportQuality {
+  ErikaGifExportQuality_Normal = 0,
+  ErikaGifExportQuality_High = 1,
+} ErikaGifExportQuality;</pre>
+    </div>
+    <h3>ErikaGifExportOptions</h3>
+    <div class="code">
+<pre>typedef struct ErikaGifExportOptions {
+  const char *input_uri;
+  const char *output_path;
+  uint64_t start_millis;
+  uint64_t end_millis;
+  uint32_t frames_per_second;
+  uint32_t output_width;
+  uint32_t output_height;
+  int32_t quality;
+  int32_t loop_count;
+  bool overwrite;
+  const ErikaHttpHeader *headers;
+  uintptr_t header_count;
+  uint64_t http_read_ahead_bytes;
+  uint64_t reserved[3];
+} ErikaGifExportOptions;</pre>
+    </div>
+    <h3>ErikaGifExportResult</h3>
+    <div class="code">
+<pre>typedef struct ErikaGifExportResult {
+  uint32_t width;
+  uint32_t height;
+  uint64_t frame_count;
+  uint64_t file_size;
+} ErikaGifExportResult;</pre>
+    </div>
+    <p><code>http_read_ahead_bytes</code> 决定向前预读的字节数，默认 2 MiB；<code>http_back_buffer_bytes</code> 决定保留多少已播放数据，默认 16 MiB。两者省略或传 0 使用默认值。预读默认值也可由 <code>ERIKA_HTTP_READAHEAD_BYTES</code> 设置。</p>
+    <p>回退缓存内的后退 seek 可直接复用已下载数据。高码率视频需要更大的预算：80 Mbit/s 的视频保留约 10 秒需约 100 MB。缓存按字节限制，不代表固定的播放秒数。</p>
+  </section>
+
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.7</b></span>
+    <span>Erika <b>v0.2.1</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
@@ -603,24 +665,5 @@
 </main>
 
 </div>
-<script>
-(function () {
-  document.querySelectorAll('.code').forEach(function (box) {
-    if (!box.querySelector('pre')) return;
-    var btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'copy'; btn.textContent = '复制';
-    box.appendChild(btn);
-    btn.addEventListener('click', function () {
-      var pre = box.querySelector('pre');
-      if (!pre || !navigator.clipboard) return;
-      navigator.clipboard.writeText(pre.innerText).then(function () {
-        var old = btn.textContent;
-        btn.textContent = '已复制';
-        setTimeout(function () { btn.textContent = old; }, 1400);
-      });
-    });
-  });
-})();
-</script>
 </body>
 </html>

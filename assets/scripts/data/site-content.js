@@ -4,7 +4,7 @@ app.siteContent = {
     name: 'Erika',
     kana: '古戸ヱリカ',
     descriptor: 'Playback Kernel',
-    version: 'v0.1.7',
+    version: 'v0.2.1',
     repoUrl: 'https://github.com/AimesSoft/Erika',
   },
   navigation: [
@@ -26,7 +26,7 @@ app.siteContent = {
     sideNote: '「如何です？古戸ヱリカにはこの程度の推理が可能です。」',
     facts: [
       { value: 'Rust', label: '内核语言' },
-      { value: '6', label: '已支持平台' },
+      { value: '7', label: '平台覆盖' },
     ],
   },
   features: {
@@ -54,26 +54,26 @@ app.siteContent = {
         icon: 'subtitle',
         title: '完整播放栈',
         text: '时钟、音频、字幕、弹幕和神经超分都由内核统一调度，宿主只管理产品体验。',
-        tags: ['libass', 'Audio', 'Anime4K'],
+        tags: ['libass', 'Audio', 'ArtCNN'],
       },
     ],
   },
   quickStart: {
     eyebrow: 'Evidence / 02',
     title: '留下最少的接入痕迹',
-    lead: '选择宿主环境，复制最短的开始方式。Flutter 走 pub.dev，Swift 走 SwiftPM，OpenHarmony 走 OHPM，其他原生宿主走 GitHub Releases 预编译产物。',
+    lead: '选择宿主环境，复制最短的开始方式。Flutter 走 pub.dev，Swift 走 SwiftPM，OpenHarmony 走 OHPM，其他原生宿主使用 GitHub Releases 预编译产物，Linux 从源码构建。',
     tabs: [
       {
         id: 'release',
         label: '预编译产物',
         language: 'SHELL',
         code: `# github.com/AimesSoft/Erika/releases
-erika-swift-core-0.1.7.xcframework.zip
+erika-swift-core-0.2.1.xcframework.zip
 erika-capi-macos-universal.zip
 erika-capi-windows-x64.zip
 erika-capi-android.zip
 erika-capi-openharmony-arm64.zip`,
-        note: '每个归档都包含 include/erika.h、许可证文本与 MANIFEST.txt。',
+        note: 'C ABI 归档包含 erika.h、许可证与 MANIFEST.txt；Swift 使用 XCFramework。',
         action: {
           label: '查看 GitHub Releases',
           url: 'https://github.com/AimesSoft/Erika/releases',
@@ -117,7 +117,7 @@ try player.play()`,
 const player = new ErikaPlayer();
 player.open('https://example.com/video.mp4');
 player.play();`,
-        note: '先运行 ohpm install erika；视频 surface 生命周期和 renderTick() 见 OpenHarmony 接入指南。',
+        note: 'ohpm install erika 安装公开版 0.1.9；0.2.1 已提交审核。原生表面与帧调度示例收录在接入指南。',
         action: {
           label: '查看 OpenHarmony 接入指南',
           url: 'docs/guide/openharmony.html',
@@ -132,7 +132,7 @@ player.play();`,
 let player = Player::new(PlayerConfig::default());
 player.open(MediaRequest::new("/path/to/video.mp4"))?;
 player.play()?;`,
-        note: 'Cargo.toml：erika = { git = "https://github.com/AimesSoft/Erika" }',
+        note: 'Cargo.toml：erika = { git = "https://github.com/AimesSoft/Erika", tag = "v0.2.1" }',
       },
       {
         id: 'c-api',
@@ -155,7 +155,7 @@ erika_presenter_render_tick(player, host_time, &stats);`,
   },
   platforms: {
     eyebrow: 'Coverage / 03',
-    title: '六个平台，同一种行为',
+    title: '七个平台，同一套接口',
     lead: '平台能力留在内核里，产品逻辑留在宿主里。',
     items: [
       { name: 'macOS', minimum: '11+', render: 'Metal', decode: 'VideoToolbox', status: 'ready' },
@@ -164,7 +164,7 @@ erika_presenter_render_tick(player, host_time, &stats);`,
       { name: 'Windows', minimum: '10+', render: 'D3D11', decode: 'D3D11VA', status: 'ready' },
       { name: 'Android', minimum: '8+', render: 'wgpu', decode: 'MediaCodec', status: 'ready' },
       { name: 'HarmonyOS', minimum: 'API 18', render: 'wgpu', decode: 'AVCodec', status: 'ready' },
-      { name: 'Linux', minimum: '—', render: 'wgpu', decode: '—', status: 'planned' },
+      { name: 'Linux', minimum: 'FFmpeg 8.x', render: 'wgpu', decode: 'NVDEC / VA-API', status: 'planned', statusLabel: '实验性' },
     ],
   },
   docs: {
@@ -183,6 +183,7 @@ erika_presenter_render_tick(player, host_time, &stats);`,
           ['OpenHarmony / OHPM', 'docs/guide/openharmony.html'],
           ['Rust 嵌入', 'docs/guide/rust.html'],
           ['C ABI 嵌入', 'docs/guide/c.html'],
+          ['Linux 接入', 'docs/guide/linux.html'],
         ],
       },
       {

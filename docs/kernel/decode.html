@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -23,6 +23,7 @@
       <li><a href="../guide/openharmony.html">OpenHarmony / OHPM</a></li>
       <li><a href="../guide/rust.html">Rust 嵌入</a></li>
       <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/linux.html">Linux 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -50,18 +51,18 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.7<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
-  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>硬件解码</p>
+  <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>硬件解码</p>
   <h1>硬件解码</h1>
   <p class="kicker">Decoding</p>
   <p class="lead">解码统一走 FFmpeg 的 <code>avcodec</code> 接口，通过 <code>DecoderBackend</code> 选择软件或硬件后端。硬件路径不可用时回退软解，切换经 <code>VideoDecoderChanged</code> 事件上报宿主。</p>
 
   <ul class="meta-strip">
-    <li>后端 <b>5</b> 种</li>
-    <li>硬件 4 / 软件 1</li>
+    <li>后端 <b>7</b> 种</li>
+    <li>硬件 6 / 软件 1</li>
     <li>切换事件 <b>VideoDecoderChanged</b></li>
   </ul>
 
@@ -71,6 +72,8 @@
       <table>
         <thead><tr><th>后端</th><th>平台</th><th>说明</th></tr></thead>
         <tbody>
+          <tr><td class="k">Cuda / NVDEC</td><td class="m">Linux / NVIDIA</td><td>使用 CUDA 视频解码设备。</td></tr>
+          <tr><td class="k">Vaapi</td><td class="m">Linux / Intel、AMD</td><td>使用 VA-API render device。</td></tr>
           <tr><td class="k">Software</td><td class="m">所有</td><td>FFmpeg 软解，任何平台的回退目标。</td></tr>
           <tr><td class="k">VideoToolbox</td><td class="m">macOS / iOS / tvOS</td><td>Apple 硬件解码。</td></tr>
           <tr><td class="k">D3d11va</td><td class="m">Windows</td><td>Direct3D 11 视频加速。</td></tr>
@@ -79,7 +82,7 @@
         </tbody>
       </table>
     </div>
-    <p>平台默认选择由 <code>VideoDecodePreference</code> 决定：Apple 系默认 VideoToolbox，Windows 默认 D3D11VA，Android 默认 MediaCodec，HarmonyOS 默认 AVCodec，其余平台使用软件解码。</p>
+    <p>平台默认选择由 <code>VideoDecodePreference</code> 决定：Apple 系默认 VideoToolbox，Windows 默认 D3D11VA，Android 默认 MediaCodec，HarmonyOS 默认 AVCodec，Linux 默认尝试 CUDA / NVDEC，再尝试 VA-API；其余平台使用软件解码。</p>
   </section>
 
   <section id="hardware">
@@ -127,8 +130,13 @@
     <p>零拷贝导入的具体路径见<a href="zero-copy.html">零拷贝导入</a>。</p>
   </section>
 
+  <section id="software">
+    <h2>软件解码回退<a class="anchor" href="#software">#</a></h2>
+    <p>0.2.1 补齐 WMV / WMA 软件解码，并通过 dav1d 支持 8-bit 与 10-bit AV1。硬解不可用或视频格式不受设备支持时，软件帧进入同一渲染管线；Windows 也支持软件帧上传。</p>
+  </section>
+
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.7</b></span>
+    <span>Erika <b>v0.2.1</b></span>
     <span>Section <b>Kernel</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
@@ -140,24 +148,5 @@
 </main>
 
 </div>
-<script>
-(function () {
-  document.querySelectorAll('.code').forEach(function (box) {
-    if (!box.querySelector('pre')) return;
-    var btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'copy'; btn.textContent = '复制';
-    box.appendChild(btn);
-    btn.addEventListener('click', function () {
-      var pre = box.querySelector('pre');
-      if (!pre || !navigator.clipboard) return;
-      navigator.clipboard.writeText(pre.innerText).then(function () {
-        var old = btn.textContent;
-        btn.textContent = '已复制';
-        setTimeout(function () { btn.textContent = old; }, 1400);
-      });
-    });
-  });
-})();
-</script>
 </body>
 </html>

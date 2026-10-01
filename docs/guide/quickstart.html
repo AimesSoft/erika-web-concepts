@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -23,6 +23,7 @@
       <li><a href="openharmony.html">OpenHarmony / OHPM</a></li>
       <li><a href="rust.html">Rust 嵌入</a></li>
       <li><a href="c.html">C ABI 嵌入</a></li>
+      <li><a href="linux.html">Linux 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -50,11 +51,11 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.7<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
-  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>快速开始</p>
+  <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>快速开始</p>
   <h1>快速开始</h1>
   <p class="kicker">Quickstart</p>
   <p class="lead">Erika 提供了面向多种技术栈的接入方式：Flutter 插件 <code>erika_flutter</code>、SwiftPM 包 <code>ErikaSwift</code>、OpenHarmony ArkTS 原生包 <code>erika</code>、Rust 原生 crate 以及标准 C ABI 动态/静态库。</p>
@@ -72,11 +73,11 @@
       <table>
         <thead><tr><th>产物归档</th><th>包含内容</th><th>支持架构</th></tr></thead>
         <tbody>
-          <tr><td class="m">erika-swift-core-0.1.7.xcframework.zip</td><td>Apple XCFramework 核心运行时（macOS / iOS / tvOS）</td><td>arm64 / x86_64</td></tr>
+          <tr><td class="m">erika-swift-core-0.2.1.xcframework.zip</td><td>Apple XCFramework 核心运行时（macOS / iOS / tvOS）</td><td>arm64 / x86_64</td></tr>
           <tr><td class="m">erika-capi-macos-universal.zip</td><td>liberika_capi.dylib / .a</td><td>arm64 / x86_64</td></tr>
           <tr><td class="m">erika-capi-windows-x64.zip</td><td>erika_capi.dll / .lib</td><td>x86_64</td></tr>
           <tr><td class="m">erika-capi-android.zip</td><td>4 个 ABI 的 so 库</td><td>arm64-v8a / armeabi-v7a / x86_64 / x86</td></tr>
-          <tr><td class="m">erika-capi-openharmony-arm64.zip</td><td>liberika_capi.so + N-API 模块</td><td>arm64</td></tr>
+          <tr><td class="m">erika-capi-openharmony-arm64.zip</td><td>liberika_capi.so + C ABI 头文件</td><td>arm64</td></tr>
         </tbody>
       </table>
     </div>
@@ -87,7 +88,7 @@
     <div class="code">
       <p class="lbl">pubspec.yaml</p>
 <pre>dependencies:
-  erika_flutter: ^0.1.7</pre>
+  erika_flutter: ^0.2.1</pre>
     </div>
     <div class="code">
       <p class="lbl">lib/main.dart</p>
@@ -95,7 +96,7 @@
 <span class="k">await</span> player.open(<span class="s">'/path/to/video.mp4'</span>);
 <span class="k">await</span> player.play();</pre>
     </div>
-    <p>插件覆盖 macOS / iOS / tvOS / Windows / Android / HarmonyOS 六个平台，详见 <a href="flutter.html">Flutter 嵌入指南</a>。</p>
+    <p>插件覆盖 macOS / iOS / tvOS / Windows / Android / OpenHarmony，并新增实验性 Linux 支持。使用方法收录在 <a href="flutter.html">Flutter 嵌入指南</a>，Linux 的依赖和编译步骤收录在 <a href="linux.html">Linux 接入</a>。</p>
   </section>
 
   <section id="swift">
@@ -127,7 +128,7 @@
     <div class="code">
       <p class="lbl">Cargo.toml</p>
 <pre>[dependencies]
-erika = { git = <span class="s">"https://github.com/AimesSoft/Erika"</span>, tag = <span class="s">"v0.1.7"</span> }</pre>
+erika = { git = <span class="s">"https://github.com/AimesSoft/Erika"</span>, tag = <span class="s">"v0.2.1"</span> }</pre>
     </div>
     <div class="code">
       <p class="lbl">src/main.rs</p>
@@ -171,14 +172,14 @@ erika_presenter_render_tick(p, host_time, &amp;stats);</pre>
           <tr><td class="p">Windows</td><td class="m">Windows 10</td><td class="m">D3D11VA</td><td class="m">Direct3D 11</td><td class="m">WASAPI</td><td class="st ok">正式支持</td></tr>
           <tr><td class="p">Android</td><td class="m">Android 8.0</td><td class="m">MediaCodec</td><td class="m">wgpu (Vulkan / GLES)</td><td class="m">AAudio</td><td class="st ok">正式支持</td></tr>
           <tr><td class="p">OpenHarmony</td><td class="m">API 18</td><td class="m">AVCodec</td><td class="m">wgpu (Vulkan)</td><td class="m">OHAudio</td><td class="st ok">正式支持</td></tr>
-          <tr><td class="p">Linux</td><td class="m">—</td><td class="m">VAAPI</td><td class="m">wgpu (Vulkan)</td><td class="m">PipeWire</td><td class="st wait">规划中</td></tr>
+          <tr><td class="p">Linux</td><td class="m">FFmpeg 8.x</td><td class="m">NVDEC / VA-API</td><td class="m">wgpu (Vulkan / EGL)</td><td class="m">PulseAudio / pipewire-pulse</td><td class="st wait">实验性 · 源码构建</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.7</b></span>
+    <span>Erika <b>v0.2.1</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

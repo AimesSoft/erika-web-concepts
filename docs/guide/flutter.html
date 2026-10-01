@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -23,6 +23,7 @@
       <li><a href="openharmony.html">OpenHarmony / OHPM</a></li>
       <li><a href="rust.html">Rust 嵌入</a></li>
       <li><a href="c.html">C ABI 嵌入</a></li>
+      <li><a href="linux.html">Linux 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -50,18 +51,18 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.7<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
-  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Flutter 嵌入</p>
+  <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Flutter 嵌入</p>
   <h1>Flutter 嵌入</h1>
   <p class="kicker">Flutter Embedding</p>
-  <p class="lead"><code>erika_flutter</code> 是 Erika 的官方 Flutter 插件，支持 macOS、iOS、tvOS、Windows、Android 与 HarmonyOS 六个平台。插件提供完整的播放控制、多轨管理、弹幕与字幕渲染、ArtCNN 超分以及两种视图呈现方案。</p>
+  <p class="lead"><code>erika_flutter</code> 是 Erika 的官方 Flutter 插件，支持 macOS、iOS、tvOS、Windows、Android、OpenHarmony，并提供实验性 Linux 插件。插件提供完整的播放控制、多轨管理、弹幕与字幕渲染、ArtCNN 超分以及三种视图组件。</p>
 
   <ul class="meta-strip">
-    <li>目标平台 <b>6</b> 个</li>
-    <li>视图组件 <b>2</b> 款</li>
+    <li>目标平台 <b>7</b> 个</li>
+    <li>视图组件 <b>3</b> 款</li>
     <li>Dart SDK <b>≥ 3.5</b></li>
   </ul>
 
@@ -70,21 +71,21 @@
     <div class="code">
       <p class="lbl">pubspec.yaml</p>
 <pre>dependencies:
-  erika_flutter: ^0.1.7</pre>
+  erika_flutter: ^0.2.1</pre>
     </div>
-    <p>运行 <code>flutter pub get</code> 即可。构建时插件会自动下载与当前平台匹配的预编译原生二进制。若需要从本地源码构建，设置环境变量 <code>ERIKA_FORCE_SOURCE_BUILD=1</code> 并指定 <code>ERIKA_REPO_ROOT</code> 即可。例外：在 Erika 仓库内使用 macOS 插件时，检测到 <code>crates/erika_capi</code> 会自动改走源码编译（无需 Rust 工具链的仓库内场景可设 <code>ERIKA_FORCE_PREBUILT=1</code> 强制使用预编译包）。</p>
+    <p>运行 <code>flutter pub get</code> 即可。Apple、Windows、Android 与 OpenHarmony 构建会自动下载匹配的预编译内核。Linux 需先构建本地动态库并设置 <code>ERIKA_LIBRARY_DIR</code>，步骤收录在 <a href="linux.html">Linux 接入</a>。若需要从本地源码构建，设置环境变量 <code>ERIKA_FORCE_SOURCE_BUILD=1</code> 并指定 <code>ERIKA_REPO_ROOT</code> 即可。例外：在 Erika 仓库内使用 macOS 插件时，检测到 <code>crates/erika_capi</code> 会自动改走源码编译（无需 Rust 工具链的仓库内场景可设 <code>ERIKA_FORCE_PREBUILT=1</code> 强制使用预编译包）。</p>
   </section>
 
   <section id="views">
     <h2>视图选择<span class="jp">ビューの選択</span><a class="anchor" href="#views">#</a></h2>
-    <p>插件提供两个渲染视图组件：</p>
+    <p>插件提供三个渲染视图组件：</p>
     <div class="tw">
       <table>
         <thead><tr><th>视图组件</th><th>底层机制</th><th>推荐场景</th></tr></thead>
         <tbody>
-          <tr><td class="k">ErikaWindowOverlayVideoView</td><td>原生子窗口 / 原生 Overlay 图层</td><td>macOS / iOS / tvOS / Windows 推荐，原生 60/120fps 极低开销与高帧率。</td></tr>
-          <tr><td class="k">ErikaTextureVideoView</td><td>Flutter Texture：macOS 走 IOSurface + Metal 直写（无逐帧 CPU 回读），OpenHarmony 复用外部纹理；其余平台回退 ErikaVideoView。</td><td>macOS / OpenHarmony 上需要 <code>Opacity</code>、裁剪、变换、颜色滤镜等 Flutter 合成效果时使用。</td></tr>
-          <tr><td class="k">ErikaVideoView</td><td>统一跨平台视图：macOS/iOS PlatformView、Windows Overlay、Android TextureView/SurfaceView、HarmonyOS 外部纹理。</td><td><b>全部 6 平台可用</b>。开箱即用，支持被 Flutter 复杂控件（如圆角裁剪、半透明蒙层）正常层叠。</td></tr>
+          <tr><td class="k">ErikaWindowOverlayVideoView</td><td>原生子窗口 / 原生 Overlay 图层</td><td>Apple / Windows 的原生呈现；Linux Wayland 使用原生视频层，视频区域需保持透明。</td></tr>
+          <tr><td class="k">ErikaTextureVideoView</td><td>Flutter Texture：macOS 使用 IOSurface + Metal，Windows 使用共享 D3D11 纹理，OpenHarmony 使用外部纹理，Linux 使用 RGBA 读回；其他平台回退 ErikaVideoView。</td><td>macOS / Windows / OpenHarmony / Linux 上需要 <code>Opacity</code>、裁剪、变换、颜色滤镜等 Flutter 合成效果时使用。</td></tr>
+          <tr><td class="k">ErikaVideoView</td><td>统一跨平台视图：macOS/iOS PlatformView、Windows 原生窗口、Android TextureView/SurfaceView、OpenHarmony 外部纹理、Linux RGBA 纹理。</td><td>通用播放入口。需要 Flutter 裁剪、颜色滤镜时优先选择 Texture；Windows Texture 输出 SDR。</td></tr>
         </tbody>
       </table>
     </div>
@@ -161,6 +162,8 @@ ErikaTextureVideoView(
         <tbody>
           <tr><td class="k">macOS · ErikaTextureVideoView（Flutter Texture）</td><td>仅 <code>srcOver</code>；其他值改走原生层由 Core Animation 混合</td><td>Flutter <code>Opacity</code></td></tr>
           <tr><td class="k">macOS · 原生层（blendMode ≠ srcOver）</td><td>支持 <code>overlay</code>（背景感知）；其他值忽略</td><td>原生 CALayer opacity</td></tr>
+          <tr><td class="k">Windows · ErikaTextureVideoView（SDR）</td><td><code>srcOver</code>；overlay 改走原生合成层</td><td>Flutter <code>Opacity</code></td></tr>
+          <tr><td class="k">Linux · Flutter 纹理 / Wayland 原生层</td><td>纹理走 Flutter 合成；原生层仅不透明 <code>srcOver</code></td><td>纹理支持 Flutter <code>Opacity</code>；原生层固定不透明</td></tr>
           <tr><td class="k">Windows · 窗口 Overlay（DirectComposition）</td><td><code>srcOver</code> / <code>overlay</code>；其他值抛插件错误</td><td>IDCompositionEffectGroup opacity</td></tr>
           <tr><td class="k">Android / iOS / OpenHarmony</td><td>接受创建参数但不消费</td><td>Texture 路径上由 Flutter 侧应用</td></tr>
         </tbody>
@@ -209,8 +212,43 @@ ErikaTextureVideoView(
     </div>
   </section>
 
+  <section id="http-cache">
+    <h2>HTTP 缓存<a class="anchor" href="#http-cache">#</a></h2>
+    <p><code>httpReadAheadBytes</code> 决定向前预读的字节数，默认 2 MiB；<code>httpBackBufferBytes</code> 决定保留多少已播放数据，默认 16 MiB。两者省略或传 0 使用默认值。预读默认值也可由 <code>ERIKA_HTTP_READAHEAD_BYTES</code> 设置。</p>
+    <p>回退缓存内的后退 seek 可直接复用已下载数据。高码率视频需要更大的预算：80 Mbit/s 的视频保留约 10 秒需约 100 MB。缓存按字节限制，不代表固定的播放秒数。</p>
+    <div class="code">
+      <p class="lbl">Dart</p>
+<pre>await player.open(
+  &#x27;https://example.com/video.mp4&#x27;,
+  httpReadAheadBytes: 8 * 1024 * 1024,
+  httpBackBufferBytes: 128 * 1024 * 1024,
+);
+await player.play();</pre>
+    </div>
+  </section>
+
+  <section id="gif-export">
+    <h2>导出 GIF<a class="anchor" href="#gif-export">#</a></h2>
+    <p><code>ErikaPlayer.exportGif()</code> 使用独立的无头管线，不需要视频视图，也不影响当前播放。传入片段起止时间、帧率和输出尺寸：</p>
+    <div class="code">
+      <p class="lbl">Dart</p>
+<pre>final result = await ErikaPlayer.exportGif(
+  ErikaGifExportOptions(
+    inputUri: &#x27;/path/input.mp4&#x27;,
+    outputPath: &#x27;/path/output.gif&#x27;,
+    start: const Duration(seconds: 5),
+    end: const Duration(seconds: 10),
+    framesPerSecond: 10,
+    outputWidth: 640,
+    outputHeight: 360,
+    quality: ErikaGifExportQuality.high,
+  ),
+);</pre>
+    </div>
+  </section>
+
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.7</b></span>
+    <span>Erika <b>v0.2.1</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

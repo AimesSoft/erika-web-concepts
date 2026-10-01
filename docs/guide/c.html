@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -23,6 +23,7 @@
       <li><a href="openharmony.html">OpenHarmony / OHPM</a></li>
       <li><a href="rust.html">Rust 嵌入</a></li>
       <li><a href="c.html" aria-current="page">C ABI 嵌入</a></li>
+      <li><a href="linux.html">Linux 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -50,18 +51,18 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.7<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
-  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>C ABI 嵌入</p>
+  <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>C ABI 嵌入</p>
   <h1>C ABI 嵌入</h1>
   <p class="kicker">C ABI Embedding</p>
   <p class="lead">C / C++ / 原生宿主经 <code>erika.h</code> 接入。接口提供两个入口族：标准应用接入使用由内核托管渲染与音频的 <code>ErikaPresenterHandle</code>；无头控制与轻量宿主可使用 <code>ErikaHandle</code>。</p>
 
   <ul class="meta-strip">
     <li>头文件 <b>crates/erika_capi/include/erika.h</b></li>
-    <li>导出 <b>91</b> 个函数</li>
+    <li>导出 <b>101</b> 个函数</li>
     <li>入口 <b>2</b> 族</li>
   </ul>
 
@@ -222,15 +223,30 @@ erika_destroy(h);</pre>
     </div>
   </section>
 
+  <section id="http-cache">
+    <h2>HTTP 缓存<a class="anchor" href="#http-cache">#</a></h2>
+    <p><code>http_read_ahead_bytes</code> 决定向前预读的字节数，默认 2 MiB；<code>http_back_buffer_bytes</code> 决定保留多少已播放数据，默认 16 MiB。两者省略或传 0 使用默认值。预读默认值也可由 <code>ERIKA_HTTP_READAHEAD_BYTES</code> 设置。</p>
+    <p>回退缓存内的后退 seek 可直接复用已下载数据。高码率视频需要更大的预算：80 Mbit/s 的视频保留约 10 秒需约 100 MB。缓存按字节限制，不代表固定的播放秒数。</p>
+    <div class="code">
+      <p class="lbl">C</p>
+<pre>ErikaOpenOptions options = {0};
+options.http_read_ahead_bytes = 8 * 1024 * 1024;
+options.http_back_buffer_bytes = 128 * 1024 * 1024;
+ErikaStatus status = erika_presenter_open_with_options(
+    player, &quot;https://example.com/video.mp4&quot;, &amp;options);</pre>
+    </div>
+    <p>头文件与内核使用同一发布版本。0.1.8 起 <code>ErikaPresenterConfig</code> 包含 <code>video_alpha_mode</code>；0.2.1 的 <code>ErikaOpenOptions</code> 使用原预留位置提供回退缓存字段，其余 <code>reserved</code> 字段置零。</p>
+  </section>
+
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.7</b></span>
+    <span>Erika <b>v0.2.1</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
 
   <nav class="pager">
     <a href="rust.html"><span class="dir">Prev</span>Rust 嵌入</a>
-    <a class="nx" href="../kernel/architecture.html"><span class="dir">Next</span>架构总览</a>
+    <a class="nx" href="linux.html"><span class="dir">Next</span>Linux 接入</a>
   </nav>
 </main>
 

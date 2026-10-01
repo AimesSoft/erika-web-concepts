@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -23,6 +23,7 @@
       <li><a href="../guide/openharmony.html">OpenHarmony / OHPM</a></li>
       <li><a href="../guide/rust.html">Rust 嵌入</a></li>
       <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/linux.html">Linux 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -50,11 +51,11 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.7<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
-  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>时钟与调度</p>
+  <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>时钟与调度</p>
   <h1>时钟与调度</h1>
   <p class="kicker">Clock &amp; Scheduling</p>
   <p class="lead">音频输出是主时钟。视频帧的呈现目标按 vsync 量化对齐到音频时钟，音频与视频之间没有独立的显示时钟。缓冲不足时显式进入 buffering，时钟冻结并在数据恢复后重新锚定。</p>
@@ -62,7 +63,7 @@
   <ul class="meta-strip">
     <li>主时钟 <b>音频</b></li>
     <li>ring buffer <b>192,000 帧</b></li>
-    <li>vsync <b>16.67 ms 量化</b></li>
+    <li>vsync <b>显示目标量化</b></li>
   </ul>
 
   <section id="clock">
@@ -118,8 +119,14 @@
     <p>诊断输出在 Android 上经 logcat 的 <code>Erika</code> tag 发出。调试 HUD 用帧计数差值计算 fps，可由 <code>set_debug_hud_enabled</code> 控制。</p>
   </section>
 
+  <section id="display-target">
+    <h2>iOS 显示目标时间<a class="anchor" href="#display-target">#</a></h2>
+    <p>0.2.1 的 iOS Flutter 插件使用 <code>CADisplayLink.targetTimestamp</code> 作为显示目标，而不是原生队列实际执行时刻。刷新间隔跟随显示回调，避免把 120 Hz 屏幕按固定 60 Hz 调度。</p>
+    <p>显示回调通过 mailbox 合并积压 tick。<code>erika_presenter_render_tick_with_timing</code> 同时采样目标时刻的视频、字幕和弹幕；暂停或 seek 后也不推进、重锚播放时钟。</p>
+  </section>
+
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.7</b></span>
+    <span>Erika <b>v0.2.1</b></span>
     <span>Section <b>Kernel</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
@@ -131,24 +138,5 @@
 </main>
 
 </div>
-<script>
-(function () {
-  document.querySelectorAll('.code').forEach(function (box) {
-    if (!box.querySelector('pre')) return;
-    var btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'copy'; btn.textContent = '复制';
-    box.appendChild(btn);
-    btn.addEventListener('click', function () {
-      var pre = box.querySelector('pre');
-      if (!pre || !navigator.clipboard) return;
-      navigator.clipboard.writeText(pre.innerText).then(function () {
-        var old = btn.textContent;
-        btn.textContent = '已复制';
-        setTimeout(function () { btn.textContent = old; }, 1400);
-      });
-    });
-  });
-})();
-</script>
 </body>
 </html>

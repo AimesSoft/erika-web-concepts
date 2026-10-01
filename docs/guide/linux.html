@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Linux 接入 — Erika 开发者文档</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
+  <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <nav>
+    <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="quickstart.html">快速开始</a></li>
+      <li><a href="flutter.html">Flutter 嵌入</a></li>
+      <li><a href="swift.html">Swift 接入</a></li>
+      <li><a href="openharmony.html">OpenHarmony / OHPM</a></li>
+      <li><a href="rust.html">Rust 嵌入</a></li>
+      <li><a href="c.html">C ABI 嵌入</a></li>
+      <li><a href="linux.html" aria-current="page">Linux 接入</a></li>
+    </ul>
+    <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.html">架构总览</a></li>
+      <li><a href="../kernel/decode.html">硬件解码</a></li>
+      <li><a href="../kernel/zero-copy.html">零拷贝导入</a></li>
+      <li><a href="../kernel/render.html">渲染管线</a></li>
+      <li><a href="../kernel/hdr.html">高动态范围</a></li>
+      <li><a href="../kernel/upscale.html">神经超分</a></li>
+      <li><a href="../kernel/subtitle-danmaku.html">字幕与弹幕</a></li>
+      <li><a href="../kernel/clock.html">时钟与调度</a></li>
+    </ul>
+    <h2><span class="no">三</span>项目 <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.html">构建与依赖</a></li>
+      <li><a href="../project/releasing.html">发布与产物</a></li>
+      <li><a href="../project/contributing.html">贡献指南</a></li>
+      <li><a href="../project/changelog.html">更新日志</a></li>
+    </ul>
+    <h2><span class="no">四</span>参考 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.html">C ABI 总览</a></li>
+      <li><a href="../reference/capi-handle.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Linux 接入</p>
+  <h1>Linux 接入</h1>
+  <p class="kicker">Linux / X11 / Wayland / WSLg</p>
+  <p class="lead">0.2.1 新增实验性 Linux 支持：Rust、C/C++ 与 Flutter 宿主可通过 X11 或 Wayland 显示视频，通过 PulseAudio 输出音频。Linux 目前从源码构建，尚无预编译发布包。</p>
+  <ul class="meta-strip">
+    <li>依赖 <b>FFmpeg 8.x</b></li>
+    <li>窗口 <b>X11 / Wayland</b></li>
+    <li>音频 <b>PulseAudio</b></li>
+  </ul>
+
+  <section id="deps">
+    <h2>准备依赖<a class="anchor" href="#deps">#</a></h2>
+    <p>以下依赖命令适用于 Ubuntu 26.04；Rust 需要 1.92+。Ubuntu 22.04 / 24.04 默认仓库中的旧版 FFmpeg 不满足这一构建路径。</p>
+    <div class="code">
+      <p class="lbl">Ubuntu 26.04</p>
+<pre>sudo apt update
+sudo apt install -y \
+  build-essential pkg-config clang libclang-dev rustc cargo rustfmt \
+  curl ca-certificates meson ninja-build patch xz-utils python3 \
+  libavdevice-dev libavfilter-dev libavformat-dev libavcodec-dev \
+  libswresample-dev libswscale-dev libavutil-dev \
+  libfreetype-dev libharfbuzz-dev libfribidi-dev libfontconfig-dev \
+  libpulse-dev libx11-dev libwayland-dev libxkbcommon-dev \
+  libxkbcommon-x11-0 libvulkan-dev mesa-vulkan-drivers libegl1 \
+  libgl1-mesa-dri fonts-dejavu-core pulseaudio-utils</pre>
+    </div>
+    <p>PipeWire 桌面需启用 <code>pipewire-pulse</code>。可用 <code>pactl info</code> 检查音频连接；WSLg 已提供 PulseAudio 服务。</p>
+  </section>
+
+  <section id="build">
+    <h2>构建与运行<a class="anchor" href="#build">#</a></h2>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>git clone https://github.com/AimesSoft/Erika.git
+cd Erika
+git checkout v0.2.1
+bash scripts/build_linux_libass.sh
+cargo build --locked --release -p linux_native_demo -p erika_capi
+cargo run --locked --release -p linux_native_demo -- /path/to/video.mkv</pre>
+    </div>
+    <p>libass 使用 Erika 补丁版 0.17.5，构建脚本负责下载、校验和应用字体回退补丁。FFmpeg 8 与 PulseAudio 默认动态链接系统库。产物位于 <code>target/release/</code>。</p>
+    <p>Demo 自动选择窗口协议，也可传入 <code>--x11</code> 或 <code>--wayland</code>。空格暂停或继续，左右箭头跳转 5 秒，Esc 退出。</p>
+  </section>
+
+  <section id="flutter">
+    <h2>Flutter 接入<a class="anchor" href="#flutter">#</a></h2>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>cargo build --locked --release -p erika_capi
+export ERIKA_LIBRARY_DIR=&quot;${CARGO_TARGET_DIR:-$PWD/target}/release&quot;
+# 在 Flutter 宿主目录中执行：
+flutter build linux --release</pre>
+    </div>
+    <p>宿主添加 <code>erika_flutter: ^0.2.1</code>。<code>ErikaVideoView</code> 与 <code>ErikaTextureVideoView</code> 使用 SDR RGBA 纹理，支持 Flutter 裁剪和 UI 叠层；这条路径需要逐帧 GPU 读回。</p>
+    <p>Wayland 可选 <code>ErikaWindowOverlayVideoView</code>，用 <code>wl_subsurface</code> 将原生视频放在透明 Flutter UI 下，减少逐帧 RGBA 读回。视频区域需留透明；该原生层支持不透明 srcOver，视频本身不接受 Flutter 裁剪或颜色滤镜。X11 使用纹理视图。</p>
+  </section>
+
+  <section id="native">
+    <h2>Rust 与 C/C++ 接入<a class="anchor" href="#native">#</a></h2>
+    <p>Rust 宿主启用 <code>erika</code> 的 <code>wgpu</code> feature。C 宿主链接 <code>liberika_capi.so</code>，使用同次构建的 <code>erika.h</code>。</p>
+    <div class="tw"><table>
+      <thead><tr><th>surface kind</th><th>raw_window</th><th>raw_display</th></tr></thead>
+      <tbody>
+        <tr><td class="m">ErikaWgpuSurfaceKind_XlibWindow</td><td>X11 Window 整数 ID</td><td>Display*</td></tr>
+        <tr><td class="m">ErikaWgpuSurfaceKind_WaylandSurface</td><td>wl_surface*</td><td>wl_display*</td></tr>
+      </tbody>
+    </table></div>
+    <p>通过 <code>erika_presenter_attach_wgpu_surface</code> 附着窗口；指针经 <code>uintptr_t</code> 转为 <code>uint64_t</code>，宽高传物理像素。窗口与 display 在 detach 或销毁 presenter 完成后释放。同一 presenter 的 attach、render、resize 和 detach 在窗口事件线程串行执行。</p>
+    <p>调用顺序：<code>create → attach → open → play → render_tick → close → detach → destroy</code>。可运行的 C 示例位于 <code>examples/linux_native_demo/capi_smoke.c</code>。</p>
+  </section>
+
+  <section id="gpu">
+    <h2>解码与 GPU 路径<a class="anchor" href="#gpu">#</a></h2>
+    <p>Linux 默认尝试 NVIDIA NVDEC，再尝试 Intel / AMD VA-API；驱动或格式不支持时回退 FFmpeg 软解。</p>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>export ERIKA_HWDEC=auto  # auto / cuda / nvdec / vaapi / software
+# 多显卡机器可指定：
+export ERIKA_CUDA_DEVICE=0
+export ERIKA_VAAPI_DEVICE=/dev/dri/renderD128</pre>
+    </div>
+    <p>普通 NVDEC 路径可将解码平面下载后上传到 wgpu；VA-API 到 Vulkan 的直接导入为实验性路径。Linux HDR 需要合成器实际提供 FP16 extended-linear WSI 表面，Flutter RGBA 纹理输出为 SDR。</p>
+  </section>
+
+  <section id="wsl">
+    <h2>WSLg<a class="anchor" href="#wsl">#</a></h2>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>bash scripts/run_wsl_gpu.sh --wayland /mnt/c/path/to/video.mkv
+# 或使用 X11：
+bash scripts/run_wsl_gpu.sh --x11</pre>
+    </div>
+    <p>启动脚本为 Erika 进程选择 <code>wgpu → OpenGL/EGL → Mesa D3D12</code>。WSL 使用 Windows 显卡驱动，无需安装 Linux NVIDIA 内核驱动。仓库位于 <code>/mnt/c</code> 时，可将 <code>CARGO_TARGET_DIR</code> 放到 Linux 文件系统以加快构建。</p>
+  </section>
+
+  <section id="check">
+    <h2>运行检查<a class="anchor" href="#check">#</a></h2>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>bash scripts/check_linux.sh
+# 同时检查 Wayland：
+ERIKA_TEST_WAYLAND=1 bash scripts/check_linux.sh</pre>
+    </div>
+    <p>检查需要可用的显示和音频服务，覆盖播放、暂停、seek、resize 和 C ABI 生命周期。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>Erika <b>v0.2.1</b></span>
+    <span>Section <b>Guide</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="c.html"><span class="dir">Prev</span>C ABI 嵌入</a>
+    <a class="nx" href="../kernel/architecture.html"><span class="dir">Next</span>架构总览</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

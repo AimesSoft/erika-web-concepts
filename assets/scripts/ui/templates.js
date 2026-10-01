@@ -124,7 +124,7 @@ function renderPlatforms(platforms) {
             <span>${escapeHTML(item.minimum)}</span>
             <code>${escapeHTML(item.render)}</code>
             <code>${escapeHTML(item.decode)}</code>
-            <span class="status ${item.status}"><i></i>${item.status === 'ready' ? '可用' : '规划中'}</span>
+            <span class="status ${item.status}"><i></i>${escapeHTML(item.statusLabel || (item.status === 'ready' ? '可用' : '规划中'))}</span>
           </article>`).join('')}
       </div>
     </section>`;

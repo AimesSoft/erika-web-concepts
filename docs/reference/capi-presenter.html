@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -23,6 +23,7 @@
       <li><a href="../guide/openharmony.html">OpenHarmony / OHPM</a></li>
       <li><a href="../guide/rust.html">Rust 嵌入</a></li>
       <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/linux.html">Linux 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -50,18 +51,18 @@
       <li><a href="capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.7<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
-  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>ErikaPresenterHandle</p>
+  <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>ErikaPresenterHandle</p>
   <h1>ErikaPresenterHandle 参考</h1>
   <p class="kicker">ErikaPresenterHandle Reference</p>
-  <p class="lead">push 模型入口的全部 63 个函数：生命周期、播放与运行参数、字幕、弹幕、输出诊断、表面与呈现、渲染循环、JSON bridge、截图。仅编译于 macOS / iOS / Windows / Android / OpenHarmony，其他目标 <code>create</code> 返回 NULL。</p>
+  <p class="lead">push 模型入口的全部 71 个函数：生命周期、播放与运行参数、字幕、弹幕、输出诊断、表面与呈现、渲染循环、JSON bridge、截图。仅编译于 macOS / iOS / tvOS / Windows / Android / OpenHarmony / Linux，其他目标 <code>create</code> 返回 NULL。</p>
 
   <ul class="meta-strip">
-    <li>函数 <b>63</b> 个</li>
-    <li>平台 <b>5</b> 个</li>
+    <li>函数 <b>71</b> 个</li>
+    <li>平台 <b>7</b> 个</li>
   </ul>
 
   <section id="lifecycle">
@@ -105,6 +106,12 @@
       <p class="sig"><b>ErikaStatus erika_presenter_open_with_headers</b>(ErikaPresenterHandle *handle, const char *uri, const ErikaHttpHeader *headers, uintptr_t header_count)</p>
       <p class="desc">带自定义 HTTP 请求头打开媒体。</p>
     </div>
+
+    <div class="api" id="erika_presenter_open_with_options">
+      <p class="sig"><b>ErikaStatus erika_presenter_open_with_options</b>( ErikaPresenterHandle *handle, const char *uri, const ErikaOpenOptions *options)</p>
+      <p class="desc">使用 <code>ErikaOpenOptions</code> 打开媒体，可同时传入 HTTP 请求头、预读窗口与回退缓存预算。选项只在调用期间借用，<code>reserved</code> 置零。</p>
+    </div>
+
 
     <div class="api" id="erika_presenter_play">
       <p class="sig"><b>ErikaStatus erika_presenter_play</b>(ErikaPresenterHandle *handle)</p>
@@ -442,8 +449,31 @@
     </div>
   </section>
 
+  <section id="display-timing">
+    <h2>显示目标时间<a class="anchor" href="#display-timing">#</a></h2>
+    <div class="api" id="erika_presenter_render_tick_with_timing">
+      <p class="sig"><b>ErikaStatus erika_presenter_render_tick_with_timing</b>( ErikaPresenterHandle *handle, double time_seconds, const double *presentation_delay_seconds, ErikaPresenterStats *out_stats)</p>
+      <p class="desc"><code>presentation_delay_seconds</code> 是从调用入口到显示目标时刻的秒数，可为负数，范围 ±0.25 秒。传 NULL 保持 <code>render_tick</code> 的采样行为。字幕、弹幕与视频使用同一目标时刻快照，不改变播放时钟。</p>
+    </div>
+
+  </section>
+
+  <section id="flutter-frame">
+    <h2>Flutter 帧交接<a class="anchor" href="#flutter-frame">#</a></h2>
+    <div class="api" id="erika_presenter_windows_flutter_texture_iunknown">
+      <p class="sig"><b>ErikaStatus erika_presenter_windows_flutter_texture_iunknown</b>( ErikaPresenterHandle *handle, void **out_texture)</p>
+      <p class="desc">Windows 返回已完成、不可变的 SDR Flutter GPU 纹理。返回的 COM 引用已 AddRef，调用方使用后 Release。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_copy_flutter_frame_rgba">
+      <p class="sig"><b>ErikaStatus erika_presenter_copy_flutter_frame_rgba</b>( ErikaPresenterHandle *handle, uint8_t *out_rgba, uintptr_t capacity, uint32_t *out_width, uint32_t *out_height)</p>
+      <p class="desc">复制当前 Flutter 纹理帧的紧密 RGBA 数据；用于 Linux 像素缓冲纹理。容量与宽高按输出参数处理，缓冲区由调用方提供。</p>
+    </div>
+
+  </section>
+
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.7</b></span>
+    <span>Erika <b>v0.2.1</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
@@ -455,24 +485,5 @@
 </main>
 
 </div>
-<script>
-(function () {
-  document.querySelectorAll('.code').forEach(function (box) {
-    if (!box.querySelector('pre')) return;
-    var btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'copy'; btn.textContent = '复制';
-    box.appendChild(btn);
-    btn.addEventListener('click', function () {
-      var pre = box.querySelector('pre');
-      if (!pre || !navigator.clipboard) return;
-      navigator.clipboard.writeText(pre.innerText).then(function () {
-        var old = btn.textContent;
-        btn.textContent = '已复制';
-        setTimeout(function () { btn.textContent = old; }, 1400);
-      });
-    });
-  });
-})();
-</script>
 </body>
 </html>

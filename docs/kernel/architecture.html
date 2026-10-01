@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -23,6 +23,7 @@
       <li><a href="../guide/openharmony.html">OpenHarmony / OHPM</a></li>
       <li><a href="../guide/rust.html">Rust 嵌入</a></li>
       <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/linux.html">Linux 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -50,11 +51,11 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.7<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
-  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>架构总览</p>
+  <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>架构总览</p>
   <h1>架构总览</h1>
   <p class="kicker">Architecture</p>
   <p class="lead">Erika 由 Rust 实现，从 demux、解码到 GPU 呈现、音频、字幕与弹幕均在内核内部完成。宿主提供渲染表面并发送播放命令，不参与渲染管线。</p>
@@ -184,7 +185,7 @@
           <tr><td class="p">Windows</td><td class="m">10</td><td class="m">D3D11VA</td><td class="m">Direct3D 11</td><td class="m">WASAPI</td><td class="st ok">可用</td></tr>
           <tr><td class="p">Android</td><td class="m">8</td><td class="m">MediaCodec / 软解</td><td class="m">wgpu · Vulkan+GLES</td><td class="m">AAudio</td><td class="st ok">可用</td></tr>
           <tr><td class="p">HarmonyOS</td><td class="m">API 18</td><td class="m">AVCodec / 软解</td><td class="m">wgpu · Vulkan</td><td class="m">OHAudio</td><td class="st ok">可用</td></tr>
-          <tr><td class="p">Linux</td><td class="m">—</td><td class="m">—</td><td class="m">wgpu</td><td class="m">—</td><td class="st wait">规划中</td></tr>
+          <tr><td class="p">Linux</td><td class="m">FFmpeg 8.x</td><td class="m">NVDEC / VA-API</td><td class="m">wgpu (Vulkan / EGL)</td><td class="m">PulseAudio</td><td class="st wait">实验性</td></tr>
         </tbody>
       </table>
     </div>
@@ -192,36 +193,17 @@
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.7</b></span>
+    <span>Erika <b>v0.2.1</b></span>
     <span>Section <b>Kernel</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
 
   <nav class="pager">
-    <a href="../guide/c.html"><span class="dir">Prev</span>C ABI 嵌入</a>
+    <a href="../guide/linux.html"><span class="dir">Prev</span>Linux 接入</a>
     <a class="nx" href="decode.html"><span class="dir">Next</span>硬件解码</a>
   </nav>
 </main>
 
 </div>
-<script>
-(function () {
-  document.querySelectorAll('.code').forEach(function (box) {
-    if (!box.querySelector('pre')) return;
-    var btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'copy'; btn.textContent = '复制';
-    box.appendChild(btn);
-    btn.addEventListener('click', function () {
-      var pre = box.querySelector('pre');
-      if (!pre || !navigator.clipboard) return;
-      navigator.clipboard.writeText(pre.innerText).then(function () {
-        var old = btn.textContent;
-        btn.textContent = '已复制';
-        setTimeout(function () { btn.textContent = old; }, 1400);
-      });
-    });
-  });
-})();
-</script>
 </body>
 </html>

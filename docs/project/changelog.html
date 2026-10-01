@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -23,6 +23,7 @@
       <li><a href="../guide/openharmony.html">OpenHarmony / OHPM</a></li>
       <li><a href="../guide/rust.html">Rust 嵌入</a></li>
       <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/linux.html">Linux 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -50,22 +51,45 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.7<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
-  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>project<span class="sep">/</span>更新日志</p>
+  <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>project<span class="sep">/</span>更新日志</p>
   <h1>更新日志</h1>
   <p class="kicker">Changelog</p>
   <p class="lead">按版本列出对宿主可见的变化。已回退的条目不在此列；完整历史以仓库根 <code>CHANGELOG.md</code> 为准。0.1.3 及更早的 breaking change 见文末小结。</p>
 
   <ul class="meta-strip">
-    <li>当前 <b>0.1.7</b></li>
-    <li>发布 <b>2026-08-16</b></li>
+    <li>当前 <b>0.2.1</b></li>
+    <li>发布 <b>2026-10-02</b></li>
   </ul>
 
-  <section id="unreleased">
-    <h2>Unreleased<span class="jp">未リリース</span><a class="anchor" href="#unreleased">#</a></h2>
+  <section id="v021">
+    <h2>0.2.1 · 2026-10-02<a class="anchor" href="#v021">#</a></h2>
+    <ul class="body">
+      <li>HTTP 连接、TLS、响应读取与后台预读可取消；stop / close / 重新打开会回收网络线程及缓存，减少退出卡顿和资源残留。</li>
+      <li>Flutter、Swift 与 OpenHarmony SDK 可通过 <code>httpBackBufferBytes</code> 调整回退缓存，默认 16 MiB。</li>
+      <li>补齐 WMV / WMA、dav1d 8-bit / 10-bit AV1 软件回退，以及 Windows 软件帧上传。</li>
+      <li>iOS 根据显示目标时刻调度视频、字幕和弹幕，并合并积压的渲染回调。</li>
+      <li>新增实验性 Linux 支持：X11 / Wayland、PulseAudio、NVDEC / VA-API、Flutter 纹理及 Wayland 原生视频层。</li>
+      <li>P010 上传保留 10-bit 精度，改善 HDR 色彩转换。</li>
+    </ul>
+  </section>
+
+  <section id="v020">
+    <h2>0.2.0 · 2026-09-23<a class="anchor" href="#v020">#</a></h2>
+    <ul class="body">
+      <li>HTTP 持久连接、后台预读、seek 窗口与断点恢复；请求头和缓存验证器随请求保留。</li>
+      <li>支持 Dolby Vision RPU reshaping 与色彩转换，覆盖 Profile 5 / 8 及 Profile 7 基础层映射。</li>
+      <li>默认 BT.2390 / IPT tone mapping，加入更多算子、目标黑点和对比度，以及缓存的感知色域 LUT。</li>
+      <li>HDR10 软件帧使用场景亮度统计调整映射，Apple EDR 输出跟随显示器 headroom。</li>
+    </ul>
+  </section>
+
+  <section id="v018">
+    <h2>0.1.8 · 2026-09-07<span class="jp">バージョン</span><a class="anchor" href="#v018">#</a></h2>
+    <p>新增 HTTP 打开选项与预读窗口配置、统一 SDK 发布入口，以及 Windows Flutter SDR 纹理。Presenter 配置加入视频 alpha 模式，原生宿主需要配套更新头文件与运行时。</p>
     <h3>透明视频与跨平台原生 GPU 合成 (#124)</h3>
     <ul class="body">
       <li>新增 packed-alpha 视频呈现（<code>ErikaVideoAlphaMode.packedAlphaRight</code>）：左半颜色、右半 alpha 的素材在 GPU 中重建预乘 alpha，按编码宽度的一半呈现；未请求该模式的播放器行为不变。</li>
@@ -201,7 +225,7 @@
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.7</b></span>
+    <span>Erika <b>v0.2.1</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
@@ -213,24 +237,5 @@
 </main>
 
 </div>
-<script>
-(function () {
-  document.querySelectorAll('.code').forEach(function (box) {
-    if (!box.querySelector('pre')) return;
-    var btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'copy'; btn.textContent = '复制';
-    box.appendChild(btn);
-    btn.addEventListener('click', function () {
-      var pre = box.querySelector('pre');
-      if (!pre || !navigator.clipboard) return;
-      navigator.clipboard.writeText(pre.innerText).then(function () {
-        var old = btn.textContent;
-        btn.textContent = '已复制';
-        setTimeout(function () { btn.textContent = old; }, 1400);
-      });
-    });
-  });
-})();
-</script>
 </body>
 </html>

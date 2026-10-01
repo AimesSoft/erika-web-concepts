@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../06-washi-home.html"><span class="n">Erika</span><span class="v">v0.1.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -23,6 +23,7 @@
       <li><a href="../guide/openharmony.html">OpenHarmony / OHPM</a></li>
       <li><a href="../guide/rust.html">Rust 嵌入</a></li>
       <li><a href="../guide/c.html">C ABI 嵌入</a></li>
+      <li><a href="../guide/linux.html">Linux 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -50,18 +51,18 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.1.7<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
 </aside>
 
 <main>
-  <p class="crumb"><a href="../../06-washi-home.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>project<span class="sep">/</span>发布与产物</p>
+  <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>project<span class="sep">/</span>发布与产物</p>
   <h1>发布与产物</h1>
   <p class="kicker">Releasing and Artifacts</p>
   <p class="lead">release workflow 构建全部平台的 <code>erika_capi</code> 预编译产物并挂到 GitHub Release。每个 bundle 包含库文件、<code>erika.h</code>、MPL-2.0 许可证与依赖声明。桌面 Linux 暂不发布。</p>
 
   <ul class="meta-strip">
     <li>平台 <b>6</b> 个</li>
-    <li>bundle <b>9</b> 个</li>
+    <li>ZIP 归档 <b>14</b> 个</li>
     <li>profile <b>lgpl</b></li>
   </ul>
 
@@ -69,8 +70,8 @@
     <h2>触发<span class="jp">トリガー</span><a class="anchor" href="#trigger">#</a></h2>
     <p>推入 <code>v*</code> 标签触发正式发布，构建完成后发布到 GitHub Releases。workflow_dispatch 手动运行只构建不发布，用于发布前检查。发布前先在本机执行 <a href="building.html">构建流程</a> 验证。</p>
     <div class="code">
-<pre>git tag v0.1.7
-git push origin v0.1.7</pre>
+<pre>git tag v0.2.1
+git push origin v0.2.1</pre>
     </div>
   </section>
 
@@ -95,7 +96,7 @@ git push origin v0.1.7</pre>
 
   <section id="ohpm">
     <h2>OpenHarmony OHPM 包<span class="jp">OHPM パッケージ</span><a class="anchor" href="#ohpm">#</a></h2>
-    <p>OpenHarmony arm64 的原生 ArkTS 包 <code>erika</code> 0.1.7 已发布到 <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM</a>，最低兼容 API 18，使用时直接安装包：</p>
+    <p>OpenHarmony arm64 的原生 ArkTS 包 <code>erika</code> 通过 <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM</a> 分发，最低兼容 API 18。截至 2026-10-02 公开版本为 0.1.9，0.2.1 已提交审核：</p>
     <div class="code">
       <p class="lbl">shell</p>
 <pre>ohpm install erika</pre>
@@ -105,7 +106,7 @@ git push origin v0.1.7</pre>
 
   <section id="layout">
     <h2>bundle 结构<span class="jp">構成</span><a class="anchor" href="#layout">#</a></h2>
-    <p>所有 bundle 由 <code>packaging/bundle.sh</code> 生成，结构一致：</p>
+    <p>C ABI bundle 由 <code>packaging/bundle.sh</code> 生成，结构一致：</p>
     <div class="code">
 <pre>&lt;bundle-name&gt;/
   lib/                    <span class="c"># 库文件或 xcframework</span>
@@ -124,14 +125,22 @@ git push origin v0.1.7</pre>
     <p>Flutter 插件构建时默认下载预编译运行时（<code>erika_flutter</code> 的 pub.dev 版本自带校验与缓存）；需要从源码构建时显式导出：</p>
     <div class="code">
 <pre><span class="k">export</span> ERIKA_FORCE_SOURCE_BUILD=1    <span class="c"># 改为源码构建（需 ERIKA_REPO_ROOT 指向仓库检出）</span>
-<span class="k">export</span> ERIKA_PREBUILT_TAG=v0.1.7       <span class="c"># 自定义预编译版本标签，默认匹配当前版本</span></pre>
+<span class="k">export</span> ERIKA_PREBUILT_TAG=v0.2.1       <span class="c"># 自定义预编译版本标签，默认匹配当前版本</span></pre>
     </div>
     <p>构建脚本按平台从 <code>github.com/AimesSoft/Erika/releases/download/&lt;tag&gt;/</code> 下载对应 bundle 并解包，并按发布级 <code>SHA256SUMS</code> 校验摘要。</p>
     <p>native 宿主的消费方式：把 bundle 解包，<code>include/erika.h</code> 作为唯一头文件，<code>lib/</code> 内的库链接进宿主，见<a href="../guide/c.html">C ABI 嵌入</a>。</p>
   </section>
 
+  <section id="pipeline">
+    <h2>构建与包发布流程<a class="anchor" href="#pipeline">#</a></h2>
+    <p>当前 main 的 Release workflow 将 macOS 两个架构、iOS 三个 slice、tvOS 三个 slice、Android 四个 ABI、Windows 两个架构与 OpenHarmony 分开构建，完成后再合并 universal / XCFramework 或按 ABI 打包。原生依赖缓存按目标保存，CI 与 Release 复用。</p>
+    <p>发布共生成 14 个 ZIP：9 个 C ABI 归档、4 个按 ABI 拆分的 Flutter Android 运行时，以及 1 个 Swift XCFramework。<code>SHA256SUMS</code> 记录全部归档摘要。</p>
+    <p>原生标签发布成功后，<code>Release ecosystem packages</code> 更新 Flutter / OHPM 版本及原生产物摘要，随后发布 pub.dev 与 OHPM；Swift XCFramework 构建及 SwiftPM 发布并行推进。OHPM 上传成功后仍需完成平台审核，公开版本以 registry 为准。</p>
+    <p>主分支 CI 按变更路径选择原生任务；旧分支构建可取消。仅改文档或生态包发布脚本时，主 CI 跳过原生构建；原生源码、依赖补丁和 CI / Release 构建脚本变更仍会触发。</p>
+  </section>
+
   <footer class="doc-foot">
-    <span>Erika <b>v0.1.7</b></span>
+    <span>Erika <b>v0.2.1</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
@@ -143,24 +152,5 @@ git push origin v0.1.7</pre>
 </main>
 
 </div>
-<script>
-(function () {
-  document.querySelectorAll('.code').forEach(function (box) {
-    if (!box.querySelector('pre')) return;
-    var btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'copy'; btn.textContent = '复制';
-    box.appendChild(btn);
-    btn.addEventListener('click', function () {
-      var pre = box.querySelector('pre');
-      if (!pre || !navigator.clipboard) return;
-      navigator.clipboard.writeText(pre.innerText).then(function () {
-        var old = btn.textContent;
-        btn.textContent = '已复制';
-        setTimeout(function () { btn.textContent = old; }, 1400);
-      });
-    });
-  });
-})();
-</script>
 </body>
 </html>
