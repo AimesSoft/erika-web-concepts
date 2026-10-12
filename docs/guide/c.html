@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>C ABI 嵌入 — Erika 开发者文档</title>
+<title>C ABI 嵌入 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.2.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -51,7 +51,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">liberika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -87,7 +87,7 @@
     <ul class="body">
       <li><b>返回值。</b> 每个可能失败的调用返回 <code>ErikaStatus</code>。<code>ErikaStatus_Ok</code>（0）表示成功；<code>ErikaStatus_NoEvent</code>（5）表示事件队列暂空。非零且非 5 的状态码均表示错误。</li>
       <li><b>错误消息。</b> 发生错误时，内核会将详细的可读错误信息保存在<b>线程局部变量</b>中。必须在调用失败的同一线程中立即调用 <code>erika_last_error_message()</code> 读取，并使用 <code>erika_string_free()</code> 释放返回的指针。</li>
-      <li><b>所有权。</b> Erika 返回的 <code>char*</code> 堆内存归调用方所有。独立字符串使用 <code>erika_string_free()</code>；结构体（如 <code>ErikaTrackInfo</code>）内部包含的字符串使用配套的 <code>erika_track_info_free()</code>。</li>
+      <li><b>所有权。</b> liberika 返回的 <code>char*</code> 堆内存归调用方所有。独立字符串使用 <code>erika_string_free()</code>；结构体（如 <code>ErikaTrackInfo</code>）内部包含的字符串使用配套的 <code>erika_track_info_free()</code>。</li>
       <li><b>参数借用。</b> <code>const char*</code> 参数仅在函数调用期间被借用，必须是以 NUL 结尾的 UTF-8 字符串。</li>
       <li><b>计数数组。</b> 列表查询采用 <code>(buf, capacity, &amp;len)</code> 模式：<code>len</code> 总是返回流中的实际总数量，而写入 <code>buf</code> 的数量最多为 <code>capacity</code>。遍历时应以 <code>min(len, capacity)</code> 为界，避免越界访问。</li>
       <li><b>线程安全。</b> 单个 handle 内部不包含同步锁，禁止在多个线程中并发调用同一句柄的方法。</li>
@@ -106,7 +106,7 @@
 <span class="c">/* 辅助函数：读取并打印线程局部错误信息 */</span>
 <span class="k">static void</span> print_last_error(<span class="k">const char</span> *action, ErikaStatus status) {
     <span class="k">char</span> *msg = erika_last_error_message();
-    fprintf(stderr, <span class="s">"[Erika Error] %s failed (status=%d): %s
+    fprintf(stderr, <span class="s">"[liberika Error] %s failed (status=%d): %s
 "</span>,
             action, status, msg ? msg : <span class="s">"unknown"</span>);
     <span class="k">if</span> (msg) {
@@ -118,7 +118,7 @@
     <span class="c">/* 1. 创建 Presenter 句柄 */</span>
     ErikaPresenterHandle *p = erika_presenter_create();
     <span class="k">if</span> (!p) {
-        fprintf(stderr, <span class="s">"创建 Erika Presenter 失败
+        fprintf(stderr, <span class="s">"创建 liberika Presenter 失败
 "</span>);
         <span class="k">return</span>;
     }
@@ -204,7 +204,7 @@ ErikaStatus st = erika_presenter_tracks(p, tracks, 16, &amp;total_count);
 
   <section id="handle">
     <h2>Handle 模式 (无头控制)<span class="jp">Handle 概要</span><a class="anchor" href="#handle">#</a></h2>
-    <p>仅需状态机与媒体控制、无需由 Erika 驱动上屏与音频的轻量级场景，可使用 <code>ErikaHandle</code>：</p>
+    <p>仅需状态机与媒体控制、无需由 liberika 驱动上屏与音频的轻量级场景，可使用 <code>ErikaHandle</code>：</p>
     <div class="code">
       <p class="lbl">ErikaHandle 控制示例</p>
 <pre>ErikaHandle *h = erika_create();
@@ -239,7 +239,7 @@ ErikaStatus status = erika_presenter_open_with_options(
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.2.1</b></span>
+    <span>liberika <b>v0.2.1</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Linux 接入 — Erika 开发者文档</title>
+<title>Linux 接入 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.2.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -51,7 +51,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">liberika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -88,14 +88,14 @@ sudo apt install -y \
     <h2>构建与运行<a class="anchor" href="#build">#</a></h2>
     <div class="code">
       <p class="lbl">shell</p>
-<pre>git clone https://github.com/AimesSoft/Erika.git
-cd Erika
+<pre>git clone https://github.com/AimesSoft/liberika.git
+cd liberika
 git checkout v0.2.1
 bash scripts/build_linux_libass.sh
 cargo build --locked --release -p linux_native_demo -p erika_capi
 cargo run --locked --release -p linux_native_demo -- /path/to/video.mkv</pre>
     </div>
-    <p>libass 使用 Erika 补丁版 0.17.5，构建脚本负责下载、校验和应用字体回退补丁。FFmpeg 8 与 PulseAudio 默认动态链接系统库。产物位于 <code>target/release/</code>。</p>
+    <p>libass 使用 liberika 补丁版 0.17.5，构建脚本负责下载、校验和应用字体回退补丁。FFmpeg 8 与 PulseAudio 默认动态链接系统库。产物位于 <code>target/release/</code>。</p>
     <p>Demo 自动选择窗口协议，也可传入 <code>--x11</code> 或 <code>--wayland</code>。空格暂停或继续，左右箭头跳转 5 秒，Esc 退出。</p>
   </section>
 
@@ -147,7 +147,7 @@ export ERIKA_VAAPI_DEVICE=/dev/dri/renderD128</pre>
 # 或使用 X11：
 bash scripts/run_wsl_gpu.sh --x11</pre>
     </div>
-    <p>启动脚本为 Erika 进程选择 <code>wgpu → OpenGL/EGL → Mesa D3D12</code>。WSL 使用 Windows 显卡驱动，无需安装 Linux NVIDIA 内核驱动。仓库位于 <code>/mnt/c</code> 时，可将 <code>CARGO_TARGET_DIR</code> 放到 Linux 文件系统以加快构建。</p>
+    <p>启动脚本为 liberika 进程选择 <code>wgpu → OpenGL/EGL → Mesa D3D12</code>。WSL 使用 Windows 显卡驱动，无需安装 Linux NVIDIA 内核驱动。仓库位于 <code>/mnt/c</code> 时，可将 <code>CARGO_TARGET_DIR</code> 放到 Linux 文件系统以加快构建。</p>
   </section>
 
   <section id="check">
@@ -162,7 +162,7 @@ ERIKA_TEST_WAYLAND=1 bash scripts/check_linux.sh</pre>
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.2.1</b></span>
+    <span>liberika <b>v0.2.1</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

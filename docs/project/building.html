@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>构建与依赖 — Erika 开发者文档</title>
+<title>构建与依赖 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.2.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -51,14 +51,14 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">liberika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>project<span class="sep">/</span>构建与依赖</p>
   <h1>构建与依赖</h1>
   <p class="kicker">Building and Dependencies</p>
-  <p class="lead">Erika 的 Rust 代码直接以 cargo 构建；FFmpeg、dav1d、libass、HarfBuzz 等原生依赖以源码方式获取并在 <code>third_party/</code> 内构建，由 <code>xtask deps</code> 管理。构建脚本保证 CI 与本地产出一致。</p>
+  <p class="lead">liberika 的 Rust 代码直接以 cargo 构建；FFmpeg、dav1d、libass、HarfBuzz 等原生依赖以源码方式获取并在 <code>third_party/</code> 内构建，由 <code>xtask deps</code> 管理。构建脚本保证 CI 与本地产出一致。</p>
 
   <ul class="meta-strip">
     <li>Rust <b>1.92+</b></li>
@@ -167,7 +167,7 @@ cargo test --workspace</pre>
 
   <section id="linux">
     <h2>Linux 系统库构建<a class="anchor" href="#linux">#</a></h2>
-    <p>Linux 使用系统 FFmpeg 8 和 PulseAudio，另行构建 Erika 补丁版 libass，入口不同于 xtask 的发布目标：</p>
+    <p>Linux 使用系统 FFmpeg 8 和 PulseAudio，另行构建 liberika 补丁版 libass，入口不同于 xtask 的发布目标：</p>
     <div class="code">
       <p class="lbl">shell</p>
 <pre>bash scripts/build_linux_libass.sh
@@ -177,7 +177,7 @@ cargo build --locked --release -p erika_capi -p linux_native_demo</pre>
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.2.1</b></span>
+    <span>liberika <b>v0.2.1</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

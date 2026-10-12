@@ -1,11 +1,11 @@
-# Erika 文档站 交接说明
+# liberika 文档站 交接说明
 
 写给接手维护正文的人。本文件只陈述事实与已核实的数据（最近一次核实：
 2026-10-02），不含风格建议。
 
 ## 1. 这是什么
 
-`~/Desktop/erika-web-concepts/` 是 Erika 播放内核的**文档站**，与 Erika 仓库
+`~/Desktop/erika-web-concepts/` 是 liberika 播放内核的**文档站**，与 liberika 仓库
 （`~/Desktop/Erika/`）分离。
 
 **它是 git 仓库**（2026-08-11 初始化），远端
@@ -41,7 +41,7 @@ CSS。交互增强统一走 `docs/docs.js`（代码块复制按钮等）。
 
 ## 4. 内容基线
 
-- 当前安装、接口及功能说明按 Erika v0.2.1 核对，更新日志保留旧版历史。
+- 当前安装、接口及功能说明按 liberika v0.2.1 核对，更新日志保留旧版历史。
 - C ABI 共 101 个导出函数、38 个类型；71 个 Presenter 函数、23 个
   Handle 函数，另有 7 个通用/独立入口。
 - Flutter 与 SwiftPM 使用 0.2.1；截至 2026-10-02，OHPM 公开版仍为
@@ -50,7 +50,7 @@ CSS。交互增强统一走 `docs/docs.js`（代码块复制按钮等）。
   FFmpeg 8、补丁 libass、X11 / Wayland、PulseAudio 和 Flutter 动态库配置。
 - 发布流程按当前 main 的 workflow 核对，涵盖独立 slice 构建、目标缓存
   及原生发布后的生态包发布。
-- 更新内容时以 Erika 仓库的 `CHANGELOG.md`、`docs/*.md`、
+- 更新内容时以 liberika 仓库的 `CHANGELOG.md`、`docs/*.md`、
   `crates/erika_capi/include/erika.h`、SDK 实现和发布 workflow 为来源。
 
 ## 5. 本文件

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>更新日志 — Erika 开发者文档</title>
+<title>更新日志 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.2.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -51,7 +51,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">liberika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -197,13 +197,13 @@
       <li>异步重排期间旧弹幕 plan 继续移动；纯绘制设置复用布局，可见性即时生效。</li>
       <li>增量 glyph atlas 上传与可复用 Metal instance buffer，减少每帧 DFM 分配与候选遍历开销。</li>
       <li>外挂文本字幕的字符集检测与转码，覆盖 GBK、Big5、Shift_JIS、UTF-16，UTF-8 直通，低置信度或二进制输入回退保护。</li>
-      <li>libass 全平台注册 Erika 内置 Droid Sans Fallback；无系统字体提供者的目标默认该族，不再落到不可解析的 <code>Arial</code>。</li>
+      <li>libass 全平台注册 liberika 内置 Droid Sans Fallback；无系统字体提供者的目标默认该族，不再落到不可解析的 <code>Arial</code>。</li>
       <li>字幕回退与选择性样式覆盖：自定义字体族与文件、RGBA 颜色、度量、文本属性、边框、对齐、边距、模糊。入口为 <code>erika_presenter_set_subtitle_font</code>、<code>erika_presenter_set_subtitle_style</code> 与 <code>ErikaPlayer.setSubtitleStyle</code>。</li>
     </ul>
     <h3>网络与媒体诊断</h3>
     <ul class="body">
       <li><code>erika_open_with_headers</code> 与 <code>erika_presenter_open_with_headers</code>。请求头应用到 probe、range 读、重试与预取，但不传给字幕与弹幕 sidecar。</li>
-      <li>拒绝宿主传入 Erika 管理的传输头与非法 HTTP 字段。HTTP range 输入加固：被忽略的 <code>Range</code>、错误偏移、瞬时失败、部分响应、重复预取与假 EOF，重试有界。</li>
+      <li>拒绝宿主传入 liberika 管理的传输头与非法 HTTP 字段。HTTP range 输入加固：被忽略的 <code>Range</code>、错误偏移、瞬时失败、部分响应、重复预取与假 EOF，重试有界。</li>
       <li>轨道 bitrate 与有理帧率元数据贯通 Rust、C、Dart。可选原生 debug HUD 覆盖解码器、渲染器、GPU、音频、输出与 HDR、弹幕诊断。</li>
     </ul>
     <h3>音频、色彩与编解码</h3>
@@ -225,7 +225,7 @@
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.2.1</b></span>
+    <span>liberika <b>v0.2.1</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

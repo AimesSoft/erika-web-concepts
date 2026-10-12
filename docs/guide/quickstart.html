@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>快速开始 — Erika 开发者文档</title>
+<title>快速开始 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.2.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -51,14 +51,14 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">liberika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>快速开始</p>
   <h1>快速开始</h1>
   <p class="kicker">Quickstart</p>
-  <p class="lead">Erika 提供了面向多种技术栈的接入方式：Flutter 插件 <code>erika_flutter</code>、SwiftPM 包 <code>ErikaSwift</code>、OpenHarmony ArkTS 原生包 <code>erika</code>、Rust 原生 crate 以及标准 C ABI 动态/静态库。</p>
+  <p class="lead">liberika 提供了面向多种技术栈的接入方式：Flutter 插件 <code>erika_flutter</code>、SwiftPM 包 <code>ErikaSwift</code>、OpenHarmony ArkTS 原生包 <code>erika</code>、Rust 原生 crate 以及标准 C ABI 动态/静态库。</p>
 
   <ul class="meta-strip">
     <li>预编译 <b>6 大平台</b></li>
@@ -68,7 +68,7 @@
 
   <section id="prebuilt">
     <h2>预编译二进制产物<span class="jp">プリビルト</span><a class="anchor" href="#prebuilt">#</a></h2>
-    <p>GitHub Releases（<code>github.com/AimesSoft/Erika/releases</code>）为各大平台提供自包含预编译归档：</p>
+    <p>GitHub Releases（<code>github.com/AimesSoft/liberika/releases</code>）为各大平台提供自包含预编译归档：</p>
     <div class="tw">
       <table>
         <thead><tr><th>产物归档</th><th>包含内容</th><th>支持架构</th></tr></thead>
@@ -101,7 +101,7 @@
 
   <section id="swift">
     <h2>Swift / Apple 原生接入<span class="jp">Swift</span><a class="anchor" href="#swift">#</a></h2>
-    <p>在 Xcode 项目中添加 SwiftPM 依赖 <code>https://github.com/AimesSoft/ErikaSwift</code>，通过 Metal 渲染与系统硬解快速起步：</p>
+    <p>在 Xcode 项目中添加 SwiftPM 依赖 <code>https://github.com/AimesSoft/liberika-swift</code>，通过 Metal 渲染与系统硬解快速起步：</p>
     <div class="code">
       <p class="lbl">Swift 示例</p>
 <pre><span class="k">import</span> Erika
@@ -128,7 +128,7 @@
     <div class="code">
       <p class="lbl">Cargo.toml</p>
 <pre>[dependencies]
-erika = { git = <span class="s">"https://github.com/AimesSoft/Erika"</span>, tag = <span class="s">"v0.2.1"</span> }</pre>
+erika = { git = <span class="s">"https://github.com/AimesSoft/liberika"</span>, tag = <span class="s">"v0.2.1"</span> }</pre>
     </div>
     <div class="code">
       <p class="lbl">src/main.rs</p>
@@ -179,7 +179,7 @@ erika_presenter_render_tick(p, host_time, &amp;stats);</pre>
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.2.1</b></span>
+    <span>liberika <b>v0.2.1</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

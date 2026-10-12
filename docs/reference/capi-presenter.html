@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ErikaPresenterHandle 参考 — Erika 开发者文档</title>
+<title>ErikaPresenterHandle 参考 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.2.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -51,7 +51,7 @@
       <li><a href="capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">liberika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -382,7 +382,7 @@
 
     <div class="api" id="erika_presenter_windows_composition_swapchain_iunknown">
       <p class="sig"><b>ErikaStatus erika_presenter_windows_composition_swapchain_iunknown</b>(ErikaPresenterHandle *handle, void **out_swapchain)</p>
-      <p class="desc">仅限 Windows。以 <code>direct_composition</code> 能力附着、且以透明 alpha 模式或 overlay 混合播放时，返回 Erika 创建的预乘 alpha DirectComposition swap chain。返回的 IUnknown 已 AddRef，调用者拥有该 COM 引用并必须 Release；解码器或输出设备重建 swap chain 后需重新获取（指针未变说明没有重建）。</p>
+      <p class="desc">仅限 Windows。以 <code>direct_composition</code> 能力附着、且以透明 alpha 模式或 overlay 混合播放时，返回 liberika 创建的预乘 alpha DirectComposition swap chain。返回的 IUnknown 已 AddRef，调用者拥有该 COM 引用并必须 Release；解码器或输出设备重建 swap chain 后需重新获取（指针未变说明没有重建）。</p>
     </div>
 
     <div class="api" id="erika_presenter_resize_surface">
@@ -473,7 +473,7 @@
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.2.1</b></span>
+    <span>liberika <b>v0.2.1</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

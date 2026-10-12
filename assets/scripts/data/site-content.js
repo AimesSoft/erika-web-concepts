@@ -1,11 +1,11 @@
 (function registerContent(app) {
 app.siteContent = {
   brand: {
-    name: 'Erika',
+    name: 'liberika',
     kana: '古戸ヱリカ',
     descriptor: 'Playback Kernel',
     version: 'v0.2.1',
-    repoUrl: 'https://github.com/AimesSoft/Erika',
+    repoUrl: 'https://github.com/AimesSoft/liberika',
   },
   navigation: [
     { label: '能力', href: '#features' },
@@ -33,7 +33,7 @@ app.siteContent = {
     eyebrow: 'Case file / 01',
     title: '真相只有一条播放管线',
     lead:
-      'Erika 把繁琐的媒体能力收进一致的内核边界，让每个宿主都能共享同一套播放行为。',
+      'liberika 把繁琐的媒体能力收进一致的内核边界，让每个宿主都能共享同一套播放行为。',
     items: [
       {
         number: '01',
@@ -67,7 +67,7 @@ app.siteContent = {
         id: 'release',
         label: '预编译产物',
         language: 'SHELL',
-        code: `# github.com/AimesSoft/Erika/releases
+        code: `# github.com/AimesSoft/liberika/releases
 erika-swift-core-0.2.1.xcframework.zip
 erika-capi-macos-universal.zip
 erika-capi-windows-x64.zip
@@ -76,7 +76,7 @@ erika-capi-openharmony-arm64.zip`,
         note: 'C ABI 归档包含 erika.h、许可证与 MANIFEST.txt；Swift 使用 XCFramework。',
         action: {
           label: '查看 GitHub Releases',
-          url: 'https://github.com/AimesSoft/Erika/releases',
+          url: 'https://github.com/AimesSoft/liberika/releases',
         },
       },
       {
@@ -102,7 +102,7 @@ ErikaVideoView(player: player)`,
 let player = try ErikaPlayer()
 try player.open("https://example.com/video.mp4")
 try player.play()`,
-        note: '在 Xcode 中添加 Package: https://github.com/AimesSoft/ErikaSwift',
+        note: '在 Xcode 中添加 Package: https://github.com/AimesSoft/liberika-swift',
         action: {
           label: '查看 Swift 接入指南',
           url: 'docs/guide/swift.html',
@@ -132,7 +132,7 @@ player.play();`,
 let player = Player::new(PlayerConfig::default());
 player.open(MediaRequest::new("/path/to/video.mp4"))?;
 player.play()?;`,
-        note: 'Cargo.toml：erika = { git = "https://github.com/AimesSoft/Erika", tag = "v0.2.1" }',
+        note: 'Cargo.toml：erika = { git = "https://github.com/AimesSoft/liberika", tag = "v0.2.1" }',
       },
       {
         id: 'c-api',
@@ -219,8 +219,8 @@ erika_presenter_render_tick(player, host_time, &stats);`,
     ],
   },
   closing: {
-    label: 'A little truth from Erika',
-    quote: '“GOOD！我是 Erika，是 NipaPlay 里第五个播放器内核。”',
+    label: 'A little truth from liberika',
+    quote: '“GOOD！我是 liberika，是 NipaPlay 里第五个播放器内核。”',
     reply: '“即便算上你，也只有四个播放器内核！”',
     note:
       '名字取自《海猫鸣泣之时》的侦探古戸ヱリカ（古户绘梨花）。一个是台前的播放器，一个是幕后的引擎。',

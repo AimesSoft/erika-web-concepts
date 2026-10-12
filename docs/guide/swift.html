@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Swift 接入 — Erika 开发者文档</title>
+<title>Swift 接入 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.2.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -51,14 +51,14 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">liberika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Swift 接入</p>
   <h1>Swift 接入</h1>
   <p class="kicker">Swift &amp; Apple Platforms</p>
-  <p class="lead"><code>ErikaSwift</code> 是面向 Apple 平台（macOS 11+、iOS 13+、tvOS 13+）的官方 SwiftPM 库。SDK 提供了针对 SwiftUI 的 <code>ErikaPlayerView</code> 与针对 AppKit / UIKit 的 <code>ErikaVideoView</code>，自动托管 Metal 图层绑定与显示帧时钟调度。</p>
+  <p class="lead"><code>liberika-swift</code> 是面向 Apple 平台（macOS 11+、iOS 13+、tvOS 13+）的官方 SwiftPM 库。SDK 提供了针对 SwiftUI 的 <code>ErikaPlayerView</code> 与针对 AppKit / UIKit 的 <code>ErikaVideoView</code>，自动托管 Metal 图层绑定与显示帧时钟调度。</p>
 
   <ul class="meta-strip">
     <li>模块 <b>import Erika</b></li>
@@ -71,13 +71,13 @@
     <p>在 Xcode 项目中添加 Package 依赖：</p>
     <div class="code">
       <p class="lbl">Xcode Package URL</p>
-<pre>https://github.com/AimesSoft/ErikaSwift</pre>
+<pre>https://github.com/AimesSoft/liberika-swift</pre>
     </div>
     <p>或在 <code>Package.swift</code> 的 dependencies 中加入：</p>
     <div class="code">
       <p class="lbl">Package.swift</p>
 <pre><span class="k">dependencies</span>: [
-    .<span class="k">package</span>(url: <span class="s">"https://github.com/AimesSoft/ErikaSwift"</span>, from: <span class="s">"0.2.1"</span>)
+    .<span class="k">package</span>(url: <span class="s">"https://github.com/AimesSoft/liberika-swift"</span>, from: <span class="s">"0.2.1"</span>)
 ]</pre>
     </div>
     <p>在代码中导入模块：</p>
@@ -90,7 +90,7 @@
 
   <section id="views">
     <h2>视图与线程生命周期<span class="jp">ビュー連携</span><a class="anchor" href="#views">#</a></h2>
-    <p>使用 Erika 播放器的两个核心生命周期原则：</p>
+    <p>使用 liberika 播放器的两个核心生命周期原则：</p>
     <ul class="body">
       <li><b>强持有播放器：</b> <code>ErikaPlayerView</code> 与 <code>ErikaVideoView</code> 对 <code>ErikaPlayer</code> 采用 <code>weak</code> 弱引用。宿主的 <code>ObservableObject</code>、<code>@Observable</code> ViewModel 或 ViewController 必须以强引用持有 <code>ErikaPlayer</code> 实例。</li>
       <li><b>主线程运行：</b> <code>ErikaPlayer</code> 被标记为 <code>@MainActor</code>，所有播放控制与状态查询均在主线程执行，底层 C 内核句柄由 SDK 自动保证调用串行化。</li>
@@ -241,7 +241,7 @@ view.addSubview(videoView)</pre>
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.2.1</b></span>
+    <span>liberika <b>v0.2.1</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

@@ -22,7 +22,7 @@ function renderHeader(content) {
   return `
     <header class="site-header" data-header>
       <div class="shell header-inner">
-        <a class="brand" href="#top" aria-label="Erika 首页">
+        <a class="brand" href="#top" aria-label="liberika 首页">
           <img class="brand-mark" src="assets/images/favicon.svg" alt="" width="64" height="64">
           <span class="brand-name">${escapeHTML(brand.name)}</span>
           <span class="brand-kana">${escapeHTML(brand.kana)}</span>

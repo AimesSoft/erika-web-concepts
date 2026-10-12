@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>发布与产物 — Erika 开发者文档</title>
+<title>发布与产物 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">Erika</span><span class="v">v0.2.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.2.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -51,7 +51,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">Erika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/Erika</p>
+  <p class="side-foot">liberika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -101,7 +101,7 @@ git push origin v0.2.1</pre>
       <p class="lbl">shell</p>
 <pre>ohpm install erika</pre>
     </div>
-    <p>包内含 N-API bridge 与匹配的 <code>liberika_capi.so</code>，接口与 <code>XComponent</code> surface 生命周期见 <a href="https://github.com/AimesSoft/Erika/blob/main/packages/erika_ohos/README.md">OpenHarmony package guide</a>。</p>
+    <p>包内含 N-API bridge 与匹配的 <code>liberika_capi.so</code>，接口与 <code>XComponent</code> surface 生命周期见 <a href="https://github.com/AimesSoft/liberika/blob/main/packages/erika_ohos/README.md">OpenHarmony package guide</a>。</p>
   </section>
 
   <section id="layout">
@@ -127,7 +127,7 @@ git push origin v0.2.1</pre>
 <pre><span class="k">export</span> ERIKA_FORCE_SOURCE_BUILD=1    <span class="c"># 改为源码构建（需 ERIKA_REPO_ROOT 指向仓库检出）</span>
 <span class="k">export</span> ERIKA_PREBUILT_TAG=v0.2.1       <span class="c"># 自定义预编译版本标签，默认匹配当前版本</span></pre>
     </div>
-    <p>构建脚本按平台从 <code>github.com/AimesSoft/Erika/releases/download/&lt;tag&gt;/</code> 下载对应 bundle 并解包，并按发布级 <code>SHA256SUMS</code> 校验摘要。</p>
+    <p>构建脚本按平台从 <code>github.com/AimesSoft/liberika/releases/download/&lt;tag&gt;/</code> 下载对应 bundle 并解包，并按发布级 <code>SHA256SUMS</code> 校验摘要。</p>
     <p>native 宿主的消费方式：把 bundle 解包，<code>include/erika.h</code> 作为唯一头文件，<code>lib/</code> 内的库链接进宿主，见<a href="../guide/c.html">C ABI 嵌入</a>。</p>
   </section>
 
@@ -140,7 +140,7 @@ git push origin v0.2.1</pre>
   </section>
 
   <footer class="doc-foot">
-    <span>Erika <b>v0.2.1</b></span>
+    <span>liberika <b>v0.2.1</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
