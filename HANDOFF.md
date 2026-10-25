@@ -56,7 +56,23 @@ CSS。交互增强统一走 `docs/docs.js`（代码块复制按钮等）。
 - 更新内容时以 liberika 仓库的 `CHANGELOG.md`、`docs/*.md`、
   `crates/erika_capi/include/erika.h`、SDK 实现和发布 workflow 为来源。
 
-## 5. 本文件
+## 5. 线上部署
+
+- 生产地址为 `https://liberika.aimes-soft.com/`，服务器使用本机 SSH 配置的
+  `nipaplay-prod`（43.128.47.234）。
+- `erika-deploy-watch.service` 每 60 秒检查 `main`，从
+  `/www/deploy/erika.aimes-soft.com/repository` 同步到
+  `/www/wwwroot/erika.aimes-soft.com`；部署提交记录在同级 `DEPLOYED_COMMIT`。
+- liberika 与旧 erika 域名共用上述自动部署目录。2026-10-25 修复新域名仍指向
+  改名前静态副本的问题；新域名 nginx 配置为
+  `/www/server/panel/vhost/nginx/liberika.aimes-soft.com.conf`。
+- 同步保留 `.well-known`、`.user.ini`、`.htaccess` 和 `404.html`，不发布 `.git`
+  与本维护文档。部署前自动备份到 `/www/backups/erika.aimes-soft.com/auto`。
+- nginx 对 JS/CSS 设置 12 小时缓存。首页内容脚本在 `index.html` 中使用版本查询参数；
+  后续发版同步更新该参数，避免已有浏览器继续显示旧版内容。
+- push 后仍需检查线上首页和修改的文档，确认服务器已同步。
+
+## 6. 本文件
 
 HANDOFF.md 不在站点导航内，属于仓库维护说明。事实变化（文件清单、
 工作流、内容基线）时随手更新本文件——上一版"未纳入 git、删除不可逆"
