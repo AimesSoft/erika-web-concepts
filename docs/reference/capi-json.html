@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.2.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -24,6 +24,7 @@
       <li><a href="../guide/rust.html">Rust 嵌入</a></li>
       <li><a href="../guide/c.html">C ABI 嵌入</a></li>
       <li><a href="../guide/linux.html">Linux 接入</a></li>
+      <li><a href="../guide/web.html">Web / WASM 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -51,17 +52,17 @@
       <li><a href="capi-json.html" aria-current="page">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>JSON bridge</p>
   <h1>JSON bridge</h1>
   <p class="kicker">JSON Bridge Reference</p>
-  <p class="lead">三个 JSON 变体函数与 34 个命名方法。供已用平台通道序列化结构化参数的宿主使用，例如 Dart FFI 宿主的 <code>MethodChannel</code> 一侧。方法与 presenter 的 C 函数一一对应，参数经 JSON 对象传入。</p>
+  <p class="lead">三个 JSON 变体函数与 47 个命名方法。供已用平台通道序列化结构化参数的宿主使用，例如 Dart FFI 宿主的 <code>MethodChannel</code> 一侧。方法覆盖 Presenter 操作、全局日志及帧导出，参数经 JSON 对象传入；用 listMethods 查询运行时支持的接口。</p>
 
   <ul class="meta-strip">
-    <li>方法 <b>34</b> 个</li>
+    <li>方法 <b>47</b> 个</li>
     <li>命名 <b>camelCase</b></li>
   </ul>
 
@@ -193,6 +194,31 @@
     </div>
   </section>
 
+  <section id="discovery">
+    <h2>接口发现、章节与诊断 · 0.3.0<a class="anchor" href="#discovery">#</a></h2>
+    <p><code>listMethods</code> 返回 <code>{schema, methods}</code>。每项包含 name、scope、summary、arguments（name / type / required）、returns、blocking 和 writesFiles；以当前运行时返回的表为准。全局方法无需 handle，Presenter 方法需要有效 handle；表项说明同步阻塞与可能写文件的行为，不代表异步任务调度。</p>
+    <div class="code"><p class="lbl">C</p><pre>char *methods = erika_presenter_invoke_json(NULL, "listMethods", "{}");
+// 解析后释放
+erika_string_free(methods);</pre></div>
+    <div class="tw"><table><thead><tr><th>方法</th><th>参数 / 返回</th><th>作用域</th></tr></thead><tbody>
+      <tr><td class="m">listMethods</td><td>无参数；返回完整接口表。</td><td>global</td></tr>
+      <tr><td class="m">invokeJson</td><td>method、[arguments]；返回被调用方法的完整响应信封。</td><td>presenter</td></tr>
+      <tr><td class="m">setDebugHudEnabled</td><td>enabled；返回 null。</td><td>presenter</td></tr>
+      <tr><td class="m">setOutputHeadroom</td><td>headroom、known；返回 null。</td><td>presenter</td></tr>
+      <tr><td class="m">trackSelection</td><td>无参数；返回 {video, audio, subtitle}，未选为 null。</td><td>presenter</td></tr>
+      <tr><td class="m">setSubtitleFont</td><td>[fontFamily]、[fontFilePath]；返回 null。</td><td>presenter</td></tr>
+      <tr><td class="m">setSubtitleStyle</td><td>ErikaSubtitleStyle 对应的 camelCase 字段；返回 null。</td><td>presenter</td></tr>
+      <tr><td class="m">getDanmakuConfig</td><td>无参数；返回当前布局配置。</td><td>presenter</td></tr>
+      <tr><td class="m">chapters</td><td>无参数；返回 {chapters:[{index,title,startMs,endMs}], mediaOpen}。</td><td>presenter</td></tr>
+      <tr><td class="m">getDiagnosticsSnapshot</td><td>无参数；返回 schema 1 诊断文档，含实际解码路径、输出、音频、缓冲及时间统计。</td><td>presenter</td></tr>
+      <tr><td class="m">getLogs</td><td>[limit]、[minLevel]（trace/debug/info/warn/error）、[sinceSeq]；返回脱敏日志文档及 nextSeq。</td><td>global</td></tr>
+      <tr><td class="m">exportFrame</td><td>uri、positionMillis；可选 width、height、format（png / rgba）、outputPath、overwrite、httpHeaders、httpReadAheadBytes。未指定路径时返回 dataBase64。</td><td>global</td></tr>
+      <tr><td class="m">exportFrames</td><td>uri、positionsMillis、outputDir；其余可选项同单帧导出。返回源尺寸、时长、seek/解码计数及逐帧结果。</td><td>global</td></tr>
+    </tbody></table></div>
+    <p>章节位置以毫秒计，endMs 可为 null；传给 <code>seek</code> 时把 startMs 转为微秒。单帧与批量导出是同步阻塞操作，可写文件，必须在 UI 工作线程执行。批量导出复用解码器，单帧失败会记在对应条目，其余继续。</p>
+    <p>导出结果包括 timestampMicros、源尺寸和 toneMapped；HDR 映射至 SDR。详细内存与线程规则见<a href="capi-handle.html#frame-export">帧导出 C 入口</a>。日志的 limit=0 读取全部保留条目，sinceSeq 使用上次 nextSeq；日志环最多保留 2000 条 / 512 KiB。</p>
+  </section>
+
   <section id="example">
     <h2>示例<span class="jp">例</span><a class="anchor" href="#example">#</a></h2>
     <div class="code">
@@ -215,7 +241,7 @@ char *ev = erika_presenter_poll_event_json(p);
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.2.1</b></span>
+    <span>liberika <b>v0.3.0</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

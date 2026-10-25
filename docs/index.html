@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../index.html"><span class="n">liberika</span><span class="v">v0.2.1</span></a></div>
+  <div class="brand"><a href="../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -24,6 +24,7 @@
       <li><a href="guide/rust.html">Rust 嵌入</a></li>
       <li><a href="guide/c.html">C ABI 嵌入</a></li>
       <li><a href="guide/linux.html">Linux 接入</a></li>
+      <li><a href="guide/web.html">Web / WASM 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -51,21 +52,27 @@
       <li><a href="reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../index.html">主页</a><span class="sep">/</span>docs</p>
   <h1>开发者文档</h1>
   <p class="kicker">Developer Documentation</p>
-  <p class="lead">liberika 是为现代跨平台音视频应用量身打造的高性能嵌入式播放内核。本文档面向在应用中接入 liberika 的工程团队，以及参与内核演进的开发者。内容以 <b>v0.2.1</b> 为准。</p>
+  <p class="lead">liberika 是为现代跨平台音视频应用量身打造的高性能嵌入式播放内核。本文档面向在应用中接入 liberika 的工程团队，以及参与内核演进的开发者。内容以 <b>v0.3.0</b> 为准。项目现名 liberika，<code>erika</code> crate、<code>erika_*</code> C ABI 与 SDK 包名保持兼容。</p>
 
   <ul class="meta-strip">
-    <li>版本 <b>0.2.1</b></li>
-    <li>C ABI 导出 <b>101</b></li>
+    <li>版本 <b>0.3.0</b></li>
+    <li>C ABI 导出 <b>108</b></li>
     <li>Rust <b>1.92+</b></li>
     <li>许可证 <b>MPL-2.0</b></li>
   </ul>
+
+  <section id="release030">
+    <h2>0.3.0 升级提示<a class="anchor" href="#release030">#</a></h2>
+    <p class="note"><b>默认行为变化：</b>原生和 Web 的字幕、弹幕超采样默认开启；原生软件视频解码默认使用 FFmpeg 多线程。设置 <code>ERIKA_VIDEO_DECODE_THREADS=1</code> 可恢复单线程。</p>
+    <p>新增 <a href="guide/web.html">Web / WASM 后端</a>、<a href="reference/capi-handle.html#frame-export">独立帧导出</a>、<a href="reference/capi-presenter.html#diagnostics">诊断快照</a>与章节查询。Flutter、SwiftPM、OHPM 的 0.3.0 均已发布；完整变化见<a href="project/changelog.html#v030">更新日志</a>。</p>
+  </section>
 
   <section id="guide">
     <h2>接入指南<span class="jp">導入手引</span><a class="anchor" href="#guide">#</a></h2>
@@ -74,7 +81,7 @@
       <div class="crow">
         <span class="no">01</span>
         <div class="ttl"><a href="guide/quickstart.html">快速开始</a><span class="en">Quickstart</span></div>
-        <div class="txt">主流接入方式概览：预编译产物、Flutter、SwiftPM、OpenHarmony OHPM、Rust 与 C ABI。</div>
+        <div class="txt">主流接入方式概览：预编译产物、Flutter、SwiftPM、OpenHarmony OHPM、Rust、C ABI 与 Web / WASM。</div>
       </div>
       <div class="crow">
         <span class="no">02</span>
@@ -106,6 +113,11 @@
         <div class="ttl"><a href="guide/linux.html">Linux 接入</a><span class="en">Linux / WSLg</span></div>
         <div class="txt">实验性 Linux 支持：FFmpeg 8、X11 / Wayland、PulseAudio 与 Flutter 源码接入。</div>
       </div>
+      <div class="crow">
+        <span class="no">08</span>
+        <div class="ttl"><a href="guide/web.html">Web / WASM 接入</a><span class="en">Browser Playback</span></div>
+        <div class="txt">WebCodecs、FFmpeg WASM、libass 与 Rust 弹幕：本地 MKV、字幕字体、多轨、章节及 PNG 截图。</div>
+      </div>
     </div>
   </section>
 
@@ -114,42 +126,42 @@
     <p>从媒体解封装、硬件解码到最终上屏呈现的完整架构与核心子系统实现。</p>
     <div class="cards">
       <div class="crow">
-        <span class="no">08</span>
+        <span class="no">09</span>
         <div class="ttl"><a href="kernel/architecture.html">架构总览</a><span class="en">Architecture</span></div>
         <div class="txt">crate 分层、模块划分、线程模型与流水线数据流。</div>
       </div>
       <div class="crow">
-        <span class="no">09</span>
+        <span class="no">10</span>
         <div class="ttl"><a href="kernel/decode.html">硬件解码</a><span class="en">Decoding</span></div>
         <div class="txt">VideoToolbox、D3D11VA、MediaCodec、AVCodec、NVDEC / VA-API 解码与软件回退。</div>
       </div>
       <div class="crow">
-        <span class="no">10</span>
+        <span class="no">11</span>
         <div class="ttl"><a href="kernel/zero-copy.html">零拷贝导入</a><span class="en">Zero-copy Import</span></div>
         <div class="txt">解码后直接导入 GPU 纹理：CVPixelBuffer、DirectX 共享句柄、AHardwareBuffer、OHNativeBuffer。</div>
       </div>
       <div class="crow">
-        <span class="no">11</span>
+        <span class="no">12</span>
         <div class="ttl"><a href="kernel/render.html">渲染管线</a><span class="en">Render Pipeline</span></div>
         <div class="txt">色彩转换、Dolby Vision、Tone Mapping、字幕与弹幕合成。</div>
       </div>
       <div class="crow">
-        <span class="no">12</span>
+        <span class="no">13</span>
         <div class="ttl"><a href="kernel/hdr.html">高动态范围</a><span class="en">HDR / EDR</span></div>
         <div class="txt">Apple EDR、HDR10 PQ、Extended-linear scRGB 输出协商与动态 Headroom 调节。</div>
       </div>
       <div class="crow">
-        <span class="no">13</span>
+        <span class="no">14</span>
         <div class="ttl"><a href="kernel/upscale.html">神经超分</a><span class="en">Neural Upscaling</span></div>
         <div class="txt">ArtCNN 动漫超分算法：Metal SIMDGroup Matrix 与 wgpu Compute 硬件加速。</div>
       </div>
       <div class="crow">
-        <span class="no">14</span>
+        <span class="no">15</span>
         <div class="ttl"><a href="kernel/subtitle-danmaku.html">字幕与弹幕</a><span class="en">Subtitle &amp; Danmaku</span></div>
         <div class="txt">libass 矢量特效字幕渲染与自研 DFM+ 碰撞避让弹幕排版引擎。</div>
       </div>
       <div class="crow">
-        <span class="no">15</span>
+        <span class="no">16</span>
         <div class="ttl"><a href="kernel/clock.html">时钟与调度</a><span class="en">Clock &amp; Scheduling</span></div>
         <div class="txt">高精度音频主时钟、Ring Buffer 缓冲、VSync 量化帧调度与智能丢帧控制。</div>
       </div>
@@ -161,22 +173,22 @@
     <p>面向内核开发者与深度定制者的工程指南：构建、发布与协同规范。</p>
     <div class="cards">
       <div class="crow">
-        <span class="no">16</span>
+        <span class="no">17</span>
         <div class="ttl"><a href="project/building.html">构建与依赖</a><span class="en">Building</span></div>
         <div class="txt">xtask 自动化管理 C/C++ 依赖，全平台交叉编译矩阵与本地冒烟验证。</div>
       </div>
       <div class="crow">
-        <span class="no">17</span>
+        <span class="no">18</span>
         <div class="ttl"><a href="project/releasing.html">发布与产物</a><span class="en">Releasing</span></div>
         <div class="txt">CI 流水线、各平台预编译归档分发与版本命名规范。</div>
       </div>
       <div class="crow">
-        <span class="no">18</span>
+        <span class="no">19</span>
         <div class="ttl"><a href="project/contributing.html">贡献指南</a><span class="en">Contributing</span></div>
         <div class="txt">代码风格、C ABI 兼容性保证、平台后端实现约定与测试要求。</div>
       </div>
       <div class="crow">
-        <span class="no">19</span>
+        <span class="no">20</span>
         <div class="ttl"><a href="project/changelog.html">更新日志</a><span class="en">Changelog</span></div>
         <div class="txt">全版本演进历程与详细发布记录。</div>
       </div>
@@ -188,22 +200,22 @@
     <p>C ABI 导出函数全量参考索引，签名与类型定义以 <code>erika.h</code> 为准。</p>
     <div class="cards">
       <div class="crow">
-        <span class="no">20</span>
+        <span class="no">21</span>
         <div class="ttl"><a href="reference/capi.html">C ABI 总览</a><span class="en">C ABI Overview</span></div>
         <div class="txt">状态码规范、线程局部错误机制、内存所有权与全部基础结构体定义。</div>
       </div>
       <div class="crow">
-        <span class="no">21</span>
+        <span class="no">22</span>
         <div class="ttl"><a href="reference/capi-handle.html">ErikaHandle 参考</a><span class="en">ErikaHandle Reference</span></div>
         <div class="txt">无头播放器控制、事件轮询与公共工具函数。</div>
       </div>
       <div class="crow">
-        <span class="no">22</span>
+        <span class="no">23</span>
         <div class="ttl"><a href="reference/capi-presenter.html">ErikaPresenterHandle 参考</a><span class="en">ErikaPresenterHandle Reference</span></div>
         <div class="txt">全功能 Presenter 导出函数：表面绑定、渲染循环、音频控制、弹幕管理与截图。</div>
       </div>
       <div class="crow">
-        <span class="no">23</span>
+        <span class="no">24</span>
         <div class="ttl"><a href="reference/capi-json.html">JSON bridge</a><span class="en">JSON Bridge</span></div>
         <div class="txt"><code>invoke_json</code> 与 <code>render_tick_json</code> 跨语言动态桥接协议。</div>
       </div>
@@ -211,7 +223,7 @@
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.2.1</b></span>
+    <span>liberika <b>v0.3.0</b></span>
     <span>Source <b>crates/erika_capi/include/erika.h</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

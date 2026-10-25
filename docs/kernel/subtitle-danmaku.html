@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.2.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -24,6 +24,7 @@
       <li><a href="../guide/rust.html">Rust 嵌入</a></li>
       <li><a href="../guide/c.html">C ABI 嵌入</a></li>
       <li><a href="../guide/linux.html">Linux 接入</a></li>
+      <li><a href="../guide/web.html">Web / WASM 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -51,7 +52,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -163,8 +164,14 @@
     </div>
   </section>
 
+  <section id="supersampling">
+    <h2>超采样默认值 · 0.3.0<a class="anchor" href="#supersampling">#</a></h2>
+    <p>原生与 Web 后端的字幕、弹幕超采样均默认开启，提高字形清晰度并保持逻辑显示大小，不提高视频分辨率。两者独立配置；Web 可用 <code>configureSubtitles({ supersampling: false })</code> 和 <code>configureDanmaku({ supersampling: false })</code> 分别关闭。</p>
+    <p>暂停跳转、长字幕跨 seek 和暂停切轨会重新计算当前字幕。系统字体回退通过零拷贝覆盖检查与有界 LRU 缓存控制内存，保留有效字形。</p>
+  </section>
+
   <footer class="doc-foot">
-    <span>liberika <b>v0.2.1</b></span>
+    <span>liberika <b>v0.3.0</b></span>
     <span>Section <b>Kernel</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

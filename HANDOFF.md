@@ -1,7 +1,7 @@
 # liberika 文档站 交接说明
 
 写给接手维护正文的人。本文件只陈述事实与已核实的数据（最近一次核实：
-2026-10-02），不含风格建议。
+2026-10-25），不含风格建议。
 
 ## 1. 这是什么
 
@@ -16,8 +16,8 @@
 | 路径 | 内容 |
 |---|---|
 | `index.html`（根） | 独立 landing 页，用自己的 `assets/styles/main.css`，提供进入 `docs/` 的入口；文档品牌与面包屑返回此页 |
-| `docs/index.html` | 文档区入口，侧栏导航进全部 23 个正文页 |
-| `docs/guide/` | 接入指南 7 页：quickstart / flutter / swift / c / rust / openharmony / linux |
+| `docs/index.html` | 文档区入口，侧栏导航进全部 24 个正文页 |
+| `docs/guide/` | 接入指南 8 页：quickstart / flutter / swift / c / rust / openharmony / linux / web |
 | `docs/kernel/` | 内核设计 8 页：architecture / decode / render / hdr / clock / upscale / zero-copy / subtitle-danmaku |
 | `docs/reference/` | C ABI 参考 4 页：capi / capi-presenter / capi-handle / capi-json |
 | `docs/project/` | 项目文档 4 页：building / releasing / contributing / changelog |
@@ -32,7 +32,7 @@
 直接手改 HTML，commit 后 push。** 没有任何"跑脚本会覆盖正文"的风险。
 
 链接校验脚本也没有了。需要校验时临时写一段解析器：遍历 `href`，检查
-同页锚点与相对路径目标是否存在即可（2026-10-02 全站 24 个文档页校验通过）。
+同页锚点与相对路径目标是否存在即可（2026-10-25 全站 25 个文档页校验通过）。
 
 ## 3. 设计系统
 
@@ -41,11 +41,14 @@ CSS。交互增强统一走 `docs/docs.js`（代码块复制按钮等）。
 
 ## 4. 内容基线
 
-- 当前安装、接口及功能说明按 liberika v0.2.1 核对，更新日志保留旧版历史。
-- C ABI 共 101 个导出函数、38 个类型；71 个 Presenter 函数、23 个
-  Handle 函数，另有 7 个通用/独立入口。
-- Flutter 与 SwiftPM 使用 0.2.1；截至 2026-10-02，OHPM 公开版仍为
-  0.1.9，0.2.1 已提交审核。审核完成后更新对应安装说明。
+- 当前安装、接口及功能说明按 liberika v0.3.0 核对，更新日志保留旧版历史。
+- C ABI 共 108 个导出函数、45 个类型；72 个 Presenter 函数、23 个
+  Handle 函数，另有 13 个通用/独立入口。
+- Flutter、SwiftPM 与 OHPM 的 0.3.0 均已公开可用。
+- JSON bridge 共 47 个方法，支持 listMethods 发现、日志、章节和帧导出。
+- Web 通过 liberika-web-0.3.0.zip 分发，包含运行时和演示页，尚未发布到 npm；
+  需要 WebCodecs、OffscreenCanvas、WebGL2、Web Audio 和 HTTPS/localhost。
+- 字幕/弹幕超采样默认开启；原生软件视频解码默认多线程。
 - Linux 为实验性源码构建目标，没有预编译发布包。接入指南包含
   FFmpeg 8、补丁 libass、X11 / Wayland、PulseAudio 和 Flutter 动态库配置。
 - 发布流程按当前 main 的 workflow 核对，涵盖独立 slice 构建、目标缓存

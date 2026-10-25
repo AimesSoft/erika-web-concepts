@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Web / WASM 接入 — liberika 开发者文档</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <nav>
+    <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="quickstart.html">快速开始</a></li>
+      <li><a href="flutter.html">Flutter 嵌入</a></li>
+      <li><a href="swift.html">Swift 接入</a></li>
+      <li><a href="openharmony.html">OpenHarmony / OHPM</a></li>
+      <li><a href="rust.html">Rust 嵌入</a></li>
+      <li><a href="c.html">C ABI 嵌入</a></li>
+      <li><a href="linux.html">Linux 接入</a></li>
+      <li><a href="web.html" aria-current="page">Web / WASM 接入</a></li>
+    </ul>
+    <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.html">架构总览</a></li>
+      <li><a href="../kernel/decode.html">硬件解码</a></li>
+      <li><a href="../kernel/zero-copy.html">零拷贝导入</a></li>
+      <li><a href="../kernel/render.html">渲染管线</a></li>
+      <li><a href="../kernel/hdr.html">高动态范围</a></li>
+      <li><a href="../kernel/upscale.html">神经超分</a></li>
+      <li><a href="../kernel/subtitle-danmaku.html">字幕与弹幕</a></li>
+      <li><a href="../kernel/clock.html">时钟与调度</a></li>
+    </ul>
+    <h2><span class="no">三</span>项目 <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.html">构建与依赖</a></li>
+      <li><a href="../project/releasing.html">发布与产物</a></li>
+      <li><a href="../project/contributing.html">贡献指南</a></li>
+      <li><a href="../project/changelog.html">更新日志</a></li>
+    </ul>
+    <h2><span class="no">四</span>参考 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.html">C ABI 总览</a></li>
+      <li><a href="../reference/capi-handle.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Web / WASM 接入</p>
+  <h1>Web / WASM 接入</h1>
+  <p class="kicker">Browser Playback</p>
+  <p class="lead">把原始 MKV 交给浏览器，保留 ASS 特效、字体附件和弹幕。liberika 0.3.0 用 FFmpeg WASM 解封装、WebCodecs 解码、libass 绘制字幕，再以 WebGL2 合成到宿主的一块 Canvas。</p>
+  <ul class="meta-strip"><li>版本 <b>0.3.0</b></li><li>分发 <b>GitHub Release ZIP</b></li><li>环境 <b>HTTPS / localhost</b></li><li>输出 <b>SDR</b></li></ul>
+
+  <section id="download">
+    <h2>下载与试播<a class="anchor" href="#download">#</a></h2>
+    <p>下载 <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/liberika-web-0.3.0.zip">liberika-web-0.3.0.zip</a>，按同一 Release 的 <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/SHA256SUMS">SHA256SUMS</a> 校验，完整解压后通过 HTTPS 或本机 HTTP 服务访问 <code>index.html</code>。演示页可选择本地视频、字幕和弹幕，无需媒体服务器。</p>
+    <div class="code"><p class="lbl">在解压后的目录运行</p><pre>python3 -m http.server 18765 --bind 127.0.0.1
+# 浏览器打开 http://127.0.0.1:18765</pre></div>
+    <p>包内包含 JavaScript、两个 WASM、Worker、许可证、构建清单和演示页。运行时尚未发布到 npm。部署时保留完整目录及相对路径，正确提供 JavaScript 模块和 <code>application/wasm</code> MIME；无需 SharedArrayBuffer 或跨源隔离。</p>
+  </section>
+
+  <section id="integration">
+    <h2>最小接入<a class="anchor" href="#integration">#</a></h2>
+    <p>把运行时资源放入网站的 <code>liberika/</code> 目录。示例让用户选择本地 File，浏览器在 Worker 内分块读取；也可向 <code>open</code> 传入 Blob 或允许跨域的媒体 URL。</p>
+    <div class="code"><p class="lbl">HTML + JavaScript module</p><pre>&lt;input id=&quot;media&quot; type=&quot;file&quot;&gt;
+&lt;button id=&quot;play&quot; disabled&gt;播放&lt;/button&gt;
+&lt;canvas id=&quot;video&quot; style=&quot;width:100%;height:60vh&quot;&gt;&lt;/canvas&gt;
+&lt;pre id=&quot;status&quot;&gt;&lt;/pre&gt;
+&lt;script type=&quot;module&quot;&gt;
+import { Player } from &#x27;./liberika/index.js&#x27;;
+const media = document.querySelector(&#x27;#media&#x27;);
+const play = document.querySelector(&#x27;#play&#x27;);
+const status = document.querySelector(&#x27;#status&#x27;);
+const showError = error =&gt; { status.textContent = error.message; };
+const player = await Player.create({ canvas: document.querySelector(&#x27;#video&#x27;) });
+player.addEventListener(&#x27;error&#x27;, event =&gt; showError(event.detail));
+media.onchange = async () =&gt; {
+  const file = media.files[0];
+  if (!file) return;
+  media.disabled = true;
+  play.disabled = true;
+  try {
+    const info = await player.open(file);
+    status.textContent = `${file.name}：${info.duration.toFixed(1)} 秒`;
+    play.disabled = false;
+  } catch (error) {
+    showError(error);
+  } finally {
+    media.disabled = false;
+  }
+};
+play.onclick = () =&gt; player.play().catch(showError);
+// 应用卸载时：await player.destroy();
+&lt;/script&gt;</pre></div>
+    <p class="note">从用户点击中调用 <code>play()</code>，满足浏览器音频策略。应用卸载时执行 <code>await player.destroy()</code>。Canvas 只能转交一次；销毁后重建播放器需新 Canvas，布局切换时应保留原实例。</p>
+    <p>如果 Canvas 或播放器要延迟创建，可在页面初始化时创建 <code>AudioSession</code>，随后传给 <code>Player.create({ canvas, audioSession })</code>，确保第一次真实用户输入能够准备音频。</p>
+  </section>
+
+  <section id="features">
+    <h2>字幕、弹幕与播放控制<a class="anchor" href="#features">#</a></h2>
+    <p>MKV 内嵌 ASS/SSA 和字体附件自动交给 libass；弹幕复用原生 Rust DFM 引擎。字幕与弹幕共享 Web Audio 播放时钟，并在同一个 Canvas 合成。</p>
+    <div class="code"><p class="lbl">打开媒体后调用</p><pre>await player.addSubtitle(await subtitleFile.text()); // ASS / SSA / SRT / WebVTT
+await player.addDanmaku(await danmakuFile.text());   // Bilibili XML / Dandanplay JSON
+await player.configureDanmaku({ opacity: 0.8, fontSize: 30, delay: 0 });
+await player.configureSubtitles({ scale: 1 });</pre></div>
+    <p class="note">字幕与弹幕双倍采样默认开启，不改变显示大小或视频分辨率。分别传入 <code>{ supersampling: false }</code> 可关闭；省略字段保留当前值。</p>
+    <div class="tw"><table><thead><tr><th>操作</th><th>API 与行为</th></tr></thead><tbody>
+      <tr><td>播放 / 跳转</td><td><code>play()</code>、<code>pause()</code>、<code>seek(seconds)</code>；跳转保留暂停或播放状态。</td></tr>
+      <tr><td>音量 / 倍速</td><td><code>setVolume(0…1)</code>、<code>setRate(0.25…4)</code>；当前倍速会改变音调。</td></tr>
+      <tr><td>轨道</td><td><code>info.tracks</code>、<code>selectAudio(id)</code>、<code>selectSubtitle(id)</code>；null 关闭对应轨。</td></tr>
+      <tr><td>章节</td><td><code>info.chapters</code> 的 start / end 以秒计，end 可为 null；调用 <code>seek(chapter.start)</code> 定位。</td></tr>
+      <tr><td>截图</td><td><code>capture(width?)</code> 返回含视频、字幕和弹幕的 PNG Blob。</td></tr>
+      <tr><td>关闭 / 释放</td><td><code>close()</code> 清空当前媒体后可重新 open；<code>destroy()</code> 释放 Worker、解码器、帧、GPU 和音频资源。</td></tr>
+    </tbody></table></div>
+    <p>完整类型见 <a href="https://github.com/AimesSoft/liberika/blob/v0.3.0/packages/erika_web/index.d.ts">index.d.ts</a>。<code>loaded</code>、<code>stats</code>、<code>timeupdate</code>、<code>error</code>、<code>log</code> 是 CustomEvent，数据在 detail 中；play / pause / ended 是普通 Event。</p>
+  </section>
+
+  <section id="compatibility">
+    <h2>浏览器与媒体源要求<a class="anchor" href="#compatibility">#</a></h2>
+    <ul class="body">
+      <li>同时需要 WebCodecs 视频/音频解码、OffscreenCanvas、WebGL2 和 Web Audio。打开时查询编码配置、profile 和尺寸；编码支持取决于浏览器，WASM 不包含音视频软解或服务端转码回退。</li>
+      <li>默认请求 prefer-hardware，再尝试 no-preference；<code>open(source, { hardwareDecode: false })</code> 请求 prefer-software。偏好字段不能证明实际用了硬解。</li>
+      <li>远程大文件通过有界 HTTP Range 缓存读取；超过 8 MiB 需要服务器正确返回 <code>206</code> 和已知总长度，跨域时通过 <code>Access-Control-Expose-Headers</code> 暴露 <code>Content-Range</code>。</li>
+      <li>容器包括 MP4/MOV、MKV/WebM、MPEG-TS、AVI、FLV 和 Ogg。音视频编码是否能播，以当前浏览器的 WebCodecs 查询结果为准。</li>
+      <li>当前输出为 SDR，暂不包含桌面 HDR/EDR/Dolby Vision、ArtCNN、DRM、未知长度直播、位图字幕和内嵌非 ASS 字幕转换。SRT/VTT 作为纯文本转换，不保留复杂 VTT 排版。</li>
+      <li>内嵌 ASS 跳转预读前 5 秒并保留已见事件；首次跳到更早开始的长事件可能暂时缺失。完整外挂 ASS 脚本没有此限制。</li>
+    </ul>
+    <p>源码验证记录覆盖 Chrome 与 Safari 的指定版本和素材；Firefox 尚未验证。详细构建与测试步骤见<a href="https://github.com/AimesSoft/liberika/blob/v0.3.0/docs/web.zh.md">源码 Web 指南</a>。</p>
+  </section>
+
+  <section id="build">
+    <h2>从源码构建<a class="anchor" href="#build">#</a></h2>
+    <p>使用 Emscripten 4.0.23、wasm-bindgen-cli 0.2.126，以及 Rust、Python 3、Node、CMake、Meson、Ninja、make 和 pkg-config。固定工具版本及初始化步骤见上方源码指南。</p>
+    <div class="code"><p class="lbl">shell</p><pre>cargo run -p xtask -- web build
+python3 scripts/serve_web.py
+# 已构建原生 C 依赖时可追加 --skip-native</pre></div>
+    <p>完整可部署目录为 <code>target/web</code>，中间文件为 <code>target/web-build</code>。服务端宜把运行时放进版本目录，避免新旧 JS/WASM 混用。</p>
+  </section>
+
+  <footer class="doc-foot"><span>liberika <b>v0.3.0</b></span><span>Section <b>Guide</b></span><span>License <b>MPL-2.0</b></span></footer>
+  <nav class="pager"><a href="linux.html"><span class="dir">Prev</span>Linux 接入</a><a class="nx" href="../kernel/architecture.html"><span class="dir">Next</span>架构总览</a></nav>
+</main>
+</div>
+</body>
+</html>

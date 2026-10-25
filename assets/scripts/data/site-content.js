@@ -4,7 +4,7 @@ app.siteContent = {
     name: 'liberika',
     kana: '古戸ヱリカ',
     descriptor: 'Playback Kernel',
-    version: 'v0.2.1',
+    version: 'v0.3.0',
     repoUrl: 'https://github.com/AimesSoft/liberika',
   },
   navigation: [
@@ -18,7 +18,7 @@ app.siteContent = {
     titleLead: '把播放，',
     titleAccent: '交给她来推理。',
     description:
-      '宿主只需递出一块画布。解码、同步、字幕、弹幕与渲染，全部在内核之内完成。',
+      '从原生应用到浏览器，宿主只需递出一块画布。解码、同步、字幕、弹幕与渲染，全部在内核之内完成。',
     primaryAction: { label: '开始接入', href: '#start' },
     secondaryAction: { label: '阅读文档', href: 'docs/index.html' },
     characterImage: 'assets/images/erika-character.png',
@@ -26,21 +26,21 @@ app.siteContent = {
     sideNote: '「如何です？古戸ヱリカにはこの程度の推理が可能です。」',
     facts: [
       { value: 'Rust', label: '内核语言' },
-      { value: '7', label: '平台覆盖' },
+      { value: '8', label: '平台覆盖' },
     ],
   },
   features: {
     eyebrow: 'Case file / 01',
     title: '真相只有一条播放管线',
     lead:
-      'liberika 把繁琐的媒体能力收进一致的内核边界，让每个宿主都能共享同一套播放行为。',
+      '0.3.0 带来 Web 后端、帧导出与诊断。字幕和弹幕超采样默认开启，原生软件视频解码默认多线程。',
     items: [
       {
         number: '01',
         icon: 'frame',
         title: '一块画布',
-        text: '宿主提供原生绘制表面，内核接管硬解、色彩转换、HDR 与最终呈现。',
-        tags: ['Metal', 'D3D11', 'wgpu'],
+        text: '宿主提供原生表面或浏览器 Canvas，内核处理播放与合成；原生后端还支持 HDR 输出。',
+        tags: ['Metal', 'wgpu', 'WebGL2'],
       },
       {
         number: '02',
@@ -53,30 +53,31 @@ app.siteContent = {
         number: '03',
         icon: 'subtitle',
         title: '完整播放栈',
-        text: '时钟、音频、字幕、弹幕和神经超分都由内核统一调度，宿主只管理产品体验。',
-        tags: ['libass', 'Audio', 'ArtCNN'],
+        text: '原生应用与浏览器共享 libass 字幕和 Rust 弹幕引擎。Web 可直接打开本地 MKV，保留 ASS 特效与字体。',
+        tags: ['libass', 'Danmaku', 'WebCodecs'],
       },
     ],
   },
   quickStart: {
     eyebrow: 'Evidence / 02',
     title: '留下最少的接入痕迹',
-    lead: '选择宿主环境，复制最短的开始方式。Flutter 走 pub.dev，Swift 走 SwiftPM，OpenHarmony 走 OHPM，其他原生宿主使用 GitHub Releases 预编译产物，Linux 从源码构建。',
+    lead: '选择宿主环境，复制最短的开始方式。Flutter 走 pub.dev，Swift 走 SwiftPM，OpenHarmony 走 OHPM，其他原生宿主使用 GitHub Releases 预编译产物，Linux 从源码构建，Web 下载独立运行时。',
     tabs: [
       {
         id: 'release',
         label: '预编译产物',
         language: 'SHELL',
         code: `# github.com/AimesSoft/liberika/releases
-erika-swift-core-0.2.1.xcframework.zip
+erika-swift-core-0.3.0.xcframework.zip
 erika-capi-macos-universal.zip
 erika-capi-windows-x64.zip
 erika-capi-android.zip
-erika-capi-openharmony-arm64.zip`,
+erika-capi-openharmony-arm64.zip
+liberika-web-0.3.0.zip`,
         note: 'C ABI 归档包含 erika.h、许可证与 MANIFEST.txt；Swift 使用 XCFramework。',
         action: {
           label: '查看 GitHub Releases',
-          url: 'https://github.com/AimesSoft/liberika/releases',
+          url: 'https://github.com/AimesSoft/liberika/releases/tag/v0.3.0',
         },
       },
       {
@@ -91,7 +92,7 @@ await player.play();
 
 // 放入 Widget 树
 ErikaVideoView(player: player)`,
-        note: '已发布到 pub.dev：flutter pub add erika_flutter。',
+        note: 'pub.dev 0.3.0 已发布：flutter pub add erika_flutter:^0.3.0。',
       },
       {
         id: 'swift',
@@ -102,7 +103,7 @@ ErikaVideoView(player: player)`,
 let player = try ErikaPlayer()
 try player.open("https://example.com/video.mp4")
 try player.play()`,
-        note: '在 Xcode 中添加 Package: https://github.com/AimesSoft/liberika-swift',
+        note: 'SwiftPM 0.3.0：在 Xcode 中添加 https://github.com/AimesSoft/liberika-swift',
         action: {
           label: '查看 Swift 接入指南',
           url: 'docs/guide/swift.html',
@@ -117,10 +118,28 @@ try player.play()`,
 const player = new ErikaPlayer();
 player.open('https://example.com/video.mp4');
 player.play();`,
-        note: 'ohpm install erika 安装公开版 0.1.9；0.2.1 已提交审核。原生表面与帧调度示例收录在接入指南。',
+        note: 'OHPM 0.3.0 已公开：ohpm install erika@0.3.0。原生表面与帧调度示例收录在接入指南。',
         action: {
           label: '查看 OpenHarmony 接入指南',
           url: 'docs/guide/openharmony.html',
+        },
+      },
+      {
+        id: 'web',
+        label: 'Web · WASM',
+        language: 'JAVASCRIPT',
+        code: `import { Player } from './liberika/index.js';
+
+const player = await Player.create({ canvas });
+await player.open(file); // 本地 File / Blob 或远程 URL
+playButton.onclick = () => player.play();
+
+// 卸载时释放播放器
+// await player.destroy();`,
+        note: '下载 liberika-web-0.3.0.zip，完整解压后通过 HTTPS 或 localhost 访问。附带演示页；尚未发布到 npm。',
+        action: {
+          label: '查看 Web 接入与下载',
+          url: 'docs/guide/web.html',
         },
       },
       {
@@ -132,7 +151,7 @@ player.play();`,
 let player = Player::new(PlayerConfig::default());
 player.open(MediaRequest::new("/path/to/video.mp4"))?;
 player.play()?;`,
-        note: 'Cargo.toml：erika = { git = "https://github.com/AimesSoft/liberika", tag = "v0.2.1" }',
+        note: 'Cargo.toml：erika = { git = "https://github.com/AimesSoft/liberika", tag = "v0.3.0" }',
       },
       {
         id: 'c-api',
@@ -155,8 +174,8 @@ erika_presenter_render_tick(player, host_time, &stats);`,
   },
   platforms: {
     eyebrow: 'Coverage / 03',
-    title: '七个平台，同一套接口',
-    lead: '平台能力留在内核里，产品逻辑留在宿主里。',
+    title: '七个原生平台，加上 Web',
+    lead: '平台能力留在内核里，产品逻辑留在宿主里。Web 使用 JavaScript Player 接口，编码支持由浏览器决定。',
     items: [
       { name: 'macOS', minimum: '11+', render: 'Metal', decode: 'VideoToolbox', status: 'ready' },
       { name: 'iOS', minimum: '13+', render: 'Metal', decode: 'VideoToolbox', status: 'ready' },
@@ -164,6 +183,7 @@ erika_presenter_render_tick(player, host_time, &stats);`,
       { name: 'Windows', minimum: '10+', render: 'D3D11', decode: 'D3D11VA', status: 'ready' },
       { name: 'Android', minimum: '8+', render: 'wgpu', decode: 'MediaCodec', status: 'ready' },
       { name: 'HarmonyOS', minimum: 'API 18', render: 'wgpu', decode: 'AVCodec', status: 'ready' },
+      { name: 'Web', minimum: 'HTTPS / localhost', render: 'WebGL2', decode: 'WebCodecs', status: 'ready' },
       { name: 'Linux', minimum: 'FFmpeg 8.x', render: 'wgpu', decode: 'NVDEC / VA-API', status: 'planned', statusLabel: '实验性' },
     ],
   },
@@ -184,6 +204,7 @@ erika_presenter_render_tick(player, host_time, &stats);`,
           ['Rust 嵌入', 'docs/guide/rust.html'],
           ['C ABI 嵌入', 'docs/guide/c.html'],
           ['Linux 接入', 'docs/guide/linux.html'],
+          ['Web / WASM 接入', 'docs/guide/web.html'],
         ],
       },
       {

@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.2.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -24,6 +24,7 @@
       <li><a href="rust.html">Rust 嵌入</a></li>
       <li><a href="c.html">C ABI 嵌入</a></li>
       <li><a href="linux.html">Linux 接入</a></li>
+      <li><a href="web.html">Web / WASM 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -51,7 +52,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -61,17 +62,17 @@
   <p class="lead"><code>erika</code> 是 OpenHarmony 原生 ArkTS SDK。应用通过 <code>XComponent</code> 获取原生 surface，使用 <code>ErikaPlayer</code> 驱动播放控制、事件处理与每帧渲染调度。</p>
 
   <ul class="meta-strip">
-    <li>公开版 <b>erika 0.1.9</b></li>
+    <li>公开版 <b>erika 0.3.0</b></li>
     <li>目标架构 <b>arm64</b></li>
     <li>最低 API <b>API 18</b></li>
   </ul>
 
   <section id="install">
     <h2>安装与引入<span class="jp">インストール</span><a class="anchor" href="#install">#</a></h2>
-    <p>在 DevEco Studio 项目根目录安装公开版 0.1.9（0.2.1 已提交审核）：</p>
+    <p>在 DevEco Studio 项目根目录安装公开版 0.3.0：</p>
     <div class="code">
       <p class="lbl">shell</p>
-<pre>ohpm install erika</pre>
+<pre>ohpm install erika@0.3.0</pre>
     </div>
     <p>包详情见 <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM 详情页</a>；源码模块参见官方仓库的 <code>packages/erika_ohos</code> 目录。</p>
   </section>
@@ -202,7 +203,7 @@
 
   <section id="http-cache">
     <h2>0.2.1 HTTP 缓存选项<a class="anchor" href="#http-cache">#</a></h2>
-    <p>截至 2026-10-02，OHPM 公开版本为 0.1.9，0.2.1 已提交审核。下面的回退缓存参数属于 0.2.1 SDK；审核期间可从 liberika 仓库的 0.2.1 源码构建 HAR。</p>
+    <p>截至 2026-10-25，OHPM 0.3.0 已公开可用，包含以下 HTTP 回退缓存参数。</p>
     <p><code>httpReadAheadBytes</code> 决定向前预读的字节数，默认 2 MiB；<code>httpBackBufferBytes</code> 决定保留多少已播放数据，默认 16 MiB。两者省略或传 0 使用默认值。预读默认值也可由 <code>ERIKA_HTTP_READAHEAD_BYTES</code> 设置。</p>
     <p>回退缓存内的后退 seek 可直接复用已下载数据。高码率视频需要更大的预算：80 Mbit/s 的视频保留约 10 秒需约 100 MB。缓存按字节限制，不代表固定的播放秒数。</p>
     <div class="code">
@@ -216,7 +217,7 @@ player.play();</pre>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.2.1</b></span>
+    <span>liberika <b>v0.3.0</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

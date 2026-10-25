@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.2.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -24,6 +24,7 @@
       <li><a href="../guide/rust.html">Rust 嵌入</a></li>
       <li><a href="../guide/c.html">C ABI 嵌入</a></li>
       <li><a href="../guide/linux.html">Linux 接入</a></li>
+      <li><a href="../guide/web.html">Web / WASM 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -51,7 +52,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -135,8 +136,14 @@
     <p>0.2.1 补齐 WMV / WMA 软件解码，并通过 dav1d 支持 8-bit 与 10-bit AV1。硬解不可用或视频格式不受设备支持时，软件帧进入同一渲染管线；Windows 也支持软件帧上传。</p>
   </section>
 
+  <section id="software-threads">
+    <h2>软件解码线程 · 0.3.0<a class="anchor" href="#software-threads">#</a></h2>
+    <p>软件视频解码默认启用帧/切片多线程，由 FFmpeg 根据编码器和运行环境选择线程数。设置 <code>ERIKA_VIDEO_DECODE_THREADS=1</code> 恢复单线程；测试纯软件路径时同时使用 <code>ERIKA_HWDEC=software</code>。</p>
+    <p>硬解后端内部退回软件像素格式时，诊断与 <code>VideoDecoderChanged</code> 会报告实际解码路径、回退原因与计数，不能仅凭请求的后端判断实际硬解。</p>
+  </section>
+
   <footer class="doc-foot">
-    <span>liberika <b>v0.2.1</b></span>
+    <span>liberika <b>v0.3.0</b></span>
     <span>Section <b>Kernel</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

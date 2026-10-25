@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.2.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -24,6 +24,7 @@
       <li><a href="../guide/rust.html">Rust 嵌入</a></li>
       <li><a href="../guide/c.html">C ABI 嵌入</a></li>
       <li><a href="../guide/linux.html">Linux 接入</a></li>
+      <li><a href="../guide/web.html">Web / WASM 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -51,7 +52,7 @@
       <li><a href="capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -256,8 +257,79 @@ ErikaStatus status = erika_export_gif(&amp;options, &amp;result);</pre>
     </div>
   </section>
 
+  <section id="frame-export">
+    <h2>独立帧导出与日志 · 0.3.0<a class="anchor" href="#frame-export">#</a></h2>
+    <p>帧导出是同步操作，UI 宿主应放在工作线程。输入 position_millis 的单位为毫秒；结果 timestamp_micros 与 duration_micros 的单位为微秒。HDR（PQ / HLG / Dolby Vision）会按 SDR 显示路径色调映射，并在结果 reserved_flags 中置 <code>ERIKA_FRAME_EXPORT_TONE_MAPPED</code>（1）。</p>
+    <div class="api" id="erika_export_frame"><p class="sig">ErikaStatus erika_export_frame( const ErikaFrameExportOptions *options, ErikaFrameExportResult *out_result)</p><p class="desc">独立同步导出媒体时间处的图像，返回 RGBA 或 PNG；保持显示宽高比、在可选尺寸范围内缩放且不放大。拥有独立解封装器和多线程软件解码器，无需播放器或表面。</p></div>
+    <div class="api" id="erika_frame_export_result_free"><p class="sig">void erika_frame_export_result_free(ErikaFrameExportResult *result)</p><p class="desc">释放结果中的 data 并重置结果。不可用 erika_string_free 或宿主 free 代替。</p></div>
+    <div class="api" id="erika_frame_export_session_open"><p class="sig">ErikaStatus erika_frame_export_session_open( const ErikaFrameExportSessionOptions *options, ErikaFrameExportSession **out_session)</p><p class="desc">打开一次媒体供连续截帧，成功时返回会话。初始化结构体时将 reserved 与 reserved_flags 置零。</p></div>
+    <div class="api" id="erika_frame_export_session_frame"><p class="sig">ErikaStatus erika_frame_export_session_frame( ErikaFrameExportSession *session, const ErikaFrameExportRequest *request, ErikaFrameExportResult *out_result)</p><p class="desc">从会话中导出指定时间的图像；递增请求且中间无关键帧时继续解码，其他情况重新 seek。结果与单次导出相同，逐个调用 result_free 释放。</p></div>
+    <div class="api" id="erika_frame_export_session_close"><p class="sig">void erika_frame_export_session_close(ErikaFrameExportSession *session)</p><p class="desc">关闭并释放会话，接受 NULL。一个会话的调用必须串行，不能与 close 并发，也不能在关闭后继续使用。</p></div>
+    <div class="api" id="erika_log_read_json"><p class="sig">ErikaStatus erika_log_read_json( uint32_t limit, int32_t min_level, uint64_t since_seq, char **out_json)</p><p class="desc">读取进程级脱敏日志环：最多 2000 条 / 512 KiB。limit=0 读取全部保留条目，min_level=-1 不限级别，since_seq 传上次 nextSeq 增量读取。任意线程可调用，无需 handle。成功字符串用 erika_string_free 释放，失败时 out_json 为 NULL。</p></div>
+    <p class="note">独立帧导出只解码媒体图像，不包含当前 Presenter 的字幕和弹幕。原生 <code>erika_presenter_capture_frame_rgba</code> 包含视频和字幕，不含弹幕；Web <code>capture()</code> 则包含三者。</p>
+    <h3>相关类型</h3>
+    <div class="code"><p class="lbl">erika.h</p><pre>typedef enum ErikaFrameExportFormat {
+  ErikaFrameExportFormat_Rgba = 0, /* rows of width * 4 bytes, alpha 255 */
+  ErikaFrameExportFormat_Png = 1,  /* PNG file bytes, 8-bit RGB */
+} ErikaFrameExportFormat;
+
+typedef struct ErikaFrameExportOptions {
+  const char *input_uri;
+  const ErikaHttpHeader *headers;
+  uintptr_t header_count;
+  uint64_t position_millis;
+  uint64_t http_read_ahead_bytes;
+  uint32_t max_width;
+  uint32_t max_height;
+  int32_t format;
+  uint32_t reserved_flags;
+  uint64_t reserved[4];
+} ErikaFrameExportOptions;
+
+typedef struct ErikaFrameExportResult {
+  uint8_t *data;
+  uintptr_t data_len;
+  uint64_t timestamp_micros;
+  uint64_t duration_micros;
+  uint32_t width;
+  uint32_t height;
+  uint32_t source_width;
+  uint32_t source_height;
+  int32_t format;
+  uint32_t reserved_flags;
+  uint64_t reserved[2];
+} ErikaFrameExportResult;
+
+typedef struct ErikaFrameExportSessionOptions {
+  const char *input_uri;
+  const ErikaHttpHeader *headers;
+  uintptr_t header_count;
+  uint64_t http_read_ahead_bytes;
+  uint32_t reserved_flags;
+  uint64_t reserved[4];
+} ErikaFrameExportSessionOptions;
+
+typedef struct ErikaFrameExportRequest {
+  uint64_t position_millis;
+  uint32_t max_width;
+  uint32_t max_height;
+  int32_t format; /* ErikaFrameExportFormat */
+  uint32_t reserved_flags;
+  uint64_t reserved[4];
+} ErikaFrameExportRequest;
+
+typedef enum ErikaLogLevel {
+  ErikaLogLevel_Trace = 0,
+  ErikaLogLevel_Debug = 1,
+  ErikaLogLevel_Info = 2,
+  ErikaLogLevel_Warn = 3,
+  ErikaLogLevel_Error = 4,
+} ErikaLogLevel;</pre></div>
+    <p>日志会脱敏 URL 查询参数、凭据类字段、请求头和用户主目录。兼容旧运行时的宿主应可选解析诊断符号。JSON bridge 提供 <code>getLogs</code>、<code>exportFrame</code> 与 <code>exportFrames</code>，见<a href="capi-json.html#discovery">接口发现</a>。</p>
+  </section>
+
   <footer class="doc-foot">
-    <span>liberika <b>v0.2.1</b></span>
+    <span>liberika <b>v0.3.0</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

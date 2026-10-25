@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.2.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -24,6 +24,7 @@
       <li><a href="../guide/rust.html">Rust 嵌入</a></li>
       <li><a href="../guide/c.html">C ABI 嵌入</a></li>
       <li><a href="../guide/linux.html">Linux 接入</a></li>
+      <li><a href="../guide/web.html">Web / WASM 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -51,7 +52,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -192,8 +193,13 @@
     <p>平台表上方的版本为功能基线。构建时实际部署目标为 macOS 11.0 / iOS 13.0，见<a href="../project/building.html">构建与依赖</a>。</p>
   </section>
 
+  <section id="web">
+    <h2>浏览器后端 · 0.3.0<a class="anchor" href="#web">#</a></h2>
+    <p>Web 是独立的 JavaScript Player 接口：Worker 内 FFmpeg WASM 读取和解封装，压缩包交给 WebCodecs，libass 与 Rust DFM 引擎处理字幕和弹幕，再由 WebGL2 合成；Web Audio 提供输出与播放时钟。它不使用原生 Presenter C ABI，也不包含桌面 HDR 或 ArtCNN。部署和支持范围见<a href="../guide/web.html">Web / WASM 接入</a>。</p>
+  </section>
+
   <footer class="doc-foot">
-    <span>liberika <b>v0.2.1</b></span>
+    <span>liberika <b>v0.3.0</b></span>
     <span>Section <b>Kernel</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

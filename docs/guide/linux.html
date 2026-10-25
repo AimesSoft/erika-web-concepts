@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.2.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -24,6 +24,7 @@
       <li><a href="rust.html">Rust 嵌入</a></li>
       <li><a href="c.html">C ABI 嵌入</a></li>
       <li><a href="linux.html" aria-current="page">Linux 接入</a></li>
+      <li><a href="web.html">Web / WASM 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -51,7 +52,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -90,7 +91,7 @@ sudo apt install -y \
       <p class="lbl">shell</p>
 <pre>git clone https://github.com/AimesSoft/liberika.git
 cd liberika
-git checkout v0.2.1
+git checkout v0.3.0
 bash scripts/build_linux_libass.sh
 cargo build --locked --release -p linux_native_demo -p erika_capi
 cargo run --locked --release -p linux_native_demo -- /path/to/video.mkv</pre>
@@ -108,7 +109,7 @@ export ERIKA_LIBRARY_DIR=&quot;${CARGO_TARGET_DIR:-$PWD/target}/release&quot;
 # 在 Flutter 宿主目录中执行：
 flutter build linux --release</pre>
     </div>
-    <p>宿主添加 <code>erika_flutter: ^0.2.1</code>。<code>ErikaVideoView</code> 与 <code>ErikaTextureVideoView</code> 使用 SDR RGBA 纹理，支持 Flutter 裁剪和 UI 叠层；这条路径需要逐帧 GPU 读回。</p>
+    <p>宿主添加 <code>erika_flutter: ^0.3.0</code>。<code>ErikaVideoView</code> 与 <code>ErikaTextureVideoView</code> 使用 SDR RGBA 纹理，支持 Flutter 裁剪和 UI 叠层；这条路径需要逐帧 GPU 读回。</p>
     <p>Wayland 可选 <code>ErikaWindowOverlayVideoView</code>，用 <code>wl_subsurface</code> 将原生视频放在透明 Flutter UI 下，减少逐帧 RGBA 读回。视频区域需留透明；该原生层支持不透明 srcOver，视频本身不接受 Flutter 裁剪或颜色滤镜。X11 使用纹理视图。</p>
   </section>
 
@@ -162,14 +163,14 @@ ERIKA_TEST_WAYLAND=1 bash scripts/check_linux.sh</pre>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.2.1</b></span>
+    <span>liberika <b>v0.3.0</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
 
   <nav class="pager">
     <a href="c.html"><span class="dir">Prev</span>C ABI 嵌入</a>
-    <a class="nx" href="../kernel/architecture.html"><span class="dir">Next</span>架构总览</a>
+    <a class="nx" href="web.html"><span class="dir">Next</span>Web / WASM 接入</a>
   </nav>
 </main>
 

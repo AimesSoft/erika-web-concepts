@@ -12,7 +12,7 @@
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.2.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
@@ -24,6 +24,7 @@
       <li><a href="../guide/rust.html">Rust 嵌入</a></li>
       <li><a href="../guide/c.html">C ABI 嵌入</a></li>
       <li><a href="../guide/linux.html">Linux 接入</a></li>
+      <li><a href="../guide/web.html">Web / WASM 接入</a></li>
     </ul>
     <h2><span class="no">二</span>内核原理 <span class="en">Kernel</span></h2>
     <ul>
@@ -51,18 +52,18 @@
       <li><a href="capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.2.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>C ABI 总览</p>
   <h1>C ABI 总览</h1>
   <p class="kicker">C ABI Overview</p>
-  <p class="lead">C ABI 的全局约定与类型定义。函数清单按入口族分页：<a href="capi-handle.html">ErikaHandle</a>（23 个）、<a href="capi-presenter.html">ErikaPresenterHandle</a>（71 个）、通用与独立入口（7 个）。以 <code>crates/erika_capi/include/erika.h</code> 为唯一权威。</p>
+  <p class="lead">C ABI 的全局约定与类型定义。函数清单按入口族分页：<a href="capi-handle.html">ErikaHandle</a>（23 个）、<a href="capi-presenter.html">ErikaPresenterHandle</a>（72 个）、通用与独立入口（13 个）。以 <code>crates/erika_capi/include/erika.h</code> 为唯一权威。</p>
 
   <ul class="meta-strip">
-    <li>导出函数 <b>101</b></li>
-    <li>类型 <b>38</b></li>
+    <li>导出函数 <b>108</b></li>
+    <li>类型 <b>45</b></li>
     <li>事件 <b>12</b> 种</li>
   </ul>
 
@@ -148,11 +149,12 @@
 
   <section id="types">
     <h2>类型清单<span class="jp">型</span><a class="anchor" href="#types">#</a></h2>
-    <p>38 个类型定义全部位于 <code>erika.h</code>。结构体字段见下方各表;枚举的成员值也在本节列出。</p>
+    <p>45 个类型定义全部位于 <code>erika.h</code>。主要结构体字段见下方各表；完整字段和枚举定义以同版本头文件为准。</p>
     <h3>句柄</h3>
     <ul class="body">
       <li><code>ErikaHandle</code> — pull 模型句柄。</li>
       <li><code>ErikaPresenterHandle</code> — push 模型句柄。</li>
+      <li><code>ErikaFrameExportSession</code> — 独立帧导出会话句柄。</li>
     </ul>
     <h3>结构体</h3>
     <div class="tw">
@@ -178,8 +180,11 @@
       </table>
     </div>
 
+    <h3>0.3.0 新增类型</h3>
+    <p><code>ErikaFrameExportFormat</code> 定义 RGBA（0）与 PNG（1）；<code>ErikaFrameExportOptions</code>、<code>ErikaFrameExportResult</code>、<code>ErikaFrameExportSessionOptions</code>、<code>ErikaFrameExportRequest</code> 分别描述单次导出、结果、会话打开与逐帧请求；<code>ErikaFrameExportSession</code> 是不透明会话句柄。<code>ErikaLogLevel</code> 从 Trace（0）到 Error（4）。完整声明及所有权见<a href="capi-handle.html#frame-export">帧导出与日志</a>。</p>
+
     <h3>结构体字段</h3>
-    <p>下表给出每个结构体的字段、类型与语义。字段名与 <code>erika.h</code> 一致。</p>
+    <p>下表给出常用结构体的字段、类型与语义。字段名与 <code>erika.h</code> 一致。</p>
 
     <h4>ErikaSubtitleStyle</h4>
     <p>字幕回退外观:颜色默认不透明白正文(<code>0xFFFFFFFF</code>)加半透明黑描边(<code>0x0000007F</code>)。数值度量越界被钳制而非拒绝;<code>border_style</code> 与 <code>alignment</code> 越界时替换为默认值(1 / 2)。生效方式按字幕类型二分:容器 ASS 轨上,<code>override_mask</code> 为 0 时这些字段不生效(仅字体族回退),置位对应位后字段覆盖 ASS 对白声明的样式;纯文本(SRT/WebVTT)字幕的样式由 liberika 生成的 ASS 头整体烘焙,与 <code>override_mask</code> 无关。所有尺寸是 ASS 脚本单位,受 <code>set_subtitle_scale</code> 相乘。</p>
@@ -595,7 +600,7 @@
 
   <section id="open-and-export">
     <h2>打开选项与 GIF 导出类型<a class="anchor" href="#open-and-export">#</a></h2>
-    <p>以下定义来自 0.2.1 的 <code>erika.h</code>。HTTP 窗口和 GIF 导出的完整字段如下：</p>
+    <p>以下定义来自 0.3.0 的 <code>erika.h</code>。HTTP 窗口和 GIF 导出的完整字段如下：</p>
     <h3>ErikaOpenOptions</h3>
     <div class="code">
 <pre>typedef struct ErikaOpenOptions {
@@ -653,7 +658,7 @@
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.2.1</b></span>
+    <span>liberika <b>v0.3.0</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
