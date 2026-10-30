@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Web / WASM アクセス — liberika 開発者ドキュメント</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
+  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="web.html">中文</option><option value="web.en.html">English</option><option value="web.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="web.html">中文</a> · <a href="web.en.html">English</a> · <a href="web.ja.html">日本語</a></nav></noscript></div>
+  <nav>
+    <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="quickstart.ja.html">クイックスタート</a></li>
+      <li><a href="flutter.ja.html">Flutter の組み込み</a></li>
+      <li><a href="swift.ja.html">Swift の導入</a></li>
+      <li><a href="openharmony.ja.html">OpenHarmony / OHPM</a></li>
+      <li><a href="rust.ja.html">Rust の組み込み</a></li>
+      <li><a href="c.ja.html">C ABI の組み込み</a></li>
+      <li><a href="linux.ja.html">Linux の導入</a></li>
+      <li><a href="web.ja.html" aria-current="page">Web / WASM の導入</a></li>
+    </ul>
+    <h2><span class="no">2</span>カーネル設計 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.ja.html">アーキテクチャ概要</a></li>
+      <li><a href="../kernel/decode.ja.html">ハードウェアデコード</a></li>
+      <li><a href="../kernel/zero-copy.ja.html">ゼロコピー取り込み</a></li>
+      <li><a href="../kernel/render.ja.html">レンダリングパイプライン</a></li>
+      <li><a href="../kernel/hdr.ja.html">ハイダイナミックレンジ</a></li>
+      <li><a href="../kernel/upscale.ja.html">ニューラル超解像</a></li>
+      <li><a href="../kernel/subtitle-danmaku.ja.html">字幕と弾幕</a></li>
+      <li><a href="../kernel/clock.ja.html">クロックとスケジューリング</a></li>
+    </ul>
+    <h2><span class="no">3</span>プロジェクト <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.ja.html">ビルドと依存関係</a></li>
+      <li><a href="../project/releasing.ja.html">リリースと成果物</a></li>
+      <li><a href="../project/contributing.ja.html">貢献ガイド</a></li>
+      <li><a href="../project/changelog.ja.html">変更履歴</a></li>
+    </ul>
+    <h2><span class="no">4</span>参考資料 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.ja.html">C ABI 概要</a></li>
+      <li><a href="../reference/capi-handle.ja.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.ja.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">機械翻訳です。正確な内容は中国語版をご参照ください。</p>
+  <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Web / WASM アクセス</p>
+  <h1>Web / WASM アクセス</h1>
+  <p class="kicker">Browser Playback</p>
+  <p class="lead">オリジナルの MKV をブラウザに提供し、ASS の特殊効果、フォントの添付ファイル、弾幕を保持します。 liberika 0.3.0 は、FFmpeg WASM を使用してカプセル化を解除し、WebCodecs をデコードし、libass を使用して字幕を描画し、その後、WebGL2 を使用して Canvas の一部をホストに合成します。</p>
+  <ul class="meta-strip"><li>バージョン <b>0.3.0</b></li><li>配布する <b>GitHub Release ZIP</b></li><li>環境 <b>HTTPS / localhost</b></li><li>出力 <b>SDR</b></li></ul>
+
+  <section id="download">
+    <h2>ダウンロードしてプレビューする<a class="anchor" href="#download">#</a></h2>
+    <p>ダウンロード <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/liberika-web-0.3.0.zip">liberika-web-0.3.0.zip</a>、同じReleaseを押します <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/SHA256SUMS">SHA256SUMS</a> 検証、完全な解凍、HTTPS またはローカル HTTP サービス経由のアクセス <code>index.html</code>。デモ ページでは、メディア サーバーを必要とせずに、ローカル ビデオ、字幕、および弾幕を選択できます。</p>
+    <div class="code"><p class="lbl">解凍したディレクトリで実行</p><pre>python3 -m http.server 18765 --bind 127.0.0.1
+# 浏览器打开 http://127.0.0.1:18765</pre></div>
+    <p>パッケージには、JavaScript、2 つの WASM、Worker、ライセンス、ビルド リスト、デモ ページが含まれています。ランタイムはまだ npm にリリースされていません。デプロイ時に完全なディレクトリと相対パスを保持し、JavaScript モジュールと <code>application/wasm</code> MIME; SharedArrayBuffer やクロスソース絶縁は必要ありません。</p>
+  </section>
+
+  <section id="integration">
+    <h2>最小限のアクセス<a class="anchor" href="#integration">#</a></h2>
+    <p>ランタイム リソースを Web サイトに配置する <code>liberika/</code> 目次。この例ではユーザーがローカル File を選択し、Worker がそれを分割して読み取ります。<code>open</code> には Blob や、サーバーがクロスオリジンアクセスを許可するメディア URL も渡せます。</p>
+    <div class="code"><p class="lbl">HTML + JavaScript module</p><pre>&lt;input id=&quot;media&quot; type=&quot;file&quot;&gt;
+&lt;button id=&quot;play&quot; disabled&gt;播放&lt;/button&gt;
+&lt;canvas id=&quot;video&quot; style=&quot;width:100%;height:60vh&quot;&gt;&lt;/canvas&gt;
+&lt;pre id=&quot;status&quot;&gt;&lt;/pre&gt;
+&lt;script type=&quot;module&quot;&gt;
+import { Player } from &#x27;./liberika/index.js&#x27;;
+const media = document.querySelector(&#x27;#media&#x27;);
+const play = document.querySelector(&#x27;#play&#x27;);
+const status = document.querySelector(&#x27;#status&#x27;);
+const showError = error =&gt; { status.textContent = error.message; };
+const player = await Player.create({ canvas: document.querySelector(&#x27;#video&#x27;) });
+player.addEventListener(&#x27;error&#x27;, event =&gt; showError(event.detail));
+media.onchange = async () =&gt; {
+  const file = media.files[0];
+  if (!file) return;
+  media.disabled = true;
+  play.disabled = true;
+  try {
+    const info = await player.open(file);
+    status.textContent = `${file.name}：${info.duration.toFixed(1)} 秒`;
+    play.disabled = false;
+  } catch (error) {
+    showError(error);
+  } finally {
+    media.disabled = false;
+  }
+};
+play.onclick = () =&gt; player.play().catch(showError);
+// 应用卸载时：await player.destroy();
+&lt;/script&gt;</pre></div>
+    <p class="note">ユーザーのクリックから呼び出されます <code>play()</code>、ブラウザのオーディオ ポリシーを満たしています。アプリケーションのアンマウント時に <code>await player.destroy()</code> を実行します。 Canvas は 1 回だけ転送できます。破壊後にプレーヤーを再構築するには新しい Canvas が必要で、レイアウトを切り替えるときに元のインスタンスを保持する必要があります。</p>
+    <p>Canvas またはプレーヤーが作成を遅らせたい場合は、ページの初期化時に作成できます。 <code>AudioSession</code>、次に渡されます <code>Player.create({ canvas, audioSession })</code>、最初の実際のユーザー入力に向けて音声が準備されていることを確認します。</p>
+  </section>
+
+  <section id="features">
+    <h2>字幕、弾幕、再生制御<a class="anchor" href="#features">#</a></h2>
+    <p>MKV に埋め込まれた ASS/SSA とフォントの添付ファイルは自動的に libass に渡されます。弾幕はネイティブの Rust DFM エンジンを再利用します。字幕は Web Audio 再生クロックを弾幕と共有し、同じ Canvas で合成されます。</p>
+    <div class="code"><p class="lbl">メディアを開いた後に呼び出される</p><pre>await player.addSubtitle(await subtitleFile.text()); // ASS / SSA / SRT / WebVTT
+await player.addDanmaku(await danmakuFile.text());   // Bilibili XML / Dandanplay JSON
+await player.configureDanmaku({ opacity: 0.8, fontSize: 30, delay: 0 });
+await player.configureSubtitles({ scale: 1 });</pre></div>
+    <p class="note">字幕と弾幕のスーパーサンプリングは既定で有効で、表示サイズや動画解像度は変わりません。それぞれに <code>{ supersampling: false }</code> を渡して無効にできます。フィールドを省略すると現在の値を保持します。</p>
+    <div class="tw"><table><thead><tr><th>操作</th><th>API と動作</th></tr></thead><tbody>
+      <tr><td>プレイ/ジャンプ</td><td><code>play()</code>、<code>pause()</code>、<code>seek(seconds)</code>;ジャンプして一時停止または再生状態を保持します。</td></tr>
+      <tr><td>音量/速度</td><td><code>setVolume(0…1)</code>、<code>setRate(0.25…4)</code>; 現在の速度によってピッチが変わります。</td></tr>
+      <tr><td>トラック</td><td><code>info.tracks</code>、<code>selectAudio(id)</code>、<code>selectSubtitle(id)</code>;null は、対応するトラックを閉じます。</td></tr>
+      <tr><td>章</td><td><code>info.chapters</code> start / end (秒単位)、end は null になる可能性があります。電話する <code>seek(chapter.start)</code> ポジショニング。</td></tr>
+      <tr><td>スクリーンショット</td><td><code>capture(width?)</code> ビデオ、字幕、弾幕を含む PNG Blob を返します。</td></tr>
+      <tr><td>閉じる/解放する</td><td><code>close()</code> 現在のメディアをクリアした後、open を再実行できます。<code>destroy()</code> Worker、デコーダー、フレーム、GPU、およびオーディオ リソースを解放します。</td></tr>
+    </tbody></table></div>
+    <p>完全なタイプについては、を参照してください。 <a href="https://github.com/AimesSoft/liberika/blob/v0.3.0/packages/erika_web/index.d.ts">index.d.ts</a>。<code>loaded</code>、<code>stats</code>、<code>timeupdate</code>、<code>error</code>、<code>log</code> は CustomEvent、データは detail にあります。 play / pause / ended は通常の Event です。</p>
+  </section>
+
+  <section id="compatibility">
+    <h2>ブラウザとメディアソースの要件<a class="anchor" href="#compatibility">#</a></h2>
+    <ul class="body">
+      <li>WebCodecs の動画・音声デコード、OffscreenCanvas、WebGL2、Web Audio が必要です。open 時にコーデック設定、profile、サイズの対応を確認します。対応状況はブラウザーに依存し、WASM には音動画のソフトウェアデコードやサーバー側トランスコードへのフォールバックはありません。</li>
+      <li>既定では prefer-hardware を要求し、次に no-preference を試みます。<code>open(source, { hardwareDecode: false })</code> は prefer-software を要求します。設定値は実際にハードウェアデコードが使われたことを証明しません。</li>
+      <li>大きなリモートファイルは上限付き HTTP Range キャッシュで読み取ります。8 MiB を超える場合、サーバーは <code>206</code> と既知の総長を正しく返す必要があります。クロスオリジンでは <code>Access-Control-Expose-Headers</code> で <code>Content-Range</code> を公開します。</li>
+      <li>コンテナーには、MP4/MOV、MKV/WebM、MPEG-TS、AVI、FLV、および Ogg が含まれます。オーディオとビデオのエンコードが再生できるかどうかは、現在のブラウザーの WebCodecs クエリ結果によって決まります。</li>
+      <li>現在の出力は SDR で、デスクトップ HDR/EDR/Dolby Vision、ArtCNN、DRM、長さ不明のライブ ブロードキャスト、ビットマップ字幕、および埋め込まれた非 ASS 字幕変換を除きます。 SRT/VTT はプレーン テキストとして変換され、複雑な VTT レイアウトは保持されません。</li>
+      <li>内蔵 ASS はシーク先の 5 秒前から先読みし、既に見たイベントを保持します。より前に始まる長いイベントへ初めてシークした場合、一時的に表示されないことがあります。完全な外部 ASS スクリプトにはこの制限はありません。</li>
+    </ul>
+    <p>ソース コード検証レコードは、Chrome および Safari の指定されたバージョンとマテリアルをカバーします。 Firefox はまだ検証されていません。ビルドとテストの詳細な手順については、次を参照してください。<a href="https://github.com/AimesSoft/liberika/blob/v0.3.0/docs/web.zh.md">ソースコード Web ガイド</a>。</p>
+  </section>
+
+  <section id="build">
+    <h2>ソースからビルドする<a class="anchor" href="#build">#</a></h2>
+    <p>Emscripten 4.0.23、wasm-bindgen-cli 0.2.126、および Rust、Python 3、Node、CMake、Meson、Ninja、make、および pkg-config を使用します。修正されたツールのバージョンと初期化手順については、上記のソース コード ガイドを参照してください。</p>
+    <div class="code"><p class="lbl">shell</p><pre>cargo run -p xtask -- web build
+python3 scripts/serve_web.py
+# 已构建原生 C 依赖时可追加 --skip-native</pre></div>
+    <p>完全なデプロイ可能なディレクトリは次のとおりです。 <code>target/web</code>、中間ファイルは <code>target/web-build</code>。サーバーは、新旧の JS/WASM の混在を避けるために、ランタイムをバージョン ディレクトリに配置する必要があります。</p>
+  </section>
+
+  <footer class="doc-foot"><span>liberika <b>v0.3.0</b></span><span>Section <b>Guide</b></span><span>License <b>MPL-2.0</b></span></footer>
+  <nav class="pager"><a href="linux.ja.html"><span class="dir">Prev</span>Linux アクセス</a><a class="nx" href="../kernel/architecture.ja.html"><span class="dir">Next</span>アーキテクチャの概要</a></nav>
+</main>
+</div>
+</body>
+</html>

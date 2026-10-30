@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ニューラル スーパー スコア — liberika 開発者ドキュメント</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
+  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="upscale.html">中文</option><option value="upscale.en.html">English</option><option value="upscale.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="upscale.html">中文</a> · <a href="upscale.en.html">English</a> · <a href="upscale.ja.html">日本語</a></nav></noscript></div>
+  <nav>
+    <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.ja.html">クイックスタート</a></li>
+      <li><a href="../guide/flutter.ja.html">Flutter の組み込み</a></li>
+      <li><a href="../guide/swift.ja.html">Swift の導入</a></li>
+      <li><a href="../guide/openharmony.ja.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.ja.html">Rust の組み込み</a></li>
+      <li><a href="../guide/c.ja.html">C ABI の組み込み</a></li>
+      <li><a href="../guide/linux.ja.html">Linux の導入</a></li>
+      <li><a href="../guide/web.ja.html">Web / WASM の導入</a></li>
+    </ul>
+    <h2><span class="no">2</span>カーネル設計 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="architecture.ja.html">アーキテクチャ概要</a></li>
+      <li><a href="decode.ja.html">ハードウェアデコード</a></li>
+      <li><a href="zero-copy.ja.html">ゼロコピー取り込み</a></li>
+      <li><a href="render.ja.html">レンダリングパイプライン</a></li>
+      <li><a href="hdr.ja.html">ハイダイナミックレンジ</a></li>
+      <li><a href="upscale.ja.html" aria-current="page">ニューラル超解像</a></li>
+      <li><a href="subtitle-danmaku.ja.html">字幕と弾幕</a></li>
+      <li><a href="clock.ja.html">クロックとスケジューリング</a></li>
+    </ul>
+    <h2><span class="no">3</span>プロジェクト <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.ja.html">ビルドと依存関係</a></li>
+      <li><a href="../project/releasing.ja.html">リリースと成果物</a></li>
+      <li><a href="../project/contributing.ja.html">貢献ガイド</a></li>
+      <li><a href="../project/changelog.ja.html">変更履歴</a></li>
+    </ul>
+    <h2><span class="no">4</span>参考資料 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.ja.html">C ABI 概要</a></li>
+      <li><a href="../reference/capi-handle.ja.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.ja.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">機械翻訳です。正確な内容は中国語版をご参照ください。</p>
+  <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>ニューラル超解像</p>
+  <h1>ニューラル超解像</h1>
+  <p class="kicker">Neural Upscaling</p>
+  <p class="lead">ArtCNNは、アニメコンテンツ向けの輝度2倍ニューラル超解像モデルです。輝度チャンネルのみを処理し、それを出力します。 <code>NeuralUpscale</code> pass はレンダリング パイプラインに接続されています。バックエンドが利用できない場合、ネイティブの輝度サンプルが保持され、明示的にレポートされます。 <code>Inactive</code> ステータス。</p>
+
+  <ul class="meta-strip">
+    <li>モデル <b>ArtCNN C4</b></li>
+    <li>複数の <b>明るさ×2</b></li>
+    <li>実行する <b>Metal / wgpu</b></li>
+  </ul>
+
+  <section id="model">
+    <h2>モデルとパターン<span class="jp">モデル</span><a class="anchor" href="#model">#</a></h2>
+    <p>モデルの重みは crate で埋め込まれます (<code>crates/erika/assets/artcnn</code>)、コンパイル中にパッケージ化され、実行時にはファイル システムにアクセスしません。重みは 2 つの精度 (F16 および F32) で提供され、2 つの要求モードに対応します。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>モード</th><th>値</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Off</td><td class="m">0</td><td>超解像度をオフにして、ネイティブの輝度サンプリングを使用します。</td></tr>
+          <tr><td class="k">ArtCnnC4F16</td><td class="m">1</td><td>Metal simdgroup matrix パスの半精度重み。</td></tr>
+          <tr><td class="k">ArtCnnC4F32</td><td class="m">2</td><td>wgpu compute パスの単精度重み。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="backends">
+    <h2>実行パス<span class="jp">実行経路</span><a class="anchor" href="#backends">#</a></h2>
+    <p>2 つの compute 実装は同じモデル記述を共有し、重み形式はリクエスト モードに対応します。</p>
+    <ul class="body">
+      <li><b>Metal</b>(macOS / iOS / tvOS) — simdgroup matrix 畳み込み。体重は入っています <code>erika-upscaler-build</code> スレッドの背景構築、構築完了後に使用します <code>SimdgroupMatrix</code> 状態アクセス パイプライン。</li>
+      <li><b>wgpu compute</b>(Android / HarmonyOS) — ブロックされた compute オペレーター、F32 パス。</li>
+    </ul>
+    <p>残りのレンダリング バックエンド (D3D11) には ArtCNN エグゼキュータがなく、有効になっている場合はネイティブ輝度サンプルを保持するよう要求します。<code>active_backend</code> 報告書 <code>Inactive</code>、ホストは、プラットフォームがスーパー スコアをサポートしていないことを確認できます。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>バックエンドのステータス</th><th>意味</th></tr></thead>
+        <tbody>
+          <tr><td class="m">Off</td><td>要求されていません。</td></tr>
+          <tr><td class="m">Inactive</td><td>リクエストされましたが、バックエンドは利用できません。ネイティブ サンプリングは保持されます。</td></tr>
+          <tr><td class="m">Building</td><td>ウェイトは構築中であり、まだパイプラインに接続されていません。</td></tr>
+          <tr><td class="m">Scalar</td><td>スカラー実行パス。</td></tr>
+          <tr><td class="m">SimdgroupMatrix</td><td>simdgroup matrix 実行パス。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="pipeline">
+    <h2>アクセス方法<span class="jp">パイプライン</span><a class="anchor" href="#pipeline">#</a></h2>
+    <p>やり過ぎ <code>NeuralUpscale</code> pass は、インポートとサンプリングの間に pass イメージを挿入します。ルマ チャネルはモデルによって 2 倍に増幅され、クロマ チャネルは通常どおりスケーリングされます。後続の tone mapping、合成および出力変換は変更されません。</p>
+    <p>各フレームのエンコードと GPU 時間の消費は、 <code>last_encode_micros</code> と <code>last_gpu_micros</code>。実行失敗が蓄積される <code>fallback_count</code> そして、一時的にネイティブ サンプリングにロールバックし、次のフレームで再試行します。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Kernel</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="hdr.ja.html"><span class="dir">Prev</span>ハイダイナミックレンジ</a>
+    <a class="nx" href="subtitle-danmaku.ja.html"><span class="dir">Next</span>字幕と弾幕</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

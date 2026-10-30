@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Web / WASM access — liberika developer documentation</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
+  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="web.html">中文</option><option value="web.en.html">English</option><option value="web.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="web.html">中文</a> · <a href="web.en.html">English</a> · <a href="web.ja.html">日本語</a></nav></noscript></div>
+  <nav>
+    <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="quickstart.en.html">Quick start</a></li>
+      <li><a href="flutter.en.html">Flutter integration</a></li>
+      <li><a href="swift.en.html">Swift integration</a></li>
+      <li><a href="openharmony.en.html">OpenHarmony / OHPM</a></li>
+      <li><a href="rust.en.html">Rust integration</a></li>
+      <li><a href="c.en.html">C ABI integration</a></li>
+      <li><a href="linux.en.html">Linux integration</a></li>
+      <li><a href="web.en.html" aria-current="page">Web / WASM integration</a></li>
+    </ul>
+    <h2><span class="no">2</span>Kernel design <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.en.html">Architecture overview</a></li>
+      <li><a href="../kernel/decode.en.html">Hardware decoding</a></li>
+      <li><a href="../kernel/zero-copy.en.html">Zero-copy import</a></li>
+      <li><a href="../kernel/render.en.html">Rendering pipeline</a></li>
+      <li><a href="../kernel/hdr.en.html">High dynamic range</a></li>
+      <li><a href="../kernel/upscale.en.html">Neural upscaling</a></li>
+      <li><a href="../kernel/subtitle-danmaku.en.html">Subtitles and danmaku</a></li>
+      <li><a href="../kernel/clock.en.html">Clock and scheduling</a></li>
+    </ul>
+    <h2><span class="no">3</span>Project <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.en.html">Building and dependencies</a></li>
+      <li><a href="../project/releasing.en.html">Releases and artifacts</a></li>
+      <li><a href="../project/contributing.en.html">Contributing</a></li>
+      <li><a href="../project/changelog.en.html">Changelog</a></li>
+    </ul>
+    <h2><span class="no">4</span>Reference <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.en.html">C ABI overview</a></li>
+      <li><a href="../reference/capi-handle.en.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.en.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
+  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Web / WASM access</p>
+  <h1>Web / WASM access</h1>
+  <p class="kicker">Browser Playback</p>
+  <p class="lead">Give the original MKV to the browser and retain the ASS special effects, font attachments and danmaku. liberika 0.3.0 uses FFmpeg WASM to decapsulate, WebCodecs to decode, libass to draw subtitles, and then WebGL2 to synthesize a piece of Canvas into the host.</p>
+  <ul class="meta-strip"><li>version <b>0.3.0</b></li><li>Distribute <b>GitHub Release ZIP</b></li><li>environment <b>HTTPS / localhost</b></li><li>output <b>SDR</b></li></ul>
+
+  <section id="download">
+    <h2>Download and preview<a class="anchor" href="#download">#</a></h2>
+    <p>Download <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/liberika-web-0.3.0.zip">liberika-web-0.3.0.zip</a>, press the same Release <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/SHA256SUMS">SHA256SUMS</a> Verification, complete decompression and access through HTTPS or local HTTP service <code>index.html</code>. The demo page can choose local videos, subtitles and danmaku without the need for a media server.</p>
+    <div class="code"><p class="lbl">Run in the unzipped directory</p><pre>python3 -m http.server 18765 --bind 127.0.0.1
+# 浏览器打开 http://127.0.0.1:18765</pre></div>
+    <p>The package contains JavaScript, two WASM, Worker, license, build list and demo page. The runtime has not yet been released to npm. Keep the complete directory and relative path when deploying, and correctly provide the JavaScript module and <code>application/wasm</code> MIME; no SharedArrayBuffer or cross-source isolation required.</p>
+  </section>
+
+  <section id="integration">
+    <h2>minimal access<a class="anchor" href="#integration">#</a></h2>
+    <p>Put runtime resources into the website <code>liberika/</code> Table of contents. The example lets the user select a local File, which the Worker reads in chunks. You can also pass a Blob or a cross-origin media URL permitted by the server to <code>open</code>.</p>
+    <div class="code"><p class="lbl">HTML + JavaScript module</p><pre>&lt;input id=&quot;media&quot; type=&quot;file&quot;&gt;
+&lt;button id=&quot;play&quot; disabled&gt;播放&lt;/button&gt;
+&lt;canvas id=&quot;video&quot; style=&quot;width:100%;height:60vh&quot;&gt;&lt;/canvas&gt;
+&lt;pre id=&quot;status&quot;&gt;&lt;/pre&gt;
+&lt;script type=&quot;module&quot;&gt;
+import { Player } from &#x27;./liberika/index.js&#x27;;
+const media = document.querySelector(&#x27;#media&#x27;);
+const play = document.querySelector(&#x27;#play&#x27;);
+const status = document.querySelector(&#x27;#status&#x27;);
+const showError = error =&gt; { status.textContent = error.message; };
+const player = await Player.create({ canvas: document.querySelector(&#x27;#video&#x27;) });
+player.addEventListener(&#x27;error&#x27;, event =&gt; showError(event.detail));
+media.onchange = async () =&gt; {
+  const file = media.files[0];
+  if (!file) return;
+  media.disabled = true;
+  play.disabled = true;
+  try {
+    const info = await player.open(file);
+    status.textContent = `${file.name}：${info.duration.toFixed(1)} 秒`;
+    play.disabled = false;
+  } catch (error) {
+    showError(error);
+  } finally {
+    media.disabled = false;
+  }
+};
+play.onclick = () =&gt; player.play().catch(showError);
+// 应用卸载时：await player.destroy();
+&lt;/script&gt;</pre></div>
+    <p class="note">Called from user click <code>play()</code>, meets the browser audio policy. When the application unmounts, call <code>await player.destroy()</code>. Canvas can only be transferred once; rebuilding the player after destruction requires a new Canvas, and the original instance should be retained when switching layouts.</p>
+    <p>If Canvas or the player wants to delay creation, it can be created when the page is initialized. <code>AudioSession</code>, then passed to <code>Player.create({ canvas, audioSession })</code>, ensuring that the audio is prepared for first real user input.</p>
+  </section>
+
+  <section id="features">
+    <h2>Subtitles, danmaku and playback control<a class="anchor" href="#features">#</a></h2>
+    <p>MKV embedded ASS/SSA and font attachments are automatically handed over to libass; the danmaku reuses the native Rust DFM engine. The subtitles share the Web Audio playback clock with the danmaku and are synthesized in the same Canvas.</p>
+    <div class="code"><p class="lbl">Called after opening media</p><pre>await player.addSubtitle(await subtitleFile.text()); // ASS / SSA / SRT / WebVTT
+await player.addDanmaku(await danmakuFile.text());   // Bilibili XML / Dandanplay JSON
+await player.configureDanmaku({ opacity: 0.8, fontSize: 30, delay: 0 });
+await player.configureSubtitles({ scale: 1 });</pre></div>
+    <p class="note">Subtitle and danmaku supersampling is enabled by default without changing display size or video resolution. Pass <code>{ supersampling: false }</code> separately to disable either; omitted fields retain their current values.</p>
+    <div class="tw"><table><thead><tr><th>Operation</th><th>API and behavior</th></tr></thead><tbody>
+      <tr><td>Play/Jump</td><td><code>play()</code>、<code>pause()</code>、<code>seek(seconds)</code>; Jump to retain pause or play status.</td></tr>
+      <tr><td>Volume/speed</td><td><code>setVolume(0…1)</code>、<code>setRate(0.25…4)</code>;The current speed will change the pitch.</td></tr>
+      <tr><td>Tracks</td><td><code>info.tracks</code>、<code>selectAudio(id)</code>、<code>selectSubtitle(id)</code>;null closes the corresponding track.</td></tr>
+      <tr><td>Chapter</td><td><code>info.chapters</code> of start / end in seconds, end can be null; call <code>seek(chapter.start)</code> Positioning.</td></tr>
+      <tr><td>screenshot</td><td><code>capture(width?)</code> Return PNG Blob containing video, subtitles and danmaku.</td></tr>
+      <tr><td>close/release</td><td><code>close()</code> After clearing the current media, you can re-open;<code>destroy()</code> Release Worker, decoder, frame, GPU and audio resources.</td></tr>
+    </tbody></table></div>
+    <p>For complete types see <a href="https://github.com/AimesSoft/liberika/blob/v0.3.0/packages/erika_web/index.d.ts">index.d.ts</a>。<code>loaded</code>、<code>stats</code>、<code>timeupdate</code>、<code>error</code>、<code>log</code> is CustomEvent, the data is in detail; play / pause / ended is ordinary Event.</p>
+  </section>
+
+  <section id="compatibility">
+    <h2>Browser and media source requirements<a class="anchor" href="#compatibility">#</a></h2>
+    <ul class="body">
+      <li>WebCodecs video and audio decoding, OffscreenCanvas, WebGL2 and Web Audio are required. The codec configuration, profile and dimensions are checked when opening; codec support depends on the browser. WASM provides no audio/video software decoder or server-side transcoding fallback.</li>
+      <li>The default request is prefer-hardware, then try no-preference;<code>open(source, { hardwareDecode: false })</code> Request prefer-software. The preference field does not prove that a hardware decoding was actually used.</li>
+      <li>Large remote files use a bounded HTTP Range cache. For files over 8 MiB, the server must return <code>206</code> with the known total length; for cross-origin access, expose <code>Content-Range</code> via <code>Access-Control-Expose-Headers</code>.</li>
+      <li>Containers include MP4/MOV, MKV/WebM, MPEG-TS, AVI, FLV, and Ogg. Whether audio and video codecs can be played depends on the current browser’s WebCodecs query result.</li>
+      <li>The current output is SDR, excluding desktop HDR/EDR/Dolby Vision, ArtCNN, DRM, unknown length live broadcast, bitmap subtitles and embedded non-ASS subtitle conversions. SRT/VTT is converted as plain text and does not preserve the complex VTT layout.</li>
+      <li>On seek, embedded ASS is read ahead from 5 seconds before the target and previously seen events are retained. A first seek into a long event that started earlier may temporarily miss it. Complete external ASS scripts do not have this limitation.</li>
+    </ul>
+    <p>The source code verification record covers the specified versions and materials of Chrome and Safari; Firefox has not yet been verified. For detailed build and test steps, see<a href="https://github.com/AimesSoft/liberika/blob/v0.3.0/docs/web.zh.md">Source Code Web Guide</a>。</p>
+  </section>
+
+  <section id="build">
+    <h2>Build from source<a class="anchor" href="#build">#</a></h2>
+    <p>Use Emscripten 4.0.23, wasm-bindgen-cli 0.2.126, and Rust, Python 3, Node, CMake, Meson, Ninja, make, and pkg-config. For fixed tool versions and initialization steps, see the source code guide above.</p>
+    <div class="code"><p class="lbl">shell</p><pre>cargo run -p xtask -- web build
+python3 scripts/serve_web.py
+# 已构建原生 C 依赖时可追加 --skip-native</pre></div>
+    <p>The complete deployable directory is <code>target/web</code>, the intermediate file is <code>target/web-build</code>. The server should put the runtime into the version directory to avoid mixing old and new JS/WASM.</p>
+  </section>
+
+  <footer class="doc-foot"><span>liberika <b>v0.3.0</b></span><span>Section <b>Guide</b></span><span>License <b>MPL-2.0</b></span></footer>
+  <nav class="pager"><a href="linux.en.html"><span class="dir">Prev</span>Linux access</a><a class="nx" href="../kernel/architecture.en.html"><span class="dir">Next</span>Architecture overview</a></nav>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OpenHarmony / OHPM access — liberika developer documentation</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
+  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="openharmony.html">中文</option><option value="openharmony.en.html">English</option><option value="openharmony.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="openharmony.html">中文</a> · <a href="openharmony.en.html">English</a> · <a href="openharmony.ja.html">日本語</a></nav></noscript></div>
+  <nav>
+    <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="quickstart.en.html">Quick start</a></li>
+      <li><a href="flutter.en.html">Flutter integration</a></li>
+      <li><a href="swift.en.html">Swift integration</a></li>
+      <li><a href="openharmony.en.html" aria-current="page">OpenHarmony / OHPM</a></li>
+      <li><a href="rust.en.html">Rust integration</a></li>
+      <li><a href="c.en.html">C ABI integration</a></li>
+      <li><a href="linux.en.html">Linux integration</a></li>
+      <li><a href="web.en.html">Web / WASM integration</a></li>
+    </ul>
+    <h2><span class="no">2</span>Kernel design <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.en.html">Architecture overview</a></li>
+      <li><a href="../kernel/decode.en.html">Hardware decoding</a></li>
+      <li><a href="../kernel/zero-copy.en.html">Zero-copy import</a></li>
+      <li><a href="../kernel/render.en.html">Rendering pipeline</a></li>
+      <li><a href="../kernel/hdr.en.html">High dynamic range</a></li>
+      <li><a href="../kernel/upscale.en.html">Neural upscaling</a></li>
+      <li><a href="../kernel/subtitle-danmaku.en.html">Subtitles and danmaku</a></li>
+      <li><a href="../kernel/clock.en.html">Clock and scheduling</a></li>
+    </ul>
+    <h2><span class="no">3</span>Project <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.en.html">Building and dependencies</a></li>
+      <li><a href="../project/releasing.en.html">Releases and artifacts</a></li>
+      <li><a href="../project/contributing.en.html">Contributing</a></li>
+      <li><a href="../project/changelog.en.html">Changelog</a></li>
+    </ul>
+    <h2><span class="no">4</span>Reference <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.en.html">C ABI overview</a></li>
+      <li><a href="../reference/capi-handle.en.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.en.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
+  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>OpenHarmony / OHPM</p>
+  <h1>OpenHarmony / OHPM access</h1>
+  <p class="kicker">Native ArkTS SDK</p>
+  <p class="lead"><code>erika</code> is OpenHarmony native ArkTS SDK. Application passed <code>XComponent</code> To get the native surface, use <code>ErikaPlayer</code> Drive playback control, event handling and per-frame rendering scheduling.</p>
+
+  <ul class="meta-strip">
+    <li>Public version <b>erika 0.3.0</b></li>
+    <li>target architecture <b>arm64</b></li>
+    <li>Minimum API <b>API 18</b></li>
+  </ul>
+
+  <section id="install">
+    <h2>Installation and introduction<span class="jp">インストール</span><a class="anchor" href="#install">#</a></h2>
+    <p>Install the public version 0.3.0 in the DevEco Studio project root directory:</p>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>ohpm install erika@0.3.0</pre>
+    </div>
+    <p>For package details, see <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM details page</a>;See the official warehouse for source code modules. <code>packages/erika_ohos</code> Table of contents.</p>
+  </section>
+
+  <section id="surface">
+    <h2>Surface lifecycle and controllers<span class="jp">サーフェスcontrol</span><a class="anchor" href="#surface">#</a></h2>
+    <p><code>ErikaPlayer</code> Encapsulates the underlying Presenter instance. The host is <code>XComponentController</code> Bind the native surface in the callback and synchronize the size:</p>
+    <div class="code">
+      <p class="lbl">ErikaSurfaceController.ets</p>
+<pre><span class="k">import</span> { ErikaNativeResponse, ErikaPlayer } <span class="k">from</span> <span class="s">'erika'</span>;
+
+<span class="k">export class</span> ErikaSurfaceController <span class="k">extends</span> XComponentController {
+  <span class="k">private readonly</span> player: ErikaPlayer = <span class="k">new</span> ErikaPlayer();
+  <span class="k">private</span> attached: boolean = <span class="k">false</span>;
+  <span class="k">private</span> pendingUri: string = <span class="s">''</span>;
+
+  onSurfaceCreated(surfaceId: string): <span class="k">void</span> {
+    <span class="c">/* 记录表面创建 */</span>
+  }
+
+  onSurfaceChanged(surfaceId: string, rect: SurfaceRect): <span class="k">void</span> {
+    <span class="k">if</span> (!<span class="k">this</span>.attached) {
+      <span class="k">this</span>.player.attachSurface({
+        surfaceId: BigInt(surfaceId),
+        width: rect.surfaceWidth,
+        height: rect.surfaceHeight,
+        scale: 1.0,
+      });
+      <span class="k">this</span>.attached = <span class="k">true</span>;
+    } <span class="k">else</span> {
+      <span class="k">this</span>.player.resizeSurface(rect.surfaceWidth, rect.surfaceHeight, 1.0);
+    }
+    <span class="k">this</span>.startPendingPlay();
+  }
+
+  onSurfaceDestroyed(_surfaceId: string): <span class="k">void</span> {
+    <span class="k">if</span> (<span class="k">this</span>.attached) {
+      <span class="k">this</span>.player.detachSurface();
+      <span class="k">this</span>.attached = <span class="k">false</span>;
+    }
+    <span class="k">this</span>.player.dispose();
+  }
+
+  openAndPlay(uri: string): <span class="k">void</span> {
+    <span class="k">this</span>.pendingUri = uri;
+    <span class="k">this</span>.startPendingPlay();
+  }
+
+  renderFrame(timeSeconds: number): ErikaNativeResponse {
+    <span class="k">return</span> <span class="k">this</span>.player.renderTick(timeSeconds);
+  }
+
+  <span class="k">private</span> startPendingPlay(): <span class="k">void</span> {
+    <span class="k">if</span> (!<span class="k">this</span>.attached || <span class="k">this</span>.pendingUri.length === 0) {
+      <span class="k">return</span>;
+    }
+    <span class="k">const</span> uri: string = <span class="k">this</span>.pendingUri;
+    <span class="k">this</span>.pendingUri = <span class="s">''</span>;
+    <span class="k">this</span>.player.open(uri);
+    <span class="k">this</span>.player.play();
+  }
+}</pre>
+    </div>
+  </section>
+
+  <section id="arkui">
+    <h2>Used in ArkUI page<span class="jp">ArkUI linked</span><a class="anchor" href="#arkui">#</a></h2>
+    <div class="code">
+      <p class="lbl">Index.ets</p>
+<pre><span class="k">import</span> { ErikaSurfaceController } <span class="k">from</span> <span class="s">'./ErikaSurfaceController'</span>;
+
+@Entry
+@Component
+<span class="k">struct</span> VideoPlayerPage {
+  <span class="k">private readonly</span> controller: ErikaSurfaceController = <span class="k">new</span> ErikaSurfaceController();
+  <span class="k">private</span> timerId: number = -1;
+
+  aboutToAppear(): <span class="k">void</span> {
+    <span class="c">/* 简化示例：用定时器调用 renderTick，应用可改用显示帧回调 */</span>
+    <span class="k">let</span> startTime = Date.now();
+    <span class="k">this</span>.timerId = setInterval(() =&gt; {
+      <span class="k">const</span> nowSeconds = (Date.now() - startTime) / 1000.0;
+      <span class="k">this</span>.controller.renderFrame(nowSeconds);
+    }, 16);
+  }
+
+  aboutToDisappear(): <span class="k">void</span> {
+    <span class="k">if</span> (<span class="k">this</span>.timerId !== -1) {
+      clearInterval(<span class="k">this</span>.timerId);
+      <span class="k">this</span>.timerId = -1;
+    }
+  }
+
+  build() {
+    Column() {
+      XComponent({
+        id: <span class="s">'erika_video_surface'</span>,
+        type: XComponentType.SURFACE,
+        controller: <span class="k">this</span>.controller,
+      })
+        .width(<span class="s">'100%'</span>)
+        .aspectRatio(1.777)
+        .onLoad(() =&gt; {
+          <span class="k">this</span>.controller.openAndPlay(<span class="s">'https://example.com/stream.mp4'</span>);
+        })
+    }
+    .width(<span class="s">'100%'</span>)
+    .height(<span class="s">'100%'</span>)
+  }
+}</pre>
+    </div>
+  </section>
+
+  <section id="api">
+    <h2>ArkTS ErikaPlayer Public API<span class="jp">Public API</span><a class="anchor" href="#api">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Classification</th><th>method</th><th>Function description</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Playback controls</td><td class="m">open(uri) / play() / pause() / stop() / close() / seek(positionMicros) / setPlaybackRate(rate) / setVolume(volume)</td><td>Open the media source, play, pause, jump progress (microseconds), adjust speed and volume.</td></tr>
+          <tr><td class="k">surface management</td><td class="m">attachSurface(options) / resizeSurface(w, h, scale) / detachSurface()</td><td>Bind the XComponent native surface, synchronize the pixel size, and release the surface.</td></tr>
+          <tr><td class="k">Rendering schedule</td><td class="m">renderTick(timeSeconds) / audioOnlyTick() / pollEvent()</td><td>Drivers display clock rendering frames, audio and pictureless scheduling and polling status events.</td></tr>
+          <tr><td class="k">Additional capabilities</td><td class="m">captureFrame(w, h) / registerSubtitleMemoryFont(bytes) / dispose()</td><td>Grab the current frame pixels, register the memory subtitle font and destroy the player instance.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="http-cache">
+    <h2>0.2.1 HTTP cache option<a class="anchor" href="#http-cache">#</a></h2>
+    <p>As of 2026-10-30, OHPM 0.3.0 is publicly available and contains the following HTTP fallback cache parameters.</p>
+    <p><code>httpReadAheadBytes</code> Determines the number of bytes to read forward, the default is 2 MiB;<code>httpBackBufferBytes</code> Determine how much played data to keep, the default is 16 MiB. Omit both or pass 0 to use the default value. The readahead default value can also be given by <code>ERIKA_HTTP_READAHEAD_BYTES</code> set up.</p>
+    <p>A backward seek within the rewind cache can reuse downloaded data directly. High bitrate videos require a larger budget: a video of 80 Mbit/s would require about 100 MB to retain for about 10 seconds. The cache is limited by bytes and does not represent a fixed number of playback seconds.</p>
+    <div class="code">
+      <p class="lbl">ArkTS</p>
+<pre>player.open(&#x27;https://example.com/video.mp4&#x27;, {
+  httpReadAheadBytes: 8 * 1024 * 1024,
+  httpBackBufferBytes: 128 * 1024 * 1024,
+});
+player.play();</pre>
+    </div>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Guide</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="swift.en.html"><span class="dir">Prev</span>Swift access</a>
+    <a class="nx" href="rust.en.html"><span class="dir">Next</span>Rust embedded</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

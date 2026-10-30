@@ -10,7 +10,7 @@ app.initNavigation = function initNavigation(root = document) {
   const setOpen = (open) => {
     header.classList.toggle('nav-open', open);
     toggle.setAttribute('aria-expanded', String(open));
-    toggle.setAttribute('aria-label', open ? '关闭菜单' : '打开菜单');
+    toggle.setAttribute('aria-label', open ? app.ui.closeMenu : app.ui.openMenu);
     toggle.innerHTML = icon(open ? 'close' : 'menu');
   };
 

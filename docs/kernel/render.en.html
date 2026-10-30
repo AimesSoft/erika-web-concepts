@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rendering Pipeline — liberika Developer Documentation</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
+  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="render.html">中文</option><option value="render.en.html">English</option><option value="render.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="render.html">中文</a> · <a href="render.en.html">English</a> · <a href="render.ja.html">日本語</a></nav></noscript></div>
+  <nav>
+    <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.en.html">Quick start</a></li>
+      <li><a href="../guide/flutter.en.html">Flutter integration</a></li>
+      <li><a href="../guide/swift.en.html">Swift integration</a></li>
+      <li><a href="../guide/openharmony.en.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.en.html">Rust integration</a></li>
+      <li><a href="../guide/c.en.html">C ABI integration</a></li>
+      <li><a href="../guide/linux.en.html">Linux integration</a></li>
+      <li><a href="../guide/web.en.html">Web / WASM integration</a></li>
+    </ul>
+    <h2><span class="no">2</span>Kernel design <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="architecture.en.html">Architecture overview</a></li>
+      <li><a href="decode.en.html">Hardware decoding</a></li>
+      <li><a href="zero-copy.en.html">Zero-copy import</a></li>
+      <li><a href="render.en.html" aria-current="page">Rendering pipeline</a></li>
+      <li><a href="hdr.en.html">High dynamic range</a></li>
+      <li><a href="upscale.en.html">Neural upscaling</a></li>
+      <li><a href="subtitle-danmaku.en.html">Subtitles and danmaku</a></li>
+      <li><a href="clock.en.html">Clock and scheduling</a></li>
+    </ul>
+    <h2><span class="no">3</span>Project <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.en.html">Building and dependencies</a></li>
+      <li><a href="../project/releasing.en.html">Releases and artifacts</a></li>
+      <li><a href="../project/contributing.en.html">Contributing</a></li>
+      <li><a href="../project/changelog.en.html">Changelog</a></li>
+    </ul>
+    <h2><span class="no">4</span>Reference <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.en.html">C ABI overview</a></li>
+      <li><a href="../reference/capi-handle.en.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.en.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
+  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>rendering pipeline</p>
+  <h1>rendering pipeline</h1>
+  <p class="kicker">Render Pipeline</p>
+  <p class="lead">The video, subtitles and danmaku are sampled, color converted, tone mapping, zoomed and synthesized in the same pass picture, render pass on the screen at once. pass Picture by <code>pipeline::build_graph</code> Constructed conditionally on the color state of the source and destination.</p>
+
+  <ul class="meta-strip">
+    <li>pass type <b>11</b> kind</li>
+    <li>backend <b>Metal / D3D11 / wgpu</b></li>
+    <li>Geometry <b>aspect_fit centered</b></li>
+  </ul>
+
+  <section id="passes">
+    <h2>pass diagram<span class="jp">パスグラフ</span><a class="anchor" href="#passes">#</a></h2>
+    <p><code>RenderPassKind</code> All 11 types of pass are defined. When rendering a frame,<code>build_graph</code> The transformations from the import frame to the output are combined sequentially, and pass that do not meet the conditions are skipped:</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>pass</th><th>Responsibilities</th></tr></thead>
+        <tbody>
+          <tr><td class="m">ImportFrame</td><td>Decoded frames are imported as GPU texture (zero copy or CPU upload).</td></tr>
+          <tr><td class="m">NeuralUpscale</td><td>ArtCNN Brightness 2× Super Resolution, only inserted when enabled and supported by the backend.</td></tr>
+          <tr><td class="m">PlaneSampling</td><td>YCbCr planar sampling, uv upsampling and chroma reconstruction.</td></tr>
+          <tr><td class="m">ChromaReconstruction</td><td>Chroma plane reconstruction.</td></tr>
+          <tr><td class="m">TransferDecode</td><td>Transfer function decoding to restore linear light from the encoded format.</td></tr>
+          <tr><td class="m">GamutMap</td><td>Gamut mapping, inserting when the source and target primary colors are different.</td></tr>
+          <tr><td class="m">ToneMap</td><td>tone mapping, inserted when the source is HDR and the peak exceeds the target by about 1.05 times.</td></tr>
+          <tr><td class="m">Scale</td><td>Scale to output size.</td></tr>
+          <tr><td class="m">OverlayComposite</td><td>The synthesis of subtitle layer (internal kernel overlay) and danmaku.</td></tr>
+          <tr><td class="m">Dither</td><td>Jitter when output bit depth is reduced.</td></tr>
+          <tr><td class="m">OutputTransform</td><td>Encode to output format (SDR/EDR/HDR10 PQ/scRGB).</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The two conditional insertion rules come from <code>SourceColorState</code> with <code>TargetColorState</code> Comparison of: tone map is only inserted if the source is HDR and the peak exceeds the target by about 5%, gamut mapping is only inserted if the source and target primary colors are different. SDR content is directly sampled and output transformed on the SDR target.</p>
+  </section>
+
+  <section id="backends">
+    <h2>Backend implementation<span class="jp">バックエンド</span><a class="anchor" href="#backends">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>backend</th><th>platform</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Metal</td><td class="m">macOS / iOS / tvOS</td><td>Native implementation. YCbCr sampling, color conversion, tone mapping, overlay synthesis. ArtCNN goes simdgroup matrix.</td></tr>
+          <tr><td class="k">Direct3D 11</td><td class="m">Windows</td><td>Native implementation. D3D11VA texture interop, HDR10 output, overlay composition.</td></tr>
+          <tr><td class="k">wgpu</td><td class="m">Android / HarmonyOS</td><td>Vulkan backend, GLES with recovery path available. HarmonyOS presented by OHNativeWindow.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The rendering backend is determined by the presenter configuration, regardless of the surface attachment method. Color decisions are unified <code>pipeline</code> module, the three backends share the same set of pass graph descriptions.</p>
+  </section>
+
+  <section id="compositing">
+    <h2>Composition and Geometry<span class="jp">synthesis</span><a class="anchor" href="#compositing">#</a></h2>
+    <p>Subtitles and danmaku in <code>OverlayComposite</code> Synthesized in pass. Compositing takes place within the video viewport: bullet posts and subtitles are positioned relative to the video content, following the video's aspect-fit geometry.</p>
+    <p>Video content starts with <code>aspect_fit</code> Centered within the output surface, the letterbox area is filled with the clear screen color (currently uniformly black on the backend). The synthesis sequence is video, subtitles, and danmaku.</p>
+    <p>The rendering chain of HDR content and the screenshot chain share the same pass image; the screenshot is rendered to an off-screen target with the same pixel format as the surface, and is converted to RGBA8 when read back (the HDR value is clamped to the SDR range). The screenshots only combine video and subtitles, excluding danmaku and debug HUD.</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Kernel</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="zero-copy.en.html"><span class="dir">Prev</span>Zero copy import</a>
+    <a class="nx" href="hdr.en.html"><span class="dir">Next</span>high dynamic range</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

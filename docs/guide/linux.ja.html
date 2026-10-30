@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Linux アクセス — liberika 開発者ドキュメント</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
+  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="linux.html">中文</option><option value="linux.en.html">English</option><option value="linux.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="linux.html">中文</a> · <a href="linux.en.html">English</a> · <a href="linux.ja.html">日本語</a></nav></noscript></div>
+  <nav>
+    <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="quickstart.ja.html">クイックスタート</a></li>
+      <li><a href="flutter.ja.html">Flutter の組み込み</a></li>
+      <li><a href="swift.ja.html">Swift の導入</a></li>
+      <li><a href="openharmony.ja.html">OpenHarmony / OHPM</a></li>
+      <li><a href="rust.ja.html">Rust の組み込み</a></li>
+      <li><a href="c.ja.html">C ABI の組み込み</a></li>
+      <li><a href="linux.ja.html" aria-current="page">Linux の導入</a></li>
+      <li><a href="web.ja.html">Web / WASM の導入</a></li>
+    </ul>
+    <h2><span class="no">2</span>カーネル設計 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.ja.html">アーキテクチャ概要</a></li>
+      <li><a href="../kernel/decode.ja.html">ハードウェアデコード</a></li>
+      <li><a href="../kernel/zero-copy.ja.html">ゼロコピー取り込み</a></li>
+      <li><a href="../kernel/render.ja.html">レンダリングパイプライン</a></li>
+      <li><a href="../kernel/hdr.ja.html">ハイダイナミックレンジ</a></li>
+      <li><a href="../kernel/upscale.ja.html">ニューラル超解像</a></li>
+      <li><a href="../kernel/subtitle-danmaku.ja.html">字幕と弾幕</a></li>
+      <li><a href="../kernel/clock.ja.html">クロックとスケジューリング</a></li>
+    </ul>
+    <h2><span class="no">3</span>プロジェクト <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.ja.html">ビルドと依存関係</a></li>
+      <li><a href="../project/releasing.ja.html">リリースと成果物</a></li>
+      <li><a href="../project/contributing.ja.html">貢献ガイド</a></li>
+      <li><a href="../project/changelog.ja.html">変更履歴</a></li>
+    </ul>
+    <h2><span class="no">4</span>参考資料 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.ja.html">C ABI 概要</a></li>
+      <li><a href="../reference/capi-handle.ja.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.ja.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">機械翻訳です。正確な内容は中国語版をご参照ください。</p>
+  <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Linux アクセス</p>
+  <h1>Linux アクセス</h1>
+  <p class="kicker">Linux / X11 / Wayland / WSLg</p>
+  <p class="lead">0.2.1 実験的な Linux サポートを追加: Rust、C/C++、および Flutter ホストは、X11 または Wayland を介してビデオを表示し、PulseAudio を介してオーディオを出力できます。 Linux は現在ソース コードからビルドされており、プリコンパイルされたリリース パッケージはありません。</p>
+  <ul class="meta-strip">
+    <li>依存する <b>FFmpeg 8.x</b></li>
+    <li>窓 <b>X11 / Wayland</b></li>
+    <li>オーディオ <b>PulseAudio</b></li>
+  </ul>
+
+  <section id="deps">
+    <h2>依存する準備をする<a class="anchor" href="#deps">#</a></h2>
+    <p>次の依存関係コマンドは、Ubuntu 26.04 に適用されます。 Rust には 1.92 以降が必要です。 Ubuntu 22.04 / 24.04 デフォルト リポジトリ内の古いバージョンの FFmpeg は、このビルド パスを満たしていません。</p>
+    <div class="code">
+      <p class="lbl">Ubuntu 26.04</p>
+<pre>sudo apt update
+sudo apt install -y \
+  build-essential pkg-config clang libclang-dev rustc cargo rustfmt \
+  curl ca-certificates meson ninja-build patch xz-utils python3 \
+  libavdevice-dev libavfilter-dev libavformat-dev libavcodec-dev \
+  libswresample-dev libswscale-dev libavutil-dev \
+  libfreetype-dev libharfbuzz-dev libfribidi-dev libfontconfig-dev \
+  libpulse-dev libx11-dev libwayland-dev libxkbcommon-dev \
+  libxkbcommon-x11-0 libvulkan-dev mesa-vulkan-drivers libegl1 \
+  libgl1-mesa-dri fonts-dejavu-core pulseaudio-utils</pre>
+    </div>
+    <p>PipeWire デスクトップを有効にする必要があります <code>pipewire-pulse</code>。利用可能 <code>pactl info</code> オーディオ接続を確認してください。 WSLg は PulseAudio サービスを提供しました。</p>
+  </section>
+
+  <section id="build">
+    <h2>構築して実行する<a class="anchor" href="#build">#</a></h2>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>git clone https://github.com/AimesSoft/liberika.git
+cd liberika
+git checkout v0.3.0
+bash scripts/build_linux_libass.sh
+cargo build --locked --release -p linux_native_demo -p erika_capi
+cargo run --locked --release -p linux_native_demo -- /path/to/video.mkv</pre>
+    </div>
+    <p>libass は liberika パッチ バージョン 0.17.5 を使用し、ビルド スクリプトはフォント フォールバック パッチのダウンロード、検証、および適用を担当します。 FFmpeg 8 および PulseAudio は、デフォルトでシステム ライブラリを動的にリンクします。製品は次の場所にあります <code>target/release/</code>。</p>
+    <p>Demo はウィンドウ プロトコルを自動的に選択します。これを渡すこともできます。 <code>--x11</code> または <code>--wayland</code>。スペースで一時停止または続行、左右の矢印で 5 秒間ジャンプ、Esc で終了します。</p>
+  </section>
+
+  <section id="flutter">
+    <h2>Flutter アクセス<a class="anchor" href="#flutter">#</a></h2>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>cargo build --locked --release -p erika_capi
+export ERIKA_LIBRARY_DIR=&quot;${CARGO_TARGET_DIR:-$PWD/target}/release&quot;
+# 在 Flutter 宿主目录中执行：
+flutter build linux --release</pre>
+    </div>
+    <p>ホストが追加されました <code>erika_flutter: ^0.3.0</code>。<code>ErikaVideoView</code> と <code>ErikaTextureVideoView</code> SDR RGBA テクスチャを使用すると、Flutter トリミングと UI オーバーレイがサポートされます。このパスには、フレームごとの GPU リードバックが必要です。</p>
+    <p>Wayland オプション <code>ErikaWindowOverlayVideoView</code>、使用します <code>wl_subsurface</code> フレームごとの RGBA リードバックを減らすために、ネイティブ ビデオを透明な Flutter UI の下に置きます。ビデオ領域は透明のままにしておく必要があります。このネイティブ レイヤーは不透明な srcOver をサポートしており、ビデオ自体は Flutter トリミングやカラー フィルターを受け入れません。 X11 はテクスチャ ビューを使用します。</p>
+  </section>
+
+  <section id="native">
+    <h2>Rust および C/C++ アクセス<a class="anchor" href="#native">#</a></h2>
+    <p>Rust ホストが有効になりました <code>erika</code> の <code>wgpu</code> feature。 C ホストリンク <code>liberika_capi.so</code>、同じビルドを使用 <code>erika.h</code>。</p>
+    <div class="tw"><table>
+      <thead><tr><th>surface kind</th><th>raw_window</th><th>raw_display</th></tr></thead>
+      <tbody>
+        <tr><td class="m">ErikaWgpuSurfaceKind_XlibWindow</td><td>X11 Window 整数 ID</td><td>Display*</td></tr>
+        <tr><td class="m">ErikaWgpuSurfaceKind_WaylandSurface</td><td>wl_surface*</td><td>wl_display*</td></tr>
+      </tbody>
+    </table></div>
+    <p>パス <code>erika_presenter_attach_wgpu_surface</code> 付属の窓。ポインタ <code>uintptr_t</code> に変換する <code>uint64_t</code>、幅と高さは物理ピクセルを送信します。 display を持つウィンドウは、detach または presenter が破棄された後に解放されます。同じ presenter の attach、render、resize、detach は、ウィンドウ イベント スレッドでシリアルに実行されます。</p>
+    <p>呼び出しシーケンス:<code>create → attach → open → play → render_tick → close → detach → destroy</code>。実行可能な C の例は次の場所にあります。 <code>examples/linux_native_demo/capi_smoke.c</code>。</p>
+  </section>
+
+  <section id="gpu">
+    <h2>GPU パスでデコードする<a class="anchor" href="#gpu">#</a></h2>
+    <p>Linux は、デフォルトで NVIDIA NVDEC を試行し、次に Intel / AMD VA-API を試行します。ドライバーまたは形式がサポートされていない場合は、FFmpeg ソフトウェアデコードにフォールバックします。</p>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>export ERIKA_HWDEC=auto  # auto / cuda / nvdec / vaapi / software
+# 多显卡机器可指定：
+export ERIKA_CUDA_DEVICE=0
+export ERIKA_VAAPI_DEVICE=/dev/dri/renderD128</pre>
+    </div>
+    <p>通常の NVDEC パスでは、デコード済みプレーンをダウンロードして wgpu にアップロードできます。VA-API から Vulkan への直接インポートは実験的です。Linux の HDR には、コンポジターが FP16 extended-linear WSI サーフェスを提供する必要があります。Flutter の RGBA テクスチャ出力は SDR です。</p>
+  </section>
+
+  <section id="wsl">
+    <h2>WSLg<a class="anchor" href="#wsl">#</a></h2>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>bash scripts/run_wsl_gpu.sh --wayland /mnt/c/path/to/video.mkv
+# 或使用 X11：
+bash scripts/run_wsl_gpu.sh --x11</pre>
+    </div>
+    <p>起動スクリプトは liberika プロセスに <code>wgpu → OpenGL/EGL → Mesa D3D12</code> を選択します。WSL は Windows の GPU ドライバーを使うため、Linux の NVIDIA カーネルドライバーは不要です。リポジトリが <code>/mnt/c</code> にある場合、<code>CARGO_TARGET_DIR</code> を Linux ファイルシステムに置くとビルドを高速化できます。</p>
+  </section>
+
+  <section id="check">
+    <h2>実行チェック<a class="anchor" href="#check">#</a></h2>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>bash scripts/check_linux.sh
+# 同时检查 Wayland：
+ERIKA_TEST_WAYLAND=1 bash scripts/check_linux.sh</pre>
+    </div>
+    <p>このチェックには、再生、一時停止、seek、resize、および C ABI ライフサイクルをカバーする、利用可能なディスプレイ サービスとオーディオ サービスが必要です。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Guide</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="c.ja.html"><span class="dir">Prev</span>C ABI 埋め込み</a>
+    <a class="nx" href="web.ja.html"><span class="dir">Next</span>Web / WASM アクセス</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

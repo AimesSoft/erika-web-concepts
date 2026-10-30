@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Developer Documentation — liberika</title>
+<link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="docs.css">
+<script defer src="docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
+  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="index.html">中文</option><option value="index.en.html">English</option><option value="index.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="index.html">中文</a> · <a href="index.en.html">English</a> · <a href="index.ja.html">日本語</a></nav></noscript></div>
+  <nav>
+    <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="guide/quickstart.en.html">Quick start</a></li>
+      <li><a href="guide/flutter.en.html">Flutter integration</a></li>
+      <li><a href="guide/swift.en.html">Swift integration</a></li>
+      <li><a href="guide/openharmony.en.html">OpenHarmony / OHPM</a></li>
+      <li><a href="guide/rust.en.html">Rust integration</a></li>
+      <li><a href="guide/c.en.html">C ABI integration</a></li>
+      <li><a href="guide/linux.en.html">Linux integration</a></li>
+      <li><a href="guide/web.en.html">Web / WASM integration</a></li>
+    </ul>
+    <h2><span class="no">2</span>Kernel design <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="kernel/architecture.en.html">Architecture overview</a></li>
+      <li><a href="kernel/decode.en.html">Hardware decoding</a></li>
+      <li><a href="kernel/zero-copy.en.html">Zero-copy import</a></li>
+      <li><a href="kernel/render.en.html">Rendering pipeline</a></li>
+      <li><a href="kernel/hdr.en.html">High dynamic range</a></li>
+      <li><a href="kernel/upscale.en.html">Neural upscaling</a></li>
+      <li><a href="kernel/subtitle-danmaku.en.html">Subtitles and danmaku</a></li>
+      <li><a href="kernel/clock.en.html">Clock and scheduling</a></li>
+    </ul>
+    <h2><span class="no">3</span>Project <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="project/building.en.html">Building and dependencies</a></li>
+      <li><a href="project/releasing.en.html">Releases and artifacts</a></li>
+      <li><a href="project/contributing.en.html">Contributing</a></li>
+      <li><a href="project/changelog.en.html">Changelog</a></li>
+    </ul>
+    <h2><span class="no">4</span>Reference <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="reference/capi.en.html">C ABI overview</a></li>
+      <li><a href="reference/capi-handle.en.html">ErikaHandle</a></li>
+      <li><a href="reference/capi-presenter.en.html">ErikaPresenterHandle</a></li>
+      <li><a href="reference/capi-json.en.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
+  <p class="crumb"><a href="../index.html">Home page</a><span class="sep">/</span>docs</p>
+  <h1>Developer documentation</h1>
+  <p class="kicker">Developer Documentation</p>
+  <p class="lead">liberika is an embeddable playback engine for cross-platform audio and video applications. This documentation is for teams integrating liberika and developers working on the engine. It describes <b>v0.3.0</b>. The project is named liberika; the <code>erika</code> crate, <code>erika_*</code> C ABI, and SDK package names remain compatible.</p>
+
+  <ul class="meta-strip">
+    <li>version <b>0.3.0</b></li>
+    <li>C ABI export <b>108</b></li>
+    <li>Rust <b>1.92+</b></li>
+    <li>license <b>MPL-2.0</b></li>
+  </ul>
+
+  <section id="release030">
+    <h2>0.3.0 Upgrade Tips<a class="anchor" href="#release030">#</a></h2>
+    <p class="note"><b>Default behavior changes:</b> Subtitle and danmaku supersampling is enabled by default on native and Web. Native software video decoding uses FFmpeg multithreading by default. Set <code>ERIKA_VIDEO_DECODE_THREADS=1</code> to use a single thread.</p>
+    <p>New features include the <a href="guide/web.en.html">Web / WASM backend</a>, <a href="reference/capi-handle.en.html#frame-export">standalone frame export</a>, <a href="reference/capi-presenter.en.html#diagnostics">diagnostic snapshots</a>, and chapter queries. Version 0.3.0 is available for Flutter, SwiftPM, and OHPM. See the <a href="project/changelog.en.html#v030">changelog</a> for all changes.</p>
+  </section>
+
+  <section id="guide">
+    <h2>Integration guide<span class="jp">導入手引</span><a class="anchor" href="#guide">#</a></h2>
+    <p>Integrate liberika into your application. Start with the <a href="guide/quickstart.en.html">quickstart</a>, then choose a guide for your platform and language.</p>
+    <div class="cards">
+      <div class="crow">
+        <span class="no">01</span>
+        <div class="ttl"><a href="guide/quickstart.en.html">Quick start</a><span class="en">Quickstart</span></div>
+        <div class="txt">An overview of prebuilt binaries, Flutter, SwiftPM, OpenHarmony OHPM, Rust, C ABI, and Web / WASM.</div>
+      </div>
+      <div class="crow">
+        <span class="no">02</span>
+        <div class="ttl"><a href="guide/flutter.en.html">Flutter embedded</a><span class="en">Flutter Embedding</span></div>
+        <div class="txt">The official plugin supports seven platforms, with native video layers, Flutter textures, and compatibility views. Linux builds from source.</div>
+      </div>
+      <div class="crow">
+        <span class="no">03</span>
+        <div class="ttl"><a href="guide/swift.en.html">Swift access</a><span class="en">Swift &amp; Apple</span></div>
+        <div class="txt">The native macOS / iOS / tvOS SwiftPM package liberika-swift: CAMetalLayer binding, event polling, and lifecycle management.</div>
+      </div>
+      <div class="crow">
+        <span class="no">04</span>
+        <div class="ttl"><a href="guide/openharmony.en.html">OpenHarmony / OHPM</a><span class="en">ArkTS SDK</span></div>
+        <div class="txt">The native OpenHarmony ArkTS SDK: XComponent surface binding, renderTick scheduling, and lifecycle management.</div>
+      </div>
+      <div class="crow">
+        <span class="no">05</span>
+        <div class="ttl"><a href="guide/rust.en.html">Rust embedded</a><span class="en">Rust Embedding</span></div>
+        <div class="txt">Use <code>Player</code> and <code>PresenterRuntime</code> from the <code>erika</code> crate to open media, subscribe to events, and receive decoded frames.</div>
+      </div>
+      <div class="crow">
+        <span class="no">06</span>
+        <div class="ttl"><a href="guide/c.en.html">C ABI embedded</a><span class="en">C ABI Embedding</span></div>
+        <div class="txt">Integrate via <code>erika.h</code>: use <code>ErikaPresenterHandle</code> for managed rendering and audio, or <code>ErikaHandle</code> for lightweight headless control.</div>
+      </div>
+      <div class="crow">
+        <span class="no">07</span>
+        <div class="ttl"><a href="guide/linux.en.html">Linux access</a><span class="en">Linux / WSLg</span></div>
+        <div class="txt">Experimental Linux support: FFmpeg 8, X11 / Wayland, PulseAudio, and Flutter integration from source.</div>
+      </div>
+      <div class="crow">
+        <span class="no">08</span>
+        <div class="ttl"><a href="guide/web.en.html">Web / WASM access</a><span class="en">Browser Playback</span></div>
+        <div class="txt">WebCodecs, FFmpeg WASM, libass, and Rust danmaku: local MKV, subtitle fonts, multiple tracks, chapters, and PNG screenshots.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="kernel">
+    <h2>Kernel design<span class="jp">核の仕組み</span><a class="anchor" href="#kernel">#</a></h2>
+    <p>The architecture and core subsystems, from demuxing and hardware decoding through presentation.</p>
+    <div class="cards">
+      <div class="crow">
+        <span class="no">09</span>
+        <div class="ttl"><a href="kernel/architecture.en.html">Architecture overview</a><span class="en">Architecture</span></div>
+        <div class="txt">Crate layers, modules, threading, and pipeline data flow.</div>
+      </div>
+      <div class="crow">
+        <span class="no">10</span>
+        <div class="ttl"><a href="kernel/decode.en.html">Hardware decoding</a><span class="en">Decoding</span></div>
+        <div class="txt">VideoToolbox, D3D11VA, MediaCodec, AVCodec, NVDEC / VA-API decoding, with software fallback.</div>
+      </div>
+      <div class="crow">
+        <span class="no">11</span>
+        <div class="ttl"><a href="kernel/zero-copy.en.html">Zero copy import</a><span class="en">Zero-copy Import</span></div>
+        <div class="txt">Import decoded frames directly as GPU textures: CVPixelBuffer, DirectX shared handles, AHardwareBuffer, and OHNativeBuffer.</div>
+      </div>
+      <div class="crow">
+        <span class="no">12</span>
+        <div class="ttl"><a href="kernel/render.en.html">rendering pipeline</a><span class="en">Render Pipeline</span></div>
+        <div class="txt">Color conversion, Dolby Vision, tone mapping, and subtitle and danmaku composition.</div>
+      </div>
+      <div class="crow">
+        <span class="no">13</span>
+        <div class="ttl"><a href="kernel/hdr.en.html">high dynamic range</a><span class="en">HDR / EDR</span></div>
+        <div class="txt">Apple EDR, HDR10 PQ, and extended-linear scRGB output negotiation and dynamic headroom adjustment.</div>
+      </div>
+      <div class="crow">
+        <span class="no">14</span>
+        <div class="ttl"><a href="kernel/upscale.en.html">Neural upscaling</a><span class="en">Neural Upscaling</span></div>
+        <div class="txt">ArtCNN anime upscaling accelerated by Metal SIMDGroup Matrix and wgpu compute.</div>
+      </div>
+      <div class="crow">
+        <span class="no">15</span>
+        <div class="ttl"><a href="kernel/subtitle-danmaku.en.html">Subtitles and danmaku</a><span class="en">Subtitle &amp; Danmaku</span></div>
+        <div class="txt">libass vector-effect subtitle rendering and the DFM+ collision-aware danmaku layout engine.</div>
+      </div>
+      <div class="crow">
+        <span class="no">16</span>
+        <div class="ttl"><a href="kernel/clock.en.html">Clock and scheduling</a><span class="en">Clock &amp; Scheduling</span></div>
+        <div class="txt">High-precision audio master clock, ring buffer, VSync-quantized frame scheduling, and frame dropping.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="project">
+    <h2>Projects and Builds<span class="jp">開発</span><a class="anchor" href="#project">#</a></h2>
+    <p>Engineering guides for engine developers and integrators: building, releasing, and contributing.</p>
+    <div class="cards">
+      <div class="crow">
+        <span class="no">17</span>
+        <div class="ttl"><a href="project/building.en.html">Build and dependencies</a><span class="en">Building</span></div>
+        <div class="txt">xtask manages C/C++ dependencies; cross-compilation targets and local smoke tests.</div>
+      </div>
+      <div class="crow">
+        <span class="no">18</span>
+        <div class="ttl"><a href="project/releasing.en.html">releases and products</a><span class="en">Releasing</span></div>
+        <div class="txt">CI pipelines, prebuilt archives for each platform, and version naming.</div>
+      </div>
+      <div class="crow">
+        <span class="no">19</span>
+        <div class="ttl"><a href="project/contributing.en.html">Contribution Guide</a><span class="en">Contributing</span></div>
+        <div class="txt">Code style, C ABI compatibility, platform backend conventions, and test requirements.</div>
+      </div>
+      <div class="crow">
+        <span class="no">20</span>
+        <div class="ttl"><a href="project/changelog.en.html">Change log</a><span class="en">Changelog</span></div>
+        <div class="txt">Version history and detailed release notes.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="reference">
+    <h2>Reference manual<span class="jp">リファレンス</span><a class="anchor" href="#reference">#</a></h2>
+    <p>The complete C ABI index; see <code>erika.h</code> for authoritative signatures and types.</p>
+    <div class="cards">
+      <div class="crow">
+        <span class="no">21</span>
+        <div class="ttl"><a href="reference/capi.en.html">C ABI Overview</a><span class="en">C ABI Overview</span></div>
+        <div class="txt">Status codes, thread-local errors, memory ownership, and basic structure definitions.</div>
+      </div>
+      <div class="crow">
+        <span class="no">22</span>
+        <div class="ttl"><a href="reference/capi-handle.en.html">ErikaHandle reference</a><span class="en">ErikaHandle Reference</span></div>
+        <div class="txt">Headless playback control, event polling, and shared utility functions.</div>
+      </div>
+      <div class="crow">
+        <span class="no">23</span>
+        <div class="ttl"><a href="reference/capi-presenter.en.html">ErikaPresenterHandle reference</a><span class="en">ErikaPresenterHandle Reference</span></div>
+        <div class="txt">Presenter exports for surface binding, render loops, audio control, danmaku, and capture.</div>
+      </div>
+      <div class="crow">
+        <span class="no">24</span>
+        <div class="ttl"><a href="reference/capi-json.en.html">JSON bridge</a><span class="en">JSON Bridge</span></div>
+        <div class="txt">The cross-language JSON bridge using <code>invoke_json</code> and <code>render_tick_json</code>.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Source <b>crates/erika_capi/include/erika.h</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+</main>
+
+</div>
+</body>
+</html>

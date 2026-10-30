@@ -14,6 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="c.html">中文</option><option value="c.en.html">English</option><option value="c.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="c.html">中文</a> · <a href="c.en.html">English</a> · <a href="c.ja.html">日本語</a></nav></noscript></div>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
     <ul>
@@ -86,8 +87,8 @@
   <section id="conventions">
     <h2>公共约定<span class="jp">共通規約</span><a class="anchor" href="#conventions">#</a></h2>
     <ul class="body">
-      <li><b>返回值。</b> 每个可能失败的调用返回 <code>ErikaStatus</code>。<code>ErikaStatus_Ok</code>（0）表示成功；<code>ErikaStatus_NoEvent</code>（5）表示事件队列暂空。非零且非 5 的状态码均表示错误。</li>
-      <li><b>错误消息。</b> 发生错误时，内核会将详细的可读错误信息保存在<b>线程局部变量</b>中。必须在调用失败的同一线程中立即调用 <code>erika_last_error_message()</code> 读取，并使用 <code>erika_string_free()</code> 释放返回的指针。</li>
+      <li><b>返回值。</b> 返回状态的接口使用 <code>ErikaStatus</code>：<code>ErikaStatus_Ok</code>（0）表示成功，<code>ErikaStatus_NoEvent</code>（5）表示事件队列暂空；其他状态表示错误。指针、数值或无返回值的接口按头文件检查各自约定。</li>
+      <li><b>错误消息。</b> 部分失败会设置线程局部错误，但并非所有失败都提供消息；该槽位可能为空或保留旧值。在失败调用的同一线程、后续调用之前，用 <code>erika_last_error_message()</code> 读取可用信息，并用 <code>erika_string_free()</code> 释放非空返回值。 例如，<code>erika_add_external_subtitle</code> 的 <code>out_track_id</code> 为 NULL 时直接返回 NullPointer，不会写入该槽位。</li>
       <li><b>所有权。</b> liberika 返回的 <code>char*</code> 堆内存归调用方所有。独立字符串使用 <code>erika_string_free()</code>；结构体（如 <code>ErikaTrackInfo</code>）内部包含的字符串使用配套的 <code>erika_track_info_free()</code>。</li>
       <li><b>参数借用。</b> <code>const char*</code> 参数仅在函数调用期间被借用，必须是以 NUL 结尾的 UTF-8 字符串。</li>
       <li><b>计数数组。</b> 列表查询采用 <code>(buf, capacity, &amp;len)</code> 模式：<code>len</code> 总是返回流中的实际总数量，而写入 <code>buf</code> 的数量最多为 <code>capacity</code>。遍历时应以 <code>min(len, capacity)</code> 为界，避免越界访问。</li>

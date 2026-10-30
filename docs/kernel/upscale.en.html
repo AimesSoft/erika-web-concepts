@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neural Super Score — liberika Developer Documentation</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
+  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="upscale.html">中文</option><option value="upscale.en.html">English</option><option value="upscale.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="upscale.html">中文</a> · <a href="upscale.en.html">English</a> · <a href="upscale.ja.html">日本語</a></nav></noscript></div>
+  <nav>
+    <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.en.html">Quick start</a></li>
+      <li><a href="../guide/flutter.en.html">Flutter integration</a></li>
+      <li><a href="../guide/swift.en.html">Swift integration</a></li>
+      <li><a href="../guide/openharmony.en.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.en.html">Rust integration</a></li>
+      <li><a href="../guide/c.en.html">C ABI integration</a></li>
+      <li><a href="../guide/linux.en.html">Linux integration</a></li>
+      <li><a href="../guide/web.en.html">Web / WASM integration</a></li>
+    </ul>
+    <h2><span class="no">2</span>Kernel design <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="architecture.en.html">Architecture overview</a></li>
+      <li><a href="decode.en.html">Hardware decoding</a></li>
+      <li><a href="zero-copy.en.html">Zero-copy import</a></li>
+      <li><a href="render.en.html">Rendering pipeline</a></li>
+      <li><a href="hdr.en.html">High dynamic range</a></li>
+      <li><a href="upscale.en.html" aria-current="page">Neural upscaling</a></li>
+      <li><a href="subtitle-danmaku.en.html">Subtitles and danmaku</a></li>
+      <li><a href="clock.en.html">Clock and scheduling</a></li>
+    </ul>
+    <h2><span class="no">3</span>Project <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.en.html">Building and dependencies</a></li>
+      <li><a href="../project/releasing.en.html">Releases and artifacts</a></li>
+      <li><a href="../project/contributing.en.html">Contributing</a></li>
+      <li><a href="../project/changelog.en.html">Changelog</a></li>
+    </ul>
+    <h2><span class="no">4</span>Reference <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.en.html">C ABI overview</a></li>
+      <li><a href="../reference/capi-handle.en.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.en.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
+  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>Neural upscaling</p>
+  <h1>Neural upscaling</h1>
+  <p class="kicker">Neural Upscaling</p>
+  <p class="lead">ArtCNN is a brightness 2× neural super-resolution model for anime content. It only handles the luminance channel and outputs it in <code>NeuralUpscale</code> pass is connected to the rendering pipeline. When the backend is unavailable, the native brightness samples are retained and reported explicitly. <code>Inactive</code> status.</p>
+
+  <ul class="meta-strip">
+    <li>model <b>ArtCNN C4</b></li>
+    <li>multiple <b>Brightness ×2</b></li>
+    <li>execute <b>Metal / wgpu</b></li>
+  </ul>
+
+  <section id="model">
+    <h2>Models and Patterns<span class="jp">モデル</span><a class="anchor" href="#model">#</a></h2>
+    <p>Model weights are embedded with crate (<code>crates/erika/assets/artcnn</code>), packaged during compilation, and do not access the file system during runtime. The weight is provided in two precisions: F16 and F32, corresponding to two request modes:</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>mode</th><th>value</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Off</td><td class="m">0</td><td>Turn off super resolution and use native brightness sampling.</td></tr>
+          <tr><td class="k">ArtCnnC4F16</td><td class="m">1</td><td>Half-precision weights for Metal simdgroup matrix paths.</td></tr>
+          <tr><td class="k">ArtCnnC4F32</td><td class="m">2</td><td>Single precision weights for wgpu compute paths.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="backends">
+    <h2>Execution path<span class="jp">実行経路</span><a class="anchor" href="#backends">#</a></h2>
+    <p>The two compute implementations share the same model description, and the weight format corresponds to the request mode:</p>
+    <ul class="body">
+      <li><b>Metal</b>(macOS / iOS / tvOS) — simdgroup matrix convolution. The weight is in <code>erika-upscaler-build</code> Thread background construction, after the construction is completed, use <code>SimdgroupMatrix</code> State access pipeline.</li>
+      <li><b>wgpu compute</b>(Android / HarmonyOS) — Blocked compute operator, F32 path.</li>
+    </ul>
+    <p>The remaining rendering backend (D3D11) does not have the ArtCNN executor, and requests to preserve native luminance samples when enabled,<code>active_backend</code> report <code>Inactive</code>, the host can see that the platform does not support upscaling.</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>backend status</th><th>meaning</th></tr></thead>
+        <tbody>
+          <tr><td class="m">Off</td><td>Not requested.</td></tr>
+          <tr><td class="m">Inactive</td><td>Requested but backend unavailable, native sampling retained.</td></tr>
+          <tr><td class="m">Building</td><td>The weight is being constructed and has not yet been connected to the pipeline.</td></tr>
+          <tr><td class="m">Scalar</td><td>Scalar execution path.</td></tr>
+          <tr><td class="m">SimdgroupMatrix</td><td>simdgroup matrix execution path.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="pipeline">
+    <h2>Access method<span class="jp">パイプライン</span><a class="anchor" href="#pipeline">#</a></h2>
+    <p>overachievement <code>NeuralUpscale</code> pass inserts the pass image, between import and sampling: the luma channel is amplified by the model by 2×, and the chroma channel is scaled normally. Subsequent tone mapping, synthesis and output transformations remain unchanged.</p>
+    <p>The encoding and GPU time consumption of each frame are recorded in <code>last_encode_micros</code> with <code>last_gpu_micros</code>. Execution failures will accumulate <code>fallback_count</code> And temporarily roll back to native sampling and try again in the next frame.</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Kernel</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="hdr.en.html"><span class="dir">Prev</span>high dynamic range</a>
+    <a class="nx" href="subtitle-danmaku.en.html"><span class="dir">Next</span>Subtitles and danmaku</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

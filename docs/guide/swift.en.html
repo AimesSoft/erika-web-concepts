@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Swift access — liberika developer documentation</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
+  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="swift.html">中文</option><option value="swift.en.html">English</option><option value="swift.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="swift.html">中文</a> · <a href="swift.en.html">English</a> · <a href="swift.ja.html">日本語</a></nav></noscript></div>
+  <nav>
+    <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="quickstart.en.html">Quick start</a></li>
+      <li><a href="flutter.en.html">Flutter integration</a></li>
+      <li><a href="swift.en.html" aria-current="page">Swift integration</a></li>
+      <li><a href="openharmony.en.html">OpenHarmony / OHPM</a></li>
+      <li><a href="rust.en.html">Rust integration</a></li>
+      <li><a href="c.en.html">C ABI integration</a></li>
+      <li><a href="linux.en.html">Linux integration</a></li>
+      <li><a href="web.en.html">Web / WASM integration</a></li>
+    </ul>
+    <h2><span class="no">2</span>Kernel design <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.en.html">Architecture overview</a></li>
+      <li><a href="../kernel/decode.en.html">Hardware decoding</a></li>
+      <li><a href="../kernel/zero-copy.en.html">Zero-copy import</a></li>
+      <li><a href="../kernel/render.en.html">Rendering pipeline</a></li>
+      <li><a href="../kernel/hdr.en.html">High dynamic range</a></li>
+      <li><a href="../kernel/upscale.en.html">Neural upscaling</a></li>
+      <li><a href="../kernel/subtitle-danmaku.en.html">Subtitles and danmaku</a></li>
+      <li><a href="../kernel/clock.en.html">Clock and scheduling</a></li>
+    </ul>
+    <h2><span class="no">3</span>Project <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.en.html">Building and dependencies</a></li>
+      <li><a href="../project/releasing.en.html">Releases and artifacts</a></li>
+      <li><a href="../project/contributing.en.html">Contributing</a></li>
+      <li><a href="../project/changelog.en.html">Changelog</a></li>
+    </ul>
+    <h2><span class="no">4</span>Reference <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.en.html">C ABI overview</a></li>
+      <li><a href="../reference/capi-handle.en.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.en.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
+  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Swift access</p>
+  <h1>Swift access</h1>
+  <p class="kicker">Swift &amp; Apple Platforms</p>
+  <p class="lead"><code>liberika-swift</code> Is the official SwiftPM library for the Apple platform (macOS 11+, iOS 13+, tvOS 13+). SDK provides <code>ErikaPlayerView</code> and for AppKit / UIKit <code>ErikaVideoView</code>, automatically hosts Metal layer binding and display frame clock scheduling.</p>
+
+  <ul class="meta-strip">
+    <li>module <b>import Erika</b></li>
+    <li>support <b>macOS 11+ / iOS 13+ / tvOS 13+</b></li>
+    <li>Ground floor <b>VideoToolbox · Metal · CoreAudio</b></li>
+  </ul>
+
+  <section id="install">
+    <h2>Installation and introduction<span class="jp">インストール</span><a class="anchor" href="#install">#</a></h2>
+    <p>Add Package dependency to Xcode project:</p>
+    <div class="code">
+      <p class="lbl">Xcode Package URL</p>
+<pre>https://github.com/AimesSoft/liberika-swift</pre>
+    </div>
+    <p>or in <code>Package.swift</code> Added to dependencies:</p>
+    <div class="code">
+      <p class="lbl">Package.swift</p>
+<pre><span class="k">dependencies</span>: [
+    .<span class="k">package</span>(url: <span class="s">"https://github.com/AimesSoft/liberika-swift"</span>, from: <span class="s">"0.3.0"</span>)
+]</pre>
+    </div>
+    <p>Import the module in your code:</p>
+    <div class="code">
+      <p class="lbl">Swift</p>
+<pre><span class="k">import</span> Erika</pre>
+    </div>
+    <p>SwiftPM will be automatically pulled <code>erika-swift-core-0.3.0.xcframework.zip</code> Precompiled core binary (covering macOS universal, iOS device/simulator, tvOS device/simulator), no need to manually configure C/C++ native dependencies.</p>
+  </section>
+
+  <section id="views">
+    <h2>View and thread life cycle<span class="jp">ビューConnection</span><a class="anchor" href="#views">#</a></h2>
+    <p>Two core lifecycle principles for using the liberika player:</p>
+    <ul class="body">
+      <li><b>Forcibly hold the player:</b> <code>ErikaPlayerView</code> with <code>ErikaVideoView</code> Yes <code>ErikaPlayer</code> adopt <code>weak</code> Weak reference. Host's <code>ObservableObject</code>、<code>@Observable</code> ViewModel or ViewController must be held with a strong reference <code>ErikaPlayer</code> Example.</li>
+      <li><b>The main thread runs:</b> <code>ErikaPlayer</code> is marked as <code>@MainActor</code>, all playback control and status queries are executed in the main thread, and the underlying C kernel handle is automatically guaranteed to be called serialized by SDK.</li>
+    </ul>
+
+    <div class="code">
+      <p class="lbl">SwiftUI access example</p>
+<pre><span class="k">import</span> SwiftUI
+<span class="k">import</span> Erika
+
+<span class="k">@MainActor</span>
+<span class="k">final class</span> VideoPlayerModel: ObservableObject {
+    <span class="k">let</span> player: ErikaPlayer
+
+    <span class="k">init</span>() {
+        <span class="c">/* 可通过 ErikaPlayer.Configuration 设定输出模式、EDR headroom 与超分 */</span>
+        <span class="k">do</span> {
+            <span class="k">self</span>.player = <span class="k">try</span> ErikaPlayer(configuration: .init(outputMode: .automatic))
+        } <span class="k">catch</span> {
+            fatalError(<span class="s">"无法创建播放器: \(error)"</span>)
+        }
+    }
+
+    <span class="k">func</span> startPlayback() {
+        <span class="k">do</span> {
+            <span class="c">/* 支持 URL 或本地路径，可传入自定义 HTTP 请求头 */</span>
+            <span class="k">try</span> player.open(
+                <span class="s">"https://example.com/stream.m3u8"</span>,
+                httpHeaders: [<span class="s">"User-Agent"</span>: <span class="s">"MyApp/1.0"</span>]
+            )
+            <span class="k">try</span> player.play()
+        } <span class="k">catch</span> {
+            print(<span class="s">"播放失败: \(error)"</span>)
+        }
+    }
+
+    <span class="k">func</span> pausePlayback() {
+        <span class="k">try?</span> player.pause()
+    }
+}
+
+<span class="k">struct</span> VideoScreen: View {
+    <span class="k">@StateObject private var</span> model = VideoPlayerModel()
+
+    <span class="k">var</span> body: some View {
+        ErikaPlayerView(player: model.player)
+            .aspectRatio(16 / 9, contentMode: .fit)
+            .onAppear {
+                model.startPlayback()
+            }
+            .onDisappear {
+                model.pausePlayback()
+            }
+    }
+}</pre>
+    </div>
+
+    <p>Pause when the page is temporarily left; called when the player is finally no longer in use <code>close()</code>. To play again after closing, you need to create a new player.
+    </p>
+    <p>In the UIKit / AppKit project, you can directly use <code>ErikaVideoView</code>：</p>
+    <div class="code">
+      <p class="lbl">UIKit / AppKit access</p>
+<pre><span class="k">let</span> videoView = ErikaVideoView()
+videoView.player = model.player
+videoView.onError = { error <span class="k">in</span>
+    print(<span class="s">"图层渲染错误: \(error)"</span>)
+}
+view.addSubview(videoView)</pre>
+    </div>
+  </section>
+
+  <section id="playback">
+    <h2>Playback control API<span class="jp">Regeneration Control</span><a class="anchor" href="#playback">#</a></h2>
+    <p><code>ErikaPlayer</code> Provide type-safe native methods:</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>method</th><th>signature</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="m">open</td><td class="k">open(_ source: String/URL, httpHeaders: [String: String], httpReadAheadBytes: UInt64, httpBackBufferBytes: UInt64)</td><td>Media detection and track analysis are completed simultaneously, and the status is set to <code>ready</code>。</td></tr>
+          <tr><td class="m">play</td><td class="k">play()</td><td>Start background hardware decoding and audio/video rendering.</td></tr>
+          <tr><td class="m">pause / stop</td><td class="k">pause() / stop()</td><td>Pause or stop playback.</td></tr>
+          <tr><td class="m">seek</td><td class="k">seek(to seconds: TimeInterval)</td><td>Jump to the specified time (seconds).</td></tr>
+          <tr><td class="m">setPlaybackRate</td><td class="k">setPlaybackRate(_ rate: Double)</td><td>Set double speed (such as <code>1.25</code>）。</td></tr>
+          <tr><td class="m">setVolume</td><td class="k">setVolume(_ volume: Double)</td><td>set volume (<code>0.0</code> ~ <code>1.0</code>）。</td></tr>
+          <tr><td class="m">close</td><td class="k">close()</td><td>Stop the background thread and close the playback session.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="events">
+    <h2>event polling<span class="jp">イベント processing</span><a class="anchor" href="#events">#</a></h2>
+    <p>Pass <code>pollEvent()</code> Consume the events currently accumulated by the player:</p>
+    <div class="code">
+      <p class="lbl">Event polling example</p>
+<pre><span class="k">func</span> drainEvents() {
+    <span class="k">while let</span> event = <span class="k">try?</span> player.pollEvent() {
+        <span class="k">switch</span> event.kind {
+        <span class="k">case</span> .stateChanged:
+            print(<span class="s">"播放状态更新: \(event.state)"</span>) <span class="c">/* .idle / .opening / .ready / .playing 等 */</span>
+        <span class="k">case</span> .durationChanged:
+            <span class="k">let</span> seconds = Double(event.durationMicros) / 1_000_000.0
+            print(<span class="s">"总时长: \(seconds) 秒"</span>)
+        <span class="k">case</span> .positionChanged:
+            <span class="k">let</span> seconds = Double(event.positionMicros) / 1_000_000.0
+            print(<span class="s">"当前进度: \(seconds) 秒"</span>)
+        <span class="k">case</span> .bufferingChanged:
+            print(<span class="s">"缓冲状态: \(event.buffering)"</span>)
+        <span class="k">case</span> .error:
+            print(<span class="s">"播放器错误: \(event.error ?? event.message ?? \"\")"</span>)
+        <span class="k">default</span>:
+            <span class="k">break</span>
+        }
+    }
+}</pre>
+    </div>
+  </section>
+
+  <section id="features">
+    <h2>Tracks, subtitles, danmaku and upscalings<span class="jp">Highly functional</span><a class="anchor" href="#features">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Functional category</th><th>Swift API</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="k">track management</td><td class="m">tracks() / selectAudioTrack(id:) / selectSubtitleTrack(id:)</td><td>Query track list (<code>[ErikaTrack]</code>) and press ID to select the audio track and subtitle track (transfer <code>nil</code> disabled).</td></tr>
+          <tr><td class="k">External subtitles</td><td class="m">addExternalSubtitle(_ uri:) / removeSubtitleTrack(id:) / setSubtitleScale(_ scale:)</td><td>Load external SRT/ASS subtitle files and adjust font size scaling.</td></tr>
+          <tr><td class="k">Danmaku system</td><td class="m">loadDanmaku(from:) / loadDanmaku(json:) / addDanmakuTrack(from:name:offset:) / danmakuTracks() / clearDanmaku()</td><td>Load Bilibili XML or JSON format danmaku, supporting multi-track overlay and timeline offset. JSON See the contract<a href="../kernel/subtitle-danmaku.en.html#json-schema">Specification</a>。</td></tr>
+          <tr><td class="k">Neural network upscaling</td><td class="m">setUpscaler(_ upscaler:)</td><td>Enable ArtCNN Anime 2× Super Score on Apple Silicon (<code>.artCNNC4F16</code> / <code>.artCNNC4F16DS</code>）。</td></tr>
+          <tr><td class="k">Video screenshot</td><td class="m">captureFrame(width:height:)</td><td>Grab the original RGBA frame pixel data of the specified size from the current rendering pipeline (<code>ErikaFrame</code>）。</td></tr>
+          <tr><td class="k">Performance diagnostics</td><td class="m">presenterStats() / outputStatus() / resourceStatus()</td><td>Real-time query of decoding and rendering FPS, number of dropped frames, Metal video memory usage and EDR headroom status.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="http-cache">
+    <h2>HTTP cache<a class="anchor" href="#http-cache">#</a></h2>
+    <p><code>httpReadAheadBytes</code> Determines the number of bytes to read forward, the default is 2 MiB;<code>httpBackBufferBytes</code> Determine how much played data to keep, the default is 16 MiB. Omit both or pass 0 to use the default value. The readahead default value can also be given by <code>ERIKA_HTTP_READAHEAD_BYTES</code> set up.</p>
+    <p>The fallback seek in the rollback cache can directly reuse the downloaded data. High bitrate videos require a larger budget: a video of 80 Mbit/s would require about 100 MB to retain for about 10 seconds. The cache is limited by bytes and does not represent a fixed number of playback seconds.</p>
+    <div class="code">
+      <p class="lbl">Swift</p>
+<pre>try player.open(
+    &quot;https://example.com/video.mp4&quot;,
+    httpReadAheadBytes: 8 * 1024 * 1024,
+    httpBackBufferBytes: 128 * 1024 * 1024
+)</pre>
+    </div>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Guide</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="flutter.en.html"><span class="dir">Prev</span>Flutter embedded</a>
+    <a class="nx" href="openharmony.en.html"><span class="dir">Next</span>OpenHarmony / OHPM</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

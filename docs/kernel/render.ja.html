@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>レンダリング パイプライン — liberika 開発者ドキュメント</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
+  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="render.html">中文</option><option value="render.en.html">English</option><option value="render.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="render.html">中文</a> · <a href="render.en.html">English</a> · <a href="render.ja.html">日本語</a></nav></noscript></div>
+  <nav>
+    <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.ja.html">クイックスタート</a></li>
+      <li><a href="../guide/flutter.ja.html">Flutter の組み込み</a></li>
+      <li><a href="../guide/swift.ja.html">Swift の導入</a></li>
+      <li><a href="../guide/openharmony.ja.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.ja.html">Rust の組み込み</a></li>
+      <li><a href="../guide/c.ja.html">C ABI の組み込み</a></li>
+      <li><a href="../guide/linux.ja.html">Linux の導入</a></li>
+      <li><a href="../guide/web.ja.html">Web / WASM の導入</a></li>
+    </ul>
+    <h2><span class="no">2</span>カーネル設計 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="architecture.ja.html">アーキテクチャ概要</a></li>
+      <li><a href="decode.ja.html">ハードウェアデコード</a></li>
+      <li><a href="zero-copy.ja.html">ゼロコピー取り込み</a></li>
+      <li><a href="render.ja.html" aria-current="page">レンダリングパイプライン</a></li>
+      <li><a href="hdr.ja.html">ハイダイナミックレンジ</a></li>
+      <li><a href="upscale.ja.html">ニューラル超解像</a></li>
+      <li><a href="subtitle-danmaku.ja.html">字幕と弾幕</a></li>
+      <li><a href="clock.ja.html">クロックとスケジューリング</a></li>
+    </ul>
+    <h2><span class="no">3</span>プロジェクト <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.ja.html">ビルドと依存関係</a></li>
+      <li><a href="../project/releasing.ja.html">リリースと成果物</a></li>
+      <li><a href="../project/contributing.ja.html">貢献ガイド</a></li>
+      <li><a href="../project/changelog.ja.html">変更履歴</a></li>
+    </ul>
+    <h2><span class="no">4</span>参考資料 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.ja.html">C ABI 概要</a></li>
+      <li><a href="../reference/capi-handle.ja.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.ja.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">機械翻訳です。正確な内容は中国語版をご参照ください。</p>
+  <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>レンダリングパイプライン</p>
+  <h1>レンダリングパイプライン</h1>
+  <p class="kicker">Render Pipeline</p>
+  <p class="lead">ビデオ、字幕、弾幕がサンプリングされ、カラー変換され、tone mapping ズームされ、画面上の同じ pass 画像、render pass に同時に合成されます。 pass 画像提供者 <code>pipeline::build_graph</code> ソースとデスティネーションのカラー状態に基づいて条件付きで構築されます。</p>
+
+  <ul class="meta-strip">
+    <li>pass型 <b>11</b> 親切</li>
+    <li>バックエンド <b>Metal / D3D11 / wgpu</b></li>
+    <li>ジオメトリ <b>aspect_fit中心</b></li>
+  </ul>
+
+  <section id="passes">
+    <h2>pass図<span class="jp">パスグラフ</span><a class="anchor" href="#passes">#</a></h2>
+    <p><code>RenderPassKind</code> pass の 11 種類がすべて定義されています。フレームをレンダリングするとき、<code>build_graph</code> インポート フレームから出力への変換は順番に結合され、条件を満たさない pass はスキップされます。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>pass</th><th>責任</th></tr></thead>
+        <tbody>
+          <tr><td class="m">ImportFrame</td><td>デコードされたフレームは、GPU テクスチャ (ゼロ コピーまたは CPU upload) としてインポートされます。</td></tr>
+          <tr><td class="m">NeuralUpscale</td><td>ArtCNN 輝度 2 倍の超解像度。バックエンドで有効かつサポートされている場合にのみ挿入されます。</td></tr>
+          <tr><td class="m">PlaneSampling</td><td>YCbCr 平面サンプリング、uv アップサンプリング、およびクロマ再構築。</td></tr>
+          <tr><td class="m">ChromaReconstruction</td><td>クロマプレーンの再構成。</td></tr>
+          <tr><td class="m">TransferDecode</td><td>伝達関数をデコードして、エンコードされた形式から線形光を復元します。</td></tr>
+          <tr><td class="m">GamutMap</td><td>色域マッピング。ソースとターゲットの原色が異なる場合に挿入します。</td></tr>
+          <tr><td class="m">ToneMap</td><td>tone mapping。ソースが HDR で、ピークがターゲットを約 1.05 倍超える場合に挿入されます。</td></tr>
+          <tr><td class="m">Scale</td><td>出力サイズに合わせて拡大縮小します。</td></tr>
+          <tr><td class="m">OverlayComposite</td><td>字幕レイヤー（内部カーネルoverlay）と弾幕の合成。</td></tr>
+          <tr><td class="m">Dither</td><td>出力ビット深度が減少した場合のジッター。</td></tr>
+          <tr><td class="m">OutputTransform</td><td>出力形式 (SDR/EDR/HDR10 PQ/scRGB) にエンコードします。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>2 つの条件付き挿入ルールは次のとおりです。 <code>SourceColorState</code> と <code>TargetColorState</code> 比較: tone map は、ソースが HDR で、ピークがターゲットを約 5% 超えている場合にのみ挿入され、色域マッピングは、ソースとターゲットの原色が異なる場合にのみ挿入されます。 SDR コンテンツは直接サンプリングされ、SDR ターゲット上で出力変換されます。</p>
+  </section>
+
+  <section id="backends">
+    <h2>バックエンドの実装<span class="jp">バックエンド</span><a class="anchor" href="#backends">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>バックエンド</th><th>プラットフォーム</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Metal</td><td class="m">macOS / iOS / tvOS</td><td>ネイティブ実装。 YCbCr サンプリング、色変換、tone mapping、overlay 合成。 ArtCNN は simdgroup matrix になります。</td></tr>
+          <tr><td class="k">Direct3D 11</td><td class="m">Windows</td><td>ネイティブ実装。 D3D11VA テクスチャ相互運用、HDR10 出力、overlay コンポジション。</td></tr>
+          <tr><td class="k">wgpu</td><td class="m">Android / HarmonyOS</td><td>Vulkan バックエンド、リカバリ パスが利用可能な GLES。 OHNativeWindowが贈るHarmonyOS。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>レンダリング バックエンドは、サーフェス アタッチメント方法に関係なく、presenter 構成によって決定されます。色の決定が統一される <code>pipeline</code> モジュールでは、3 つのバックエンドが同じ pass グラフ記述のセットを共有します。</p>
+  </section>
+
+  <section id="compositing">
+    <h2>構成と幾何学<span class="jp">合成</span><a class="anchor" href="#compositing">#</a></h2>
+    <p>字幕と弾幕 <code>OverlayComposite</code> passで合成しました。合成はビデオ ビューポート内で行われます。箇条書きと字幕は、ビデオの aspect-fit ジオメトリに従って、ビデオ コンテンツに対して相対的に配置されます。</p>
+    <p>動画コンテンツは以下から始まります <code>aspect_fit</code> 出力サーフェス内の中心にある letterbox 領域は、クリアなスクリーン カラー (現在バックエンドでは均一に黒) で塗りつぶされます。合成シーケンスはビデオ、字幕、弾幕です。</p>
+    <p>HDR コンテンツのレンダリング チェーンとスクリーンショット チェーンは、同じ pass 画像を共有します。スクリーンショットは、サーフェスと同じピクセル形式でオフスクリーン ターゲットにレンダリングされ、読み戻されるときに RGBA8 に変換されます (HDR 値は SDR 範囲にクランプされます)。スクリーンショットは、弾幕と debug HUD を除いて、ビデオと字幕のみを組み合わせています。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Kernel</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="zero-copy.ja.html"><span class="dir">Prev</span>ゼロコピーインポート</a>
+    <a class="nx" href="hdr.ja.html"><span class="dir">Next</span>ハイダイナミックレンジ</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

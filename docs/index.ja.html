@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>開発者向けドキュメント — liberika</title>
+<link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="docs.css">
+<script defer src="docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
+  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="index.html">中文</option><option value="index.en.html">English</option><option value="index.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="index.html">中文</a> · <a href="index.en.html">English</a> · <a href="index.ja.html">日本語</a></nav></noscript></div>
+  <nav>
+    <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="guide/quickstart.ja.html">クイックスタート</a></li>
+      <li><a href="guide/flutter.ja.html">Flutter の組み込み</a></li>
+      <li><a href="guide/swift.ja.html">Swift の導入</a></li>
+      <li><a href="guide/openharmony.ja.html">OpenHarmony / OHPM</a></li>
+      <li><a href="guide/rust.ja.html">Rust の組み込み</a></li>
+      <li><a href="guide/c.ja.html">C ABI の組み込み</a></li>
+      <li><a href="guide/linux.ja.html">Linux の導入</a></li>
+      <li><a href="guide/web.ja.html">Web / WASM の導入</a></li>
+    </ul>
+    <h2><span class="no">2</span>カーネル設計 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="kernel/architecture.ja.html">アーキテクチャ概要</a></li>
+      <li><a href="kernel/decode.ja.html">ハードウェアデコード</a></li>
+      <li><a href="kernel/zero-copy.ja.html">ゼロコピー取り込み</a></li>
+      <li><a href="kernel/render.ja.html">レンダリングパイプライン</a></li>
+      <li><a href="kernel/hdr.ja.html">ハイダイナミックレンジ</a></li>
+      <li><a href="kernel/upscale.ja.html">ニューラル超解像</a></li>
+      <li><a href="kernel/subtitle-danmaku.ja.html">字幕と弾幕</a></li>
+      <li><a href="kernel/clock.ja.html">クロックとスケジューリング</a></li>
+    </ul>
+    <h2><span class="no">3</span>プロジェクト <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="project/building.ja.html">ビルドと依存関係</a></li>
+      <li><a href="project/releasing.ja.html">リリースと成果物</a></li>
+      <li><a href="project/contributing.ja.html">貢献ガイド</a></li>
+      <li><a href="project/changelog.ja.html">変更履歴</a></li>
+    </ul>
+    <h2><span class="no">4</span>参考資料 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="reference/capi.ja.html">C ABI 概要</a></li>
+      <li><a href="reference/capi-handle.ja.html">ErikaHandle</a></li>
+      <li><a href="reference/capi-presenter.ja.html">ErikaPresenterHandle</a></li>
+      <li><a href="reference/capi-json.ja.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">機械翻訳です。正確な内容は中国語版をご参照ください。</p>
+  <p class="crumb"><a href="../index.html">ホームページ</a><span class="sep">/</span>docs</p>
+  <h1>開発者向けドキュメント</h1>
+  <p class="kicker">Developer Documentation</p>
+  <p class="lead">liberika は、クロスプラットフォームの音声・動画アプリケーション向けの組み込み再生エンジンです。このドキュメントは、liberika をアプリに組み込むチームとエンジン開発者を対象とし、<b>v0.3.0</b> を基準とします。プロジェクト名は liberika ですが、<code>erika</code> crate、<code>erika_*</code> C ABI、SDK のパッケージ名は互換性のため維持されています。</p>
+
+  <ul class="meta-strip">
+    <li>バージョン <b>0.3.0</b></li>
+    <li>C ABI エクスポート <b>108</b></li>
+    <li>Rust <b>1.92+</b></li>
+    <li>ライセンス <b>MPL-2.0</b></li>
+  </ul>
+
+  <section id="release030">
+    <h2>0.3.0 アップグレードのヒント<a class="anchor" href="#release030">#</a></h2>
+    <p class="note"><b>デフォルト動作の変更：</b>ネイティブと Web では字幕・弾幕のスーパーサンプリングが既定で有効です。ネイティブのソフトウェア動画デコードは既定で FFmpeg のマルチスレッドを使います。<code>ERIKA_VIDEO_DECODE_THREADS=1</code> を設定するとシングルスレッドに戻せます。</p>
+    <p><a href="guide/web.ja.html">Web / WASM バックエンド</a>、<a href="reference/capi-handle.ja.html#frame-export">独立したフレーム出力</a>、<a href="reference/capi-presenter.ja.html#diagnostics">診断スナップショット</a>、チャプター取得を追加しました。Flutter、SwiftPM、OHPM の 0.3.0 は公開済みです。変更の詳細は<a href="project/changelog.ja.html#v030">変更履歴</a>をご覧ください。</p>
+  </section>
+
+  <section id="guide">
+    <h2>導入ガイド<span class="jp">導入手引</span><a class="anchor" href="#guide">#</a></h2>
+    <p>liberika をアプリに組み込みます。まず<a href="guide/quickstart.ja.html">クイックスタート</a>を読み、環境と言語に合うガイドを選んでください。</p>
+    <div class="cards">
+      <div class="crow">
+        <span class="no">01</span>
+        <div class="ttl"><a href="guide/quickstart.ja.html">クイックスタート</a><span class="en">Quickstart</span></div>
+        <div class="txt">ビルド済み成果物、Flutter、SwiftPM、OpenHarmony OHPM、Rust、C ABI、Web / WASM の導入方法の概要。</div>
+      </div>
+      <div class="crow">
+        <span class="no">02</span>
+        <div class="ttl"><a href="guide/flutter.ja.html">Flutter埋め込み</a><span class="en">Flutter Embedding</span></div>
+        <div class="txt">公式プラグインは 7 プラットフォームに対応し、ネイティブ動画レイヤー、Flutter テクスチャ、互換ビューを提供します。Linux はソースからビルドします。</div>
+      </div>
+      <div class="crow">
+        <span class="no">03</span>
+        <div class="ttl"><a href="guide/swift.ja.html">Swift アクセス</a><span class="en">Swift &amp; Apple</span></div>
+        <div class="txt">macOS / iOS / tvOS 向け SwiftPM パッケージ liberika-swift：CAMetalLayer の接続、イベント取得、ライフサイクル管理。</div>
+      </div>
+      <div class="crow">
+        <span class="no">04</span>
+        <div class="ttl"><a href="guide/openharmony.ja.html">OpenHarmony / OHPM</a><span class="en">ArkTS SDK</span></div>
+        <div class="txt">OpenHarmony 向け ArkTS SDK：XComponent のサーフェス接続、renderTick によるフレーム制御、ライフサイクル管理。</div>
+      </div>
+      <div class="crow">
+        <span class="no">05</span>
+        <div class="ttl"><a href="guide/rust.ja.html">Rust埋め込み</a><span class="en">Rust Embedding</span></div>
+        <div class="txt"><code>erika</code> crate の <code>Player</code> と <code>PresenterRuntime</code> を使ったメディアのオープン、イベント購読、デコード済みフレームの取得。</div>
+      </div>
+      <div class="crow">
+        <span class="no">06</span>
+        <div class="ttl"><a href="guide/c.ja.html">C ABI 埋め込み</a><span class="en">C ABI Embedding</span></div>
+        <div class="txt"><code>erika.h</code> を使った接続。描画と音声を管理する <code>ErikaPresenterHandle</code>、軽量なヘッドレス制御の <code>ErikaHandle</code> を説明します。</div>
+      </div>
+      <div class="crow">
+        <span class="no">07</span>
+        <div class="ttl"><a href="guide/linux.ja.html">Linux アクセス</a><span class="en">Linux / WSLg</span></div>
+        <div class="txt">実験的な Linux 対応：FFmpeg 8、X11 / Wayland、PulseAudio、Flutter のソースビルド。</div>
+      </div>
+      <div class="crow">
+        <span class="no">08</span>
+        <div class="ttl"><a href="guide/web.ja.html">Web / WASM アクセス</a><span class="en">Browser Playback</span></div>
+        <div class="txt">WebCodecs、FFmpeg WASM、libass、Rust 弾幕：ローカル MKV、字幕フォント、複数トラック、チャプター、PNG キャプチャ。</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="kernel">
+    <h2>カーネル設計<span class="jp">核の仕組み</span><a class="anchor" href="#kernel">#</a></h2>
+    <p>メディアの分離、ハードウェアデコードから画面表示までの全体構成と主要サブシステムを説明します。</p>
+    <div class="cards">
+      <div class="crow">
+        <span class="no">09</span>
+        <div class="ttl"><a href="kernel/architecture.ja.html">アーキテクチャの概要</a><span class="en">Architecture</span></div>
+        <div class="txt">crate の階層、モジュール、スレッドモデル、パイプラインのデータフロー。</div>
+      </div>
+      <div class="crow">
+        <span class="no">10</span>
+        <div class="ttl"><a href="kernel/decode.ja.html">ハードウェアデコード</a><span class="en">Decoding</span></div>
+        <div class="txt">VideoToolbox、D3D11VA、MediaCodec、AVCodec、NVDEC / VA-API とソフトウェアフォールバック。</div>
+      </div>
+      <div class="crow">
+        <span class="no">11</span>
+        <div class="ttl"><a href="kernel/zero-copy.ja.html">ゼロコピーインポート</a><span class="en">Zero-copy Import</span></div>
+        <div class="txt">デコード済みフレームを GPU テクスチャに直接取り込む方式：CVPixelBuffer、DirectX 共有ハンドル、AHardwareBuffer、OHNativeBuffer。</div>
+      </div>
+      <div class="crow">
+        <span class="no">12</span>
+        <div class="ttl"><a href="kernel/render.ja.html">レンダリングパイプライン</a><span class="en">Render Pipeline</span></div>
+        <div class="txt">色変換、Dolby Vision、トーンマッピング、字幕と弾幕の合成。</div>
+      </div>
+      <div class="crow">
+        <span class="no">13</span>
+        <div class="ttl"><a href="kernel/hdr.ja.html">ハイダイナミックレンジ</a><span class="en">HDR / EDR</span></div>
+        <div class="txt">Apple EDR、HDR10 PQ、extended-linear scRGB の出力選択と動的ヘッドルーム調整。</div>
+      </div>
+      <div class="crow">
+        <span class="no">14</span>
+        <div class="ttl"><a href="kernel/upscale.ja.html">ニューラル超解像</a><span class="en">Neural Upscaling</span></div>
+        <div class="txt">ArtCNN によるアニメ向け超解像：Metal SIMDGroup Matrix と wgpu Compute による高速化。</div>
+      </div>
+      <div class="crow">
+        <span class="no">15</span>
+        <div class="ttl"><a href="kernel/subtitle-danmaku.ja.html">字幕と弾幕</a><span class="en">Subtitle &amp; Danmaku</span></div>
+        <div class="txt">libass のベクター字幕描画と、自社開発の衝突回避弾幕レイアウトエンジン DFM+。</div>
+      </div>
+      <div class="crow">
+        <span class="no">16</span>
+        <div class="ttl"><a href="kernel/clock.ja.html">クロックとスケジューリング</a><span class="en">Clock &amp; Scheduling</span></div>
+        <div class="txt">高精度な音声マスタークロック、リングバッファ、VSync に合わせたフレーム制御とドロップ制御。</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="project">
+    <h2>プロジェクトとビルド<span class="jp">開発</span><a class="anchor" href="#project">#</a></h2>
+    <p>エンジン開発者と高度なカスタマイズ向けの、ビルド・リリース・貢献ガイドです。</p>
+    <div class="cards">
+      <div class="crow">
+        <span class="no">17</span>
+        <div class="ttl"><a href="project/building.ja.html">ビルドと依存関係</a><span class="en">Building</span></div>
+        <div class="txt">xtask による C/C++ 依存関係の管理、クロスコンパイル対象、ローカルのスモークテスト。</div>
+      </div>
+      <div class="crow">
+        <span class="no">18</span>
+        <div class="ttl"><a href="project/releasing.ja.html">リリースと製品</a><span class="en">Releasing</span></div>
+        <div class="txt">CI パイプライン、各プラットフォームのビルド済みアーカイブ、バージョン命名。</div>
+      </div>
+      <div class="crow">
+        <span class="no">19</span>
+        <div class="ttl"><a href="project/contributing.ja.html">貢献ガイド</a><span class="en">Contributing</span></div>
+        <div class="txt">コードスタイル、C ABI の互換性、プラットフォーム実装の規約、テスト要件。</div>
+      </div>
+      <div class="crow">
+        <span class="no">20</span>
+        <div class="ttl"><a href="project/changelog.ja.html">変更ログ</a><span class="en">Changelog</span></div>
+        <div class="txt">各バージョンの履歴と詳細なリリース情報。</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="reference">
+    <h2>リファレンスマニュアル<span class="jp">リファレンス</span><a class="anchor" href="#reference">#</a></h2>
+    <p>C ABI の全関数の索引です。正確なシグネチャと型は <code>erika.h</code> を参照してください。</p>
+    <div class="cards">
+      <div class="crow">
+        <span class="no">21</span>
+        <div class="ttl"><a href="reference/capi.ja.html">C ABI 概要</a><span class="en">C ABI Overview</span></div>
+        <div class="txt">ステータスコード、スレッドローカルのエラー、メモリ所有権、基本構造体の定義。</div>
+      </div>
+      <div class="crow">
+        <span class="no">22</span>
+        <div class="ttl"><a href="reference/capi-handle.ja.html">ErikaHandleリファレンス</a><span class="en">ErikaHandle Reference</span></div>
+        <div class="txt">ヘッドレス再生制御、イベント取得、共通ユーティリティ。</div>
+      </div>
+      <div class="crow">
+        <span class="no">23</span>
+        <div class="ttl"><a href="reference/capi-presenter.ja.html">ErikaPresenterHandleリファレンス</a><span class="en">ErikaPresenterHandle Reference</span></div>
+        <div class="txt">サーフェス接続、描画ループ、音声制御、弾幕、キャプチャを行う Presenter 関数。</div>
+      </div>
+      <div class="crow">
+        <span class="no">24</span>
+        <div class="ttl"><a href="reference/capi-json.ja.html">JSON bridge</a><span class="en">JSON Bridge</span></div>
+        <div class="txt"><code>invoke_json</code> と <code>render_tick_json</code> による言語間 JSON ブリッジ。</div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Source <b>crates/erika_capi/include/erika.h</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+</main>
+
+</div>
+</body>
+</html>

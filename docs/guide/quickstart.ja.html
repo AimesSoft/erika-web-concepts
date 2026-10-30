@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>クイック スタート — liberika 開発者ドキュメント</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
+  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="quickstart.html">中文</option><option value="quickstart.en.html">English</option><option value="quickstart.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="quickstart.html">中文</a> · <a href="quickstart.en.html">English</a> · <a href="quickstart.ja.html">日本語</a></nav></noscript></div>
+  <nav>
+    <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="quickstart.ja.html" aria-current="page">クイックスタート</a></li>
+      <li><a href="flutter.ja.html">Flutter の組み込み</a></li>
+      <li><a href="swift.ja.html">Swift の導入</a></li>
+      <li><a href="openharmony.ja.html">OpenHarmony / OHPM</a></li>
+      <li><a href="rust.ja.html">Rust の組み込み</a></li>
+      <li><a href="c.ja.html">C ABI の組み込み</a></li>
+      <li><a href="linux.ja.html">Linux の導入</a></li>
+      <li><a href="web.ja.html">Web / WASM の導入</a></li>
+    </ul>
+    <h2><span class="no">2</span>カーネル設計 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.ja.html">アーキテクチャ概要</a></li>
+      <li><a href="../kernel/decode.ja.html">ハードウェアデコード</a></li>
+      <li><a href="../kernel/zero-copy.ja.html">ゼロコピー取り込み</a></li>
+      <li><a href="../kernel/render.ja.html">レンダリングパイプライン</a></li>
+      <li><a href="../kernel/hdr.ja.html">ハイダイナミックレンジ</a></li>
+      <li><a href="../kernel/upscale.ja.html">ニューラル超解像</a></li>
+      <li><a href="../kernel/subtitle-danmaku.ja.html">字幕と弾幕</a></li>
+      <li><a href="../kernel/clock.ja.html">クロックとスケジューリング</a></li>
+    </ul>
+    <h2><span class="no">3</span>プロジェクト <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.ja.html">ビルドと依存関係</a></li>
+      <li><a href="../project/releasing.ja.html">リリースと成果物</a></li>
+      <li><a href="../project/contributing.ja.html">貢献ガイド</a></li>
+      <li><a href="../project/changelog.ja.html">変更履歴</a></li>
+    </ul>
+    <h2><span class="no">4</span>参考資料 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.ja.html">C ABI 概要</a></li>
+      <li><a href="../reference/capi-handle.ja.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.ja.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">機械翻訳です。正確な内容は中国語版をご参照ください。</p>
+  <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>クイックスタート</p>
+  <h1>クイックスタート</h1>
+  <p class="kicker">Quickstart</p>
+  <p class="lead">liberika は、複数のテクノロジー スタックへのアクセス方法を提供します: Flutter プラグイン <code>erika_flutter</code>、SwiftPMパッケージ <code>liberika-swift</code>、OpenHarmony ArkTS ネイティブ パッケージ <code>erika</code>、Rust ネイティブ crate 標準 C ABI 動的/静的ライブラリ、および独立した Web / WASM ブラウザー バックエンド。</p>
+
+  <ul class="meta-strip">
+    <li>プリコンパイル済み <b>6つの主要なプラットフォーム</b></li>
+    <li>ソースコード <b>Rust 1.92+</b></li>
+    <li>ネイティブの依存関係 <b>静的カプセル化</b></li>
+  </ul>
+
+  <section id="prebuilt">
+    <h2>プリコンパイルされたバイナリ製品<span class="jp">プリビルト</span><a class="anchor" href="#prebuilt">#</a></h2>
+    <p>GitHub Releases（<code>github.com/AimesSoft/liberika/releases</code>) は、すべての主要なプラットフォーム向けに自己完結型のプリコンパイル済みアーカイブを提供します。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>製品アーカイブ</th><th>コンテンツが含まれています</th><th>サポートアーキテクチャ</th></tr></thead>
+        <tbody>
+          <tr><td class="m">erika-swift-core-0.3.0.xcframework.zip</td><td>Apple XCFramework コア ランタイム (macOS / iOS / tvOS)</td><td>arm64 / x86_64</td></tr>
+          <tr><td class="m">erika-capi-macos-universal.zip</td><td>liberika_capi.dylib / .a</td><td>arm64 / x86_64</td></tr>
+          <tr><td class="m">erika-capi-windows-x64.zip</td><td>erika_capi.dll / .lib</td><td>x86_64</td></tr>
+          <tr><td class="m">erika-capi-android.zip</td><td>4 つの ABI 向け共有ライブラリ</td><td>arm64-v8a / armeabi-v7a / x86_64 / x86</td></tr>
+          <tr><td class="m">erika-capi-openharmony-arm64.zip</td><td>liberika_capi.so + C ABI ヘッダー ファイル</td><td>arm64</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="flutter">
+    <h2>Flutter アクセス<span class="jp">Flutter</span><a class="anchor" href="#flutter">#</a></h2>
+    <div class="code">
+      <p class="lbl">pubspec.yaml</p>
+<pre>dependencies:
+  erika_flutter: ^0.3.0</pre>
+    </div>
+    <div class="code">
+      <p class="lbl">lib/main.dart</p>
+<pre><span class="k">final</span> player = ErikaPlayer();
+<span class="k">await</span> player.open(<span class="s">'/path/to/video.mp4'</span>);
+<span class="k">await</span> player.play();</pre>
+    </div>
+    <p>このプラグインは、macOS / iOS / tvOS / Windows / Android / OpenHarmony をカバーし、実験的な Linux サポートを追加します。使い方は同梱されています <a href="flutter.ja.html">Flutter 埋め込みガイド</a>、Linux の依存関係とコンパイル手順は、 <a href="linux.ja.html">Linux アクセス</a>。</p>
+  </section>
+
+  <section id="swift">
+    <h2>Swift / Apple ネイティブ アクセス<span class="jp">Swift</span><a class="anchor" href="#swift">#</a></h2>
+    <p>SwiftPM 依存関係を Xcode プロジェクトに追加 <code>https://github.com/AimesSoft/liberika-swift</code>、Metal レンダリングとシステム ハードウェアデコードを通じてすぐに始められます。</p>
+    <div class="code">
+      <p class="lbl">Swiftの例</p>
+<pre><span class="k">import</span> Erika
+
+<span class="k">let</span> player = <span class="k">try</span> ErikaPlayer()
+<span class="k">try</span> player.open(<span class="s">"https://example.com/video.mp4"</span>)
+<span class="k">try</span> player.play()</pre>
+    </div>
+    <p>ネイティブビュー <code>ErikaPlayerView</code> ライフサイクルの詳細を確認する <a href="swift.ja.html">Swift 導入ガイド</a>。</p>
+  </section>
+
+  <section id="ohpm">
+    <h2>OpenHarmony / ArkTS<span class="jp">OpenHarmony</span><a class="anchor" href="#ohpm">#</a></h2>
+    <p>OHPM を介してネイティブ ArkTS パッケージをインストールし、 <code>XComponent</code> サーフェス駆動の再生:</p>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>ohpm install erika</pre>
+    </div>
+    <p>ArkTS ページのライフサイクルとフレーム スケジュールの詳細については、を参照してください。 <a href="openharmony.ja.html">OpenHarmony 導入ガイド</a>。</p>
+  </section>
+
+  <section id="rust">
+    <h2>Rust アクセス<span class="jp">Rust</span><a class="anchor" href="#rust">#</a></h2>
+    <div class="code">
+      <p class="lbl">Cargo.toml</p>
+<pre>[dependencies]
+erika = { git = <span class="s">"https://github.com/AimesSoft/liberika"</span>, tag = <span class="s">"v0.3.0"</span> }</pre>
+    </div>
+    <div class="code">
+      <p class="lbl">src/main.rs</p>
+<pre><span class="k">use</span> erika::{Player, PlayerConfig, MediaRequest};
+
+<span class="k">let</span> player = Player::new(PlayerConfig::default());
+player.open(MediaRequest::new(<span class="s">"/path/to/video.mp4"</span>))?;
+player.play()?;</pre>
+    </div>
+    <p>完全な API とチャンネル購読については、次を参照してください。 <a href="rust.ja.html">Rust埋め込み</a>。</p>
+  </section>
+
+  <section id="c">
+    <h2>C / C++ ABI アクセス<span class="jp">C ABI</span><a class="anchor" href="#c">#</a></h2>
+    <p>パス <code>erika.h</code> プリコンパイルあり <code>liberika_capi</code> アクセスします。カーネル管理のレンダリングとオーディオを使用することをお勧めします。 <code>ErikaPresenterHandle</code>：</p>
+    <div class="code">
+      <p class="lbl">main.c</p>
+<pre><span class="k">#include</span> <span class="s">"erika.h"</span>
+
+ErikaPresenterHandle *p = erika_presenter_create();
+erika_presenter_attach_metal_layer(p, (uint64_t)layer, w, h, scale);
+erika_presenter_open(p, <span class="s">"https://example.com/video.mp4"</span>);
+erika_presenter_play(p);
+
+<span class="c">/* 在显示时钟回调中每帧驱动 */</span>
+ErikaPresenterStats stats;
+erika_presenter_render_tick(p, host_time, &amp;stats);</pre>
+    </div>
+    <p>完全仕様かつヘッドレス <code>ErikaHandle</code> 比較のために参照してください <a href="c.ja.html">C ABI 埋め込み</a>。</p>
+  </section>
+
+  <section id="platforms">
+    <h2>プラットフォームマトリックス<span class="jp">環境</span><a class="anchor" href="#platforms">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>プラットフォーム</th><th>最小バージョン</th><th>ハードウェアデコード</th><th>レンダリングパイプライン</th><th>オーディオ出力</th><th>サポート状況</th></tr></thead>
+        <tbody>
+          <tr><td class="p">macOS</td><td class="m">macOS 11</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">CoreAudio</td><td class="st ok">正式にサポートされています</td></tr>
+          <tr><td class="p">iOS</td><td class="m">iOS 13</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">AudioQueue</td><td class="st ok">正式にサポートされています</td></tr>
+          <tr><td class="p">tvOS</td><td class="m">tvOS 13</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">AudioQueue</td><td class="st ok">正式にサポートされています</td></tr>
+          <tr><td class="p">Windows</td><td class="m">Windows 10</td><td class="m">D3D11VA</td><td class="m">Direct3D 11</td><td class="m">WASAPI</td><td class="st ok">正式にサポートされています</td></tr>
+          <tr><td class="p">Android</td><td class="m">Android 8.0</td><td class="m">MediaCodec</td><td class="m">wgpu (Vulkan / GLES)</td><td class="m">AAudio</td><td class="st ok">正式にサポートされています</td></tr>
+          <tr><td class="p">OpenHarmony</td><td class="m">API 18</td><td class="m">AVCodec</td><td class="m">wgpu (Vulkan)</td><td class="m">OHAudio</td><td class="st ok">正式にサポートされています</td></tr>
+          <tr><td class="p">Linux</td><td class="m">FFmpeg 8.x</td><td class="m">NVDEC / VA-API</td><td class="m">wgpu (Vulkan / EGL)</td><td class="m">PulseAudio / pipewire-pulse</td><td class="st wait">実験的・ソースコードビルド</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="web">
+    <h2>Web / WASM<a class="anchor" href="#web">#</a></h2>
+    <p>ダウンロード <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/liberika-web-0.3.0.zip">liberika-web-0.3.0.zip</a>、完全な解凍後、HTTPS または localhost を通じてデモ ページにアクセスします。 JavaScriptを使用する <code>Player.create({ canvas })</code> ローカルの MKV、ASS フォント、弾幕、マルチトラック、チャプター、スクリーンショットにアクセスし、サポートします。対応コーデックはブラウザーの WebCodecs 実装によって決まり、現在の出力は SDR です。詳細については参照してください <a href="web.ja.html">Web / WASM ガイド</a>。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Guide</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="../index.ja.html"><span class="dir">Prev</span>ドキュメントディレクトリ</a>
+    <a class="nx" href="flutter.ja.html"><span class="dir">Next</span>Flutter埋め込み</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

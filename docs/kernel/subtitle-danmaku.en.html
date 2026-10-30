@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Subtitles and danmaku — liberika Developer Documentation</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
+  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="subtitle-danmaku.html">中文</option><option value="subtitle-danmaku.en.html">English</option><option value="subtitle-danmaku.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="subtitle-danmaku.html">中文</a> · <a href="subtitle-danmaku.en.html">English</a> · <a href="subtitle-danmaku.ja.html">日本語</a></nav></noscript></div>
+  <nav>
+    <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.en.html">Quick start</a></li>
+      <li><a href="../guide/flutter.en.html">Flutter integration</a></li>
+      <li><a href="../guide/swift.en.html">Swift integration</a></li>
+      <li><a href="../guide/openharmony.en.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.en.html">Rust integration</a></li>
+      <li><a href="../guide/c.en.html">C ABI integration</a></li>
+      <li><a href="../guide/linux.en.html">Linux integration</a></li>
+      <li><a href="../guide/web.en.html">Web / WASM integration</a></li>
+    </ul>
+    <h2><span class="no">2</span>Kernel design <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="architecture.en.html">Architecture overview</a></li>
+      <li><a href="decode.en.html">Hardware decoding</a></li>
+      <li><a href="zero-copy.en.html">Zero-copy import</a></li>
+      <li><a href="render.en.html">Rendering pipeline</a></li>
+      <li><a href="hdr.en.html">High dynamic range</a></li>
+      <li><a href="upscale.en.html">Neural upscaling</a></li>
+      <li><a href="subtitle-danmaku.en.html" aria-current="page">Subtitles and danmaku</a></li>
+      <li><a href="clock.en.html">Clock and scheduling</a></li>
+    </ul>
+    <h2><span class="no">3</span>Project <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.en.html">Building and dependencies</a></li>
+      <li><a href="../project/releasing.en.html">Releases and artifacts</a></li>
+      <li><a href="../project/contributing.en.html">Contributing</a></li>
+      <li><a href="../project/changelog.en.html">Changelog</a></li>
+    </ul>
+    <h2><span class="no">4</span>Reference <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.en.html">C ABI overview</a></li>
+      <li><a href="../reference/capi-handle.en.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.en.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
+  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>Subtitles and danmaku</p>
+  <h1>Subtitles and danmaku</h1>
+  <p class="kicker">Subtitle &amp; Danmaku</p>
+  <p class="lead">The subtitle track supports SRT / WebVTT / ASS, rendered by libass; the danmaku supports two inputs: Bilibili XML and JSON, using DFM+ collision avoidance layout, and is drawn on GPU by glyph atlas. Both are framed with video in the render pipeline's composition pass.</p>
+
+  <ul class="meta-strip">
+    <li>subtitle rendering <b>libass</b></li>
+    <li>Danmaku layout <b>DFM+</b></li>
+    <li>draw <b>glyph atlas</b></li>
+  </ul>
+
+  <section id="subtitle">
+    <h2>subtitles<span class="jp">subtitles</span><a class="anchor" href="#subtitle">#</a></h2>
+    <p>Subtitle tracks are divided into two sources: embedded and plug-in (<code>ErikaTrackSource</code>). External subtitles <code>add_external_subtitle</code> Add, return track id; subtitle track id is -1 to disable subtitles. External text subtitles come with character set detection and transcoding, covering GBK, Big5, Shift_JIS, UTF-16, UTF-8 pass-through, and low confidence or binary input will fall back conservatively.</p>
+    <p>Rendering unification is done by libass, the embedded Droid Sans Fallback is registered as an in-memory font on all platforms, and target platforms without a system font provider use this family by default.</p>
+    <h3>style override</h3>
+    <p>The host can override subtitle styles as a whole. Coverage granularity is controlled by bits,<code>ErikaSubtitleStyle.override_mask</code> bit flags:</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>logo</th><th>Bit</th><th>Override</th></tr></thead>
+        <tbody>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_FONT_SIZE_FIELDS</td><td class="m">2</td><td>Font size</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_FONT_NAME</td><td class="m">3</td><td>Font families and font files</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_COLORS</td><td class="m">4</td><td>Main color and stroke color</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_ATTRIBUTES</td><td class="m">5</td><td>Bold, italics, underline, strikethrough</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_BORDER</td><td class="m">6</td><td>Border style and width</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_ALIGNMENT</td><td class="m">7</td><td>Align</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_MARGINS</td><td class="m">8</td><td>margin</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_BLUR</td><td class="m">11</td><td>blurry</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><code>ERIKA_SUBTITLE_OVERRIDE_ALL</code> It is a combination of the above. Container ASS scripts retain their own fonts unless the host forces substitution via the font name override bit.</p>
+    <h3>Memory font</h3>
+    <p>0.1.5 introduces memory font registry. The host can register font data (without writing to disk), query the faces of the font, select an ordered fallback set, replace font data and clear the registry. The renderer rebuilds the cache according to the selected generation of the font: fonts in the selected collection will take effect on the active subtitle track immediately after replacement; only registered but unselected fonts will not trigger renderer reconstruction.</p>
+  </section>
+
+  <section id="danmaku">
+    <h2>Danmaku<span class="jp">curtain</span><a class="anchor" href="#danmaku">#</a></h2>
+    <p>The danmaku input is Bilibili XML (file or URL) and JSON (inline string). Two loading paths:</p>
+    <ul class="body">
+      <li><code>load_danmaku_file</code> / <code>load_danmaku_json</code> — Replace all danmaku with an anonymous track.</li>
+      <li><code>add_danmaku_track_file</code> / <code>add_danmaku_track_json</code> — Create a named multi-track list, each track can be started, stopped and offset independently.</li>
+    </ul>
+    <p>Orbital level <code>offset_micros</code> Offset the timeline of a single track, global offset applies to all tracks. Layout in <code>erika-danmaku</code> Generated in the thread, plan is gated with generation and media time to keep synchronized with the video.</p>
+    <h3>DFM+ layout</h3>
+    <p>The danmaku layout is completed by the DFM+ collision avoidance engine: the three modes of scrolling, top and bottom have respective track allocation, density restrictions and coverage strategies. Draw glyph atlas, the glyphs are rasterized into atlas at once, and then drawn frame by frame with instanced vertices.</p>
+    <p>Layout parameters <code>ErikaDanmakuConfig</code> Control:</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Field</th><th>meaning</th></tr></thead>
+        <tbody>
+          <tr><td class="m">font_size</td><td>The logical font size of the danmaku is consistent with the default danmaku font NipaPlay, and is converted from scale to glyph pixels on the surface.</td></tr>
+          <tr><td class="m">opacity / outline_width / shadow_*</td><td>Transparency, stroke width, shadow offset and style.</td></tr>
+          <tr><td class="m">display_area</td><td>The proportion of the display area that the danmaku can occupy.</td></tr>
+          <tr><td class="m">scroll_duration_seconds / scroll_speed_factor</td><td>Scroll duration and speed coefficient.</td></tr>
+          <tr><td class="m">merge_duplicates</td><td>Repeat the danmaku merge.</td></tr>
+          <tr><td class="m">allow_stacking / allow_scroll_overwrite</td><td>Co-track stacking and rolling coverage strategies.</td></tr>
+          <tr><td class="m">max_quantity / max_lines_per_mode</td><td>The total amount of danmaku and the maximum number of lines in a single mode.</td></tr>
+          <tr><td class="m">block_top / block_bottom / block_scroll</td><td>Block comments by mode.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Shield Ci Jing <code>set_danmaku_block_words_json</code> Provided, JSON array format, matching danmaku text one by one.</p>
+
+    <h3 id="json-schema">Danmaku JSON Contract Specifications</h3>
+    <p><code>load_danmaku_json</code> with <code>add_danmaku_track_json</code> Accepts inline JSON. The input root node supports two types of structures:</p>
+    <ul class="body">
+      <li><b>Item array:</b> <code>[ { ... }, { ... } ]</code></li>
+      <li><b>Packaging object:</b> contains <code>comments</code>、<code>danmaku</code> or <code>items</code> Array of objects, for example <code>{ "comments": [ ... ] }</code>. Also compatible with JSON Lines (JSONL) split by rows.</li>
+    </ul>
+
+    <p>The supported fields of each danmaku item are as follows (compatible aliases are in brackets):</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Field name</th><th>Type</th><th>Default value</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="m">content<br><span class="en">(text, c)</span></td><td class="k">String</td><td class="m">—</td><td>Danmaku text. Entries that are missing or contain only whitespace characters are automatically skipped.</td></tr>
+          <tr><td class="m">time<br><span class="en">(t)</span></td><td class="k">Number / String</td><td class="m">0.0</td><td>Danmaku presentation time (seconds), supports floating point seconds (such as <code>12.45</code>）。</td></tr>
+          <tr><td class="m">type<br><span class="en">(mode, y)</span></td><td class="k">String / Number</td><td class="m">"scroll"</td><td>Danmaku type:<code>scroll</code> / <code>1</code>(Scroll),<code>bottom</code> / <code>4</code>(bottom fixed),<code>top</code> / <code>5</code>(top fixed),<code>reverse</code> / <code>6</code>(reverse scrolling),<code>special</code> / <code>7</code>(Advanced special, does not enter layout rendering after current parsing). Numeric fields can also be used <code>type_code</code> / <code>mode_code</code>。</td></tr>
+          <tr><td class="m">color<br><span class="en">(r)</span></td><td class="k">Number / String</td><td class="m">white</td><td>Danmaku color: supports decimal RGB integer (such as <code>16777215</code>), complete <code>#RRGGBB</code> Hexadecimal string (such as <code>"#FFFFFF"</code>) or CSS <code>rgb(r,g,b)</code>. Note: should not be used <code>#FFF</code> and other 3-digit abbreviations (which will be directly parsed into <code>0x000FFF</code>）。</td></tr>
+          <tr><td class="m">font_size<br><span class="en">(fontSize, size, s)</span></td><td class="k">Number / String</td><td class="m">25.0</td><td>Source reference font size (point). The final rendered font size will also be scaled relative to the global configuration and surface scale.</td></tr>
+          <tr><td class="m">opacity<br><span class="en">(alpha, a)</span></td><td class="k">Number / String</td><td class="m">1.0</td><td>custom opacity (<code>0.0</code> ~ <code>1.0</code>）。</td></tr>
+          <tr><td class="m">is_me<br><span class="en">(isMe, self, mine)</span></td><td class="k">Boolean / Number</td><td class="m">false</td><td>Whether it is a spontaneous danmaku for the current user (with layout priority to avoid being filtered by the anti-stack policy).</td></tr>
+          <tr><td class="m">id</td><td class="k">u64 / String</td><td class="m">sequential allocation</td><td>Business ID. support <code>u64</code> an unsigned integer or decimal string in the range;<code>0</code> Treated as not provided.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Analysis and behavioral convention:</p>
+    <ul class="body">
+      <li><b><code>id</code> Can be omitted:</b> When omitted, 0, illegal, or out of bounds, liberika is assigned numbers according to their natural position in the entire input.</li>
+      <li><b>precise <code>u64</code> Analysis:</b> support <code>0</code> Arrive <code>18446744073709551615</code>（<code>u64::MAX</code>), unsigned integers or decimal strings within the range will not undergo floating point conversion during parsing to prevent JS/JSON double-precision floating-point precision truncation.</li>
+      <li><b>Business ID is decoupled from layout identity:</b> Business ID allows duplication or cross-origin conflicts when merging multiple tracks. caller<b>Should not be spliced track ID</b>, also<b>There is no need to synthesize special ID for typesetting uniqueness</b>。</li>
+      <li><b>Cross-sliding window continuity guarantees:</b> Danmaku sessions independently assign internal layout identities to the current content version after multi-track merging. In the same continuous session, the continuous time sliding window will strictly inherit the historical admission and orbit allocation decisions, and the external commitment<b>"The danmaku will not appear or change tracks halfway after the sliding window is refreshed"</b>(Except for viewport size changes, timeline content changes, or layout configuration adjustments).</li>
+      <li><b>Fault tolerance mechanism:</b> If the root node format is incorrect, a failure will be returned directly; if a single item text is missing or blank, it will be skipped without interrupting the entire batch parsing; illegal optional fields will fall back to default values; unknown business fields (such as <code>cid</code>、<code>danmakuId</code>) is safely ignored.</li>
+    </ul>
+
+    <div class="code">
+      <p class="lbl">Standard danmaku JSON example</p>
+<pre>[
+  { <span class="s">"time"</span>: 1.5, <span class="s">"content"</span>: <span class="s">"前方高能预警"</span>, <span class="s">"type"</span>: <span class="s">"scroll"</span>, <span class="s">"color"</span>: <span class="s">"#FF0000"</span> },
+  { <span class="s">"t"</span>: 2.0, <span class="s">"c"</span>: <span class="s">"名场面打卡"</span>, <span class="s">"mode"</span>: 5, <span class="s">"color"</span>: 16777215, <span class="s">"id"</span>: <span class="s">"9007199254740993"</span> },
+  { <span class="s">"time"</span>: 4.8, <span class="s">"content"</span>: <span class="s">"弹幕合影"</span>, <span class="s">"is_me"</span>: <span class="k">true</span>, <span class="s">"opacity"</span>: 0.9 }
+]</pre>
+    </div>
+  </section>
+
+  <section id="supersampling">
+    <h2>Supersampling default · 0.3.0<a class="anchor" href="#supersampling">#</a></h2>
+    <p>Both native and Web backend subtitles and danmaku supersampling are turned on by default, which improves font clarity and maintains the logical display size without increasing video resolution. Both are configured independently; Web is available <code>configureSubtitles({ supersampling: false })</code> and <code>configureDanmaku({ supersampling: false })</code> Close respectively.</p>
+    <p>Pause jump, long subtitle span seek and pause track cutting will recalculate the current subtitle. System font fallback controls memory via zero-copy overwrite checking and a bounded LRU cache, preserving valid glyphs.</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Kernel</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="upscale.en.html"><span class="dir">Prev</span>Neural upscaling</a>
+    <a class="nx" href="clock.en.html"><span class="dir">Next</span>Clock and scheduling</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

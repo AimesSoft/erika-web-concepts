@@ -23,14 +23,14 @@ app.initClipboard = function initClipboard(root = document) {
       if (!code) return;
       try {
         await copyText(code);
-        button.innerHTML = `${icon('check')}<span>已复制</span>`;
+        button.innerHTML = `${icon('check')}<span>${app.ui.copied}</span>`;
         button.classList.add('copied');
         window.setTimeout(() => {
-          button.innerHTML = `${icon('copy')}<span>复制</span>`;
+          button.innerHTML = `${icon('copy')}<span>${app.ui.copy}</span>`;
           button.classList.remove('copied');
         }, 1600);
       } catch {
-        button.querySelector('span').textContent = '复制失败';
+        button.querySelector('span').textContent = app.ui.copyFailed;
       }
     });
   });

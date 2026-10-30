@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Swift アクセス — liberika 開発者ドキュメント</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
+  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="swift.html">中文</option><option value="swift.en.html">English</option><option value="swift.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="swift.html">中文</a> · <a href="swift.en.html">English</a> · <a href="swift.ja.html">日本語</a></nav></noscript></div>
+  <nav>
+    <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="quickstart.ja.html">クイックスタート</a></li>
+      <li><a href="flutter.ja.html">Flutter の組み込み</a></li>
+      <li><a href="swift.ja.html" aria-current="page">Swift の導入</a></li>
+      <li><a href="openharmony.ja.html">OpenHarmony / OHPM</a></li>
+      <li><a href="rust.ja.html">Rust の組み込み</a></li>
+      <li><a href="c.ja.html">C ABI の組み込み</a></li>
+      <li><a href="linux.ja.html">Linux の導入</a></li>
+      <li><a href="web.ja.html">Web / WASM の導入</a></li>
+    </ul>
+    <h2><span class="no">2</span>カーネル設計 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.ja.html">アーキテクチャ概要</a></li>
+      <li><a href="../kernel/decode.ja.html">ハードウェアデコード</a></li>
+      <li><a href="../kernel/zero-copy.ja.html">ゼロコピー取り込み</a></li>
+      <li><a href="../kernel/render.ja.html">レンダリングパイプライン</a></li>
+      <li><a href="../kernel/hdr.ja.html">ハイダイナミックレンジ</a></li>
+      <li><a href="../kernel/upscale.ja.html">ニューラル超解像</a></li>
+      <li><a href="../kernel/subtitle-danmaku.ja.html">字幕と弾幕</a></li>
+      <li><a href="../kernel/clock.ja.html">クロックとスケジューリング</a></li>
+    </ul>
+    <h2><span class="no">3</span>プロジェクト <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.ja.html">ビルドと依存関係</a></li>
+      <li><a href="../project/releasing.ja.html">リリースと成果物</a></li>
+      <li><a href="../project/contributing.ja.html">貢献ガイド</a></li>
+      <li><a href="../project/changelog.ja.html">変更履歴</a></li>
+    </ul>
+    <h2><span class="no">4</span>参考資料 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.ja.html">C ABI 概要</a></li>
+      <li><a href="../reference/capi-handle.ja.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.ja.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">機械翻訳です。正確な内容は中国語版をご参照ください。</p>
+  <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Swift アクセス</p>
+  <h1>Swift アクセス</h1>
+  <p class="kicker">Swift &amp; Apple Platforms</p>
+  <p class="lead"><code>liberika-swift</code> Apple プラットフォーム (macOS 11+、iOS 13+、tvOS 13+) 用の公式 SwiftPM ライブラリです。 SDK が提供する <code>ErikaPlayerView</code> および AppKit / UIKit 用 <code>ErikaVideoView</code>、Metal レイヤー バインディングと表示フレーム クロック スケジューリングを自動的にホストします。</p>
+
+  <ul class="meta-strip">
+    <li>モジュール <b>import Erika</b></li>
+    <li>サポート <b>macOS 11+ / iOS 13+ / tvOS 13+</b></li>
+    <li>1階 <b>VideoToolbox · Metal · CoreAudio</b></li>
+  </ul>
+
+  <section id="install">
+    <h2>設置と導入<span class="jp">インストール</span><a class="anchor" href="#install">#</a></h2>
+    <p>Package 依存関係を Xcode プロジェクトに追加します。</p>
+    <div class="code">
+      <p class="lbl">Xcode Package URL</p>
+<pre>https://github.com/AimesSoft/liberika-swift</pre>
+    </div>
+    <p>またはで <code>Package.swift</code> dependencies に追加:</p>
+    <div class="code">
+      <p class="lbl">Package.swift</p>
+<pre><span class="k">dependencies</span>: [
+    .<span class="k">package</span>(url: <span class="s">"https://github.com/AimesSoft/liberika-swift"</span>, from: <span class="s">"0.3.0"</span>)
+]</pre>
+    </div>
+    <p>コードにモジュールをインポートします。</p>
+    <div class="code">
+      <p class="lbl">Swift</p>
+<pre><span class="k">import</span> Erika</pre>
+    </div>
+    <p>SwiftPM は自動的にプルされます <code>erika-swift-core-0.3.0.xcframework.zip</code> プリコンパイルされたコア バイナリ (macOS universal、iOS デバイス/シミュレーター、tvOS デバイス/シミュレーターをカバー)、C/C++ ネイティブ依存関係を手動で構成する必要はありません。</p>
+  </section>
+
+  <section id="views">
+    <h2>ビューとスレッドのライフサイクル<span class="jp">接続の表示</span><a class="anchor" href="#views">#</a></h2>
+    <p>liberika プレーヤーを使用するための 2 つの主要なライフサイクル原則:</p>
+    <ul class="body">
+      <li><b>プレーヤーを強制的に保持します。</b> <code>ErikaPlayerView</code> と <code>ErikaVideoView</code> はい <code>ErikaPlayer</code> 採用する <code>weak</code> 弱い参照。ホストの <code>ObservableObject</code>、<code>@Observable</code> ViewModel または ViewController は強参照で保持する必要があります <code>ErikaPlayer</code> 例。</li>
+      <li><b>メインスレッドは次のように実行されます。</b> <code>ErikaPlayer</code> としてマークされています <code>@MainActor</code>、すべての再生制御とステータス クエリはメイン スレッドで実行され、基になる C カーネル ハンドルは、SDK によってシリアル化されて呼び出されることが自動的に保証されます。</li>
+    </ul>
+
+    <div class="code">
+      <p class="lbl">SwiftUI アクセス例</p>
+<pre><span class="k">import</span> SwiftUI
+<span class="k">import</span> Erika
+
+<span class="k">@MainActor</span>
+<span class="k">final class</span> VideoPlayerModel: ObservableObject {
+    <span class="k">let</span> player: ErikaPlayer
+
+    <span class="k">init</span>() {
+        <span class="c">/* 可通过 ErikaPlayer.Configuration 设定输出模式、EDR headroom 与超分 */</span>
+        <span class="k">do</span> {
+            <span class="k">self</span>.player = <span class="k">try</span> ErikaPlayer(configuration: .init(outputMode: .automatic))
+        } <span class="k">catch</span> {
+            fatalError(<span class="s">"无法创建播放器: \(error)"</span>)
+        }
+    }
+
+    <span class="k">func</span> startPlayback() {
+        <span class="k">do</span> {
+            <span class="c">/* 支持 URL 或本地路径，可传入自定义 HTTP 请求头 */</span>
+            <span class="k">try</span> player.open(
+                <span class="s">"https://example.com/stream.m3u8"</span>,
+                httpHeaders: [<span class="s">"User-Agent"</span>: <span class="s">"MyApp/1.0"</span>]
+            )
+            <span class="k">try</span> player.play()
+        } <span class="k">catch</span> {
+            print(<span class="s">"播放失败: \(error)"</span>)
+        }
+    }
+
+    <span class="k">func</span> pausePlayback() {
+        <span class="k">try?</span> player.pause()
+    }
+}
+
+<span class="k">struct</span> VideoScreen: View {
+    <span class="k">@StateObject private var</span> model = VideoPlayerModel()
+
+    <span class="k">var</span> body: some View {
+        ErikaPlayerView(player: model.player)
+            .aspectRatio(16 / 9, contentMode: .fit)
+            .onAppear {
+                model.startPlayback()
+            }
+            .onDisappear {
+                model.pausePlayback()
+            }
+    }
+}</pre>
+    </div>
+
+    <p>ページを一時的に離れる場合は一時停止します。プレーヤーが最終的に使用されなくなったときに呼び出されます <code>close()</code>。終了後に再度プレイするには、新しいプレーヤーを作成する必要があります。
+    </p>
+    <p>UIKit / AppKit プロジェクトでは、直接使用できます <code>ErikaVideoView</code>：</p>
+    <div class="code">
+      <p class="lbl">UIKit / AppKit アクセス</p>
+<pre><span class="k">let</span> videoView = ErikaVideoView()
+videoView.player = model.player
+videoView.onError = { error <span class="k">in</span>
+    print(<span class="s">"图层渲染错误: \(error)"</span>)
+}
+view.addSubview(videoView)</pre>
+    </div>
+  </section>
+
+  <section id="playback">
+    <h2>再生制御 API<span class="jp">回生制御</span><a class="anchor" href="#playback">#</a></h2>
+    <p><code>ErikaPlayer</code> タイプセーフなネイティブ メソッドを提供します。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>方法</th><th>署名</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td class="m">open</td><td class="k">open(_ source: String/URL, httpHeaders: [String: String], httpReadAheadBytes: UInt64, httpBackBufferBytes: UInt64)</td><td>メディア検出とトラック解析が同時に完了し、ステータスは <code>ready</code>。</td></tr>
+          <tr><td class="m">play</td><td class="k">play()</td><td>バックグラウンドのハードウェア デコードとオーディオ/ビデオ レンダリングを開始します。</td></tr>
+          <tr><td class="m">pause / stop</td><td class="k">pause() / stop()</td><td>再生を一時停止または停止します。</td></tr>
+          <tr><td class="m">seek</td><td class="k">seek(to seconds: TimeInterval)</td><td>指定した時間（秒）にジャンプします。</td></tr>
+          <tr><td class="m">setPlaybackRate</td><td class="k">setPlaybackRate(_ rate: Double)</td><td>倍速の設定（例： <code>1.25</code>）。</td></tr>
+          <tr><td class="m">setVolume</td><td class="k">setVolume(_ volume: Double)</td><td>音量を設定(<code>0.0</code> ~ <code>1.0</code>）。</td></tr>
+          <tr><td class="m">close</td><td class="k">close()</td><td>バックグラウンド スレッドを停止し、再生セッションを閉じます。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="events">
+    <h2>イベントポーリング<span class="jp">イベント処理</span><a class="anchor" href="#events">#</a></h2>
+    <p>パス <code>pollEvent()</code> プレーヤーによって現在蓄積されているイベントを消費します。</p>
+    <div class="code">
+      <p class="lbl">イベントポーリングの例</p>
+<pre><span class="k">func</span> drainEvents() {
+    <span class="k">while let</span> event = <span class="k">try?</span> player.pollEvent() {
+        <span class="k">switch</span> event.kind {
+        <span class="k">case</span> .stateChanged:
+            print(<span class="s">"播放状态更新: \(event.state)"</span>) <span class="c">/* .idle / .opening / .ready / .playing 等 */</span>
+        <span class="k">case</span> .durationChanged:
+            <span class="k">let</span> seconds = Double(event.durationMicros) / 1_000_000.0
+            print(<span class="s">"总时长: \(seconds) 秒"</span>)
+        <span class="k">case</span> .positionChanged:
+            <span class="k">let</span> seconds = Double(event.positionMicros) / 1_000_000.0
+            print(<span class="s">"当前进度: \(seconds) 秒"</span>)
+        <span class="k">case</span> .bufferingChanged:
+            print(<span class="s">"缓冲状态: \(event.buffering)"</span>)
+        <span class="k">case</span> .error:
+            print(<span class="s">"播放器错误: \(event.error ?? event.message ?? \"\")"</span>)
+        <span class="k">default</span>:
+            <span class="k">break</span>
+        }
+    }
+}</pre>
+    </div>
+  </section>
+
+  <section id="features">
+    <h2>トラック、字幕、弾幕、スーパースコア<span class="jp">高機能</span><a class="anchor" href="#features">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>機能カテゴリー</th><th>Swift API</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td class="k">トラック管理</td><td class="m">tracks() / selectAudioTrack(id:) / selectSubtitleTrack(id:)</td><td>トラックリストのクエリ(<code>[ErikaTrack]</code>) を押して、ID を押して音声トラックと字幕トラックを選択します (転送) <code>nil</code> 無効化されています）。</td></tr>
+          <tr><td class="k">外部字幕</td><td class="m">addExternalSubtitle(_ uri:) / removeSubtitleTrack(id:) / setSubtitleScale(_ scale:)</td><td>外部のSRT/ASS字幕ファイルをロードし、フォントサイズのスケーリングを調整します。</td></tr>
+          <tr><td class="k">弾幕システム</td><td class="m">loadDanmaku(from:) / loadDanmaku(json:) / addDanmakuTrack(from:name:offset:) / danmakuTracks() / clearDanmaku()</td><td>Bilibili XML または JSON 形式の弾幕をロードし、マルチトラック オーバーレイとタイムライン オフセットをサポートします。 JSON 契約書を見る<a href="../kernel/subtitle-danmaku.ja.html#json-schema">仕様</a>。</td></tr>
+          <tr><td class="k">ニューラルネットワークのスーパースコア</td><td class="m">setUpscaler(_ upscaler:)</td><td>Apple Silicon で ArtCNN アニメ 2 倍のスーパー スコアを有効にする (<code>.artCNNC4F16</code> / <code>.artCNNC4F16DS</code>）。</td></tr>
+          <tr><td class="k">ビデオのスクリーンショット</td><td class="m">captureFrame(width:height:)</td><td>現在のレンダリング パイプラインから、指定されたサイズの元の RGBA フレーム ピクセル データを取得します (<code>ErikaFrame</code>）。</td></tr>
+          <tr><td class="k">パフォーマンス診断</td><td class="m">presenterStats() / outputStatus() / resourceStatus()</td><td>FPS のデコードとレンダリング、ドロップされたフレーム数、Metal ビデオ メモリ使用量、EDR headroom ステータスのリアルタイム クエリ。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="http-cache">
+    <h2>HTTP キャッシュ<a class="anchor" href="#http-cache">#</a></h2>
+    <p><code>httpReadAheadBytes</code> 前方に読み取るバイト数を決定します。デフォルトは 2 MiB です。<code>httpBackBufferBytes</code> 保持する再生データの量を決定します。デフォルトは 16 MiB です。両方を省略するか、0 を渡してデフォルト値を使用します。先読みのデフォルト値は次のように指定することもできます。 <code>ERIKA_HTTP_READAHEAD_BYTES</code> 設定。</p>
+    <p>ロールバック キャッシュ内のフォールバック seek は、ダウンロードされたデータを直接再利用できます。高ビットレートのビデオには、より大きな予算が必要です。80 Mbit/s のビデオを約 10 秒保持するには、約 100 MB が必要になります。キャッシュはバイト数によって制限されており、固定の再生秒数を表しません。</p>
+    <div class="code">
+      <p class="lbl">Swift</p>
+<pre>try player.open(
+    &quot;https://example.com/video.mp4&quot;,
+    httpReadAheadBytes: 8 * 1024 * 1024,
+    httpBackBufferBytes: 128 * 1024 * 1024
+)</pre>
+    </div>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Guide</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="flutter.ja.html"><span class="dir">Prev</span>Flutter埋め込み</a>
+    <a class="nx" href="openharmony.ja.html"><span class="dir">Next</span>OpenHarmony / OHPM</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

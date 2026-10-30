@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Build and Dependencies — liberika Developer Documentation</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
+  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="building.html">中文</option><option value="building.en.html">English</option><option value="building.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="building.html">中文</a> · <a href="building.en.html">English</a> · <a href="building.ja.html">日本語</a></nav></noscript></div>
+  <nav>
+    <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.en.html">Quick start</a></li>
+      <li><a href="../guide/flutter.en.html">Flutter integration</a></li>
+      <li><a href="../guide/swift.en.html">Swift integration</a></li>
+      <li><a href="../guide/openharmony.en.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.en.html">Rust integration</a></li>
+      <li><a href="../guide/c.en.html">C ABI integration</a></li>
+      <li><a href="../guide/linux.en.html">Linux integration</a></li>
+      <li><a href="../guide/web.en.html">Web / WASM integration</a></li>
+    </ul>
+    <h2><span class="no">2</span>Kernel design <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.en.html">Architecture overview</a></li>
+      <li><a href="../kernel/decode.en.html">Hardware decoding</a></li>
+      <li><a href="../kernel/zero-copy.en.html">Zero-copy import</a></li>
+      <li><a href="../kernel/render.en.html">Rendering pipeline</a></li>
+      <li><a href="../kernel/hdr.en.html">High dynamic range</a></li>
+      <li><a href="../kernel/upscale.en.html">Neural upscaling</a></li>
+      <li><a href="../kernel/subtitle-danmaku.en.html">Subtitles and danmaku</a></li>
+      <li><a href="../kernel/clock.en.html">Clock and scheduling</a></li>
+    </ul>
+    <h2><span class="no">3</span>Project <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="building.en.html" aria-current="page">Building and dependencies</a></li>
+      <li><a href="releasing.en.html">Releases and artifacts</a></li>
+      <li><a href="contributing.en.html">Contributing</a></li>
+      <li><a href="changelog.en.html">Changelog</a></li>
+    </ul>
+    <h2><span class="no">4</span>Reference <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.en.html">C ABI overview</a></li>
+      <li><a href="../reference/capi-handle.en.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.en.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
+  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>project<span class="sep">/</span>Build and dependencies</p>
+  <h1>Build and dependencies</h1>
+  <p class="kicker">Building and Dependencies</p>
+  <p class="lead">The Rust code of liberika is built directly with cargo; native dependencies such as FFmpeg, dav1d, libass, HarfBuzz are obtained in source code and <code>third_party/</code> Built within, by <code>xtask deps</code> management. The build script ensures that CI is consistent with the local output.</p>
+
+  <ul class="meta-strip">
+    <li>Rust <b>1.92+</b></li>
+    <li>edition <b>2024</b></li>
+    <li>Native dependencies <b>7</b> a</li>
+  </ul>
+
+  <section id="prereq">
+    <h2>pre-dependency<span class="jp">Premise</span><a class="anchor" href="#prereq">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>target</th><th>Tools</th></tr></thead>
+        <tbody>
+          <tr><td class="k">macOS / iOS / tvOS</td><td>Xcode Command Line Tools；<code>nasm</code>、<code>meson</code>、<code>ninja</code>、<code>pkg-config</code>（Homebrew）。</td></tr>
+          <tr><td class="k">Windows</td><td>Within MSYS2 (UCRT64) <code>make</code>、<code>tar</code>、<code>pkgconf</code>、<code>perl</code>、<code>zip</code>；<code>nasm</code>;Python <code>meson</code>、<code>ninja</code>；LLVM（<code>LIBCLANG_PATH</code> point to <code>bin/</code>）。</td></tr>
+          <tr><td class="k">Android</td><td>Android SDK and NDK (r29, API 26).</td></tr>
+          <tr><td class="k">OpenHarmony</td><td>DevEco Studio corresponds to SDK / NDK.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="deps">
+    <h2>Native dependencies<span class="jp">ネイティブdependence</span><a class="anchor" href="#deps">#</a></h2>
+    <p>The dependencies of the release target are obtained from the upstream source code in a fixed version and the script application is built. <code>third_party/patches/</code> within the patch.</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>components</th><th>version</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="k">FFmpeg</td><td class="m">8.1.2</td><td>encapsulated in <code>crates/erika_ffmpeg_sys</code>;Android uses patchset <code>erika-android-mediacodec-v4</code>。</td></tr>
+          <tr><td class="k">dav1d</td><td class="m">1.5.1</td><td>AV1 decoding.</td></tr>
+          <tr><td class="k">libass</td><td class="m">0.17.5</td><td>Subtitle rendering.</td></tr>
+          <tr><td class="k">HarfBuzz</td><td class="m">14.2.1</td><td>Text shaping.</td></tr>
+          <tr><td class="k">FreeType</td><td class="m">2.14.3</td><td>Font rasterization.</td></tr>
+          <tr><td class="k">FriBidi</td><td class="m">1.0.16</td><td>Bidirectional text.</td></tr>
+          <tr><td class="k">zlib</td><td class="m">1.3.2</td><td>FFmpeg depends.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The fetch and build results are located in the work area <code>third_party/</code>, do not install to the system directory:</p>
+    <div class="code">
+<pre>third_party/cache     <span class="c"># 下载的源码压缩包</span>
+third_party/src       <span class="c"># 解压后的源码树</span>
+third_party/build     <span class="c"># 按 target / profile 分隔的构建目录</span>
+third_party/dist      <span class="c"># 按 target / profile 分隔的产物前缀</span></pre>
+    </div>
+  </section>
+
+  <section id="xtask">
+    <h2>xtask deps<span class="jp">dependency management</span><a class="anchor" href="#xtask">#</a></h2>
+    <div class="code">
+      <p class="lbl">Complete build process</p>
+<pre>cargo run -p xtask -- deps plan                 <span class="c"># 打印依赖计划</span>
+cargo run -p xtask -- deps fetch                <span class="c"># 下载并解压源码</span>
+cargo run -p xtask -- deps build                <span class="c"># 构建 host 目标</span></pre>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Options</th><th>value</th><th>Default</th></tr></thead>
+        <tbody>
+          <tr><td class="k">--profile</td><td>lgpl / gpl-full</td><td>lgpl</td></tr>
+          <tr><td class="k">--target</td><td>See table target below</td><td>host</td></tr>
+          <tr><td class="k">--force</td><td>Force rebuild native dependencies</td><td>Close; reuse completed products by default</td></tr>
+          <tr><td class="k">--all</td><td>Additional construction of subtitle stack: libass + FreeType + HarfBuzz + FriBidi (fetch captures the source code of these four at the same time)</td><td>Build only the video stack</td></tr>
+          <tr><td class="k">--jobs</td><td>Parallelism</td><td>automatic</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The difference between the two profile is in the configure flag of FFmpeg. lgpl disables the GPL component, disables network, and only enables the demuxer / parser / decoder required by the playback core; gpl-full enables the GPL part on this basis. The default lgpl meets publishing needs.</p>
+    <p class="note">The build result saves the build tag by target with profile; FFmpeg and dav1d will check the version, patch and build options. changed <code>xtask/src/main.rs</code> or <code>third_party/patches/</code> Needed later <code>deps build --force</code> Trigger a rebuild.</p>
+  </section>
+
+  <section id="targets">
+    <h2>target list<span class="jp">ターゲット</span><a class="anchor" href="#targets">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>target parameters</th><th>platform</th></tr></thead>
+        <tbody>
+          <tr><td class="m">host</td><td>current machine.</td></tr>
+          <tr><td class="m">aarch64-apple-darwin / x86_64-apple-darwin</td><td>macOS。</td></tr>
+          <tr><td class="m">aarch64-apple-ios</td><td>iOS real machine.</td></tr>
+          <tr><td class="m">aarch64-apple-ios-sim / x86_64-apple-ios</td><td>iOS emulator.</td></tr>
+          <tr><td class="m">aarch64-apple-tvos / aarch64-apple-tvos-sim / x86_64-apple-tvos</td><td>tvOS。</td></tr>
+          <tr><td class="m">x86_64-pc-windows-msvc / aarch64-pc-windows-msvc</td><td>Windows。</td></tr>
+          <tr><td class="m">aarch64-linux-android / armv7-linux-androideabi / x86_64-linux-android / i686-linux-android</td><td>Android。</td></tr>
+          <tr><td class="m">aarch64-unknown-linux-ohos</td><td>OpenHarmony。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>macOS artifacts are built for <code>MACOSX_DEPLOYMENT_TARGET=11.0</code> Build; if missing, the script will fill in the default value. The arm64 and x86_64 products of the Apple platform are synthesized into universal binaries when released, see<a href="releasing.en.html">releases and products</a>。</p>
+  </section>
+
+  <section id="workspace">
+    <h2>Workspace build<span class="jp">ワークスペース</span><a class="anchor" href="#workspace">#</a></h2>
+    <div class="code">
+<pre>cargo build --workspace
+cargo test --workspace</pre>
+    </div>
+    <p>The workspace contains three crate:<code>erika</code>(kernel),<code>erika_capi</code>（C ABI）、<code>erika_ffmpeg_sys</code>(FFmpeg binding), and <code>xtask</code> with over 20 examples. Example is a minimal program that verifies a specific path:</p>
+    <div class="code">
+      <p class="lbl">macOS desktop smoke test</p>
+<pre>cargo run -p macos_native_demo -- --smoke-seconds 3 /path/to/video.mp4</pre>
+    </div>
+    <p><code>macos_native_demo</code> is a complete end-to-end demonstration of presenter: opening, playback, Metal rendering and system media control. Other examples of division of labor by name,<code>capi_smoke</code> Cover the main calling path of C ABI,<code>playback_tick</code> / <code>player_tick</code> Covering the scheduling cycle of two entries play / pull.</p>
+  </section>
+
+  <section id="linux">
+    <h2>Linux system library construction<a class="anchor" href="#linux">#</a></h2>
+    <p>Linux uses systems FFmpeg 8 and PulseAudio, and separately builds the liberika patch version libass. The entrance is different from the release target of xtask:</p>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>bash scripts/build_linux_libass.sh
+cargo build --locked --release -p erika_capi -p linux_native_demo</pre>
+    </div>
+    <p>Release dependencies, Flutter dynamic library paths and X11 / Wayland examples are included in <a href="../guide/linux.en.html">Linux access</a>. The codecs and licenses for system FFmpeg depend on the distribution build; setting lgpl profile does not change the system libraries.</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Project</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="../reference/capi-json.en.html"><span class="dir">Prev</span>JSON bridge</a>
+    <a class="nx" href="releasing.en.html"><span class="dir">Next</span>releases and products</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

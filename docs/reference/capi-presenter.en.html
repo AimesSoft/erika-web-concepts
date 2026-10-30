@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ErikaPresenterHandle Reference — liberika Developer Documentation</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
+  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="capi-presenter.html">中文</option><option value="capi-presenter.en.html">English</option><option value="capi-presenter.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="capi-presenter.html">中文</a> · <a href="capi-presenter.en.html">English</a> · <a href="capi-presenter.ja.html">日本語</a></nav></noscript></div>
+  <nav>
+    <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.en.html">Quick start</a></li>
+      <li><a href="../guide/flutter.en.html">Flutter integration</a></li>
+      <li><a href="../guide/swift.en.html">Swift integration</a></li>
+      <li><a href="../guide/openharmony.en.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.en.html">Rust integration</a></li>
+      <li><a href="../guide/c.en.html">C ABI integration</a></li>
+      <li><a href="../guide/linux.en.html">Linux integration</a></li>
+      <li><a href="../guide/web.en.html">Web / WASM integration</a></li>
+    </ul>
+    <h2><span class="no">2</span>Kernel design <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.en.html">Architecture overview</a></li>
+      <li><a href="../kernel/decode.en.html">Hardware decoding</a></li>
+      <li><a href="../kernel/zero-copy.en.html">Zero-copy import</a></li>
+      <li><a href="../kernel/render.en.html">Rendering pipeline</a></li>
+      <li><a href="../kernel/hdr.en.html">High dynamic range</a></li>
+      <li><a href="../kernel/upscale.en.html">Neural upscaling</a></li>
+      <li><a href="../kernel/subtitle-danmaku.en.html">Subtitles and danmaku</a></li>
+      <li><a href="../kernel/clock.en.html">Clock and scheduling</a></li>
+    </ul>
+    <h2><span class="no">3</span>Project <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.en.html">Building and dependencies</a></li>
+      <li><a href="../project/releasing.en.html">Releases and artifacts</a></li>
+      <li><a href="../project/contributing.en.html">Contributing</a></li>
+      <li><a href="../project/changelog.en.html">Changelog</a></li>
+    </ul>
+    <h2><span class="no">4</span>Reference <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="capi.en.html">C ABI overview</a></li>
+      <li><a href="capi-handle.en.html">ErikaHandle</a></li>
+      <li><a href="capi-presenter.en.html" aria-current="page">ErikaPresenterHandle</a></li>
+      <li><a href="capi-json.en.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
+  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>ErikaPresenterHandle</p>
+  <h1>ErikaPresenterHandle reference</h1>
+  <p class="kicker">ErikaPresenterHandle Reference</p>
+  <p class="lead">All 72 functions of the push model entrance: life cycle, playback and running parameters, subtitles, danmaku, output diagnosis, surface and presentation, rendering loop, JSON bridge, screenshots. Only compiles on macOS/iOS/tvOS/Windows/Android/OpenHarmony/Linux, other targets <code>create</code> Return NULL.</p>
+
+  <ul class="meta-strip">
+    <li>function <b>72</b> a</li>
+    <li>platform <b>7</b> a</li>
+  </ul>
+
+  <section id="lifecycle">
+    <h2>Lifecycle and configuration<span class="jp">ライフサイクル</span><a class="anchor" href="#lifecycle">#</a></h2>
+
+    <div class="api" id="erika_presenter_create">
+      <p class="sig"><b>ErikaPresenterHandle *erika_presenter_create</b>(void)</p>
+      <p class="desc">Create presenter. Returning NULL indicates creation failure, use <code>erika_last_error_message</code> Read the reason.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_create_with_config">
+      <p class="sig"><b>ErikaPresenterHandle *erika_presenter_create_with_config</b>(ErikaPresenterConfig config)</p>
+      <p class="desc">Create presenter with configuration. config selects output mode, EDR headroom and super-resolution mode.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_create_with_output_mode">
+      <p class="sig"><b>ErikaPresenterHandle *erika_presenter_create_with_output_mode</b>(int32_t output_mode, float edr_headroom)</p>
+      <p class="desc">Create presenter with headroom in output mode, which is equivalent to configuring the corresponding field. <code>create_with_config</code>。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_create_with_output_mode_and_alpha">
+      <p class="sig"><b>ErikaPresenterHandle *erika_presenter_create_with_output_mode_and_alpha</b>(int32_t output_mode, float edr_headroom, int32_t video_alpha_mode)</p>
+      <p class="desc">in <code>create_with_output_mode</code> Based on additional <code>ErikaVideoAlphaMode</code>：<code>Opaque</code>(default, the screen is completely opaque) or <code>PackedAlphaRight</code>(Left and right partitioned material: left half color, right half grayscale alpha, GPU reconstructed premultiplied by alpha and rendered at half the encoding width).</p>
+    </div>
+
+    <div class="api" id="erika_presenter_destroy">
+      <p class="sig"><b>void erika_presenter_destroy</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">Destroy presenter and release all resources.</p>
+    </div>
+  </section>
+
+  <section id="playback">
+    <h2>Playback and operating parameters<span class="jp">regeneration</span><a class="anchor" href="#playback">#</a></h2>
+
+    <div class="api" id="erika_presenter_open">
+      <p class="sig"><b>ErikaStatus erika_presenter_open</b>(ErikaPresenterHandle *handle, const char *uri)</p>
+      <p class="desc">Open media.<code>uri</code> is the local path or HTTP(S) URL. The function synchronously completes stream information detection and track analysis and sets the status to Ready. After returning, it calls the playback function to start asynchronous decoding and presentation.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_open_with_headers">
+      <p class="sig"><b>ErikaStatus erika_presenter_open_with_headers</b>(ErikaPresenterHandle *handle, const char *uri, const ErikaHttpHeader *headers, uintptr_t header_count)</p>
+      <p class="desc">Open media with custom HTTP request header.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_open_with_options">
+      <p class="sig"><b>ErikaStatus erika_presenter_open_with_options</b>( ErikaPresenterHandle *handle, const char *uri, const ErikaOpenOptions *options)</p>
+      <p class="desc">Use <code>ErikaOpenOptions</code> When opening the media, you can pass in the HTTP request header, read-ahead window and fallback cache budget at the same time. Options are only borrowed during the call,<code>reserved</code> Set to zero.</p>
+    </div>
+
+
+    <div class="api" id="erika_presenter_play">
+      <p class="sig"><b>ErikaStatus erika_presenter_play</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">Start playing. play only delivers work, the final result is <code>StateChanged</code> or <code>Error</code> The event shall prevail.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_pause">
+      <p class="sig"><b>ErikaStatus erika_presenter_pause</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">Pause playback.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_stop">
+      <p class="sig"><b>ErikaStatus erika_presenter_stop</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">Stop playing.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_close">
+      <p class="sig"><b>ErikaStatus erika_presenter_close</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">Close and release the media resource.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_seek">
+      <p class="sig"><b>ErikaStatus erika_presenter_seek</b>(ErikaPresenterHandle *handle, uint64_t position_micros)</p>
+      <p class="desc">Jump to the specified location in microseconds.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_playback_rate">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_playback_rate</b>(ErikaPresenterHandle *handle, double rate)</p>
+      <p class="desc">Set playback speed. 1.0 is normal speed, clamped to 0.25–16×.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_volume">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_volume</b>(ErikaPresenterHandle *handle, double volume)</p>
+      <p class="desc">Set the volume from 0.0–1.0.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_upscaler">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_upscaler</b>(ErikaPresenterHandle *handle, int32_t mode)</p>
+      <p class="desc">Set the super-resolution mode, take <code>ErikaLumaUpscalerMode</code>. Metal and compute-capable wgpu/Vulkan renderers perform ArtCNN; other backends retain native luminance samples and report Inactive explicitly.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_subtitle_scale">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_subtitle_scale</b>(ErikaPresenterHandle *handle, double scale)</p>
+      <p class="desc">Set the subtitle scaling ratio.</p>
+    </div>
+  </section>
+
+  <section id="subtitle">
+    <h2>Subtitle font and style<span class="jp">subtitles</span><a class="anchor" href="#subtitle">#</a></h2>
+
+    <div class="api" id="erika_presenter_set_subtitle_font">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_subtitle_font</b>(ErikaPresenterHandle *handle, const char *family, const char *file_path)</p>
+      <p class="desc">Set fallback subtitle font. NULL or empty string clears the corresponding half. The container ASS script retains its own fonts unless <code>set_subtitle_style</code> Pass in the font name override bit.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_register_subtitle_memory_font">
+      <p class="sig"><b>ErikaStatus erika_presenter_register_subtitle_memory_font</b>(ErikaPresenterHandle *handle, const uint8_t *data, uintptr_t data_len, uint64_t *out_font_id)</p>
+      <p class="desc">Register the memory font data and output the font id. The data is not written to the disk, and the renderer rebuilds the cache according to the selected generation of the font: fonts in the selected set will take effect on the activated subtitle track immediately after replacement; fonts that are only registered but not selected will not trigger renderer reconstruction. (Same-name replacements for custom font file paths are detected as mtime/size and reloaded immediately.)</p>
+    </div>
+
+    <div class="api" id="erika_presenter_select_subtitle_memory_fonts">
+      <p class="sig"><b>ErikaStatus erika_presenter_select_subtitle_memory_fonts</b>(ErikaPresenterHandle *handle, const uint64_t *font_ids, uintptr_t font_count)</p>
+      <p class="desc">Select an ordered fallback font collection.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_clear_subtitle_memory_fonts">
+      <p class="sig"><b>ErikaStatus erika_presenter_clear_subtitle_memory_fonts</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">Clear the memory font registry.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_subtitle_memory_font_status">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_subtitle_memory_font_status</b>(ErikaPresenterHandle *handle, ErikaSubtitleMemoryFontStatus *out_status)</p>
+      <p class="desc">Read registry status (number, bytes, selected font id). The result is used <code>erika_subtitle_memory_font_status_free</code> release.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_subtitle_memory_font_info">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_subtitle_memory_font_info</b>(ErikaPresenterHandle *handle, uint64_t font_id, ErikaSubtitleMemoryFontInfo *out_info)</p>
+      <p class="desc">Read the faces and metadata of the specified font. The result is used <code>erika_subtitle_memory_font_info_free</code> release.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_subtitle_style">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_subtitle_style</b>(ErikaPresenterHandle *handle, ErikaSubtitleStyle style)</p>
+      <p class="desc">Apply a subtitle style override. Coverage granularity is given by <code>style.override_mask</code> Bit flag control, the value and clamping range of each field are shown in<a href="capi.en.html#types">C ABI Overview</a>Type section.</p>
+    </div>
+  </section>
+
+  <section id="output">
+    <h2>Output and diagnostics<span class="jp">Output and Diagnosis</span><a class="anchor" href="#output">#</a></h2>
+
+    <div class="api" id="erika_presenter_set_output_headroom">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_output_headroom</b>(ErikaPresenterHandle *handle, float headroom, bool known)</p>
+      <p class="desc">Provide the expectation headroom and validity flag to participate in output negotiation.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_upscaler_status">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_upscaler_status</b>(ErikaPresenterHandle *handle, ErikaUpscalerStatus *out_status)</p>
+      <p class="desc">Read super-resolution status: request mode, active backends, rollback times, and frame count.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_output_status">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_output_status</b>(ErikaPresenterHandle *handle, ErikaOutputStatus *out_status)</p>
+      <p class="desc">Read output status: active encoding, surface format, headroom and fallback reason.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_resource_status">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_resource_status</b>(ErikaPresenterHandle *handle, ErikaPresenterResourceStatus *out_status)</p>
+      <p class="desc">Read renderer memory snapshot. The count for level device is process-wide and may include allocations of other presenter.</p>
+    </div>
+  </section>
+
+  <section id="tracks">
+    <h2>Orbit<span class="jp">トラック</span><a class="anchor" href="#tracks">#</a></h2>
+
+    <div class="api" id="erika_presenter_add_external_subtitle">
+      <p class="sig"><b>ErikaStatus erika_presenter_add_external_subtitle</b>(ErikaPresenterHandle *handle, const char *uri, int64_t *out_track_id)</p>
+      <p class="desc">Add an external subtitle track and output the track id.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_remove_subtitle_track">
+      <p class="sig"><b>ErikaStatus erika_presenter_remove_subtitle_track</b>(ErikaPresenterHandle *handle, int64_t track_id)</p>
+      <p class="desc">Remove subtitle track.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_select_audio_track">
+      <p class="sig"><b>ErikaStatus erika_presenter_select_audio_track</b>(ErikaPresenterHandle *handle, int64_t track_id)</p>
+      <p class="desc">Select audio track.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_select_subtitle_track">
+      <p class="sig"><b>ErikaStatus erika_presenter_select_subtitle_track</b>(ErikaPresenterHandle *handle, int64_t track_id)</p>
+      <p class="desc">Select the subtitle track. id -1 disables subtitles.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_track_selection">
+      <p class="sig"><b>ErikaStatus erika_presenter_track_selection</b>(ErikaPresenterHandle *handle, ErikaTrackSelection *out_selection)</p>
+      <p class="desc">Read the currently selected video, audio and subtitle tracks.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_tracks">
+      <p class="sig"><b>ErikaStatus erika_presenter_tracks</b>(ErikaPresenterHandle *handle, ErikaTrackInfo *out_tracks, uintptr_t capacity, uintptr_t *out_len)</p>
+      <p class="desc">Read the track list by count array idiom. Each populated record uses <code>erika_track_info_free</code> release.</p>
+    </div>
+  </section>
+
+  <section id="danmaku">
+    <h2>Danmaku<span class="jp">curtain</span><a class="anchor" href="#danmaku">#</a></h2>
+    <p><code>load_*</code> The series replaces all danmaku with an anonymous track;<code>add_*_track</code> Series builds named multi-track lists. Input is Bilibili XML (file, path or URL) or JSON (inline string).<code>offset_micros</code> Offset the timeline of a single track, global offset applies to all tracks.</p>
+
+    <div class="api" id="erika_presenter_load_danmaku_file">
+      <p class="sig"><b>ErikaStatus erika_presenter_load_danmaku_file</b>(ErikaPresenterHandle *handle, const char *uri)</p>
+      <p class="desc">Load Bilibili XML danmaku from file or URL, replacing it with an anonymous track.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_load_danmaku_json">
+      <p class="sig"><b>ErikaStatus erika_presenter_load_danmaku_json</b>(ErikaPresenterHandle *handle, const char *json)</p>
+      <p class="desc">Load danmaku from inline JSON, replaced by an anonymous track. For details on data format and field specifications, see<a href="../kernel/subtitle-danmaku.en.html#json-schema">Danmaku JSON Contract Specifications</a>。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_add_danmaku_track_file">
+      <p class="sig"><b>ErikaStatus erika_presenter_add_danmaku_track_file</b>(ErikaPresenterHandle *handle, const char *uri, const char *name, int64_t offset_micros, uint64_t *out_track_id)</p>
+      <p class="desc">Add a named bullet track (XML file), which can be offset by the timeline, and the output track is id.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_add_danmaku_track_json">
+      <p class="sig"><b>ErikaStatus erika_presenter_add_danmaku_track_json</b>(ErikaPresenterHandle *handle, const char *json, const char *name, int64_t offset_micros, uint64_t *out_track_id)</p>
+      <p class="desc">Add a named bullet track (inline JSON), which can be offset by the timeline, and the output track is id. For details on data format and field specifications, see<a href="../kernel/subtitle-danmaku.en.html#json-schema">Danmaku JSON Contract Specifications</a>。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_remove_danmaku_track">
+      <p class="sig"><b>ErikaStatus erika_presenter_remove_danmaku_track</b>(ErikaPresenterHandle *handle, uint64_t track_id)</p>
+      <p class="desc">Remove the danmaku track.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_track_enabled">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_track_enabled</b>(ErikaPresenterHandle *handle, uint64_t track_id, bool enabled)</p>
+      <p class="desc">Start and stop a single danmaku track.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_track_offset">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_track_offset</b>(ErikaPresenterHandle *handle, uint64_t track_id, int64_t offset_micros)</p>
+      <p class="desc">Set the timeline offset of a single bullet track.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_global_offset">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_global_offset</b>(ErikaPresenterHandle *handle, int64_t offset_micros)</p>
+      <p class="desc">Set the global danmaku timeline offset.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_danmaku_tracks">
+      <p class="sig"><b>ErikaStatus erika_presenter_danmaku_tracks</b>(ErikaPresenterHandle *handle, ErikaDanmakuTrackInfo *out_tracks, uintptr_t capacity, uintptr_t *out_len)</p>
+      <p class="desc">Read the bullet track list using the count array idiom. Each populated record uses <code>erika_danmaku_track_info_free</code> release.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_clear_danmaku">
+      <p class="sig"><b>ErikaStatus erika_presenter_clear_danmaku</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">Clear all danmaku tracks.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_enabled">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_enabled</b>(ErikaPresenterHandle *handle, bool enabled)</p>
+      <p class="desc">Start and stop the danmaku display globally.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_config">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_config</b>(ErikaPresenterHandle *handle, ErikaDanmakuConfig config)</p>
+      <p class="desc">Apply danmaku layout and display configuration.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_config_ptr">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_config_ptr</b>(ErikaPresenterHandle *handle, const ErikaDanmakuConfig *config)</p>
+      <p class="desc">Apply danmaku configuration in the form of pointers, which is equivalent to the value-based version.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_danmaku_config">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_danmaku_config</b>(ErikaPresenterHandle *handle, ErikaDanmakuConfig *out_config)</p>
+      <p class="desc">Read the currently effective danmaku configuration.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_font">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_font</b>(ErikaPresenterHandle *handle, const char *family, const char *file_path)</p>
+      <p class="desc">Set the danmaku font family and font file.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_block_words_json">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_block_words_json</b>(ErikaPresenterHandle *handle, const char *json)</p>
+      <p class="desc">Set the list of danmaku blocking words in JSON array format.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_debug_hud_enabled">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_debug_hud_enabled</b>(ErikaPresenterHandle *handle, bool enabled)</p>
+      <p class="desc">Start and stop debugging HUD overlay.</p>
+    </div>
+  </section>
+
+  <section id="surface">
+    <h2>surface and presentation<span class="jp">サーフェス</span><a class="anchor" href="#surface">#</a></h2>
+    <p>The rendering backend (native Metal, native D3D11, or wgpu) is determined by the presenter configuration, regardless of the attachment call. Any drawable size or scale changes are called <code>resize_surface</code>。</p>
+
+    <div class="api" id="erika_presenter_attach_metal_layer">
+      <p class="sig"><b>ErikaStatus erika_presenter_attach_metal_layer</b>(ErikaPresenterHandle *handle, uint64_t raw_layer, uint32_t width, uint32_t height, double scale)</p>
+      <p class="desc">Attach Metal surface (macOS / iOS).<code>raw_layer</code> Yes <code>CAMetalLayer*</code> Convert to uint64_t.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_attach_wgpu_surface">
+      <p class="sig"><b>ErikaStatus erika_presenter_attach_wgpu_surface</b>(ErikaPresenterHandle *handle, ErikaWgpuSurfaceKind kind, uint64_t raw_window, uint64_t raw_display, uint32_t width, uint32_t height, double scale)</p>
+      <p class="desc">Attach the wgpu surface.<code>raw_window</code> / <code>raw_display</code> Is the platform handle corresponding to kind.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_attach_wgpu_surface_with_output_capabilities">
+      <p class="sig"><b>ErikaStatus erika_presenter_attach_wgpu_surface_with_output_capabilities</b>(ErikaPresenterHandle *handle, ErikaWgpuSurfaceKind kind, uint64_t raw_window, uint64_t raw_display, uint32_t width, uint32_t height, double scale, ErikaSurfaceOutputCapabilities output_capabilities)</p>
+      <p class="desc">A declaration of output capability is attached to the wgpu surface for use in HDR negotiation.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_attach_windows_hwnd">
+      <p class="sig"><b>ErikaStatus erika_presenter_attach_windows_hwnd</b>(ErikaPresenterHandle *handle, uint64_t hwnd, uint64_t hinstance, uint32_t width, uint32_t height, double scale)</p>
+      <p class="desc">Attach the Windows surface. encapsulation <code>attach_wgpu_surface</code> Variants of WindowsHwnd: hwnd is HWND, hinstance is HINSTANCE.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_attach_flutter_texture">
+      <p class="sig"><b>ErikaStatus erika_presenter_attach_flutter_texture</b>(ErikaPresenterHandle *handle, ErikaFlutterTextureKind kind, int64_t texture_id, uint32_t width, uint32_t height, double scale)</p>
+      <p class="desc">Binding by texture registrar <code>texture_id</code> Identified Flutter textured surface (currently Apple <code>MacOsTextureRegistrar</code>/<code>IosTextureRegistrar</code>). pixel buffer Ownership is always on the host side.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_flutter_texture_buffer">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_flutter_texture_buffer</b>(ErikaPresenterHandle *handle, uint64_t raw_texture, uint32_t width, uint32_t height)</p>
+      <p class="desc">every time <code>render_tick</code> Previously, the host GPU texture was selected to render for the next frame. Apple on <code>raw_texture</code> It was forced to uint64_t <code>id&lt;MTLTexture&gt;</code>, must be BGRA8Unorm and have the same dimensions as declared. The texture is only borrowed within the current frame, and the host can reuse or release it after render_tick returns.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_windows_composition_swapchain_iunknown">
+      <p class="sig"><b>ErikaStatus erika_presenter_windows_composition_swapchain_iunknown</b>(ErikaPresenterHandle *handle, void **out_swapchain)</p>
+      <p class="desc">Windows only. to <code>direct_composition</code> When the ability is attached and played in transparent alpha mode or overlay mix, returns the premultiplied alpha DirectComposition swap chain created by liberika. The returned IUnknown has been AddRef. The caller owns the COM reference and must Release; the decoder or output device needs to reacquire swap chain after rebuilding it (the pointer has not changed, indicating that there is no reconstruction).</p>
+    </div>
+
+    <div class="api" id="erika_presenter_resize_surface">
+      <p class="sig"><b>ErikaStatus erika_presenter_resize_surface</b>(ErikaPresenterHandle *handle, uint32_t width, uint32_t height, double scale)</p>
+      <p class="desc">Adjust surface size or scale. Called after any drawable size changes.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_detach_surface">
+      <p class="sig"><b>ErikaStatus erika_presenter_detach_surface</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">Detach the current surface.</p>
+    </div>
+  </section>
+
+  <section id="loop">
+    <h2>Render loop and events<span class="jp">レンダーループ</span><a class="anchor" href="#loop">#</a></h2>
+
+    <div class="api" id="erika_presenter_render_tick">
+      <p class="sig"><b>ErikaStatus erika_presenter_render_tick</b>(ErikaPresenterHandle *handle, double time_seconds, ErikaPresenterStats *out_stats)</p>
+      <p class="desc">Called once per display frame.<code>time_seconds</code> Is the time of the host display clock (rendering timestamp), used for vsync quantized scheduling.<code>out_stats</code> Can be NULL.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_audio_only_tick">
+      <p class="sig"><b>ErikaStatus erika_presenter_audio_only_tick</b>(ErikaPresenterHandle *handle, ErikaPresenterStats *out_stats)</p>
+      <p class="desc">Audio-specific tick. Suspend video decoding for background audio playback.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_stats">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_stats</b>(ErikaPresenterHandle *handle, ErikaPresenterStats *out_stats)</p>
+      <p class="desc">Read cumulative statistics, with <code>render_tick</code> The statistics are consistent and can be queried at any time.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_poll_event">
+      <p class="sig"><b>ErikaStatus erika_presenter_poll_event</b>(ErikaPresenterHandle *handle, ErikaEvent *out_event)</p>
+      <p class="desc">Non-blocking polling event queue. Returns when the queue is empty <code>NoEvent</code>. event type,<code>ErikaEvent</code> For the payload fields of each event, see<a href="capi.en.html#events">C ABI Overview</a>event table.</p>
+    </div>
+  </section>
+
+  <section id="json">
+    <h2>JSON bridge<span class="jp">JSON ブリッジ</span><a class="anchor" href="#json">#</a></h2>
+    <p>For use by hosts that have used platform channels to serialize structured parameters. method expression<a href="capi-json.en.html">JSON bridge</a>。</p>
+
+    <div class="api" id="erika_presenter_invoke_json">
+      <p class="sig"><b>char *erika_presenter_invoke_json</b>(ErikaPresenterHandle *handle, const char *method, const char *arguments_json)</p>
+      <p class="desc">Call the named method. The returned JSON string is owned by the caller and is <code>erika_string_free</code> release.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_render_tick_json">
+      <p class="sig"><b>char *erika_presenter_render_tick_json</b>(ErikaPresenterHandle *handle, double time_seconds)</p>
+      <p class="desc">The JSON variant of render_tick, returning the statistic JSON.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_poll_event_json">
+      <p class="sig"><b>char *erika_presenter_poll_event_json</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">JSON variant of poll_event. Returns NULL when idle.</p>
+    </div>
+  </section>
+
+  <section id="capture">
+    <h2>screenshot<span class="jp">スクリーンショット</span><a class="anchor" href="#capture">#</a></h2>
+
+    <div class="api" id="erika_presenter_capture_frame_rgba">
+      <p class="sig"><b>ErikaStatus erika_presenter_capture_frame_rgba</b>(ErikaPresenterHandle *handle, uint32_t width, uint32_t height, uint8_t *out_rgba, uintptr_t out_capacity)</p>
+      <p class="desc">Render the current composite frame (video + subtitles, excluding danmaku and debug HUD) off-screen to the RGBA8 buffer allocated by the caller.<code>out_capacity</code> Must ≥ width × height × 4. Fails when no frames are available.</p>
+    </div>
+  </section>
+
+  <section id="display-timing">
+    <h2>Show target time<a class="anchor" href="#display-timing">#</a></h2>
+    <div class="api" id="erika_presenter_render_tick_with_timing">
+      <p class="sig"><b>ErikaStatus erika_presenter_render_tick_with_timing</b>( ErikaPresenterHandle *handle, double time_seconds, const double *presentation_delay_seconds, ErikaPresenterStats *out_stats)</p>
+      <p class="desc"><code>presentation_delay_seconds</code> It is the number of seconds from calling the entry to displaying the target time. It can be a negative number and ranges from ±0.25 seconds. Pass NULL Keep <code>render_tick</code> sampling behavior. Subtitles, danmaku and videos use the same target time snapshot and do not change the playback clock.</p>
+    </div>
+
+  </section>
+
+  <section id="flutter-frame">
+    <h2>Flutter frame handover<a class="anchor" href="#flutter-frame">#</a></h2>
+    <div class="api" id="erika_presenter_windows_flutter_texture_iunknown">
+      <p class="sig"><b>ErikaStatus erika_presenter_windows_flutter_texture_iunknown</b>( ErikaPresenterHandle *handle, void **out_texture)</p>
+      <p class="desc">Windows returns a completed, immutable SDR Flutter GPU texture. The returned COM reference has been replaced by AddRef, which the caller uses later as Release.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_copy_flutter_frame_rgba">
+      <p class="sig"><b>ErikaStatus erika_presenter_copy_flutter_frame_rgba</b>( ErikaPresenterHandle *handle, uint8_t *out_rgba, uintptr_t capacity, uint32_t *out_width, uint32_t *out_height)</p>
+      <p class="desc">Copies the compact RGBA data of the current Flutter texture frame; used for Linux pixel buffer textures. Capacity, width and height are handled as output parameters, and the buffer is provided by the caller.</p>
+    </div>
+
+  </section>
+
+  <section id="diagnostics">
+    <h2>diagnostic snapshot<a class="anchor" href="#diagnostics">#</a></h2>
+    <div class="api" id="erika_presenter_get_diagnostics_json">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_diagnostics_json</b>(ErikaPresenterHandle *handle, char **out_json)</p>
+      <p class="desc">Read the decoder and actual hardware decoding path, rendering count and time consumption, output /HDR, audio, buffer depth and scheduling timing at once. Read count only, no decoding, rendering, or waiting for the playback thread; unknown value is null. Comply with the rule that the same handle is not called concurrently.</p>
+    </div>
+    <p>Return with success <code>schema</code> The caller has all JSON strings, using <code>erika_string_free</code> Released; NULL on failure. When compatible with old native libraries, they are resolved as optional symbols. If they are missing, they are considered not supported. The corresponding method of JSON bridge is <code>getDiagnosticsSnapshot</code>。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Reference</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="capi-handle.en.html"><span class="dir">Prev</span>ErikaHandle reference</a>
+    <a class="nx" href="capi-json.en.html"><span class="dir">Next</span>JSON bridge</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

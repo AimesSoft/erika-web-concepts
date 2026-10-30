@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ビルドと依存関係 — liberika 開発者ドキュメント</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
+  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="building.html">中文</option><option value="building.en.html">English</option><option value="building.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="building.html">中文</a> · <a href="building.en.html">English</a> · <a href="building.ja.html">日本語</a></nav></noscript></div>
+  <nav>
+    <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.ja.html">クイックスタート</a></li>
+      <li><a href="../guide/flutter.ja.html">Flutter の組み込み</a></li>
+      <li><a href="../guide/swift.ja.html">Swift の導入</a></li>
+      <li><a href="../guide/openharmony.ja.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.ja.html">Rust の組み込み</a></li>
+      <li><a href="../guide/c.ja.html">C ABI の組み込み</a></li>
+      <li><a href="../guide/linux.ja.html">Linux の導入</a></li>
+      <li><a href="../guide/web.ja.html">Web / WASM の導入</a></li>
+    </ul>
+    <h2><span class="no">2</span>カーネル設計 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.ja.html">アーキテクチャ概要</a></li>
+      <li><a href="../kernel/decode.ja.html">ハードウェアデコード</a></li>
+      <li><a href="../kernel/zero-copy.ja.html">ゼロコピー取り込み</a></li>
+      <li><a href="../kernel/render.ja.html">レンダリングパイプライン</a></li>
+      <li><a href="../kernel/hdr.ja.html">ハイダイナミックレンジ</a></li>
+      <li><a href="../kernel/upscale.ja.html">ニューラル超解像</a></li>
+      <li><a href="../kernel/subtitle-danmaku.ja.html">字幕と弾幕</a></li>
+      <li><a href="../kernel/clock.ja.html">クロックとスケジューリング</a></li>
+    </ul>
+    <h2><span class="no">3</span>プロジェクト <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="building.ja.html" aria-current="page">ビルドと依存関係</a></li>
+      <li><a href="releasing.ja.html">リリースと成果物</a></li>
+      <li><a href="contributing.ja.html">貢献ガイド</a></li>
+      <li><a href="changelog.ja.html">変更履歴</a></li>
+    </ul>
+    <h2><span class="no">4</span>参考資料 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.ja.html">C ABI 概要</a></li>
+      <li><a href="../reference/capi-handle.ja.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.ja.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">機械翻訳です。正確な内容は中国語版をご参照ください。</p>
+  <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>project<span class="sep">/</span>ビルドと依存関係</p>
+  <h1>ビルドと依存関係</h1>
+  <p class="kicker">Building and Dependencies</p>
+  <p class="lead">liberika の Rust コードは、cargo を使用して直接構築されます。 FFmpeg、dav1d、libass、HarfBuzz などのネイティブ依存関係はソース コードで取得され、 <code>third_party/</code> 内部に構築され、 <code>xtask deps</code> 管理。ビルド スクリプトは、CI がローカル出力と一致していることを保証します。</p>
+
+  <ul class="meta-strip">
+    <li>Rust <b>1.92+</b></li>
+    <li>edition <b>2024</b></li>
+    <li>ネイティブの依存関係 <b>7</b> ある</li>
+  </ul>
+
+  <section id="prereq">
+    <h2>依存以前<span class="jp">前提</span><a class="anchor" href="#prereq">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>ターゲット</th><th>ツール</th></tr></thead>
+        <tbody>
+          <tr><td class="k">macOS / iOS / tvOS</td><td>Xcode Command Line Tools；<code>nasm</code>、<code>meson</code>、<code>ninja</code>、<code>pkg-config</code>（Homebrew）。</td></tr>
+          <tr><td class="k">Windows</td><td>MSYS2 (UCRT64) 内 <code>make</code>、<code>tar</code>、<code>pkgconf</code>、<code>perl</code>、<code>zip</code>；<code>nasm</code>;Python <code>meson</code>、<code>ninja</code>；LLVM（<code>LIBCLANG_PATH</code> を指す <code>bin/</code>）。</td></tr>
+          <tr><td class="k">Android</td><td>Android SDK および NDK (r29、API 26)。</td></tr>
+          <tr><td class="k">OpenHarmony</td><td>DevEco Studio は SDK / NDK に対応します。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="deps">
+    <h2>ネイティブの依存関係<span class="jp">ネイティブ依存</span><a class="anchor" href="#deps">#</a></h2>
+    <p>リリース対象の依存関係を修正版の上流ソースコードから取得し、スクリプトアプリケーションを構築します。 <code>third_party/patches/</code> パッチ内で。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>コンポーネント</th><th>バージョン</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td class="k">FFmpeg</td><td class="m">8.1.2</td><td>にカプセル化された <code>crates/erika_ffmpeg_sys</code>;Android は patchset を使用します <code>erika-android-mediacodec-v4</code>。</td></tr>
+          <tr><td class="k">dav1d</td><td class="m">1.5.1</td><td>AV1 デコード。</td></tr>
+          <tr><td class="k">libass</td><td class="m">0.17.5</td><td>字幕のレンダリング。</td></tr>
+          <tr><td class="k">HarfBuzz</td><td class="m">14.2.1</td><td>テキストの整形。</td></tr>
+          <tr><td class="k">FreeType</td><td class="m">2.14.3</td><td>フォントのラスタライズ。</td></tr>
+          <tr><td class="k">FriBidi</td><td class="m">1.0.16</td><td>双方向テキスト。</td></tr>
+          <tr><td class="k">zlib</td><td class="m">1.3.2</td><td>FFmpeg によります。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>fetch および build の結果は作業領域にあります。 <code>third_party/</code>、システム ディレクトリにはインストールしないでください。</p>
+    <div class="code">
+<pre>third_party/cache     <span class="c"># 下载的源码压缩包</span>
+third_party/src       <span class="c"># 解压后的源码树</span>
+third_party/build     <span class="c"># 按 target / profile 分隔的构建目录</span>
+third_party/dist      <span class="c"># 按 target / profile 分隔的产物前缀</span></pre>
+    </div>
+  </section>
+
+  <section id="xtask">
+    <h2>xtask deps<span class="jp">依存関係の管理</span><a class="anchor" href="#xtask">#</a></h2>
+    <div class="code">
+      <p class="lbl">ビルドプロセスを完了する</p>
+<pre>cargo run -p xtask -- deps plan                 <span class="c"># 打印依赖计划</span>
+cargo run -p xtask -- deps fetch                <span class="c"># 下载并解压源码</span>
+cargo run -p xtask -- deps build                <span class="c"># 构建 host 目标</span></pre>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>オプション</th><th>値</th><th>デフォルト</th></tr></thead>
+        <tbody>
+          <tr><td class="k">--profile</td><td>lgpl / gpl-full</td><td>lgpl</td></tr>
+          <tr><td class="k">--target</td><td>以下の表 target を参照してください。</td><td>host</td></tr>
+          <tr><td class="k">--force</td><td>ネイティブ依存関係を強制的に再構築する</td><td>近い;デフォルトで完成品を再利用する</td></tr>
+          <tr><td class="k">--all</td><td>字幕スタックの追加構成: libass + FreeType + HarfBuzz + FriBidi (fetch はこれら 4 つのソース コードを同時にキャプチャします)</td><td>ビデオスタックのみを構築する</td></tr>
+          <tr><td class="k">--jobs</td><td>平行度</td><td>自動</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>2 つの profile の違いは、FFmpeg の configure フラグにあります。 lgpl は、GPL コンポーネントを無効にし、network を無効にし、再生コアに必要な demuxer / parser / decoder のみを有効にします。 gpl-full は、これに基づいて GPL 部分を有効にします。デフォルトの lgpl は公開のニーズを満たします。</p>
+    <p class="note">ビルド結果は、profile を使用してターゲットごとにビルド タグを保存します。 FFmpeg と dav1d は、バージョン、パッチ、ビルド オプションをチェックします。変わった <code>xtask/src/main.rs</code> または <code>third_party/patches/</code> 後で必要になる <code>deps build --force</code> 再構築をトリガーします。</p>
+  </section>
+
+  <section id="targets">
+    <h2>ターゲットリスト<span class="jp">ターゲット</span><a class="anchor" href="#targets">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>targetパラメータ</th><th>プラットフォーム</th></tr></thead>
+        <tbody>
+          <tr><td class="m">host</td><td>現在のマシン。</td></tr>
+          <tr><td class="m">aarch64-apple-darwin / x86_64-apple-darwin</td><td>macOS。</td></tr>
+          <tr><td class="m">aarch64-apple-ios</td><td>iOS実機。</td></tr>
+          <tr><td class="m">aarch64-apple-ios-sim / x86_64-apple-ios</td><td>iOSエミュレータ。</td></tr>
+          <tr><td class="m">aarch64-apple-tvos / aarch64-apple-tvos-sim / x86_64-apple-tvos</td><td>tvOS。</td></tr>
+          <tr><td class="m">x86_64-pc-windows-msvc / aarch64-pc-windows-msvc</td><td>Windows。</td></tr>
+          <tr><td class="m">aarch64-linux-android / armv7-linux-androideabi / x86_64-linux-android / i686-linux-android</td><td>Android。</td></tr>
+          <tr><td class="m">aarch64-unknown-linux-ohos</td><td>OpenHarmony。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>macOS の成果物は次の構成でビルドされます： <code>MACOSX_DEPLOYMENT_TARGET=11.0</code> 構築します。欠落している場合、スクリプトはデフォルト値を入力します。 Apple プラットフォームの arm64 および x86_64 製品は、リリース時にユニバーサル バイナリに合成されます。<a href="releasing.ja.html">リリースと製品</a>。</p>
+  </section>
+
+  <section id="workspace">
+    <h2>ワークスペースの構築<span class="jp">ワークスペース</span><a class="anchor" href="#workspace">#</a></h2>
+    <div class="code">
+<pre>cargo build --workspace
+cargo test --workspace</pre>
+    </div>
+    <p>ワークスペースには 3 つの crate が含まれています。<code>erika</code>(カーネル)、<code>erika_capi</code>（C ABI）、<code>erika_ffmpeg_sys</code>(FFmpeg バインディング)、および <code>xtask</code> 20以上の例があります。例は、特定のパスを検証する最小限のプログラムです。</p>
+    <div class="code">
+      <p class="lbl">macOS デスクトップのスモークテスト</p>
+<pre>cargo run -p macos_native_demo -- --smoke-seconds 3 /path/to/video.mp4</pre>
+    </div>
+    <p><code>macos_native_demo</code> これは、presenter の完全なエンドツーエンドのデモです: オープニング、再生、Metal レンダリング、システム メディア コントロール。名前による分業の他の例、<code>capi_smoke</code> C ABI のメイン呼び出しパスをカバーし、<code>playback_tick</code> / <code>player_tick</code> 2 つのエントリ play / pull のスケジューリング サイクルをカバーします。</p>
+  </section>
+
+  <section id="linux">
+    <h2>Linux システムライブラリ構築<a class="anchor" href="#linux">#</a></h2>
+    <p>Linux は、システム FFmpeg 8 および PulseAudio を使用し、liberika パッチ バージョン libass を個別にビルドします。入り口はxtaskのリリースターゲットとは異なります:</p>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>bash scripts/build_linux_libass.sh
+cargo build --locked --release -p erika_capi -p linux_native_demo</pre>
+    </div>
+    <p>リリースの依存関係、Flutter ダイナミック ライブラリ パス、および X11 / Wayland の例が含まれています。 <a href="../guide/linux.ja.html">Linux アクセス</a>。システム FFmpeg のコーデックとライセンスは、ディストリビューションのビルドによって異なります。 lgpl profile を設定しても、システム ライブラリは変更されません。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Project</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="../reference/capi-json.ja.html"><span class="dir">Prev</span>JSON bridge</a>
+    <a class="nx" href="releasing.ja.html"><span class="dir">Next</span>リリースと製品</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

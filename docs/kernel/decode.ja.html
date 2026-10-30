@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ハードウェア デコード — liberika 開発者ドキュメント</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
+  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="decode.html">中文</option><option value="decode.en.html">English</option><option value="decode.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="decode.html">中文</a> · <a href="decode.en.html">English</a> · <a href="decode.ja.html">日本語</a></nav></noscript></div>
+  <nav>
+    <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.ja.html">クイックスタート</a></li>
+      <li><a href="../guide/flutter.ja.html">Flutter の組み込み</a></li>
+      <li><a href="../guide/swift.ja.html">Swift の導入</a></li>
+      <li><a href="../guide/openharmony.ja.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.ja.html">Rust の組み込み</a></li>
+      <li><a href="../guide/c.ja.html">C ABI の組み込み</a></li>
+      <li><a href="../guide/linux.ja.html">Linux の導入</a></li>
+      <li><a href="../guide/web.ja.html">Web / WASM の導入</a></li>
+    </ul>
+    <h2><span class="no">2</span>カーネル設計 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="architecture.ja.html">アーキテクチャ概要</a></li>
+      <li><a href="decode.ja.html" aria-current="page">ハードウェアデコード</a></li>
+      <li><a href="zero-copy.ja.html">ゼロコピー取り込み</a></li>
+      <li><a href="render.ja.html">レンダリングパイプライン</a></li>
+      <li><a href="hdr.ja.html">ハイダイナミックレンジ</a></li>
+      <li><a href="upscale.ja.html">ニューラル超解像</a></li>
+      <li><a href="subtitle-danmaku.ja.html">字幕と弾幕</a></li>
+      <li><a href="clock.ja.html">クロックとスケジューリング</a></li>
+    </ul>
+    <h2><span class="no">3</span>プロジェクト <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.ja.html">ビルドと依存関係</a></li>
+      <li><a href="../project/releasing.ja.html">リリースと成果物</a></li>
+      <li><a href="../project/contributing.ja.html">貢献ガイド</a></li>
+      <li><a href="../project/changelog.ja.html">変更履歴</a></li>
+    </ul>
+    <h2><span class="no">4</span>参考資料 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.ja.html">C ABI 概要</a></li>
+      <li><a href="../reference/capi-handle.ja.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.ja.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">機械翻訳です。正確な内容は中国語版をご参照ください。</p>
+  <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>ハードウェアデコード</p>
+  <h1>ハードウェアデコード</h1>
+  <p class="kicker">Decoding</p>
+  <p class="lead">デコードは一律FFmpeg <code>avcodec</code> インターフェース、経由 <code>DecoderBackend</code> ソフトウェアまたはハードウェア バックエンドを選択します。ハードウェア パスが使用できない場合は、ソフトウェア ソリューションにフォールバックし、 <code>VideoDecoderChanged</code> イベントを主催者に報告します。</p>
+
+  <ul class="meta-strip">
+    <li>バックエンド <b>7</b> 親切</li>
+    <li>ハードウェア 6 / ソフトウェア 1</li>
+    <li>スイッチイベント <b>VideoDecoderChanged</b></li>
+  </ul>
+
+  <section id="backends">
+    <h2>デコードバックエンド<span class="jp">デコーダ</span><a class="anchor" href="#backends">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>バックエンド</th><th>プラットフォーム</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Cuda / NVDEC</td><td class="m">Linux / NVIDIA</td><td>CUDAビデオデコードデバイスを使用してください。</td></tr>
+          <tr><td class="k">Vaapi</td><td class="m">Linux / Intel、AMD</td><td>VA-API render device を使用します。</td></tr>
+          <tr><td class="k">Software</td><td class="m">すべて</td><td>FFmpeg ソフト ソリューション、あらゆるプラットフォームのフォールバック ターゲット。</td></tr>
+          <tr><td class="k">VideoToolbox</td><td class="m">macOS / iOS / tvOS</td><td>Apple ハードウェア デコード。</td></tr>
+          <tr><td class="k">D3d11va</td><td class="m">Windows</td><td>Direct3D 11 ビデオ アクセラレーション。</td></tr>
+          <tr><td class="k">MediaCodec</td><td class="m">Android</td><td>surface モードがメイン モードであり、ByteBuffer モードにフォールバックできません。</td></tr>
+          <tr><td class="k">AvCodec</td><td class="m">HarmonyOS</td><td>AVCodec ハードウェア デコード、H.264 / HEVC をカバーします。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>プラットフォームのデフォルトの選択は次のように行われます。 <code>VideoDecodePreference</code> 決定: Apple のデフォルトは VideoToolbox、Windows のデフォルトは D3D11VA、Android のデフォルトは MediaCodec、HarmonyOS のデフォルトは AVCodec、Linux のデフォルトは CUDA / NVDEC、次に VA-API です。他のプラットフォームではソフトウェア デコードが使用されます。</p>
+  </section>
+
+  <section id="hardware">
+    <h2>ハードウェアパス<span class="jp">ハードウェア経路</span><a class="anchor" href="#hardware">#</a></h2>
+    <p>ハードウェア バックエンドの選択は次の場所で行われます。 <code>open_raw</code>: バックエンドを押して、codec を選択します。 <code>avcodec_get_hw_config</code> ハードウェア構成を問い合わせてから使用します <code>av_hwdevice_ctx_create</code> デバイスコンテキストを作成します。デバイスの作成に失敗すると、フォールバック チェーンに沿ってソフトウェア デコードにフォールバックします。</p>
+    <p>MediaCodec はその中で最も特別なパスです。 surface モードのデコーダー バインディング <code>AVMediaCodecDeviceContext.native_window</code>、設定します <code>ndk_codec=1</code>、<code>delay_flush=1</code>、<code>erika_nonblocking=1</code> 3 つのオプション。 surface の作成またはバインドに失敗すると、再生スレッドは ByteBuffer モードでデコーダを再構築し、再起動します。プロセス全体がホストに一度だけ表示されます <code>VideoDecoderChanged</code> イベント。</p>
+    <div class="note">
+      <p><b>フォールバックは明示的です。</b> すべてのバックエンド スイッチで公開する <code>VideoDecoderChanged</code> イベント。ホストはこれを使用して、診断インターフェイスを更新したり、ログを更新したりできます。統計フィールド <code>hardware_video_frames</code> と <code>software_video_frames</code> 2 つのパスそれぞれのデコードされたフレームの数を累積します。</p>
+    </div>
+  </section>
+
+  <section id="queues">
+    <h2>フレームキュー<span class="jp">フレームキュー</span><a class="anchor" href="#queues">#</a></h2>
+    <p>デコードされた出力は境界付きキューに入り、再生スレッドはレンダリング側キューから切り離されます。キューの深さは次の場所で確認できます。 <code>PlayerConfig</code> 中程度の調整:</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>キュー</th><th>デフォルトの容量</th><th>設定フィールド</th></tr></thead>
+        <tbody>
+          <tr><td class="k">ビデオフレーム</td><td class="m">3</td><td class="m">video_frame_queue_capacity</td></tr>
+          <tr><td class="k">オーディオフレーム</td><td class="m">192</td><td class="m">audio_frame_queue_capacity</td></tr>
+          <tr><td class="k">字幕フレーム</td><td class="m">16</td><td class="m">subtitle_frame_queue_capacity</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>キューがいっぱいになると新しいフレームが破棄されます。統計フィールド <code>video_frame_backpressure_drops</code> 破棄されたビデオ フレームの累積数。オーディオ フレーム キューはオーディオ クロックによって消費され、容量は次のように構成されます。 <code>PlayerConfig.audio_frame_queue_capacity</code> 決める(<code>AudioSyncConfig</code> 同期パラメータのみが含まれ、容量は含まれません)。</p>
+  </section>
+
+  <section id="stats">
+    <h2>関連統計<span class="jp">統計</span><a class="anchor" href="#stats">#</a></h2>
+    <p><code>ErikaPresenterStats</code> デコードに関連するフィールド:</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>フィールド</th><th>意味</th></tr></thead>
+        <tbody>
+          <tr><td class="m">decoded_video_frames</td><td>デコードされたビデオ フレームの総数。</td></tr>
+          <tr><td class="m">hardware_video_frames</td><td>ハードウェアでデコードされたフレームの数。</td></tr>
+          <tr><td class="m">software_video_frames</td><td>ソフトウェアデコードされたフレームの数。</td></tr>
+          <tr><td class="m">zero_copy_video_frames</td><td>ゼロコピーでレンダラーにインポートされたフレームの数。</td></tr>
+          <tr><td class="m">cpu_video_frame_fallbacks</td><td>ゼロコピーは失敗し、フレーム数 CPU upload を返します。</td></tr>
+          <tr><td class="m">import_failures</td><td>デコーダ出力が GPU のインポートに失敗した回数。</td></tr>
+          <tr><td class="m">video_frame_backpressure_drops</td><td>キューがいっぱいになったために失われたフレームの数。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>ゼロコピーインポートの具体的なパスについては、を参照してください。<a href="zero-copy.ja.html">ゼロコピーインポート</a>。</p>
+  </section>
+
+  <section id="software">
+    <h2>ソフトウェアデコードフォールバック<a class="anchor" href="#software">#</a></h2>
+    <p>0.2.1 WMV / WMA ソフトウェア デコードを完了し、8-bit および 10-bit AV1 から dav1d をサポートします。ハード デコードが利用できない場合、またはビデオ形式がデバイスでサポートされていない場合、ソフトウェア フレームは同じレンダリング パイプラインに入ります。 Windows はソフトウェア フレームのアップロードもサポートしています。</p>
+  </section>
+
+  <section id="software-threads">
+    <h2>ソフトウェア デコード スレッド · 0.3.0<a class="anchor" href="#software-threads">#</a></h2>
+    <p>ソフトウェア ビデオ デコードでは、デフォルトでフレーム/スライスのマルチスレッドが有効になり、スレッドの数はエンコーダーとランタイム環境に基づいて FFmpeg によって選択されます。設定 <code>ERIKA_VIDEO_DECODE_THREADS=1</code> シングルスレッドを復元します。純粋なソフトウェアパスをテストする場合は両方を使用してください <code>ERIKA_HWDEC=software</code>。</p>
+    <p>ハード復号化バックエンドが内部的にソフトウェア ピクセル フォーマットに戻ると、診断と <code>VideoDecoderChanged</code> 実際のデコード パス、フォールバック理由、およびカウントがレポートされますが、実際のハード デコードは、要求されたバックエンドだけでは判断できません。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Kernel</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="architecture.ja.html"><span class="dir">Prev</span>アーキテクチャの概要</a>
+    <a class="nx" href="zero-copy.ja.html"><span class="dir">Next</span>ゼロコピーインポート</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

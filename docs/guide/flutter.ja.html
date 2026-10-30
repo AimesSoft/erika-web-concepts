@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flutter 埋め込み — liberika 開発者ドキュメント</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css">
+<script defer src="../docs.js"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
+  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="flutter.html">中文</option><option value="flutter.en.html">English</option><option value="flutter.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="flutter.html">中文</a> · <a href="flutter.en.html">English</a> · <a href="flutter.ja.html">日本語</a></nav></noscript></div>
+  <nav>
+    <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="quickstart.ja.html">クイックスタート</a></li>
+      <li><a href="flutter.ja.html" aria-current="page">Flutter の組み込み</a></li>
+      <li><a href="swift.ja.html">Swift の導入</a></li>
+      <li><a href="openharmony.ja.html">OpenHarmony / OHPM</a></li>
+      <li><a href="rust.ja.html">Rust の組み込み</a></li>
+      <li><a href="c.ja.html">C ABI の組み込み</a></li>
+      <li><a href="linux.ja.html">Linux の導入</a></li>
+      <li><a href="web.ja.html">Web / WASM の導入</a></li>
+    </ul>
+    <h2><span class="no">2</span>カーネル設計 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.ja.html">アーキテクチャ概要</a></li>
+      <li><a href="../kernel/decode.ja.html">ハードウェアデコード</a></li>
+      <li><a href="../kernel/zero-copy.ja.html">ゼロコピー取り込み</a></li>
+      <li><a href="../kernel/render.ja.html">レンダリングパイプライン</a></li>
+      <li><a href="../kernel/hdr.ja.html">ハイダイナミックレンジ</a></li>
+      <li><a href="../kernel/upscale.ja.html">ニューラル超解像</a></li>
+      <li><a href="../kernel/subtitle-danmaku.ja.html">字幕と弾幕</a></li>
+      <li><a href="../kernel/clock.ja.html">クロックとスケジューリング</a></li>
+    </ul>
+    <h2><span class="no">3</span>プロジェクト <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.ja.html">ビルドと依存関係</a></li>
+      <li><a href="../project/releasing.ja.html">リリースと成果物</a></li>
+      <li><a href="../project/contributing.ja.html">貢献ガイド</a></li>
+      <li><a href="../project/changelog.ja.html">変更履歴</a></li>
+    </ul>
+    <h2><span class="no">4</span>参考資料 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.ja.html">C ABI 概要</a></li>
+      <li><a href="../reference/capi-handle.ja.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.ja.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">機械翻訳です。正確な内容は中国語版をご参照ください。</p>
+  <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Flutter埋め込み</p>
+  <h1>Flutter埋め込み</h1>
+  <p class="kicker">Flutter Embedding</p>
+  <p class="lead"><code>erika_flutter</code> これは、liberika の公式 Flutter プラグインであり、macOS、iOS、tvOS、Windows、Android、OpenHarmony をサポートし、実験的な Linux プラグインを提供します。このプラグインは、完全な再生制御、マルチトラック管理、弾幕と字幕のレンダリング、ArtCNN アップスケーリング、および 3 つのビュー コンポーネントを提供します。</p>
+
+  <ul class="meta-strip">
+    <li>ターゲットプラットフォーム <b>7</b> ある</li>
+    <li>ビューコンポーネント <b>3</b> お金</li>
+    <li>Dart SDK <b>≥ 3.5</b></li>
+  </ul>
+
+  <section id="setup">
+    <h2>依存関係とインストール<span class="jp">インストール</span><a class="anchor" href="#setup">#</a></h2>
+    <div class="code">
+      <p class="lbl">pubspec.yaml</p>
+<pre>dependencies:
+  erika_flutter: ^0.3.0</pre>
+    </div>
+    <p>走る <code>flutter pub get</code> それだけです。 Apple、Windows、Android、および OpenHarmony ビルドは、一致するプリコンパイルされたカーネルを自動的にダウンロードします。 Linux は、最初にローカル動的ライブラリを構築して設定する必要があります <code>ERIKA_LIBRARY_DIR</code>の手順は次のとおりです。 <a href="linux.ja.html">Linux アクセス</a>。ローカル ソース コードからビルドする必要がある場合は、環境変数を設定します <code>ERIKA_FORCE_SOURCE_BUILD=1</code> そして指定します <code>ERIKA_REPO_ROOT</code> それだけです。例外: liberika リポジトリで macOS プラグインを使用するときに検出されました <code>crates/erika_capi</code> ソースコードのコンパイルが自動的に変更されます(Rustツールチェーンを必要としないウェアハウス内のシーンを設定可能) <code>ERIKA_FORCE_PREBUILT=1</code> プリコンパイルされたパッケージの使用を強制します)。</p>
+  </section>
+
+  <section id="views">
+    <h2>ビューの選択<span class="jp">ビューの選択肢</span><a class="anchor" href="#views">#</a></h2>
+    <p>このプラグインは、次の 3 つのレンダリング ビュー コンポーネントを提供します。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>ビューコンポーネント</th><th>根底にあるメカニズム</th><th>推奨されるシナリオ</th></tr></thead>
+        <tbody>
+          <tr><td class="k">ErikaWindowOverlayVideoView</td><td>ネイティブ子ウィンドウ/ネイティブ Overlay レイヤー</td><td>Apple / Windows のネイティブ レンダリング。 Linux Wayland はネイティブ ビデオ レイヤーを使用し、ビデオ領域は透明なままにする必要があります。</td></tr>
+          <tr><td class="k">ErikaTextureVideoView</td><td>Flutter Texture: macOS は IOSurface + Metal を使用し、Windows は共有 D3D11 テクスチャを使用し、OpenHarmony は外部テクスチャを使用し、Linux は RGBA リードバックを使用します。他のプラットフォームは ErikaVideoView にフォールバックします。</td><td>macOS / Windows / OpenHarmony / Linux で <code>Opacity</code>、クリッピング、変換、カラーフィルターなどの Flutter 合成効果が必要な場合に使用します。</td></tr>
+          <tr><td class="k">ErikaVideoView</td><td>統合されたクロスプラットフォーム ビュー: macOS/iOS PlatformView、Windows ネイティブ ウィンドウ、Android TextureView/SurfaceView、OpenHarmony 外部テクスチャ、Linux RGBA テクスチャ。</td><td>ユニバーサル再生の入り口。 Flutter トリミングとカラー フィルターが必要な場合は、Texture が推奨されます。 Windows Texture は SDR を出力します。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="code">
+      <p class="lbl">基本的な使用例</p>
+<pre><span class="k">import</span> <span class="s">'package:flutter/material.dart'</span>;
+<span class="k">import</span> <span class="s">'package:erika_flutter/erika_flutter.dart'</span>;
+
+<span class="k">class</span> VideoScreen <span class="k">extends</span> StatefulWidget {
+  <span class="k">const</span> VideoScreen({<span class="k">super</span>.key});
+
+  <span class="k">@override</span>
+  State&lt;VideoScreen&gt; createState() =&gt; _VideoScreenState();
+}
+
+<span class="k">class</span> _VideoScreenState <span class="k">extends</span> State&lt;VideoScreen&gt; {
+  <span class="k">final</span> _player = ErikaPlayer();
+
+  <span class="k">@override</span>
+  <span class="k">void</span> initState() {
+    <span class="k">super</span>.initState();
+    _initPlayer();
+  }
+
+  <span class="k">Future</span>&lt;<span class="k">void</span>&gt; _initPlayer() <span class="k">async</span> {
+    <span class="c">/* 1. 同步打开媒体（解析轨道与时长，状态置为 Ready） */</span>
+    <span class="k">await</span> _player.open(
+      <span class="s">'https://example.com/movie.mp4'</span>,
+      httpHeaders: {<span class="s">'User-Agent'</span>: <span class="s">'FlutterApp/1.0'</span>},
+    );
+    <span class="c">/* 2. 启动异步解码与播放 */</span>
+    <span class="k">await</span> _player.play();
+  }
+
+  <span class="k">@override</span>
+  <span class="k">void</span> dispose() {
+    _player.dispose();
+    <span class="k">super</span>.dispose();
+  }
+
+  <span class="k">@override</span>
+  Widget build(BuildContext context) {
+    <span class="k">return</span> Scaffold(
+      body: Center(
+        child: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: ErikaVideoView(player: _player),
+        ),
+      ),
+    );
+  }
+}</pre>
+    </div>
+  </section>
+
+  <section id="transparent">
+    <h2>透明ビデオとブレンディングモード<span class="jp">透明アニメーション</span><a class="anchor" href="#transparent">#</a></h2>
+    <p>player によってリクエストされた透明なビデオ:<code>ErikaVideoAlphaMode.packedAlphaRight</code> 左右のパーティションを必要とするエンコードされたマテリアル - 左半分はカラー、右半分はグレースケール alpha マスクです。 GPU レンダリング シェーダー (Metal / wgpu / D3D11) は、エンコードされた幅の半分でレンダリングされたビデオを使用して、プリマルチプライされた alpha フレームを再構築します。このモードを要求していない player は引き続き画面を不透明として解釈し、既存のコンテンツは影響を受けません。ブレンディングと不透明度はビデオ widget に入力されます。</p>
+    <div class="code">
+      <p class="lbl">透明なビデオの例</p>
+<pre>final player = ErikaPlayer(
+  videoAlphaMode: ErikaVideoAlphaMode.packedAlphaRight,
+);
+
+ErikaTextureVideoView(
+  player: player,
+  blendMode: BlendMode.overlay,
+  opacity: 0.8,
+)</pre>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>プラットフォームとパス</th><th>blendMode</th><th>opacity</th></tr></thead>
+        <tbody>
+          <tr><td class="k">macOS · ErikaTextureVideoView（Flutter Texture）</td><td>だけ <code>srcOver</code>;他の値はネイティブレイヤーに変更され、Core Animation によって混合されます。</td><td>Flutter <code>Opacity</code></td></tr>
+          <tr><td class="k">macOS · ネイティブ層 (blendMode ≠ srcOver)</td><td>サポート <code>overlay</code>(背景認識);他の値は無視されます</td><td>ネイティブ CALayer opacity</td></tr>
+          <tr><td class="k">Windows · ErikaTextureVideoView（SDR）</td><td><code>srcOver</code>;overlay ネイティブ合成レイヤーに変更</td><td>Flutter <code>Opacity</code></td></tr>
+          <tr><td class="k">Linux ・ Flutter テクスチャ / Wayland ネイティブ レイヤー</td><td>テクスチャは Flutter コンポジットになります。ネイティブレイヤーは不透明のみです <code>srcOver</code></td><td>テクスチャサポート Flutter <code>Opacity</code>;ネイティブレイヤーの固定不透明度</td></tr>
+          <tr><td class="k">Windows · ウィンドウ Overlay (DirectComposition)</td><td><code>srcOver</code> / <code>overlay</code>; 他の値を指定するとプラグイン エラーがスローされます。</td><td>IDCompositionEffectGroup opacity</td></tr>
+          <tr><td class="k">Android / iOS / OpenHarmony</td><td>作成パラメータを受け入れますが、消費しません</td><td>Flutter側によるTextureパス上のアプリケーション</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Windows 透明/overlay ウィンドウ Overlay ビデオは、独立した不透明なポップアップ ウィンドウを使用しなくなりましたが、事前に乗算された alpha DirectComposition swap chain を Flutter HWND にバインドして直接合成され、基になる Flutter またはゲーム画面は表示されたままになります。 HDR ソースは、liberika 内の tone map から SDR 合成空間になります。不透明なビデオは引き続き元の HWND パスを使用します。</p>
+  </section>
+
+  <section id="apis">
+    <h2>API 機能の概要<span class="jp">機能一覧</span><a class="anchor" href="#apis">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>カテゴリ</th><th>メソッド/プロパティ</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td class="k">再生コントロール</td><td class="m">open / play / pause / stop / close / seek / setPlaybackRate / setVolume</td><td>コアの再生と進行状況、ボリューム、速度制御 (速度範囲 0.25 ～ 16 倍)。</td></tr>
+          <tr><td class="k">透明なビデオ</td><td class="m">ErikaVideoAlphaMode.packedAlphaRight / ErikaTextureVideoView(blendMode, opacity)</td><td>左右のパーティション カラー/alpha マテリアルの透明レンダリング。srcOver/overlay ブレンディングと不透明度をサポートします (サポート範囲はプラットフォームによって異なります)。</td></tr>
+          <tr><td class="k">オーディオトラックと字幕</td><td class="m">tracks / selectAudioTrack / selectSubtitleTrack / addExternalSubtitle / removeSubtitleTrack / setSubtitleStyle / registerSubtitleMemoryFont</td><td>オーディオトラックの切り替え、外部 SRT/ASS 字幕、フォントスタイル、メモリフォントインジェクション。</td></tr>
+          <tr><td class="k">弾幕システム</td><td class="m">loadDanmakuJson / addDanmakuTrackJson / loadDanmakuFile / addDanmakuTrackFile / danmakuTracks / setDanmakuEnabled / setDanmakuConfig / clearDanmaku</td><td>DFM+ コリジョン レイアウト、マルチトラック弾幕、マスキング ワード、スタイル構成。 JSON 文字列は統一されたものに従います<a href="../kernel/subtitle-danmaku.ja.html#json-schema">弾幕 JSON 契約仕様</a>。</td></tr>
+          <tr><td class="k">グラフィックとアップスケーリング</td><td class="m">setUpscaler / getUpscalerStatus / screenshot / getPresenterStats / setDebugHudEnabled</td><td>ArtCNN ニューラル ネットワーク 2 倍の超解像度、シームレスなスクリーンショット、およびリアルタイムのレンダリング パフォーマンス統計。</td></tr>
+          <tr><td class="k">イベントストリーム</td><td class="m">events (Stream&lt;ErikaPlayerEvent&gt;)</td><td>再生ステータス、バッファリング、継続時間の変更、エラー報告を監視します。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="events">
+    <h2>イベントリスニング<span class="jp">イベント購入確認</span><a class="anchor" href="#events">#</a></h2>
+    <div class="code">
+      <p class="lbl">プレーヤーのイベント ストリームを聞く</p>
+<pre>_player.events.listen((event) {
+  <span class="k">switch</span> (event.kind) {
+    <span class="k">case</span> ErikaEventKind.stateChanged:
+      debugPrint(<span class="s">'播放状态: ${event.state}'</span>);
+    <span class="k">case</span> ErikaEventKind.durationChanged:
+      debugPrint(<span class="s">'总时长: ${event.duration}'</span>);
+    <span class="k">case</span> ErikaEventKind.positionChanged:
+      debugPrint(<span class="s">'当前进度: ${event.position}'</span>);
+    <span class="k">case</span> ErikaEventKind.bufferingChanged:
+      debugPrint(<span class="s">'缓冲状态: ${event.buffering}'</span>);
+    <span class="k">case</span> ErikaEventKind.error:
+      debugPrint(<span class="s">'播放错误: ${event.error ?? event.message}'</span>);
+    <span class="k">default</span>:
+      <span class="k">break</span>;
+  }
+});</pre>
+    </div>
+  </section>
+
+  <section id="http-cache">
+    <h2>HTTP キャッシュ<a class="anchor" href="#http-cache">#</a></h2>
+    <p><code>httpReadAheadBytes</code> 前方に読み取るバイト数を決定します。デフォルトは 2 MiB です。<code>httpBackBufferBytes</code> 保持する再生データの量を決定します。デフォルトは 16 MiB です。両方を省略するか、0 を渡してデフォルト値を使用します。先読みのデフォルト値は次のように指定することもできます。 <code>ERIKA_HTTP_READAHEAD_BYTES</code> 設定。</p>
+    <p>巻き戻しキャッシュ内の後方 seek は、ダウンロードされたデータを直接再利用できます。高ビットレートのビデオには、より大きな予算が必要です。80 Mbit/s のビデオを約 10 秒保持するには、約 100 MB が必要になります。キャッシュはバイト数によって制限されており、固定の再生秒数を表しません。</p>
+    <div class="code">
+      <p class="lbl">Dart</p>
+<pre>await player.open(
+  &#x27;https://example.com/video.mp4&#x27;,
+  httpReadAheadBytes: 8 * 1024 * 1024,
+  httpBackBufferBytes: 128 * 1024 * 1024,
+);
+await player.play();</pre>
+    </div>
+  </section>
+
+  <section id="gif-export">
+    <h2>GIFをエクスポート<a class="anchor" href="#gif-export">#</a></h2>
+    <p><code>ErikaPlayer.exportGif()</code> 別のヘッドレス パイプラインを使用し、ビデオ ビューを必要とせず、現在の再生には影響しません。クリップの開始時間と終了時間、フレーム レート、出力サイズを渡します。</p>
+    <div class="code">
+      <p class="lbl">Dart</p>
+<pre>final result = await ErikaPlayer.exportGif(
+  ErikaGifExportOptions(
+    inputUri: &#x27;/path/input.mp4&#x27;,
+    outputPath: &#x27;/path/output.gif&#x27;,
+    start: const Duration(seconds: 5),
+    end: const Duration(seconds: 10),
+    framesPerSecond: 10,
+    outputWidth: 640,
+    outputHeight: 360,
+    quality: ErikaGifExportQuality.high,
+  ),
+);</pre>
+    </div>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Guide</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="quickstart.ja.html"><span class="dir">Prev</span>クイックスタート</a>
+    <a class="nx" href="swift.ja.html"><span class="dir">Next</span>Swift アクセス</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>
