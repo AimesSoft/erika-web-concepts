@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Linux access — liberika developer documentation</title>
+<title>Linux integration — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -14,7 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
-  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="linux.html">中文</option><option value="linux.en.html">English</option><option value="linux.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="linux.html">中文</a> · <a href="linux.en.html">English</a> · <a href="linux.ja.html">日本語</a></nav></noscript></div>
+  <div class="language-switch" role="group" aria-label="Language"><a href="linux.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="linux.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="linux.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
     <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
     <ul>
@@ -57,20 +57,19 @@
 </aside>
 
 <main>
-  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
-  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Linux access</p>
-  <h1>Linux access</h1>
+  <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Linux integration</p>
+  <h1>Linux integration</h1>
   <p class="kicker">Linux / X11 / Wayland / WSLg</p>
-  <p class="lead">0.2.1 Added experimental Linux support: Rust, C/C++ and Flutter hosts can display video through X11 or Wayland and output audio through PulseAudio. Linux is currently built from source code and there is no precompiled release package.</p>
+  <p class="lead">Version 0.2.1 added experimental Linux support. Rust, C/C++, and Flutter hosts can display video through X11 or Wayland and output audio through PulseAudio. Linux is currently built from source; there is no prebuilt release package.</p>
   <ul class="meta-strip">
-    <li>Depend on <b>FFmpeg 8.x</b></li>
-    <li>window <b>X11 / Wayland</b></li>
+    <li>Depends on <b>FFmpeg 8.x</b></li>
+    <li>Window <b>X11 / Wayland</b></li>
     <li>Audio <b>PulseAudio</b></li>
   </ul>
 
   <section id="deps">
-    <h2>Prepare to depend on<a class="anchor" href="#deps">#</a></h2>
-    <p>The following dependency commands are applicable to Ubuntu 26.04; Rust requires 1.92+. Ubuntu 22.04 / 24.04 The old version of FFmpeg in the default repository does not satisfy this build path.</p>
+    <h2>Install dependencies<a class="anchor" href="#deps">#</a></h2>
+    <p>The following commands are for Ubuntu 26.04. Rust 1.92+ is required. The older FFmpeg in the default Ubuntu 22.04 and 24.04 repositories does not satisfy this build path.</p>
     <div class="code">
       <p class="lbl">Ubuntu 26.04</p>
 <pre>sudo apt update
@@ -84,7 +83,7 @@ sudo apt install -y \
   libxkbcommon-x11-0 libvulkan-dev mesa-vulkan-drivers libegl1 \
   libgl1-mesa-dri fonts-dejavu-core pulseaudio-utils</pre>
     </div>
-    <p>PipeWire desktop needs to be enabled <code>pipewire-pulse</code>. Available <code>pactl info</code> Check audio connection; WSLg has provided PulseAudio service.</p>
+    <p>On PipeWire desktops, enable <code>pipewire-pulse</code>. You can check the audio connection with <code>pactl info</code>. WSLg already provides a PulseAudio service.</p>
   </section>
 
   <section id="build">
@@ -98,26 +97,26 @@ bash scripts/build_linux_libass.sh
 cargo build --locked --release -p linux_native_demo -p erika_capi
 cargo run --locked --release -p linux_native_demo -- /path/to/video.mkv</pre>
     </div>
-    <p>libass uses liberika patch version 0.17.5, and the build script is responsible for downloading, verifying, and applying the font fallback patch. FFmpeg 8 and PulseAudio dynamically link system libraries by default. The product is located in <code>target/release/</code>。</p>
-    <p>Demo automatically selects the window protocol, which can also be passed in <code>--x11</code> or <code>--wayland</code>. Space to pause or continue, left and right arrows to jump for 5 seconds, Esc to exit.</p>
+    <p>libass uses liberika's patched version of 0.17.5; the build script downloads it, verifies it, and applies the font fallback patch. FFmpeg 8 and PulseAudio link dynamically against system libraries by default. Build outputs are in <code>target/release/</code>.</p>
+    <p>The demo selects the window protocol automatically; you can also pass <code>--x11</code> or <code>--wayland</code>. Press Space to pause or resume, the left and right arrow keys to seek 5 seconds, and Esc to exit.</p>
   </section>
 
   <section id="flutter">
-    <h2>Flutter access<a class="anchor" href="#flutter">#</a></h2>
+    <h2>Flutter integration<a class="anchor" href="#flutter">#</a></h2>
     <div class="code">
       <p class="lbl">shell</p>
 <pre>cargo build --locked --release -p erika_capi
 export ERIKA_LIBRARY_DIR=&quot;${CARGO_TARGET_DIR:-$PWD/target}/release&quot;
-# 在 Flutter 宿主目录中执行：
+# Run in the Flutter host directory:
 flutter build linux --release</pre>
     </div>
-    <p>host added <code>erika_flutter: ^0.3.0</code>。<code>ErikaVideoView</code> with <code>ErikaTextureVideoView</code> Using the SDR RGBA texture, Flutter cropping and UI overlaying are supported; this path requires frame-by-frame GPU readback.</p>
-    <p>Wayland optional <code>ErikaWindowOverlayVideoView</code>, use <code>wl_subsurface</code> Put native video under transparent Flutter UI to reduce frame-by-frame RGBA readback. The video area needs to be left transparent; this native layer supports opaque srcOver, and the video itself does not accept Flutter cropping or color filters. X11 uses texture views.</p>
+    <p>Add <code>erika_flutter: ^0.3.0</code> to the host app. <code>ErikaVideoView</code> and <code>ErikaTextureVideoView</code> use an SDR RGBA texture and support Flutter clipping and UI overlays; this path requires a per-frame GPU readback.</p>
+    <p>On Wayland you can optionally use <code>ErikaWindowOverlayVideoView</code>, which places the native video under the transparent Flutter UI with <code>wl_subsurface</code> to reduce per-frame RGBA readback. Leave the video area transparent. This native layer supports opaque srcOver compositing, and the video itself does not accept Flutter clipping or color filters. X11 uses the texture views.</p>
   </section>
 
   <section id="native">
-    <h2>Rust and C/C++ access<a class="anchor" href="#native">#</a></h2>
-    <p>Rust host enabled <code>erika</code> of <code>wgpu</code> feature. C host link <code>liberika_capi.so</code>, using the same build <code>erika.h</code>。</p>
+    <h2>Rust and C/C++ integration<a class="anchor" href="#native">#</a></h2>
+    <p>A Rust host enables the <code>wgpu</code> feature of <code>erika</code>. A C host links <code>liberika_capi.so</code> and uses the <code>erika.h</code> from the same build.</p>
     <div class="tw"><table>
       <thead><tr><th>surface kind</th><th>raw_window</th><th>raw_display</th></tr></thead>
       <tbody>
@@ -125,21 +124,21 @@ flutter build linux --release</pre>
         <tr><td class="m">ErikaWgpuSurfaceKind_WaylandSurface</td><td>wl_surface*</td><td>wl_display*</td></tr>
       </tbody>
     </table></div>
-    <p>Pass <code>erika_presenter_attach_wgpu_surface</code> attached window; pointer <code>uintptr_t</code> convert to <code>uint64_t</code>, width and height transmit physical pixels. The window with display is released after detach or presenter is destroyed. attach, render, resize and detach of the same presenter are executed serially in the window event thread.</p>
-    <p>Calling sequence:<code>create → attach → open → play → render_tick → close → detach → destroy</code>. A runnable C example is located at <code>examples/linux_native_demo/capi_smoke.c</code>。</p>
+    <p>Attach a window with <code>erika_presenter_attach_wgpu_surface</code>. Convert pointers to <code>uint64_t</code> through <code>uintptr_t</code>, and pass the width and height in physical pixels. Release the window and display only after detach completes or the presenter is destroyed. Run attach, render, resize, and detach for the same presenter serially on the window event thread.</p>
+    <p>Call order: <code>create → attach → open → play → render_tick → close → detach → destroy</code>. A runnable C example is at <code>examples/linux_native_demo/capi_smoke.c</code>.</p>
   </section>
 
   <section id="gpu">
-    <h2>Decoding with GPU path<a class="anchor" href="#gpu">#</a></h2>
-    <p>Linux will try NVIDIA NVDEC by default, and then try Intel / AMD VA-API; if the driver or format is not supported, it will fall back to FFmpeg software decoding.</p>
+    <h2>Decoding and the GPU path<a class="anchor" href="#gpu">#</a></h2>
+    <p>On Linux, liberika tries NVIDIA NVDEC first, then Intel / AMD VA-API. If the driver or format is not supported, it falls back to FFmpeg software decoding.</p>
     <div class="code">
       <p class="lbl">shell</p>
 <pre>export ERIKA_HWDEC=auto  # auto / cuda / nvdec / vaapi / software
-# 多显卡机器可指定：
+# On multi-GPU machines you can pick a device:
 export ERIKA_CUDA_DEVICE=0
 export ERIKA_VAAPI_DEVICE=/dev/dri/renderD128</pre>
     </div>
-    <p>The ordinary NVDEC path can download the decoding plane and then upload it to wgpu; the direct import from VA-API to Vulkan is an experimental path. Linux HDR requires the compositor to actually provide the FP16 extended-linear WSI surface, Flutter RGBA texture output is SDR.</p>
+    <p>The regular NVDEC path downloads the decoded planes and then uploads them to wgpu. Direct import from VA-API to Vulkan is experimental. Linux HDR requires the compositor to actually provide an FP16 extended-linear WSI surface; Flutter RGBA texture output is SDR.</p>
   </section>
 
   <section id="wsl">
@@ -147,21 +146,21 @@ export ERIKA_VAAPI_DEVICE=/dev/dri/renderD128</pre>
     <div class="code">
       <p class="lbl">shell</p>
 <pre>bash scripts/run_wsl_gpu.sh --wayland /mnt/c/path/to/video.mkv
-# 或使用 X11：
+# Or with X11:
 bash scripts/run_wsl_gpu.sh --x11</pre>
     </div>
-    <p>The startup script selects <code>wgpu → OpenGL/EGL → Mesa D3D12</code> for the liberika process. WSL uses the Windows GPU driver; no Linux NVIDIA kernel driver is required. If the repository is under <code>/mnt/c</code>, place <code>CARGO_TARGET_DIR</code> on the Linux filesystem to speed up builds.</p>
+    <p>The launch script selects <code>wgpu → OpenGL/EGL → Mesa D3D12</code> for the liberika process. WSL uses the Windows GPU driver, so you do not need to install a Linux NVIDIA kernel driver. If the repository is under <code>/mnt/c</code>, put <code>CARGO_TARGET_DIR</code> on the Linux filesystem to speed up builds.</p>
   </section>
 
   <section id="check">
-    <h2>run check<a class="anchor" href="#check">#</a></h2>
+    <h2>Verification<a class="anchor" href="#check">#</a></h2>
     <div class="code">
       <p class="lbl">shell</p>
 <pre>bash scripts/check_linux.sh
-# 同时检查 Wayland：
+# Also check Wayland:
 ERIKA_TEST_WAYLAND=1 bash scripts/check_linux.sh</pre>
     </div>
-    <p>The check requires available display and audio services, covering the play, pause, seek, resize and C ABI lifecycles.</p>
+    <p>The check requires working display and audio services. It covers play, pause, seek, resize, and the C ABI lifecycle.</p>
   </section>
 
   <footer class="doc-foot">
@@ -171,8 +170,8 @@ ERIKA_TEST_WAYLAND=1 bash scripts/check_linux.sh</pre>
   </footer>
 
   <nav class="pager">
-    <a href="c.en.html"><span class="dir">Prev</span>C ABI embedded</a>
-    <a class="nx" href="web.en.html"><span class="dir">Next</span>Web / WASM access</a>
+    <a href="c.en.html"><span class="dir">Prev</span>C ABI integration</a>
+    <a class="nx" href="web.en.html"><span class="dir">Next</span>Web / WASM integration</a>
   </nav>
 </main>
 

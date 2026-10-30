@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Rendering Pipeline — liberika Developer Documentation</title>
+<title>Rendering pipeline — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -14,7 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
-  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="render.html">中文</option><option value="render.en.html">English</option><option value="render.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="render.html">中文</a> · <a href="render.en.html">English</a> · <a href="render.ja.html">日本語</a></nav></noscript></div>
+  <div class="language-switch" role="group" aria-label="Language"><a href="render.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="render.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="render.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
     <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
     <ul>
@@ -57,62 +57,61 @@
 </aside>
 
 <main>
-  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
-  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>rendering pipeline</p>
-  <h1>rendering pipeline</h1>
+  <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>Rendering pipeline</p>
+  <h1>Rendering pipeline</h1>
   <p class="kicker">Render Pipeline</p>
-  <p class="lead">The video, subtitles and danmaku are sampled, color converted, tone mapping, zoomed and synthesized in the same pass picture, render pass on the screen at once. pass Picture by <code>pipeline::build_graph</code> Constructed conditionally on the color state of the source and destination.</p>
+  <p class="lead">Video, subtitles, and danmaku are sampled, color converted, tone mapped, scaled, and composited in a single pass graph, and reach the screen in one render pass. <code>pipeline::build_graph</code> builds the pass graph conditionally, based on the color state of the source and the target.</p>
 
   <ul class="meta-strip">
-    <li>pass type <b>11</b> kind</li>
-    <li>backend <b>Metal / D3D11 / wgpu</b></li>
-    <li>Geometry <b>aspect_fit centered</b></li>
+    <li>Pass types <b>11</b></li>
+    <li>Backends <b>Metal / D3D11 / wgpu</b></li>
+    <li>Geometry <b>aspect_fit, centered</b></li>
   </ul>
 
   <section id="passes">
-    <h2>pass diagram<span class="jp">パスグラフ</span><a class="anchor" href="#passes">#</a></h2>
-    <p><code>RenderPassKind</code> All 11 types of pass are defined. When rendering a frame,<code>build_graph</code> The transformations from the import frame to the output are combined sequentially, and pass that do not meet the conditions are skipped:</p>
+    <h2>Pass graph<span class="jp">パスグラフ</span><a class="anchor" href="#passes">#</a></h2>
+    <p><code>RenderPassKind</code> defines all 11 pass types. To render a frame, <code>build_graph</code> chains them in order, from frame import to output transform, and skips any pass whose conditions are not met:</p>
     <div class="tw">
       <table>
-        <thead><tr><th>pass</th><th>Responsibilities</th></tr></thead>
+        <thead><tr><th>Pass</th><th>Responsibility</th></tr></thead>
         <tbody>
-          <tr><td class="m">ImportFrame</td><td>Decoded frames are imported as GPU texture (zero copy or CPU upload).</td></tr>
-          <tr><td class="m">NeuralUpscale</td><td>ArtCNN Brightness 2× Super Resolution, only inserted when enabled and supported by the backend.</td></tr>
-          <tr><td class="m">PlaneSampling</td><td>YCbCr planar sampling, uv upsampling and chroma reconstruction.</td></tr>
+          <tr><td class="m">ImportFrame</td><td>Imports the decoded frame as a GPU texture (zero-copy or CPU upload).</td></tr>
+          <tr><td class="m">NeuralUpscale</td><td>ArtCNN 2× luma upscaling; inserted only when enabled and supported by the backend.</td></tr>
+          <tr><td class="m">PlaneSampling</td><td>YCbCr plane sampling, UV upsampling, and chroma reconstruction.</td></tr>
           <tr><td class="m">ChromaReconstruction</td><td>Chroma plane reconstruction.</td></tr>
-          <tr><td class="m">TransferDecode</td><td>Transfer function decoding to restore linear light from the encoded format.</td></tr>
-          <tr><td class="m">GamutMap</td><td>Gamut mapping, inserting when the source and target primary colors are different.</td></tr>
-          <tr><td class="m">ToneMap</td><td>tone mapping, inserted when the source is HDR and the peak exceeds the target by about 1.05 times.</td></tr>
-          <tr><td class="m">Scale</td><td>Scale to output size.</td></tr>
-          <tr><td class="m">OverlayComposite</td><td>The synthesis of subtitle layer (internal kernel overlay) and danmaku.</td></tr>
-          <tr><td class="m">Dither</td><td>Jitter when output bit depth is reduced.</td></tr>
-          <tr><td class="m">OutputTransform</td><td>Encode to output format (SDR/EDR/HDR10 PQ/scRGB).</td></tr>
+          <tr><td class="m">TransferDecode</td><td>Decodes the transfer function to recover linear light from the encoded format.</td></tr>
+          <tr><td class="m">GamutMap</td><td>Gamut mapping; inserted when the source and target primaries differ.</td></tr>
+          <tr><td class="m">ToneMap</td><td>Tone mapping; inserted when the source is HDR and its peak exceeds the target's by about 1.05×.</td></tr>
+          <tr><td class="m">Scale</td><td>Scales to the output size.</td></tr>
+          <tr><td class="m">OverlayComposite</td><td>Composites the subtitle layer (the kernel's internal overlay) and danmaku.</td></tr>
+          <tr><td class="m">Dither</td><td>Dithering when the output bit depth is reduced.</td></tr>
+          <tr><td class="m">OutputTransform</td><td>Encodes to the output format (SDR / EDR / HDR10 PQ / scRGB).</td></tr>
         </tbody>
       </table>
     </div>
-    <p>The two conditional insertion rules come from <code>SourceColorState</code> with <code>TargetColorState</code> Comparison of: tone map is only inserted if the source is HDR and the peak exceeds the target by about 5%, gamut mapping is only inserted if the source and target primary colors are different. SDR content is directly sampled and output transformed on the SDR target.</p>
+    <p>The two conditional passes are decided by comparing <code>SourceColorState</code> with <code>TargetColorState</code>. Tone mapping is inserted only when the source is HDR and its peak exceeds the target's by about 5%. Gamut mapping is inserted only when the source and target primaries differ. SDR content on an SDR target goes straight through sampling and the output transform.</p>
   </section>
 
   <section id="backends">
-    <h2>Backend implementation<span class="jp">バックエンド</span><a class="anchor" href="#backends">#</a></h2>
+    <h2>Backend implementations<span class="jp">バックエンド</span><a class="anchor" href="#backends">#</a></h2>
     <div class="tw">
       <table>
-        <thead><tr><th>backend</th><th>platform</th><th>Description</th></tr></thead>
+        <thead><tr><th>Backend</th><th>Platform</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td class="k">Metal</td><td class="m">macOS / iOS / tvOS</td><td>Native implementation. YCbCr sampling, color conversion, tone mapping, overlay synthesis. ArtCNN goes simdgroup matrix.</td></tr>
-          <tr><td class="k">Direct3D 11</td><td class="m">Windows</td><td>Native implementation. D3D11VA texture interop, HDR10 output, overlay composition.</td></tr>
-          <tr><td class="k">wgpu</td><td class="m">Android / HarmonyOS</td><td>Vulkan backend, GLES with recovery path available. HarmonyOS presented by OHNativeWindow.</td></tr>
+          <tr><td class="k">Metal</td><td class="m">macOS / iOS / tvOS</td><td>Native implementation. YCbCr sampling, color conversion, tone mapping, and overlay compositing. ArtCNN uses simdgroup matrix.</td></tr>
+          <tr><td class="k">Direct3D 11</td><td class="m">Windows</td><td>Native implementation. D3D11VA texture interop, HDR10 output, and overlay compositing.</td></tr>
+          <tr><td class="k">wgpu</td><td class="m">Android / HarmonyOS</td><td>Vulkan backend, with GLES and recovery paths available. HarmonyOS presents through OHNativeWindow.</td></tr>
         </tbody>
       </table>
     </div>
-    <p>The rendering backend is determined by the presenter configuration, regardless of the surface attachment method. Color decisions are unified <code>pipeline</code> module, the three backends share the same set of pass graph descriptions.</p>
+    <p>The Presenter configuration determines the rendering backend, independent of how the surface is attached. Color decisions all go through the <code>pipeline</code> module, and the three backends share the same pass graph description.</p>
   </section>
 
   <section id="compositing">
-    <h2>Composition and Geometry<span class="jp">synthesis</span><a class="anchor" href="#compositing">#</a></h2>
-    <p>Subtitles and danmaku in <code>OverlayComposite</code> Synthesized in pass. Compositing takes place within the video viewport: bullet posts and subtitles are positioned relative to the video content, following the video's aspect-fit geometry.</p>
-    <p>Video content starts with <code>aspect_fit</code> Centered within the output surface, the letterbox area is filled with the clear screen color (currently uniformly black on the backend). The synthesis sequence is video, subtitles, and danmaku.</p>
-    <p>The rendering chain of HDR content and the screenshot chain share the same pass image; the screenshot is rendered to an off-screen target with the same pixel format as the surface, and is converted to RGBA8 when read back (the HDR value is clamped to the SDR range). The screenshots only combine video and subtitles, excluding danmaku and debug HUD.</p>
+    <h2>Compositing and geometry<span class="jp">合成</span><a class="anchor" href="#compositing">#</a></h2>
+    <p>Subtitles and danmaku are composited in the <code>OverlayComposite</code> pass. Compositing happens inside the video viewport: danmaku and subtitles are positioned relative to the video content and follow its aspect-fit geometry.</p>
+    <p>Video content is placed centered in the output surface with <code>aspect_fit</code>, and the letterbox area is filled with the clear color (currently black on all backends). The compositing order is video, subtitles, then danmaku.</p>
+    <p>The HDR rendering chain and the screenshot chain share the same pass graph. A screenshot is rendered to an offscreen target with the same pixel format as the surface and converted to RGBA8 on readback (HDR values are clamped to the SDR range). Screenshots composite only video and subtitles; they exclude danmaku and the debug HUD.</p>
   </section>
 
   <footer class="doc-foot">
@@ -122,8 +121,8 @@
   </footer>
 
   <nav class="pager">
-    <a href="zero-copy.en.html"><span class="dir">Prev</span>Zero copy import</a>
-    <a class="nx" href="hdr.en.html"><span class="dir">Next</span>high dynamic range</a>
+    <a href="zero-copy.en.html"><span class="dir">Prev</span>Zero-copy import</a>
+    <a class="nx" href="hdr.en.html"><span class="dir">Next</span>High dynamic range</a>
   </nav>
 </main>
 

@@ -10,10 +10,11 @@
   document.querySelector('meta[name="description"]').content = app.ui.description;
   document.querySelector('.skip-link').textContent = app.ui.skip;
   root.innerHTML = app.renderPage(content);
-  root.querySelector('[data-language]').addEventListener('change', (event) => {
-    try { localStorage.setItem('liberika-language', event.target.value); } catch { /* Storage may be unavailable. */ }
+  root.querySelectorAll('[data-language]').forEach((button) => button.addEventListener('click', () => {
+    if (button.dataset.language === app.language) return;
+    try { localStorage.setItem('liberika-language', button.dataset.language); } catch { /* Storage may be unavailable. */ }
     window.location.reload();
-  });
+  }));
   app.initTabs(root);
   app.initClipboard(root);
   app.initNavigation(root);

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>High Dynamic Range — liberika Developer Documentation</title>
+<title>High dynamic range — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -14,7 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
-  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="hdr.html">中文</option><option value="hdr.en.html">English</option><option value="hdr.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="hdr.html">中文</a> · <a href="hdr.en.html">English</a> · <a href="hdr.ja.html">日本語</a></nav></noscript></div>
+  <div class="language-switch" role="group" aria-label="Language"><a href="hdr.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="hdr.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="hdr.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
     <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
     <ul>
@@ -57,94 +57,93 @@
 </aside>
 
 <main>
-  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
-  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>high dynamic range</p>
-  <h1>high dynamic range</h1>
+  <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>High dynamic range</p>
+  <h1>High dynamic range</h1>
   <p class="kicker">HDR / EDR Output</p>
-  <p class="lead">liberika output encoding negotiated by the platform: Apple EDR, Windows HDR10 PQ, Android and Linux extended-linear scRGB. When negotiation fails, fall back to SDR. The fallback reason and counting time <code>ErikaOutputStatus</code> Report, not silently demote.</p>
+  <p class="lead">liberika negotiates the output encoding per platform: Apple EDR, Windows HDR10 PQ, and extended-linear scRGB on Android and Linux. When negotiation fails, it falls back to SDR. The fallback reason and count are reported through <code>ErikaOutputStatus</code>; the kernel never degrades silently.</p>
 
   <ul class="meta-strip">
-    <li>Output mode <b>4</b> kind</li>
-    <li>active coding <b>5</b> kind</li>
-    <li>Fallback reason <b>8</b> species (otherwise <code>None</code> Indicates no rollback)</li>
+    <li>Output modes <b>4</b></li>
+    <li>Active encodings <b>5</b></li>
+    <li>Fallback reasons <b>8</b> (plus <code>None</code>, meaning no fallback)</li>
   </ul>
 
   <section id="modes">
-    <h2>Output mode<span class="jp">Make an effort</span><a class="anchor" href="#modes">#</a></h2>
-    <p>When the host created presenter <code>ErikaPresenterConfig.output_mode</code> Statement request:</p>
+    <h2>Output modes<span class="jp">出力モード</span><a class="anchor" href="#modes">#</a></h2>
+    <p>When it creates a Presenter, the host declares its request through <code>ErikaPresenterConfig.output_mode</code>:</p>
     <div class="tw">
       <table>
-        <thead><tr><th>mode</th><th>value</th><th>Description</th></tr></thead>
+        <thead><tr><th>Mode</th><th>Value</th><th>Description</th></tr></thead>
         <tbody>
           <tr><td class="k">Sdr</td><td class="m">0</td><td>Fixed SDR output.</td></tr>
-          <tr><td class="k">AppleEdr</td><td class="m">1</td><td>Apple EDR, extended by headroom.</td></tr>
-          <tr><td class="k">ExtendedLinear</td><td class="m">2</td><td>extended-linear output (Android / Linux scRGB path).</td></tr>
-          <tr><td class="k">Auto</td><td class="m">3</td><td>Automatic selection based on content and surface capabilities.</td></tr>
+          <tr><td class="k">AppleEdr</td><td class="m">1</td><td>Apple EDR, extended according to headroom.</td></tr>
+          <tr><td class="k">ExtendedLinear</td><td class="m">2</td><td>Extended-linear output (the Android / Linux scRGB path).</td></tr>
+          <tr><td class="k">Auto</td><td class="m">3</td><td>Selected automatically based on the content and the surface's capabilities.</td></tr>
         </tbody>
       </table>
     </div>
-    <p>The actual effective encoding is recorded in <code>ErikaOutputStatus.active_encoding</code>：<code>SdrSrgb</code>、<code>AppleEdr</code>、<code>AndroidExtendedLinearScRgb</code>、<code>Hdr10Pq</code>、<code>LinuxExtendedLinearScRgb</code>. The request mode and active encoding can be different, and the difference is the fallback.</p>
+    <p>The encoding actually in effect is recorded in <code>ErikaOutputStatus.active_encoding</code>: <code>SdrSrgb</code>, <code>AppleEdr</code>, <code>AndroidExtendedLinearScRgb</code>, <code>Hdr10Pq</code>, and <code>LinuxExtendedLinearScRgb</code>. The requested mode and the active encoding can differ, and that difference is the fallback.</p>
   </section>
 
   <section id="headroom">
-    <h2>Headroom Negotiation<span class="jp">ヘッドルーム</span><a class="anchor" href="#headroom">#</a></h2>
-    <p>The EDR and scRGB paths negotiate dynamic range based on the display's peak brightness. For host <code>set_output_headroom</code> Provides desired headroom with a flag indicating whether the renderer is capable of converging to usable values based on the surface's actual capabilities.</p>
+    <h2>Headroom negotiation<span class="jp">ヘッドルーム</span><a class="anchor" href="#headroom">#</a></h2>
+    <p>The EDR and scRGB paths negotiate dynamic range based on the display's peak brightness. The host calls <code>set_output_headroom</code> to provide the headroom it wants along with a flag saying whether that value is known, and the renderer converges to a usable value based on the surface's actual capabilities.</p>
     <p>Status fields during negotiation:</p>
     <ul class="body">
-      <li><code>requested_headroom</code> — Host request value.</li>
-      <li><code>active_headroom</code> / <code>active_headroom_known</code> — Current effective value and validity.</li>
-      <li><code>headroom_updates</code> — Number of changes to the effective value.</li>
+      <li><code>requested_headroom</code> — The value the host requested.</li>
+      <li><code>active_headroom</code> / <code>active_headroom_known</code> — The value currently in effect, and whether it is valid.</li>
+      <li><code>headroom_updates</code> — Number of times the effective value changed.</li>
       <li><code>extended_linear_frames</code> — Number of frames output with extended-linear encoding.</li>
     </ul>
   </section>
 
   <section id="fallback">
-    <h2>rollback<span class="jp">フォールバック</span><a class="anchor" href="#fallback">#</a></h2>
-    <p>Fallback reason enumeration <code>ErikaOutputFallbackReason</code> Contains <code>None</code>(Indicating that no rollback occurred) There are 9 values in total, 8 of which are actual rollback reasons:</p>
+    <h2>Fallback<span class="jp">フォールバック</span><a class="anchor" href="#fallback">#</a></h2>
+    <p>The <code>ErikaOutputFallbackReason</code> enumeration has 9 values, including <code>None</code> (no fallback occurred); the other 8 are actual fallback reasons:</p>
     <div class="tw">
       <table>
-        <thead><tr><th>Reason</th><th>value</th><th>meaning</th></tr></thead>
+        <thead><tr><th>Reason</th><th>Value</th><th>Description</th></tr></thead>
         <tbody>
           <tr><td class="m">None</td><td class="m">0</td><td>No fallback.</td></tr>
-          <tr><td class="m">DisplayHdrUnsupported</td><td class="m">1</td><td>The monitor does not support HDR.</td></tr>
-          <tr><td class="m">HybridCompositionRequired</td><td class="m">2</td><td>Requires mixed synthesis.</td></tr>
+          <tr><td class="m">DisplayHdrUnsupported</td><td class="m">1</td><td>The display does not support HDR.</td></tr>
+          <tr><td class="m">HybridCompositionRequired</td><td class="m">2</td><td>Hybrid composition is required.</td></tr>
           <tr><td class="m">WgpuBackendNotVulkan</td><td class="m">3</td><td>The wgpu backend is not Vulkan.</td></tr>
-          <tr><td class="m">Rgba16FloatSurfaceFormatUnavailable</td><td class="m">4</td><td>RGBA16F is not supported on the surface.</td></tr>
-          <tr><td class="m">NativeWindowDataSpaceApiUnavailable</td><td class="m">5</td><td>native window is missing data space API.</td></tr>
-          <tr><td class="m">ScrgbDataSpaceVerificationFailed</td><td class="m">6</td><td>scRGB data space Verification failed.</td></tr>
+          <tr><td class="m">Rgba16FloatSurfaceFormatUnavailable</td><td class="m">4</td><td>The surface does not support RGBA16F.</td></tr>
+          <tr><td class="m">NativeWindowDataSpaceApiUnavailable</td><td class="m">5</td><td>The native window lacks the data space API.</td></tr>
+          <tr><td class="m">ScrgbDataSpaceVerificationFailed</td><td class="m">6</td><td>scRGB data space verification failed.</td></tr>
           <tr><td class="m">SurfaceConfigureFailed</td><td class="m">7</td><td>Surface configuration failed.</td></tr>
-          <tr><td class="m">LegacyAppleEdrUnsupported</td><td class="m">8</td><td>The legacy Apple EDR path is not available.</td></tr>
+          <tr><td class="m">LegacyAppleEdrUnsupported</td><td class="m">8</td><td>The legacy Apple EDR path is unavailable.</td></tr>
         </tbody>
       </table>
     </div>
-    <p><code>fallback_count</code> Cumulative number of rollbacks,<code>data_space_failures</code> The number of failed negotiations data space is accumulated individually. The host can use these two items to determine whether the HDR support of the target device is stable.</p>
-    <p>Android scRGB requires Vulkan, RGBA16F surfaces and the correct native window data space; Linux scRGB requires FP16 extended-linear WSI. Ordinary SDR surface uses tone mapping output.</p>
+    <p><code>fallback_count</code> is the cumulative number of fallbacks, and <code>data_space_failures</code> separately counts failed data space negotiations. A host can use these two values to judge whether HDR support on the target device is stable.</p>
+    <p>Android scRGB requires Vulkan, an RGBA16F surface, and the correct native window data space. Linux scRGB requires an FP16 extended-linear WSI. A regular SDR surface uses tone-mapped output.</p>
   </section>
 
   <section id="stats">
-    <h2>HDR Statistics<span class="jp">statistics</span><a class="anchor" href="#stats">#</a></h2>
+    <h2>HDR statistics<span class="jp">統計</span><a class="anchor" href="#stats">#</a></h2>
     <div class="tw">
       <table>
-        <thead><tr><th>Field</th><th>meaning</th></tr></thead>
+        <thead><tr><th>Field</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td class="m">hdr_source_frames</td><td>HDR The number of frames in the source content.</td></tr>
+          <tr><td class="m">hdr_source_frames</td><td>Number of frames of HDR source content.</td></tr>
           <tr><td class="m">hdr10_output_frames</td><td>Number of frames output as HDR10 PQ.</td></tr>
-          <tr><td class="m">sdr_tonemap_frames</td><td>The number of frames output from HDR source via tone map to SDR.</td></tr>
-          <tr><td class="m">hdr10_metadata_updates</td><td>HDR10 The number of metadata updates.</td></tr>
-          <tr><td class="m">hdr10_metadata_failures</td><td>The number of metadata generation failures.</td></tr>
-          <tr><td class="m">hdr10_output_failures</td><td>HDR10 outputs the number of failures.</td></tr>
+          <tr><td class="m">sdr_tonemap_frames</td><td>Number of frames from HDR sources tone mapped to SDR output.</td></tr>
+          <tr><td class="m">hdr10_metadata_updates</td><td>Number of HDR10 metadata updates.</td></tr>
+          <tr><td class="m">hdr10_metadata_failures</td><td>Number of metadata generation failures.</td></tr>
+          <tr><td class="m">hdr10_output_failures</td><td>Number of HDR10 output failures.</td></tr>
           <tr><td class="m">hdr10_output_active</td><td>Whether the current output is HDR10.</td></tr>
         </tbody>
       </table>
     </div>
-    <p>The tone mapping and output transformation of HDR content are completed within the rendering pipeline, see<a href="render.en.html">rendering pipeline</a>。</p>
+    <p>Tone mapping and output transforms for HDR content happen inside the rendering pipeline; see <a href="render.en.html">Rendering pipeline</a>.</p>
   </section>
 
   <section id="tonemap">
-    <h2>Tone Mapping and Dolby Vision<a class="anchor" href="#tonemap">#</a></h2>
-    <p>Starting from 0.2.0, BT.2390 EETF is used by default, and peak compression is completed in the IPT color space. Operators such as spline, BT.2446a, ST 2094, Mobius, Reinhard and clip are optional; black point and target contrast also participate in mapping.</p>
-    <p>Dolby Vision RPU supports piecewise / MMR reshaping and nonlinear matrix transformation, Profile 5 / 8 is processed as BT.2020 / PQ. Profile 7 uses the base layer and its mapping, and the enhancement layer residuals have not yet participated in the synthesis. The rendering conversion is performed here, instead of transmitting the Dolby Vision signal transparently to the display.</p>
-    <p>HDR10 software frames can be peaked using frame-by-frame brightness statistics, and perceptual gamut mapping LUT is built in the background by CPU and cached across frames. Apple EDR output updates with monitor headroom; P010 uploads retain 10-bit accuracy.</p>
+    <h2>Tone mapping and Dolby Vision<a class="anchor" href="#tonemap">#</a></h2>
+    <p>Since 0.2.0, BT.2390 EETF is the default, and peak compression is done in the IPT color space. You can optionally choose operators such as spline, BT.2446a, ST 2094, Mobius, Reinhard, and clip. The black point and target contrast also take part in the mapping.</p>
+    <p>Dolby Vision RPU support covers piecewise / MMR reshaping and nonlinear matrix transforms, and Profile 5 / 8 is processed as BT.2020 / PQ. Profile 7 uses the base layer and its mapping; enhancement layer residuals do not yet take part in compositing. The kernel performs the rendering conversion itself rather than passing the Dolby Vision signal through to the display.</p>
+    <p>For HDR10 software frames, the peak can be adjusted using per-frame brightness statistics. The perceptual gamut mapping LUT is built on the CPU in the background and cached across frames. Apple EDR output updates with the display's headroom, and P010 uploads preserve 10-bit precision.</p>
   </section>
 
   <footer class="doc-foot">
@@ -154,7 +153,7 @@
   </footer>
 
   <nav class="pager">
-    <a href="render.en.html"><span class="dir">Prev</span>rendering pipeline</a>
+    <a href="render.en.html"><span class="dir">Prev</span>Rendering pipeline</a>
     <a class="nx" href="upscale.en.html"><span class="dir">Next</span>Neural upscaling</a>
   </nav>
 </main>

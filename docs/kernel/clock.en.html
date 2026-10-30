@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Clock and Scheduling — liberika Developer Documentation</title>
+<title>Clock and scheduling — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -14,7 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
-  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="clock.html">中文</option><option value="clock.en.html">English</option><option value="clock.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="clock.html">中文</a> · <a href="clock.en.html">English</a> · <a href="clock.ja.html">日本語</a></nav></noscript></div>
+  <div class="language-switch" role="group" aria-label="Language"><a href="clock.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="clock.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="clock.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
     <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
     <ul>
@@ -57,75 +57,74 @@
 </aside>
 
 <main>
-  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
-  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>Clock and scheduling</p>
+  <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>Clock and scheduling</p>
   <h1>Clock and scheduling</h1>
   <p class="kicker">Clock &amp; Scheduling</p>
-  <p class="lead">The audio output is the master clock. The rendering target of the video frame is vsync quantized and aligned to the audio clock, and there is no independent display clock between audio and video. Explicitly enter buffering when buffer is low, clock freezes and re-anchors after data recovery.</p>
+  <p class="lead">Audio output is the master clock. The presentation target of each video frame is quantized to vsync and aligned to the audio clock; there is no separate display clock between audio and video. When the buffer runs low, the kernel explicitly enters the buffering state, the clock freezes, and it re-anchors once data recovers.</p>
 
   <ul class="meta-strip">
-    <li>master clock <b>Audio</b></li>
-    <li>ring buffer <b>192,000 frames</b></li>
-    <li>vsync <b>Show target quantification</b></li>
+    <li>Master clock <b>Audio</b></li>
+    <li>Ring buffer <b>192,000 frames</b></li>
+    <li>vsync <b>Quantized display target</b></li>
   </ul>
 
   <section id="clock">
-    <h2>audio master clock<span class="jp">オーディオマスター</span><a class="anchor" href="#clock">#</a></h2>
-    <p>All audio output backends push data into unified f32 PCM ring buffer (capacity 192,000 frames, oldest on overflow). The playback clock is based on the media time and derives the current time by combining the anchor moment and double speed.</p>
-    <p>Presenter every time <code>render_tick</code> Read the audio clock snapshot and synchronize it to the playback thread. Clock correction is governed by three parameters:</p>
+    <h2>Audio master clock<span class="jp">オーディオマスター</span><a class="anchor" href="#clock">#</a></h2>
+    <p>Every audio output backend pushes data into a shared f32 PCM ring buffer (capacity 192,000 frames; on overflow the oldest data is dropped). The playback clock is based on media time and derives the current time from the anchor point and the playback rate.</p>
+    <p>On every <code>render_tick</code>, the Presenter reads a snapshot of the audio clock and syncs it to the playback thread. Three parameters govern clock correction:</p>
     <div class="tw">
       <table>
-        <thead><tr><th>parameters</th><th>Default</th><th>meaning</th></tr></thead>
+        <thead><tr><th>Parameter</th><th>Default</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td class="m">deadband</td><td class="m">5 ms</td><td>Jitters with deviations smaller than this value are not corrected.</td></tr>
-          <tr><td class="m">Maximum single correction</td><td class="m">5 ms</td><td>The upper limit of each correction to avoid jumps.</td></tr>
-          <tr><td class="m">snapshot threshold</td><td class="m">250 ms</td><td>Deviations exceeding this value are considered derailing and are re-anchored directly.</td></tr>
+          <tr><td class="m">deadband</td><td class="m">5 ms</td><td>Jitter smaller than this value is not corrected.</td></tr>
+          <tr><td class="m">Maximum single correction</td><td class="m">5 ms</td><td>The upper limit of each correction, to avoid visible jumps.</td></tr>
+          <tr><td class="m">Snapshot threshold</td><td class="m">250 ms</td><td>A deviation above this value counts as the clock having drifted off track, and the clock is re-anchored directly.</td></tr>
         </tbody>
       </table>
     </div>
-    <p>The reference time is the media time plus the queued audio duration (audio lead 120 ms), so that the video is presented at the end of the audio queue in advance. When the multiplier is not 1, audio clock synchronization is skipped, and the audio speed is changed by SoundTouch (SEQUENCE 25 ms).</p>
+    <p>The reference time is the media time plus the duration of queued audio (an audio lead of 120 ms), so video is presented ahead of the end of the audio queue. When the playback rate is not 1, audio clock synchronization is skipped and SoundTouch changes the audio speed (SEQUENCE 25 ms).</p>
   </section>
 
   <section id="vsync">
-    <h2>vsync Quantitative Scheduling<span class="jp">VSync スケジューリング</span><a class="anchor" href="#vsync">#</a></h2>
-    <p>The rendering targets of video frames are quantized at vsync intervals (default 16,666,667 ns, which is 60 Hz). The scheduler makes one of three decisions for each frame:</p>
+    <h2>vsync-quantized scheduling<span class="jp">VSync スケジューリング</span><a class="anchor" href="#vsync">#</a></h2>
+    <p>The presentation target of each video frame is quantized to the vsync interval (16,666,667 ns by default, which is 60 Hz). For each frame, the scheduler makes one of three decisions:</p>
     <ul class="body">
-      <li><b>Present</b> — The target time falls within this vsync cycle and is presented immediately.</li>
-      <li><b>Wait</b> — The frame is earlier than the rendering window, waiting for the next cycle.</li>
-      <li><b>Drop</b> — Frames later than the rendering window are skipped to reduce cumulative latency.</li>
+      <li><b>Present</b> — The target time falls within this vsync cycle, so the frame is presented immediately.</li>
+      <li><b>Wait</b> — The frame is earlier than the presentation window, so it waits for the next cycle.</li>
+      <li><b>Drop</b> — The frame is later than the presentation window, so it is skipped to reduce accumulated latency.</li>
     </ul>
-    <p>The upper limit of continuous frame loss is 5 frames. After reaching the upper limit, stop losing frames and return to Wait to avoid no picture output for a long time.</p>
-    <p>While the clock is frozen during the pause, seek decodes and renders the keyframe at the requested position while keeping the media clock from advancing.</p>
+    <p>At most 5 consecutive frames can be dropped. Once it reaches that limit, the scheduler stops dropping and returns to Wait, so the screen is never left without output for long.</p>
+    <p>The clock is frozen while paused. A seek decodes and presents the keyframe at the requested position while the media clock stays put.</p>
   </section>
 
   <section id="buffering">
-    <h2>buffer status<span class="jp">バッファリング</span><a class="anchor" href="#buffering">#</a></h2>
-    <p>When the audio or video input is insufficient, playback enters explicit buffering: the playback clock freezes and no longer advances; after the data is restored, the clock is re-anchored according to the restored media time. host meridian <code>BufferingChanged</code> Event aware state changes.</p>
+    <h2>Buffering state<span class="jp">バッファリング</span><a class="anchor" href="#buffering">#</a></h2>
+    <p>When audio or video input runs short, playback enters an explicit buffering state: the playback clock freezes and stops advancing. Once data recovers, the clock is re-anchored at the recovered media time. The host observes the state change through the <code>BufferingChanged</code> event.</p>
     <div class="note">
-      <p>The clock is not advanced during buffering to avoid long frame drops or black screens after recovery.</p>
+      <p>The clock does not advance during buffering so that recovery does not cause a long run of dropped frames or a black screen.</p>
     </div>
   </section>
 
   <section id="diagnostics">
-    <h2>diagnostic facilities<span class="jp">Diagnosis</span><a class="anchor" href="#diagnostics">#</a></h2>
-    <p>The track output of clock and playback is controlled by environment variables, written <code>/tmp/erika_playback_trace.log</code>：</p>
+    <h2>Diagnostics<span class="jp">診断</span><a class="anchor" href="#diagnostics">#</a></h2>
+    <p>Environment variables control trace output for the clock and playback, which is written to <code>/tmp/erika_playback_trace.log</code>:</p>
     <div class="tw">
       <table>
-        <thead><tr><th>environment variables</th><th>content</th></tr></thead>
+        <thead><tr><th>Environment variable</th><th>Output</th></tr></thead>
         <tbody>
-          <tr><td class="m">ERIKA_CLOCK_TRACE</td><td>Clock corrections and anchor events.</td></tr>
-          <tr><td class="m">ERIKA_PLAYBACK_TRACE</td><td>Play state machine events.</td></tr>
-          <tr><td class="m">ERIKA_DANMAKU_TRACE</td><td>Danmaku plan generates events.</td></tr>
+          <tr><td class="m">ERIKA_CLOCK_TRACE</td><td>Clock correction and anchor events.</td></tr>
+          <tr><td class="m">ERIKA_PLAYBACK_TRACE</td><td>Playback state machine events.</td></tr>
+          <tr><td class="m">ERIKA_DANMAKU_TRACE</td><td>Danmaku plan generation events.</td></tr>
         </tbody>
       </table>
     </div>
-    <p>Diagnostic output on Android via logcat <code>Erika</code> tag is issued. Debugging HUD uses the frame count difference to calculate fps, which can be <code>set_debug_hud_enabled</code> control.</p>
+    <p>On Android, diagnostic output is emitted through logcat with the <code>Erika</code> tag. The debug HUD computes fps from frame count deltas, and you can control it with <code>set_debug_hud_enabled</code>.</p>
   </section>
 
   <section id="display-target">
-    <h2>iOS displays target time<a class="anchor" href="#display-target">#</a></h2>
-    <p>0.2.1 iOS Flutter plug-in use <code>CADisplayLink.targetTimestamp</code> As a display target, not the actual execution time of the native queue. The refresh interval follows the display callback to avoid scheduling the 120 Hz screen at a fixed 60 Hz.</p>
-    <p>Display callback merges backlog tick through mailbox.<code>erika_presenter_render_tick_with_timing</code> Simultaneously sample the video, subtitles and danmaku at the target time; do not advance or re-anchor the playback clock after pausing or seek.</p>
+    <h2>iOS display target time<a class="anchor" href="#display-target">#</a></h2>
+    <p>Since 0.2.1, the iOS Flutter plugin uses <code>CADisplayLink.targetTimestamp</code> as the display target rather than the time the native queue actually runs. The refresh interval follows the display callback, so a 120 Hz screen is not scheduled at a fixed 60 Hz.</p>
+    <p>The display callback coalesces backlogged ticks through a mailbox. <code>erika_presenter_render_tick_with_timing</code> samples video, subtitles, and danmaku at the same target time. After a pause or seek, it does not advance or re-anchor the playback clock.</p>
   </section>
 
   <footer class="doc-foot">
@@ -136,7 +135,7 @@
 
   <nav class="pager">
     <a href="subtitle-danmaku.en.html"><span class="dir">Prev</span>Subtitles and danmaku</a>
-    <a class="nx" href="../reference/capi.en.html"><span class="dir">Next</span>C ABI Overview</a>
+    <a class="nx" href="../reference/capi.en.html"><span class="dir">Next</span>C ABI overview</a>
   </nav>
 </main>
 

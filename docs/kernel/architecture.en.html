@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Architecture Overview — liberika Developer Documentation</title>
+<title>Architecture overview — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -14,7 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
-  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="architecture.html">中文</option><option value="architecture.en.html">English</option><option value="architecture.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="architecture.html">中文</a> · <a href="architecture.en.html">English</a> · <a href="architecture.ja.html">日本語</a></nav></noscript></div>
+  <div class="language-switch" role="group" aria-label="Language"><a href="architecture.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="architecture.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="architecture.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
     <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
     <ul>
@@ -57,63 +57,62 @@
 </aside>
 
 <main>
-  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
-  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>Architecture overview</p>
+  <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>Architecture overview</p>
   <h1>Architecture overview</h1>
   <p class="kicker">Architecture</p>
-  <p class="lead">liberika is implemented by Rust. From demux, decoding to GPU rendering, audio, subtitles and danmaku are all completed inside the kernel. The host provides the rendering surface and sends playback commands, and does not participate in the rendering pipeline.</p>
+  <p class="lead">liberika is implemented in Rust. Everything from demuxing and decoding to GPU presentation, audio, subtitles, and danmaku happens inside the kernel. The host provides a render surface and sends playback commands; it does not take part in the rendering pipeline.</p>
 
   <ul class="meta-strip">
     <li>Core crate <b>crates/erika</b></li>
     <li>C ABI layer <b>crates/erika_capi</b></li>
-    <li>internal thread <b>5</b></li>
-    <li>Backend trait <b>3</b></li>
+    <li>Internal threads <b>5</b></li>
+    <li>Backend traits <b>3</b></li>
   </ul>
 
   <section id="repo">
-    <h2>Warehouse stratification<span class="jp">constitute</span><a class="anchor" href="#repo">#</a></h2>
+    <h2>Repository layout<span class="jp">構成</span><a class="anchor" href="#repo">#</a></h2>
     <div class="tw">
       <table>
-        <thead><tr><th>path</th><th>Responsibilities</th></tr></thead>
+        <thead><tr><th>Path</th><th>Responsibility</th></tr></thead>
         <tbody>
-          <tr><td class="k">crates/erika</td><td>Core playback library. Player, Presenter, rendering backend, audio, subtitles, and danmaku.</td></tr>
-          <tr><td class="k">crates/erika_capi</td><td>C ABI Export layer. Export all to <code>include/erika.h</code> shall prevail.</td></tr>
-          <tr><td class="k">crates/erika_ffmpeg_sys</td><td>FFmpeg bindgen binding.</td></tr>
-          <tr><td class="k">packages/erika_flutter</td><td>Flutter plug-in, covering macOS / iOS / tvOS / Windows / Android / HarmonyOS.</td></tr>
-          <tr><td class="k">packages/erika_ohos</td><td>Standalone OpenHarmony ArkTS / OHPM native SDK, provided <code>ErikaPlayer</code> with XComponent surface bridge.</td></tr>
-          <tr><td class="k">examples/</td><td>Verification, smoke and demo programs.<code>macos_native_demo</code>、<code>windows_native_demo</code> is an end-to-end example.</td></tr>
-          <tr><td class="k">xtask/</td><td>Native dependency build orchestration.<code>deps plan / fetch / status / build</code>。</td></tr>
+          <tr><td class="k">crates/erika</td><td>Core playback library: Player, Presenter, rendering backends, audio, subtitles, and danmaku.</td></tr>
+          <tr><td class="k">crates/erika_capi</td><td>C ABI export layer. <code>include/erika.h</code> is authoritative for all exports.</td></tr>
+          <tr><td class="k">crates/erika_ffmpeg_sys</td><td>FFmpeg bindgen bindings.</td></tr>
+          <tr><td class="k">packages/erika_flutter</td><td>Flutter plugin covering macOS / iOS / tvOS / Windows / Android / HarmonyOS.</td></tr>
+          <tr><td class="k">packages/erika_ohos</td><td>Standalone OpenHarmony ArkTS / OHPM native SDK. Provides <code>ErikaPlayer</code> and an XComponent surface bridge.</td></tr>
+          <tr><td class="k">examples/</td><td>Validation, smoke-test, and demo programs. <code>macos_native_demo</code> and <code>windows_native_demo</code> are end-to-end examples.</td></tr>
+          <tr><td class="k">xtask/</td><td>Native dependency build orchestration: <code>deps plan / fetch / status / build</code>.</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
   <section id="modules">
-    <h2>Module division<span class="jp">モジュール</span><a class="anchor" href="#modules">#</a></h2>
-    <p><code>crates/erika/src/</code> The modules below are divided according to responsibilities, and the platform-related code is divided into <code>#[cfg(target_os = …)]</code> Gated, focused on <code>apple.rs</code>、<code>windows.rs</code>、<code>android.rs</code>、<code>ohos.rs</code> and its subdirectories.</p>
+    <h2>Modules<span class="jp">モジュール</span><a class="anchor" href="#modules">#</a></h2>
+    <p>The modules under <code>crates/erika/src/</code> are divided by responsibility. Platform-specific code is gated with <code>#[cfg(target_os = …)]</code> and concentrated in <code>apple.rs</code>, <code>windows.rs</code>, <code>android.rs</code>, <code>ohos.rs</code>, and their subdirectories.</p>
     <div class="tw">
       <table>
-        <thead><tr><th>module</th><th>Responsibilities</th></tr></thead>
+        <thead><tr><th>Module</th><th>Responsibility</th></tr></thead>
         <tbody>
-          <tr><td class="k">core</td><td><code>Player</code>、<code>PlayerConfig</code>, event type,<code>RendererBackend</code> trait。</td></tr>
-          <tr><td class="k">playback</td><td>Playback state machine, audio master clock, frame scheduler,<code>VideoDecodePreference</code>。</td></tr>
-          <tr><td class="k">presenter</td><td><code>PresenterRuntime</code>. String player, renderer, audio, overlay, by <code>render_tick</code> drive.</td></tr>
-          <tr><td class="k">ffmpeg</td><td>demux、decode、resample、seek。<code>DecoderBackend</code> Choice and configuration of five backends.</td></tr>
-          <tr><td class="k">audio</td><td><code>AudioOutputBackend</code> trait, f32 PCM ring buffer, audio clock.</td></tr>
-          <tr><td class="k">renderer</td><td><code>metal</code>（Apple）、<code>d3d11</code>（Windows）、<code>wgpu</code>(Android, HarmonyOS) backend;<code>pipeline</code> Makes backend-independent color decisions with tone map.</td></tr>
+          <tr><td class="k">core</td><td><code>Player</code>, <code>PlayerConfig</code>, event types, and the <code>RendererBackend</code> trait.</td></tr>
+          <tr><td class="k">playback</td><td>Playback state machine, audio master clock, frame scheduler, and <code>VideoDecodePreference</code>.</td></tr>
+          <tr><td class="k">presenter</td><td><code>PresenterRuntime</code>. Ties together the player, renderer, audio, and overlay, and is driven by <code>render_tick</code>.</td></tr>
+          <tr><td class="k">ffmpeg</td><td>Demux, decode, resample, and seek. Selection and configuration of the five <code>DecoderBackend</code> backends.</td></tr>
+          <tr><td class="k">audio</td><td>The <code>AudioOutputBackend</code> trait, the f32 PCM ring buffer, and the audio clock.</td></tr>
+          <tr><td class="k">renderer</td><td>The <code>metal</code> (Apple), <code>d3d11</code> (Windows), and <code>wgpu</code> (Android, HarmonyOS) backends. <code>pipeline</code> makes the backend-independent color and tone mapping decisions.</td></tr>
           <tr><td class="k">subtitle</td><td>SRT / WebVTT / ASS parsing and libass rendering, embedded and external subtitle tracks.</td></tr>
-          <tr><td class="k">danmaku</td><td>Bilibili XML / JSON analysis, DFM+ collision avoidance layout, glyph atlas rendering.</td></tr>
-          <tr><td class="k">overlay</td><td>Synthesis timeline, subtitle and danmaku playback window management.</td></tr>
-          <tr><td class="k">source</td><td><code>MediaSource</code> There are two implementations of trait, file and HTTP range.</td></tr>
-          <tr><td class="k">trace / debug_hud</td><td>Diagnostic facilities. Environment variable switch with HUD overlay.</td></tr>
+          <tr><td class="k">danmaku</td><td>Bilibili XML / JSON parsing, DFM+ collision-avoidance layout, and glyph atlas rendering.</td></tr>
+          <tr><td class="k">overlay</td><td>Composition timeline, and playback-window management for subtitles and danmaku.</td></tr>
+          <tr><td class="k">source</td><td>The <code>MediaSource</code> trait, with two implementations: file and HTTP range.</td></tr>
+          <tr><td class="k">trace / debug_hud</td><td>Diagnostics: environment-variable switches and the HUD overlay.</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
   <section id="flow">
-    <h2>data flow<span class="jp">データフロー</span><a class="anchor" href="#flow">#</a></h2>
-    <p>The playback chain starts from the media source and ends at the rendering surface:</p>
+    <h2>Data flow<span class="jp">データフロー</span><a class="anchor" href="#flow">#</a></h2>
+    <p>The playback path runs from the media source to the render surface:</p>
     <div class="code">
       <p class="lbl">playback data flow</p>
 <pre>MediaSource (file / HTTP range)
@@ -125,79 +124,79 @@
   → RendererBackend::render_current_frame
   → surface (Metal / D3D11 / wgpu)</pre>
     </div>
-    <p>The status and events are independent crossbeam channel. Player status changes, duration, track, buffering, errors and other information are published to the event channel, and the host <code>poll_event</code> Or event subscription consumption on the Rust side.</p>
+    <p>State and events travel over a separate crossbeam channel. Player state changes, duration, tracks, buffering, errors, and similar information are published to the event channel, and the host consumes them through <code>poll_event</code> or, on the Rust side, an event subscription.</p>
     <div class="note">
-      <p><b>time base.</b> The audio output is the master clock. Video rendering is quantized to align the audio clock by vsync, see details in<a href="clock.en.html">Clock and scheduling</a>。</p>
+      <p><b>Time base.</b> Audio output is the master clock. Video presentation is quantized to vsync and aligned to the audio clock; for details, see <a href="clock.en.html">Clock and scheduling</a>.</p>
     </div>
   </section>
 
   <section id="threads">
     <h2>Threading model<span class="jp">スレッド</span><a class="anchor" href="#threads">#</a></h2>
-    <p>The kernel maintains 5 resident threads internally, and some platform audio output runs in the system callback context (CoreAudio callback, WASAPI render thread).</p>
+    <p>The kernel keeps 5 resident threads. On some platforms, audio output also runs in a system callback context (the CoreAudio callback and the WASAPI render thread).</p>
     <div class="tw">
       <table>
-        <thead><tr><th>Thread name</th><th>Responsibilities</th></tr></thead>
+        <thead><tr><th>Thread</th><th>Responsibility</th></tr></thead>
         <tbody>
-          <tr><td class="k">erika-playback</td><td>Command loop. consumption <code>PlaybackCommand</code>, inline video decoding, management state machine.</td></tr>
-          <tr><td class="k">erika-demux</td><td>The demux consumer thread delivers the bounded packet queue (capacity 512) to the playback thread.</td></tr>
-          <tr><td class="k">erika-danmaku</td><td>The danmaku plan is generated. Mutex + Condvar requests the model, and the results are returned via unbounded channel.</td></tr>
-          <tr><td class="k">erika-upscaler-build</td><td>ArtCNN weight loading and backend construction (Metal path).</td></tr>
+          <tr><td class="k">erika-playback</td><td>Command loop. Consumes <code>PlaybackCommand</code>, decodes video inline, and manages the state machine.</td></tr>
+          <tr><td class="k">erika-demux</td><td>Demux consumer thread. Delivers packets to the playback thread through a bounded queue (capacity 512).</td></tr>
+          <tr><td class="k">erika-danmaku</td><td>Generates the danmaku plan. Uses a Mutex + Condvar request model and returns results over an unbounded channel.</td></tr>
+          <tr><td class="k">erika-upscaler-build</td><td>Loads ArtCNN weights and builds the backend (Metal path).</td></tr>
           <tr><td class="k">erika-wasapi-render</td><td>Windows WASAPI audio output thread.</td></tr>
         </tbody>
       </table>
     </div>
-    <p>The boundary between the host thread and the kernel is bounded by the C ABI layer: a handle provides no internal synchronization and may not be called concurrently from multiple threads.</p>
+    <p>The C ABI layer defines the boundary between host threads and the kernel: a handle has no internal synchronization and must not be called concurrently from multiple threads.</p>
   </section>
 
   <section id="entry">
-    <h2>three entrances<span class="jp">エントリポイント</span><a class="anchor" href="#entry">#</a></h2>
-    <p>liberika exposes three groups of usages, differentiated by host language and rendering ownership.</p>
+    <h2>Three entry points<span class="jp">エントリポイント</span><a class="anchor" href="#entry">#</a></h2>
+    <p>liberika exposes three ways to use it, distinguished by host language and rendering ownership.</p>
     <div class="tw">
       <table>
-        <thead><tr><th>entrance</th><th>host</th><th>Render ownership</th><th>Description</th></tr></thead>
+        <thead><tr><th>Entry point</th><th>Host</th><th>Rendering ownership</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td class="k">Player</td><td>Rust</td><td>Host pulls frame data</td><td>Complete Rust API. Event subscription + video/audio/subtitle frame subscription.</td></tr>
-          <tr><td class="k">ErikaHandle</td><td>C / Swift / Dart FFI</td><td>Host pulls frame data</td><td>pull model. The host manages the rendering loop itself.</td></tr>
-          <tr><td class="k">ErikaPresenterHandle</td><td>C / Swift / Dart FFI</td><td>Kernel hosting</td><td>push model. The host provides the surface and calls it every frame <code>render_tick</code>。</td></tr>
+          <tr><td class="k">Player</td><td>Rust</td><td>Host pulls frame data</td><td>Full Rust API. Event subscription plus video / audio / subtitle frame subscription.</td></tr>
+          <tr><td class="k">ErikaHandle</td><td>C / Swift / Dart FFI</td><td>Host pulls frame data</td><td>Pull model. The host manages the render loop itself.</td></tr>
+          <tr><td class="k">ErikaPresenterHandle</td><td>C / Swift / Dart FFI</td><td>Managed by the kernel</td><td>Push model. The host provides the surface and calls <code>render_tick</code> every frame.</td></tr>
         </tbody>
       </table>
     </div>
-    <p>The three sets of entrances share the same internal implementation. Each exported function of C ABI layer uses <code>catch_unwind</code> Package, panic maps to <code>ErikaStatus_Panic</code>, does not cross the FFI boundary.</p>
+    <p>All three entry points share one internal implementation. Every exported function in the C ABI layer is wrapped in <code>catch_unwind</code>; a panic maps to <code>ErikaStatus_Panic</code> and never crosses the FFI boundary.</p>
   </section>
 
   <section id="abstractions">
-    <h2>backend abstraction<span class="jp">abstraction</span><a class="anchor" href="#abstractions">#</a></h2>
-    <p>Platform differences converge after three trait, making presenter and the render loop remain platform independent.</p>
+    <h2>Backend abstractions<span class="jp">抽象化</span><a class="anchor" href="#abstractions">#</a></h2>
+    <p>Platform differences are confined behind three traits, which keeps the Presenter and the render loop platform-independent.</p>
     <ul class="body">
-      <li><code>RendererBackend</code>(core.rs)—Surface attachment and sizing,<code>render_current_frame</code>、<code>upload_player_frame</code>, screenshot. There are three implementations of Metal, D3D11, and wgpu.</li>
-      <li><code>AudioOutputBackend</code>(audio.rs)—Configuration, playback control,<code>push(PcmAudioFrame)</code>, clock snapshot. CoreAudio / AudioQueue / WASAPI / AAudio / OHAudio implementation.</li>
-      <li><code>DecoderBackend</code>(ffmpeg.rs)—software, VideoToolbox, D3D11VA, MediaCodec, AVCodec five decoding backends.</li>
+      <li><code>RendererBackend</code> (core.rs) — Surface attachment and resizing, <code>render_current_frame</code>, <code>upload_player_frame</code>, and screenshots. Implemented for Metal, D3D11, and wgpu.</li>
+      <li><code>AudioOutputBackend</code> (audio.rs) — Configuration, playback control, <code>push(PcmAudioFrame)</code>, and clock snapshots. Implemented for CoreAudio / AudioQueue / WASAPI / AAudio / OHAudio.</li>
+      <li><code>DecoderBackend</code> (ffmpeg.rs) — Five decoding backends: software, VideoToolbox, D3D11VA, MediaCodec, and AVCodec.</li>
     </ul>
-    <p>Selection rules:<code>RendererBackendPreference</code>(Platform native or wgpu fallback) determines the rendering backend,<code>VideoDecodePreference</code> Decoding backend is selected by platform by default.</p>
+    <p>Selection rules: <code>RendererBackendPreference</code> (platform-native or wgpu fallback) determines the rendering backend, and <code>VideoDecodePreference</code> picks the decoding backend using per-platform defaults.</p>
   </section>
 
   <section id="platforms">
-    <h2>Platform coverage<span class="jp">environment</span><a class="anchor" href="#platforms">#</a></h2>
+    <h2>Platform coverage<span class="jp">対応環境</span><a class="anchor" href="#platforms">#</a></h2>
     <div class="tw">
       <table>
-        <thead><tr><th>platform</th><th>lowest</th><th>Decode</th><th>rendering</th><th>Audio</th><th>Status</th></tr></thead>
+        <thead><tr><th>Platform</th><th>Minimum</th><th>Decoding</th><th>Rendering</th><th>Audio</th><th>Status</th></tr></thead>
         <tbody>
           <tr><td class="p">macOS</td><td class="m">14</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">CoreAudio</td><td class="st ok">Available</td></tr>
           <tr><td class="p">iOS</td><td class="m">16</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">AudioQueue</td><td class="st ok">Available</td></tr>
           <tr><td class="p">tvOS</td><td class="m">13</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">AudioQueue</td><td class="st ok">Available</td></tr>
           <tr><td class="p">Windows</td><td class="m">10</td><td class="m">D3D11VA</td><td class="m">Direct3D 11</td><td class="m">WASAPI</td><td class="st ok">Available</td></tr>
-          <tr><td class="p">Android</td><td class="m">8</td><td class="m">MediaCodec / Software decoding</td><td class="m">wgpu · Vulkan+GLES</td><td class="m">AAudio</td><td class="st ok">Available</td></tr>
-          <tr><td class="p">HarmonyOS</td><td class="m">API 18</td><td class="m">AVCodec / Software decoding</td><td class="m">wgpu · Vulkan</td><td class="m">OHAudio</td><td class="st ok">Available</td></tr>
+          <tr><td class="p">Android</td><td class="m">8</td><td class="m">MediaCodec / software</td><td class="m">wgpu · Vulkan+GLES</td><td class="m">AAudio</td><td class="st ok">Available</td></tr>
+          <tr><td class="p">HarmonyOS</td><td class="m">API 18</td><td class="m">AVCodec / software</td><td class="m">wgpu · Vulkan</td><td class="m">OHAudio</td><td class="st ok">Available</td></tr>
           <tr><td class="p">Linux</td><td class="m">FFmpeg 8.x</td><td class="m">NVDEC / VA-API</td><td class="m">wgpu (Vulkan / EGL)</td><td class="m">PulseAudio</td><td class="st wait">Experimental</td></tr>
         </tbody>
       </table>
     </div>
-    <p>The version above the platform table is the feature baseline. The actual deployment target when building is macOS 11.0 / iOS 13.0, see<a href="../project/building.en.html">Build and dependencies</a>。</p>
+    <p>The versions in the platform table are the feature baseline. The actual deployment targets at build time are macOS 11.0 / iOS 13.0; see <a href="../project/building.en.html">Building and dependencies</a>.</p>
   </section>
 
   <section id="web">
     <h2>Browser backend · 0.3.0<a class="anchor" href="#web">#</a></h2>
-    <p>Web is an independent JavaScript Player interface: FFmpeg WASM reads and decapsulates in Worker, and the compressed package is handed over to WebCodecs, libass and Rust DFM engines process subtitles and danmaku, and then WebGL2 Synthesis; Web Audio provides output and playback clock. It does not use the native Presenter C ABI, nor does it include the desktop HDR or ArtCNN. Deployment and support scope see<a href="../guide/web.en.html">Web / WASM access</a>。</p>
+    <p>Web is a standalone JavaScript Player interface. FFmpeg WASM reads and demuxes inside a Worker and hands compressed packets to WebCodecs; libass and the Rust DFM engine handle subtitles and danmaku; WebGL2 composites the result; and Web Audio provides output and the playback clock. It does not use the native Presenter C ABI, and it does not include desktop HDR or ArtCNN. For deployment and supported environments, see <a href="../guide/web.en.html">Web / WASM integration</a>.</p>
   </section>
 
   <footer class="doc-foot">
@@ -207,7 +206,7 @@
   </footer>
 
   <nav class="pager">
-    <a href="../guide/linux.en.html"><span class="dir">Prev</span>Linux access</a>
+    <a href="../guide/linux.en.html"><span class="dir">Prev</span>Linux integration</a>
     <a class="nx" href="decode.en.html"><span class="dir">Next</span>Hardware decoding</a>
   </nav>
 </main>

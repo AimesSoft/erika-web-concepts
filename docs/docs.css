@@ -177,28 +177,6 @@ aside::before {
   letter-spacing: 0.08em;
 }
 
-.langs {
-  display: flex;
-  width: fit-content;
-  gap: 4px;
-  margin: 0 0 22px;
-  padding: 3px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-}
-
-.langs a {
-  padding: 3px 10px;
-  border-radius: 999px;
-  color: var(--ink-faint);
-  font-size: 10px;
-}
-
-.langs a[aria-current="true"] {
-  color: var(--white);
-  background: var(--ink);
-}
-
 aside nav h2 {
   display: flex;
   align-items: center;
@@ -977,8 +955,7 @@ footer.doc-foot b {
 
   aside::before,
   .brand-sub,
-  .side-foot,
-  .langs {
+  .side-foot {
     display: none;
   }
 
@@ -1134,41 +1111,69 @@ footer.doc-foot b {
   }
 }
 
-/* Compact native language menu. */
+/* Language seals: the current page language is pressed like a stamp. */
 .language-switch {
   display: flex;
-  justify-content: flex-end;
-  margin: -9px 0 8px;
-  color: var(--ink-faint);
-  font-size: 11px;
+  gap: 2px;
+  margin: -12px 0 0 33px;
 }
-.language-switch label { position: relative; }
-.language-switch label::after {
-  content: "⌄";
+
+.language-switch a {
+  position: relative;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--ink-soft);
+  font-family: var(--serif);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  transition: color 150ms ease, transform 150ms ease;
+}
+
+.language-switch a[lang="en"] {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+.language-switch a::before {
   position: absolute;
-  right: 2px;
-  top: 0;
-  pointer-events: none;
+  inset: 3px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 50%;
+  content: "";
+  opacity: 0;
+  transform: scale(0.82);
+  transition: opacity 150ms ease, transform 200ms ease;
 }
-.language-switch select {
-  appearance: none;
-  border: 0;
-  padding: 2px 14px 2px 4px;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
+
+.language-switch a:hover {
+  color: var(--ink);
 }
-.language-switch select:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
-.language-switch .visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+
+.language-switch a:hover::before {
+  opacity: 1;
+  transform: scale(1);
 }
-.language-switch noscript nav { display: block; }
+
+.language-switch a:not([aria-current]):active {
+  transform: scale(0.9);
+}
+
+.language-switch a[aria-current] {
+  color: var(--pink);
+  cursor: default;
+  transform: rotate(-8deg);
+}
+
+.language-switch a[aria-current]::before {
+  border: 1.5px solid var(--pink);
+  opacity: 1;
+  transform: none;
+}
+
 .translation-note {
   border-left: 3px solid #9b7662;
   padding: .6rem .9rem;
@@ -1177,5 +1182,5 @@ footer.doc-foot b {
 }
 @media (max-width: 900px) {
   html { scroll-padding-top: 145px; }
-  .language-switch { position: absolute; top: 17px; right: 18px; margin: 0; }
+  .language-switch { position: absolute; top: 12px; right: 14px; margin: 0; }
 }

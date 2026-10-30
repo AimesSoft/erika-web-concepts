@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Web / WASM access — liberika developer documentation</title>
+<title>Web / WASM integration — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -14,7 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
-  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="web.html">中文</option><option value="web.en.html">English</option><option value="web.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="web.html">中文</a> · <a href="web.en.html">English</a> · <a href="web.ja.html">日本語</a></nav></noscript></div>
+  <div class="language-switch" role="group" aria-label="Language"><a href="web.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="web.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="web.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
     <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
     <ul>
@@ -57,26 +57,25 @@
 </aside>
 
 <main>
-  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
-  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Web / WASM access</p>
-  <h1>Web / WASM access</h1>
+  <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Web / WASM integration</p>
+  <h1>Web / WASM integration</h1>
   <p class="kicker">Browser Playback</p>
-  <p class="lead">Give the original MKV to the browser and retain the ASS special effects, font attachments and danmaku. liberika 0.3.0 uses FFmpeg WASM to decapsulate, WebCodecs to decode, libass to draw subtitles, and then WebGL2 to synthesize a piece of Canvas into the host.</p>
-  <ul class="meta-strip"><li>version <b>0.3.0</b></li><li>Distribute <b>GitHub Release ZIP</b></li><li>environment <b>HTTPS / localhost</b></li><li>output <b>SDR</b></li></ul>
+  <p class="lead">Hand the original MKV to the browser and keep its ASS effects, font attachments, and danmaku. liberika 0.3.0 demuxes with FFmpeg WASM, decodes with WebCodecs, renders subtitles with libass, and composites everything onto a single canvas in the host page with WebGL2.</p>
+  <ul class="meta-strip"><li>Version <b>0.3.0</b></li><li>Distribution <b>GitHub Release ZIP</b></li><li>Environment <b>HTTPS / localhost</b></li><li>Output <b>SDR</b></li></ul>
 
   <section id="download">
-    <h2>Download and preview<a class="anchor" href="#download">#</a></h2>
-    <p>Download <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/liberika-web-0.3.0.zip">liberika-web-0.3.0.zip</a>, press the same Release <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/SHA256SUMS">SHA256SUMS</a> Verification, complete decompression and access through HTTPS or local HTTP service <code>index.html</code>. The demo page can choose local videos, subtitles and danmaku without the need for a media server.</p>
-    <div class="code"><p class="lbl">Run in the unzipped directory</p><pre>python3 -m http.server 18765 --bind 127.0.0.1
-# 浏览器打开 http://127.0.0.1:18765</pre></div>
-    <p>The package contains JavaScript, two WASM, Worker, license, build list and demo page. The runtime has not yet been released to npm. Keep the complete directory and relative path when deploying, and correctly provide the JavaScript module and <code>application/wasm</code> MIME; no SharedArrayBuffer or cross-source isolation required.</p>
+    <h2>Download and try it out<a class="anchor" href="#download">#</a></h2>
+    <p>Download <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/liberika-web-0.3.0.zip">liberika-web-0.3.0.zip</a>, verify it against the <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/SHA256SUMS">SHA256SUMS</a> file from the same release, extract it completely, and open <code>index.html</code> over HTTPS or a local HTTP server. The demo page lets you choose a local video, subtitles, and danmaku, so you do not need a media server.</p>
+    <div class="code"><p class="lbl">Run in the extracted directory</p><pre>python3 -m http.server 18765 --bind 127.0.0.1
+# Open http://127.0.0.1:18765 in a browser</pre></div>
+    <p>The package contains the JavaScript, two WASM modules, the Worker, licenses, the build manifest, and the demo page. The runtime is not yet published to npm. When you deploy, keep the complete directory and its relative paths, and serve the JavaScript modules and <code>application/wasm</code> with the correct MIME types. SharedArrayBuffer and cross-origin isolation are not required.</p>
   </section>
 
   <section id="integration">
-    <h2>minimal access<a class="anchor" href="#integration">#</a></h2>
-    <p>Put runtime resources into the website <code>liberika/</code> Table of contents. The example lets the user select a local File, which the Worker reads in chunks. You can also pass a Blob or a cross-origin media URL permitted by the server to <code>open</code>.</p>
+    <h2>Minimal integration<a class="anchor" href="#integration">#</a></h2>
+    <p>Put the runtime files in your site's <code>liberika/</code> directory. This example lets the user pick a local File, which the browser reads in chunks inside the Worker. You can also pass a Blob, or a media URL that allows cross-origin access, to <code>open</code>.</p>
     <div class="code"><p class="lbl">HTML + JavaScript module</p><pre>&lt;input id=&quot;media&quot; type=&quot;file&quot;&gt;
-&lt;button id=&quot;play&quot; disabled&gt;播放&lt;/button&gt;
+&lt;button id=&quot;play&quot; disabled&gt;Play&lt;/button&gt;
 &lt;canvas id=&quot;video&quot; style=&quot;width:100%;height:60vh&quot;&gt;&lt;/canvas&gt;
 &lt;pre id=&quot;status&quot;&gt;&lt;/pre&gt;
 &lt;script type=&quot;module&quot;&gt;
@@ -94,7 +93,7 @@ media.onchange = async () =&gt; {
   play.disabled = true;
   try {
     const info = await player.open(file);
-    status.textContent = `${file.name}：${info.duration.toFixed(1)} 秒`;
+    status.textContent = `${file.name}: ${info.duration.toFixed(1)} s`;
     play.disabled = false;
   } catch (error) {
     showError(error);
@@ -103,55 +102,55 @@ media.onchange = async () =&gt; {
   }
 };
 play.onclick = () =&gt; player.play().catch(showError);
-// 应用卸载时：await player.destroy();
+// When the app unmounts: await player.destroy();
 &lt;/script&gt;</pre></div>
-    <p class="note">Called from user click <code>play()</code>, meets the browser audio policy. When the application unmounts, call <code>await player.destroy()</code>. Canvas can only be transferred once; rebuilding the player after destruction requires a new Canvas, and the original instance should be retained when switching layouts.</p>
-    <p>If Canvas or the player wants to delay creation, it can be created when the page is initialized. <code>AudioSession</code>, then passed to <code>Player.create({ canvas, audioSession })</code>, ensuring that the audio is prepared for first real user input.</p>
+    <p class="note">Call <code>play()</code> from a user click to satisfy the browser's audio policy. When the app unmounts, run <code>await player.destroy()</code>. A canvas can be transferred only once, so rebuilding a player after destroying it requires a new canvas. Keep the original instance when you switch layouts.</p>
+    <p>If you create the canvas or the player later, create an <code>AudioSession</code> when the page initializes and pass it to <code>Player.create({ canvas, audioSession })</code>. This lets audio be prepared on the first real user input.</p>
   </section>
 
   <section id="features">
-    <h2>Subtitles, danmaku and playback control<a class="anchor" href="#features">#</a></h2>
-    <p>MKV embedded ASS/SSA and font attachments are automatically handed over to libass; the danmaku reuses the native Rust DFM engine. The subtitles share the Web Audio playback clock with the danmaku and are synthesized in the same Canvas.</p>
-    <div class="code"><p class="lbl">Called after opening media</p><pre>await player.addSubtitle(await subtitleFile.text()); // ASS / SSA / SRT / WebVTT
+    <h2>Subtitles, danmaku, and playback control<a class="anchor" href="#features">#</a></h2>
+    <p>ASS/SSA subtitles and font attachments embedded in MKV are passed to libass automatically. Danmaku reuses the native Rust DFM engine. Subtitles and danmaku share the Web Audio playback clock and are composited onto the same canvas.</p>
+    <div class="code"><p class="lbl">Call after opening the media</p><pre>await player.addSubtitle(await subtitleFile.text()); // ASS / SSA / SRT / WebVTT
 await player.addDanmaku(await danmakuFile.text());   // Bilibili XML / Dandanplay JSON
 await player.configureDanmaku({ opacity: 0.8, fontSize: 30, delay: 0 });
 await player.configureSubtitles({ scale: 1 });</pre></div>
-    <p class="note">Subtitle and danmaku supersampling is enabled by default without changing display size or video resolution. Pass <code>{ supersampling: false }</code> separately to disable either; omitted fields retain their current values.</p>
+    <p class="note">Subtitle and danmaku supersampling (2×) is on by default and does not change the display size or video resolution. Pass <code>{ supersampling: false }</code> to either call to disable it for that layer; omitted fields keep their current values.</p>
     <div class="tw"><table><thead><tr><th>Operation</th><th>API and behavior</th></tr></thead><tbody>
-      <tr><td>Play/Jump</td><td><code>play()</code>、<code>pause()</code>、<code>seek(seconds)</code>; Jump to retain pause or play status.</td></tr>
-      <tr><td>Volume/speed</td><td><code>setVolume(0…1)</code>、<code>setRate(0.25…4)</code>;The current speed will change the pitch.</td></tr>
-      <tr><td>Tracks</td><td><code>info.tracks</code>、<code>selectAudio(id)</code>、<code>selectSubtitle(id)</code>;null closes the corresponding track.</td></tr>
-      <tr><td>Chapter</td><td><code>info.chapters</code> of start / end in seconds, end can be null; call <code>seek(chapter.start)</code> Positioning.</td></tr>
-      <tr><td>screenshot</td><td><code>capture(width?)</code> Return PNG Blob containing video, subtitles and danmaku.</td></tr>
-      <tr><td>close/release</td><td><code>close()</code> After clearing the current media, you can re-open;<code>destroy()</code> Release Worker, decoder, frame, GPU and audio resources.</td></tr>
+      <tr><td>Play / seek</td><td><code>play()</code>, <code>pause()</code>, <code>seek(seconds)</code>. Seeking preserves the paused or playing state.</td></tr>
+      <tr><td>Volume / rate</td><td><code>setVolume(0…1)</code>, <code>setRate(0.25…4)</code>. The current rate change also changes the pitch.</td></tr>
+      <tr><td>Tracks</td><td><code>info.tracks</code>, <code>selectAudio(id)</code>, <code>selectSubtitle(id)</code>. Passing null turns off that track.</td></tr>
+      <tr><td>Chapters</td><td><code>info.chapters</code> gives start and end in seconds; end can be null. Call <code>seek(chapter.start)</code> to jump to a chapter.</td></tr>
+      <tr><td>Screenshot</td><td><code>capture(width?)</code> returns a PNG Blob that includes the video, subtitles, and danmaku.</td></tr>
+      <tr><td>Close / release</td><td><code>close()</code> clears the current media, after which you can call open again. <code>destroy()</code> releases the Worker, decoder, frames, GPU resources, and audio resources.</td></tr>
     </tbody></table></div>
-    <p>For complete types see <a href="https://github.com/AimesSoft/liberika/blob/v0.3.0/packages/erika_web/index.d.ts">index.d.ts</a>。<code>loaded</code>、<code>stats</code>、<code>timeupdate</code>、<code>error</code>、<code>log</code> is CustomEvent, the data is in detail; play / pause / ended is ordinary Event.</p>
+    <p>For the complete types, see <a href="https://github.com/AimesSoft/liberika/blob/v0.3.0/packages/erika_web/index.d.ts">index.d.ts</a>. <code>loaded</code>, <code>stats</code>, <code>timeupdate</code>, <code>error</code>, and <code>log</code> are CustomEvents with their data in detail. play, pause, and ended are plain Events.</p>
   </section>
 
   <section id="compatibility">
     <h2>Browser and media source requirements<a class="anchor" href="#compatibility">#</a></h2>
     <ul class="body">
-      <li>WebCodecs video and audio decoding, OffscreenCanvas, WebGL2 and Web Audio are required. The codec configuration, profile and dimensions are checked when opening; codec support depends on the browser. WASM provides no audio/video software decoder or server-side transcoding fallback.</li>
-      <li>The default request is prefer-hardware, then try no-preference;<code>open(source, { hardwareDecode: false })</code> Request prefer-software. The preference field does not prove that a hardware decoding was actually used.</li>
-      <li>Large remote files use a bounded HTTP Range cache. For files over 8 MiB, the server must return <code>206</code> with the known total length; for cross-origin access, expose <code>Content-Range</code> via <code>Access-Control-Expose-Headers</code>.</li>
-      <li>Containers include MP4/MOV, MKV/WebM, MPEG-TS, AVI, FLV, and Ogg. Whether audio and video codecs can be played depends on the current browser’s WebCodecs query result.</li>
-      <li>The current output is SDR, excluding desktop HDR/EDR/Dolby Vision, ArtCNN, DRM, unknown length live broadcast, bitmap subtitles and embedded non-ASS subtitle conversions. SRT/VTT is converted as plain text and does not preserve the complex VTT layout.</li>
-      <li>On seek, embedded ASS is read ahead from 5 seconds before the target and previously seen events are retained. A first seek into a long event that started earlier may temporarily miss it. Complete external ASS scripts do not have this limitation.</li>
+      <li>WebCodecs video and audio decoding, OffscreenCanvas, WebGL2, and Web Audio are all required. Open checks the codec configuration, profile, and dimensions, and codec support depends on the browser. The WASM build includes no software audio or video decoder and no server-side transcoding fallback.</li>
+      <li>By default it requests prefer-hardware, then tries no-preference. <code>open(source, { hardwareDecode: false })</code> requests prefer-software. These preference fields do not prove that hardware decoding was actually used.</li>
+      <li>Large remote files are read through a bounded HTTP Range cache. For files over 8 MiB, the server must return <code>206</code> with a known total length. For cross-origin access, expose <code>Content-Range</code> through <code>Access-Control-Expose-Headers</code>.</li>
+      <li>Supported containers include MP4/MOV, MKV/WebM, MPEG-TS, AVI, FLV, and Ogg. Whether an audio or video codec plays depends on the current browser's WebCodecs query result.</li>
+      <li>Output is currently SDR. Not yet supported: desktop HDR/EDR/Dolby Vision, ArtCNN, DRM, live streams of unknown length, bitmap subtitles, and conversion of embedded non-ASS subtitles. SRT and VTT are converted as plain text, and complex VTT layout is not preserved.</li>
+      <li>When you seek, embedded ASS is read starting 5 seconds before the target, and events already seen are kept. On the first seek into a long event that started earlier than that, the event may be temporarily missing. Complete external ASS scripts do not have this limitation.</li>
     </ul>
-    <p>The source code verification record covers the specified versions and materials of Chrome and Safari; Firefox has not yet been verified. For detailed build and test steps, see<a href="https://github.com/AimesSoft/liberika/blob/v0.3.0/docs/web.zh.md">Source Code Web Guide</a>。</p>
+    <p>The verification record in the source repository covers specific versions of Chrome and Safari with specific test media; Firefox has not been verified yet. For detailed build and test steps, see the <a href="https://github.com/AimesSoft/liberika/blob/v0.3.0/docs/web.zh.md">source repository's Web guide</a> (in Chinese).</p>
   </section>
 
   <section id="build">
     <h2>Build from source<a class="anchor" href="#build">#</a></h2>
-    <p>Use Emscripten 4.0.23, wasm-bindgen-cli 0.2.126, and Rust, Python 3, Node, CMake, Meson, Ninja, make, and pkg-config. For fixed tool versions and initialization steps, see the source code guide above.</p>
+    <p>You need Emscripten 4.0.23, wasm-bindgen-cli 0.2.126, Rust, Python 3, Node, CMake, Meson, Ninja, make, and pkg-config. For the pinned tool versions and setup steps, see the source guide linked above.</p>
     <div class="code"><p class="lbl">shell</p><pre>cargo run -p xtask -- web build
 python3 scripts/serve_web.py
-# 已构建原生 C 依赖时可追加 --skip-native</pre></div>
-    <p>The complete deployable directory is <code>target/web</code>, the intermediate file is <code>target/web-build</code>. The server should put the runtime into the version directory to avoid mixing old and new JS/WASM.</p>
+# Add --skip-native if the native C dependencies are already built</pre></div>
+    <p>The complete deployable directory is <code>target/web</code>; intermediate files go in <code>target/web-build</code>. On the server, place the runtime in a versioned directory so old and new JS/WASM files are never mixed.</p>
   </section>
 
   <footer class="doc-foot"><span>liberika <b>v0.3.0</b></span><span>Section <b>Guide</b></span><span>License <b>MPL-2.0</b></span></footer>
-  <nav class="pager"><a href="linux.en.html"><span class="dir">Prev</span>Linux access</a><a class="nx" href="../kernel/architecture.en.html"><span class="dir">Next</span>Architecture overview</a></nav>
+  <nav class="pager"><a href="linux.en.html"><span class="dir">Prev</span>Linux integration</a><a class="nx" href="../kernel/architecture.en.html"><span class="dir">Next</span>Architecture overview</a></nav>
 </main>
 </div>
 </body>

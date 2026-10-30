@@ -14,7 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
-  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="openharmony.html">中文</option><option value="openharmony.en.html">English</option><option value="openharmony.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="openharmony.html">中文</a> · <a href="openharmony.en.html">English</a> · <a href="openharmony.ja.html">日本語</a></nav></noscript></div>
+  <div class="language-switch" role="group" aria-label="语言"><a href="openharmony.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="openharmony.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="openharmony.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
     <ul>
@@ -203,7 +203,7 @@
   </section>
 
   <section id="http-cache">
-    <h2>0.2.1 HTTP 缓存选项<a class="anchor" href="#http-cache">#</a></h2>
+    <h2>HTTP 缓存选项（自 0.2.1 起）<a class="anchor" href="#http-cache">#</a></h2>
     <p>截至 2026-10-30，OHPM 0.3.0 已公开可用，包含以下 HTTP 回退缓存参数。</p>
     <p><code>httpReadAheadBytes</code> 决定向前预读的字节数，默认 2 MiB；<code>httpBackBufferBytes</code> 决定保留多少已播放数据，默认 16 MiB。两者省略或传 0 使用默认值。预读默认值也可由 <code>ERIKA_HTTP_READAHEAD_BYTES</code> 设置。</p>
     <p>回退缓存内的后退 seek 可直接复用已下载数据。高码率视频需要更大的预算：80 Mbit/s 的视频保留约 10 秒需约 100 MB。缓存按字节限制，不代表固定的播放秒数。</p>

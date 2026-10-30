@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Change Log — liberika Developer Documentation</title>
+<title>Changelog — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -14,7 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
-  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="changelog.html">中文</option><option value="changelog.en.html">English</option><option value="changelog.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="changelog.html">中文</a> · <a href="changelog.en.html">English</a> · <a href="changelog.ja.html">日本語</a></nav></noscript></div>
+  <div class="language-switch" role="group" aria-label="Language"><a href="changelog.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="changelog.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="changelog.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
     <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
     <ul>
@@ -57,78 +57,77 @@
 </aside>
 
 <main>
-  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
-  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>project<span class="sep">/</span>Change log</p>
-  <h1>Change log</h1>
+  <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>project<span class="sep">/</span>Changelog</p>
+  <h1>Changelog</h1>
   <p class="kicker">Changelog</p>
-  <p class="lead">List changes visible to the host by version. Items that have been rolled back are not listed here; the complete history starts with the repository root <code>CHANGELOG.md</code> shall prevail. 0.1.3 and earlier breaking change see the summary at the end of the article.</p>
+  <p class="lead">Changes that are visible to the host, listed by version. Entries that were later reverted are omitted; the repository’s root <code>CHANGELOG.md</code> is authoritative for the full history. Breaking changes in 0.1.3 and earlier are summarized at the end of this page.</p>
 
   <ul class="meta-strip">
-    <li>current <b>0.3.0</b></li>
-    <li>publish <b>2026-10-25</b></li>
+    <li>Current <b>0.3.0</b></li>
+    <li>Released <b>2026-10-25</b></li>
   </ul>
 
   <section id="v030">
     <h2>0.3.0 · 2026-10-25<a class="anchor" href="#v030">#</a></h2>
-    <p class="note"><b>Default behavior changes:</b>The subtitles and danmaku supersampling of native and Web are enabled by default and can be turned off respectively; software video decoding enables frame/slice multi-threading by default, and the number of threads is selected by FFmpeg. settings <code>ERIKA_VIDEO_DECODE_THREADS=1</code> Restore single thread.</p>
-    <h3>Web, export and diagnosis</h3>
+    <p class="note"><b>Default behavior changes:</b> Subtitle and danmaku supersampling is now on by default for native and Web, and can be turned off separately. Software video decoding now uses frame/slice multithreading by default, with FFmpeg choosing the thread count. Set <code>ERIKA_VIDEO_DECODE_THREADS=1</code> to restore single-threaded decoding.</p>
+    <h3>Web, export, and diagnostics</h3>
     <ul class="body">
-      <li>Add independent <a href="../guide/web.en.html">Web / WASM backend</a>: FFmpeg decapsulation, WebCodecs decoding, libass ASS/SSA subtitles and font attachments, Rust danmaku, Web Audio clocks and WebGL2 synthesis. Supports local files, HTTP Range, multitrack, chapters and PNG screenshots, encoding capabilities depend on browser.</li>
-      <li>Release New <code>liberika-web-0.3.0.zip</code>, the complete runtime, license and demo page are distributed together, and the abstract is included <code>SHA256SUMS</code>。</li>
-      <li>Added independent RGBA / PNG frame export and continuous frame capture sessions; reuse decoding status and map HDR to SDR.</li>
-      <li>Added desensitized log loop, decoding and hardware fallback diagnosis, audio/presentation timing snapshot;<code>listMethods</code> You can find the JSON interface and <code>blocking</code> / <code>writesFiles</code> property.</li>
-      <li>Presenter JSON New <code>chapters</code> Query without extending the existing C structure.</li>
+      <li>Added a standalone <a href="../guide/web.en.html">Web / WASM backend</a>: FFmpeg demuxing, WebCodecs decoding, libass ASS/SSA subtitles with font attachments, Rust danmaku, a Web Audio clock, and WebGL2 compositing. It supports local files, HTTP Range, multiple tracks, chapters, and PNG screenshots; codec support depends on the browser.</li>
+      <li>The release now includes <code>liberika-web-0.3.0.zip</code>, which ships the full runtime, license, and a demo page together; its checksum is listed in <code>SHA256SUMS</code>.</li>
+      <li>Added standalone RGBA / PNG frame export and continuous frame-capture sessions. They reuse decoder state and tone-map HDR to SDR.</li>
+      <li>Added a redacted log ring, decoding and hardware-fallback diagnostics, and an audio/presentation timing snapshot. <code>listMethods</code> now exposes the JSON interface and the <code>blocking</code> / <code>writesFiles</code> properties.</li>
+      <li>Added a <code>chapters</code> query to the Presenter JSON bridge, without extending existing C structs.</li>
     </ul>
-    <h3>Repairs and compatibility</h3>
+    <h3>Fixes and compatibility</h3>
     <ul class="body">
-      <li>Fix pause jump, long subtitles spanning seek, and subtitle update after pause track cutting (#171).</li>
-      <li>iOS / tvOS Preserve optional interfaces by symbol availability, for compatibility with older runtimes and to avoid static linking losing new symbols (#170).</li>
-      <li>Ordinary HTTP tail read failures are handled as EOF, and Range checksum resource change errors are retained (#169).</li>
-      <li>Danmaku system font fallback uses zero-copy coverage checking and bounded LRU, fixes memory spikes and preserves visible characters (#173).</li>
-      <li><code>erika_play</code> trace records the reason for startup failure; improves Windows, Android and Hongmeng access.</li>
-      <li>Project renamed liberika; Rust crate <code>erika</code>、C ABI <code>erika_*</code>, Flutter/OHPM package names continue to be compatible.</li>
+      <li>Fixed pause seeking, long subtitles that span a seek, and subtitle updates after switching tracks while paused (#171).</li>
+      <li>iOS / tvOS now keep optional interfaces based on symbol availability, for compatibility with older runtimes and to keep static linking from dropping new symbols (#170).</li>
+      <li>Failed tail reads on plain HTTP are now treated as EOF; Range validation and resource-changed errors are preserved (#169).</li>
+      <li>Danmaku system-font fallback now uses a zero-copy coverage check and a bounded LRU, which fixes memory spikes and preserves visible characters (#173).</li>
+      <li>The <code>erika_play</code> trace now records why startup failed. Improved Windows, Android, and HarmonyOS integration.</li>
+      <li>Renamed the project to liberika. The Rust crate <code>erika</code>, the C ABI <code>erika_*</code>, and the Flutter/OHPM package names remain compatible.</li>
     </ul>
-    <p><a href="https://github.com/AimesSoft/liberika/releases/tag/v0.3.0">GitHub Release</a>、<a href="https://pub.dev/packages/erika_flutter/versions/0.3.0">Flutter 0.3.0</a>、<a href="https://github.com/AimesSoft/liberika-swift/releases/tag/v0.3.0">Swift SDK 0.3.0</a> and <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM erika 0.3.0</a> All have been made public. For complete records see<a href="https://github.com/AimesSoft/liberika/blob/v0.3.0/CHANGELOG.md">Source code CHANGELOG</a>。</p>
+    <p><a href="https://github.com/AimesSoft/liberika/releases/tag/v0.3.0">GitHub Release</a>, <a href="https://pub.dev/packages/erika_flutter/versions/0.3.0">Flutter 0.3.0</a>, <a href="https://github.com/AimesSoft/liberika-swift/releases/tag/v0.3.0">Swift SDK 0.3.0</a>, and <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM erika 0.3.0</a> are all public. For the complete record, see the <a href="https://github.com/AimesSoft/liberika/blob/v0.3.0/CHANGELOG.md">source CHANGELOG</a>.</p>
   </section>
 
   <section id="v021">
     <h2>0.2.1 · 2026-10-02<a class="anchor" href="#v021">#</a></h2>
     <ul class="body">
-      <li>HTTP connection, TLS, response reading and background pre-reading can be canceled; stop / close / reopening will recycle network threads and caches, reducing exit lag and resource residue.</li>
-      <li>Flutter, Swift and OpenHarmony SDK can pass <code>httpBackBufferBytes</code> Adjust rollback cache, default 16 MiB.</li>
-      <li>Completed WMV / WMA, dav1d 8-bit / 10-bit AV1 software rollback, and Windows software frame upload.</li>
-      <li>iOS schedules videos, subtitles and danmaku according to the display target moment, and merges the backlog of rendering callbacks.</li>
-      <li>Added experimental Linux support: X11 / Wayland, PulseAudio, NVDEC / VA-API, Flutter textures and Wayland native video layer.</li>
-      <li>P010 upload preserves 10-bit accuracy and improves HDR color conversion.</li>
+      <li>HTTP connections, TLS, response reads, and background read-ahead can now be canceled. stop, close, and reopen reclaim network threads and caches, which reduces exit stalls and leftover resources.</li>
+      <li>The Flutter, Swift, and OpenHarmony SDKs can adjust the back buffer through <code>httpBackBufferBytes</code> (default 16 MiB).</li>
+      <li>Completed WMV / WMA support, software fallback for dav1d 8-bit / 10-bit AV1, and software frame upload on Windows.</li>
+      <li>iOS now schedules video, subtitles, and danmaku against the display target time and coalesces backlogged render callbacks.</li>
+      <li>Added experimental Linux support: X11 / Wayland, PulseAudio, NVDEC / VA-API, Flutter textures, and a native Wayland video layer.</li>
+      <li>P010 upload now preserves 10-bit precision, which improves HDR color conversion.</li>
     </ul>
   </section>
 
   <section id="v020">
     <h2>0.2.0 · 2026-09-23<a class="anchor" href="#v020">#</a></h2>
     <ul class="body">
-      <li>HTTP persistent connection, background read-ahead, seek window and breakpoint recovery; request headers and cache validators are retained with the request.</li>
-      <li>Supports Dolby Vision RPU reshaping and color conversion, covering Profile 5 / 8 and Profile 7 base layer mapping.</li>
-      <li>Default BT.2390 / IPT tone mapping, add more operators, target black point and contrast, and cached perceptual color gamut LUT.</li>
-      <li>HDR10 software frames use scene brightness statistics to adjust mapping, Apple EDR output follows monitor headroom.</li>
+      <li>HTTP persistent connections, background read-ahead, a seek window, and resume after interruption. Request headers and cache validators are kept with the request.</li>
+      <li>Added Dolby Vision RPU reshaping and color conversion, covering Profile 5 / 8 and Profile 7 base-layer mapping.</li>
+      <li>Tone mapping now defaults to BT.2390 / IPT. Added more operators, target black point and contrast controls, and a cached perceptual gamut LUT.</li>
+      <li>HDR10 software frames now adjust the mapping using scene luminance statistics, and Apple EDR output follows the display headroom.</li>
     </ul>
   </section>
 
   <section id="v018">
     <h2>0.1.8 · 2026-09-07<span class="jp">バージョン</span><a class="anchor" href="#v018">#</a></h2>
-    <p>Added HTTP opening options and pre-reading window configuration, unified SDK publishing entrance, and Windows Flutter SDR textures. Presenter configuration adds video alpha mode, and the native host needs to update the header files and runtime accordingly.</p>
-    <h3>Transparent video with cross-platform native GPU compositing (#124)</h3>
+    <p>Added HTTP open options and read-ahead window configuration, a unified SDK publishing entry point, and Windows Flutter SDR textures. Presenter configuration gains a video alpha mode, so native hosts must update the header and runtime together.</p>
+    <h3>Transparent video and cross-platform native GPU compositing (#124)</h3>
     <ul class="body">
-      <li>Added packed-alpha video presentation (<code>ErikaVideoAlphaMode.packedAlphaRight</code>): Materials with left half color and right half alpha are reconstructed in GPU pre-multiplied by alpha and rendered at half the encoding width; players that do not request this mode behave unchanged.</li>
-      <li>macOS adds the Flutter Texture path of IOSurface + Metal (<code>ErikaTextureVideoView</code>), no frame-by-frame CPU readback to obtain Flutter opacity, cropping, transformation and color filters; switch to native when background-aware mixing is required <code>CAMetalLayer</code>(Support <code>overlayBlendMode</code> with layer opacity).</li>
-      <li>Windows transparent video is changed to DirectComposition synthesis: Composition Swap Chain pre-multiplied by alpha is directly bound to Flutter HWND, replacing the original independent opaque pop-up window; supported <code>srcOver</code> / <code>overlay</code> Blending and opacity, overlay can sample real game backgrounds within the same HWND. Opaque videos maintain the original HWND playback path.</li>
-      <li>The native playback speed limit has been increased from 4× to 16×, and accelerated playback of short animations and special effects materials is supported.</li>
-      <li>C ABI New <code>erika_presenter_create_with_output_mode_and_alpha</code>、<code>erika_presenter_attach_flutter_texture</code> / <code>erika_presenter_set_flutter_texture_buffer</code> with <code>erika_presenter_windows_composition_swapchain_iunknown</code>(AddRef/Release Proprietary).</li>
+      <li>Added packed-alpha video presentation (<code>ErikaVideoAlphaMode.packedAlphaRight</code>): for sources with color in the left half and alpha in the right half, the GPU reconstructs premultiplied alpha and presents at half the encoded width. Players that do not request this mode behave as before.</li>
+      <li>macOS gains an IOSurface + Metal Flutter Texture path (<code>ErikaTextureVideoView</code>) that provides Flutter opacity, clipping, transforms, and color filters without a per-frame CPU readback. When you need background-aware blending, switch to native <code>CAMetalLayer</code> (supports <code>overlayBlendMode</code> and layer opacity).</li>
+      <li>Transparent video on Windows now composites through DirectComposition: a premultiplied-alpha composition swap chain binds directly to the Flutter HWND, replacing the separate opaque pop-up window. It supports <code>srcOver</code> / <code>overlay</code> blending and opacity, and overlay can sample the real game background inside the same HWND. Opaque video keeps the existing HWND playback path.</li>
+      <li>Raised the native playback rate limit from 4× to 16×, so short animations and effect clips can play faster.</li>
+      <li>C ABI additions: <code>erika_presenter_create_with_output_mode_and_alpha</code>, <code>erika_presenter_attach_flutter_texture</code> / <code>erika_presenter_set_flutter_texture_buffer</code>, and <code>erika_presenter_windows_composition_swapchain_iunknown</code> (AddRef/Release ownership).</li>
     </ul>
     <h3>Danmaku continuity and the JSON contract (#121)</h3>
     <ul class="body">
-      <li>Keep track allocation and admission decisions between consecutive planning sliding windows stable to prevent abandoned danmaku from reappearing midway or forcing visible danmaku to change tracks.</li>
-      <li>Decouple the danmaku service ID passed in by the host from the kernel's internal layout identity, and support parsing the optional JSON ID into precise <code>u64</code> or decimal string to avoid ID truncation caused by floating point double precision rounding.</li>
-      <li>Formally standardize and document the inline danmaku JSON contract, supporting standard arrays and <code>comments</code> / <code>danmaku</code> / <code>items</code> root object.</li>
+      <li>Track assignment and admission decisions now stay stable across consecutive planning windows, so discarded danmaku no longer reappear midway and visible danmaku no longer switch tracks.</li>
+      <li>Decoupled the host-supplied danmaku business ID from the kernel’s internal layout identity. The optional JSON ID can now be parsed as an exact <code>u64</code> or a decimal string, which avoids ID truncation from double-precision rounding.</li>
+      <li>Formalized and documented the inline danmaku JSON contract, which accepts a standard array or a root object with <code>comments</code> / <code>danmaku</code> / <code>items</code>.</li>
     </ul>
   </section>
 
@@ -136,16 +135,16 @@
     <h2>0.1.7<span class="jp">バージョン</span><a class="anchor" href="#v017">#</a></h2>
     <h3>Flutter package release</h3>
     <ul class="body">
-      <li><code>erika_flutter</code> First release to pub.dev, package includes license, changelog, metadata, examples and independent testing.</li>
-      <li>The verified and locked version of native bundle becomes the default build method for Android, Apple, Windows and OpenHarmony; requires explicit setting when building from source <code>ERIKA_FORCE_SOURCE_BUILD=1</code>。</li>
-      <li>Android split runtime archive by ABI: app builds only download the required architecture and no longer ship with the native-embedder static library.</li>
-      <li>Each release adds new files that cover all native archives <code>SHA256SUMS</code> Checklist.</li>
-      <li>The GitHub Actions consumption builds for each of the six platforms are independent, and the package build no longer relies on monorepo.</li>
+      <li><code>erika_flutter</code> is now published to pub.dev, with the license, changelog, metadata, examples, and standalone tests in the package.</li>
+      <li>Verified native bundles pinned to the package version are now the default build method for Android, Apple, Windows, and OpenHarmony. To build from source, set <code>ERIKA_FORCE_SOURCE_BUILD=1</code>.</li>
+      <li>Android runtime archives are now split by ABI: app builds download only the architecture they need and no longer bundle the native-embedder static library.</li>
+      <li>Each release now includes a <code>SHA256SUMS</code> manifest covering all native archives.</li>
+      <li>The GitHub Actions consumption builds for the six platforms are now independent, and package builds no longer depend on the monorepo.</li>
     </ul>
-    <h3>OpenHarmony native package released</h3>
+    <h3>OpenHarmony native package release</h3>
     <ul class="body">
-      <li>Added OpenHarmony ArkTS / OHPM package <code>erika</code>, for arm64, API 18+.</li>
-      <li>provide <code>XComponent</code> surface life cycle, playback control,<code>renderTick()</code> Frame scheduling, events and screenshots API, and supplementary independent integration guide.</li>
+      <li>Added the OpenHarmony ArkTS / OHPM package <code>erika</code>, targeting arm64 and API 18+.</li>
+      <li>Provides the <code>XComponent</code> surface lifecycle, playback control, <code>renderTick()</code> frame scheduling, events, and a screenshot API, along with a standalone integration guide.</li>
     </ul>
   </section>
 
@@ -153,100 +152,100 @@
     <h2>0.1.6<span class="jp">バージョン</span><a class="anchor" href="#v016">#</a></h2>
     <h3>Rendering and playback</h3>
     <ul class="body">
-      <li>Added ArtCNN C4F16 DS noise reduction/sharpening brightness super-resolution, for degraded animation sources, through the Rust, C, Flutter, Metal and wgpu interfaces.</li>
-      <li>presenter rendering of Android and macOS moved out of the application UI / main thread; Android AHardwareBuffer conversion bandwidth reduced; D3D11 no longer multiplexes frames across devices.</li>
-      <li>The Apple platform selects SDR / EDR output according to the source content; the resource status is exposed through the integration of Android, Windows and OpenHarmony.</li>
+      <li>Added ArtCNN C4F16 DS luma upscaling with denoising and sharpening, aimed at degraded anime sources, across the Rust, C, Flutter, Metal, and wgpu interfaces.</li>
+      <li>Presenter rendering on Android and macOS moved off the app UI / main thread. Android AHardwareBuffer conversion bandwidth is lower, and D3D11 no longer reuses frames across devices.</li>
+      <li>Apple platforms now choose SDR / EDR output based on the source content. Resource status is exposed through the Android, Windows, and OpenHarmony integrations.</li>
     </ul>
     <h3>Integration and behavior</h3>
     <ul class="body">
-      <li>Danmaku scroll overwrite is turned off by default, keeping the stabilized danmaku from being overwritten during high-density playback.</li>
-      <li>Restored Windows system media control build; ArkTS declaration of OpenHarmony Flutter plug-in changed to explicit.</li>
+      <li>Danmaku scroll overwrite is now off by default, so already-stable danmaku are not overwritten during high-density playback.</li>
+      <li>Restored the Windows system media controls build. The ArkTS declarations in the OpenHarmony Flutter plugin are now explicit.</li>
     </ul>
   </section>
 
   <section id="v015">
     <h2>0.1.5<span class="jp">バージョン</span><a class="anchor" href="#v015">#</a></h2>
-    <h3>System media control and background audio</h3>
+    <h3>System media controls and background audio</h3>
     <ul class="body">
-      <li>Now Playing metadata, playback status, timeline, play / pause / seek and previous and next song navigation, covering six platforms: iOS, tvOS, macOS, Android, Windows, OpenHarmony.</li>
-      <li>Optional background audio playback for iOS and Android. Video decoding is suspended in the background, and the life cycle callback is queued by bounded barrier, which will not block the application thread indefinitely.</li>
-      <li>Not carried <code>ErikaMediaMetadata</code> Clear stale metadata when opening media; pause / play timing is finalized; Android media callbacks are isolated by Flutter engine.</li>
-      <li>Android cover image cache; media notifications will not be rebuilt when the native playback status has not changed.</li>
+      <li>Now Playing metadata, playback state, timeline, play / pause / seek, and previous/next track navigation, across six platforms: iOS, tvOS, macOS, Android, Windows, and OpenHarmony.</li>
+      <li>Optional background audio playback on iOS and Android. Video decoding is suspended in the background, and lifecycle callbacks are queued behind a bounded barrier so they cannot block the app thread indefinitely.</li>
+      <li>Opening media without <code>ErikaMediaMetadata</code> now clears stale metadata. pause / play timing is now deterministic, and Android media callbacks are isolated per Flutter engine.</li>
+      <li>Android caches cover art, and media notifications are no longer rebuilt when the native playback state has not changed.</li>
     </ul>
-    <h3>Platform support and product release</h3>
+    <h3>Platforms and release artifacts</h3>
     <ul class="body">
-      <li>tvOS plug-in and native target: real device and arm64 / x86_64 emulator, including Metal rendering, Apple audio, VideoToolbox, subtitles, danmaku, screenshots and HTTP source.</li>
-      <li>New <code>erika-capi-tvos.zip</code>(real machine + universal simulator xcframework), automatically add release workflow.</li>
-      <li>OpenHarmony optional precompiled consumption: CMake build downloadable tagged <code>liberika_capi.so</code> put on <code>liberika_flutter.so</code> Next, fail to roll back the source code build.</li>
-      <li>The CI and release of macOS / iOS / tvOS are unified to macOS 26 runner; macOS x64 and arm64 are cross-constructed and then synthesized into a common package. Zero-length HTTP resources are no longer misinterpreted as truncated.</li>
+      <li>tvOS plugin and native target for devices and arm64 / x86_64 simulators, including Metal presentation, Apple audio, VideoToolbox, subtitles, danmaku, screenshots, and HTTP sources.</li>
+      <li>Added <code>erika-capi-tvos.zip</code> (device + universal simulator xcframework), and added it to the release workflow automatically.</li>
+      <li>Optional prebuilt consumption on OpenHarmony: a CMake build can download a tagged <code>liberika_capi.so</code> and place it next to <code>liberika_flutter.so</code>, and falls back to a source build on failure.</li>
+      <li>CI and release for macOS / iOS / tvOS now use the macOS 26 runner. macOS x64 and arm64 are cross-built and then merged into a universal package. Zero-length HTTP resources are no longer misdetected as truncated.</li>
     </ul>
-    <h3>Subtitle memory font</h3>
+    <h3>In-memory subtitle fonts</h3>
     <ul class="body">
-      <li>The memory subtitle font registry connects Rust, C, API, Dart with each native Flutter embed. The host can check the font faces, select the ordered fallback set, replace the font data, and clear the registry without writing to the disk.</li>
-      <li>libass preserves ordered rollback; TTC / OTC data is shared across face; when fonts in the same path are replaced, the renderer cache is invalidated and the active subtitle track uses the new data immediately.</li>
-      <li>Algebraic separation of registry and selected set; renderer rebuild to replay libass codec private data; OpenHarmony and tvOS to complete the full memory font C API surface.</li>
+      <li>The in-memory subtitle font registry now spans Rust, the C API, Dart, and each native Flutter embedding. The host can inspect font faces, select an ordered fallback set, replace font data, and clear the registry, all without writing to disk.</li>
+      <li>libass keeps the ordered fallback. TTC / OTC data is shared across faces. When a font at the same path is replaced, the renderer cache is invalidated and the active subtitle track uses the new data immediately.</li>
+      <li>The registry and the selected set now track generations separately. After a renderer rebuild, libass codec private data is replayed. OpenHarmony and tvOS now expose the full in-memory font C API surface.</li>
     </ul>
-    <h3>Play resume</h3>
+    <h3>Playback recovery</h3>
     <ul class="body">
-      <li>Enter explicit buffer conversion when audio and video input is hungry. The playback clock freezes during stall and is re-anchored to the media time after the data is restored to avoid overrunning the clock and causing long-term frame drops or black screens.</li>
+      <li>When audio or video input starves, playback now enters an explicit buffering transition. The playback clock freezes during the stall and re-anchors to the media time once data returns, which avoids the clock running ahead and causing prolonged frame drops or a black screen.</li>
     </ul>
   </section>
 
   <section id="v014">
     <h2>0.1.4<span class="jp">バージョン</span><a class="anchor" href="#v014">#</a></h2>
-    <h3>Compatibility Tips</h3>
+    <h3>Compatibility notes</h3>
     <ul class="body">
-      <li><b>Danmaku <code>outline_width</code> Change to gears instead of multipliers.</b>0 off, 1 fine, 2 normal, 3 coarse, over 3 clamp to coarse. Normal and coarse scales exactly reproduce the width of the old continuous multipliers at 1.0 and 2.0, so previously sent <code>outline_width: 1.0</code> The host must now send <code>2.0</code> to keep the same stroke. Unmigrated strokes become thinner: the rasterization radius is halved from 2 px to 1 px at the default font size.</li>
-      <li>The danmaku font size is explained in pixels per em.<code>ab_glyph</code> of <code>PxScale</code> It is the height from ascender to descender. The old code directly passes in the em size, and the rendering is smaller than the request. The text is now consistent with the request, and the danmaku has become larger after the upgrade. The ratio of PingFang SC is 1.4, which is 40% larger for the same configuration. Hosts who want an older look should lower the font size.</li>
-      <li>The scrolling duration of the danmaku scales with the logical width of the viewport (×0.9 at 640 pt, ×1.3 at 1920 pt and above). The same configuration scrolls more slowly on large windows.</li>
-      <li>Danmaku screenshots no longer contain danmaku;<code>capture_*</code> Only video and subtitles are synthesized, debug HUD are not included in screenshots.</li>
+      <li><b>Danmaku <code>outline_width</code> is now a level, not a multiplier.</b> 0 is off, 1 thin, 2 normal, 3 thick; values above 3 clamp to thick. Normal and thick reproduce the widths of the old continuous multiplier at 1.0 and 2.0 exactly, so a host that used to send <code>outline_width: 1.0</code> must now send <code>2.0</code> to keep the same outline. Unmigrated outlines get thinner: at the default font size the rasterization radius halves from 2 px to 1 px.</li>
+      <li>Danmaku font size is now interpreted as pixels per em. <code>PxScale</code> in <code>ab_glyph</code> is the height from ascender to descender, and the old code passed the em size straight in, so text rendered smaller than requested. Text now matches the request, which makes danmaku larger after the upgrade. For PingFang SC the ratio is 1.4, so the same configuration is up to 40% larger. Hosts that want the old look should lower the font size.</li>
+      <li>Danmaku scroll duration now scales with the logical viewport width (×0.9 at 640 pt, ×1.3 at 1920 pt and above). The same configuration scrolls more slowly in large windows.</li>
+      <li>Screenshots no longer include danmaku. <code>capture_*</code> composites only video and subtitles, and the debug HUD is also excluded.</li>
     </ul>
-    <h3>Platform support and product release</h3>
+    <h3>Platforms and release artifacts</h3>
     <ul class="body">
-      <li>OpenHarmony playback backend and Flutter plug-in: AVCodec H.264 / HEVC hardware decoding, OHNativeBuffer / Vulkan zero-copy rendering, WGPU synthesis, subtitles, danmaku, audio, diagnosis and RGBA screenshots. publish <code>erika-capi-openharmony-arm64.zip</code>。</li>
-      <li>Windows ARM64 native dependencies and <code>erika_capi</code> build, add <code>erika-capi-windows-arm64.zip</code>。</li>
-      <li>macOS arm64 / x86_64 / universal Optional build and corresponding archive.</li>
-      <li>On Apple Silicon, Android source code construction is changed to use the general function that comes with NDK <code>glslc</code>. x86_64 product re-enables FFmpeg optimized assembly, and source code construction requires NASM.</li>
+      <li>OpenHarmony playback backend and Flutter plugin: AVCodec H.264 / HEVC hardware decoding, OHNativeBuffer / Vulkan zero-copy presentation, WGPU compositing, subtitles, danmaku, audio, diagnostics, and RGBA screenshots. Releases now include <code>erika-capi-openharmony-arm64.zip</code>.</li>
+      <li>Windows ARM64 native dependencies and an <code>erika_capi</code> build; added <code>erika-capi-windows-arm64.zip</code>.</li>
+      <li>Optional macOS arm64 / x86_64 / universal builds and matching archives.</li>
+      <li>On Apple Silicon, Android source builds now use the general-purpose <code>glslc</code> that ships with the NDK. x86_64 artifacts re-enable FFmpeg’s optimized assembly, so source builds require NASM.</li>
     </ul>
-    <h3>Playback, rendering and window integration</h3>
+    <h3>Playback, rendering, and window integration</h3>
     <ul class="body">
-      <li>The shared playback clock is published directly, and the frame snapshot atomic sampling time, state and generation are included. Danmaku, subtitles and rendering share the same time base.</li>
-      <li>Paused seek decodes and renders the preview frame, the media clock remains frozen. seek preroll, EOF, and seek pause and resume startup race conditions no longer produce clock rollback, worker idling, or long black frames.</li>
-      <li>The demux requirements for audio and video are separated, and audio backpressure no longer blocks video packet scanning. Switching or adding subtitles does not reset the audio and video demux selection.</li>
-      <li>macOS renders reconstructed as <code>CVDisplayLink</code>, slow frame merging, reset display link after screen change. Duplicate overlay attachment and GPU resource work reduction during window migration.</li>
-      <li>Desktop overlay API supports multiple <code>FlutterView</code> and secondary window. The player maintains surface, visibility, generational and aspect-fit state when migrating between host windows.</li>
-      <li>Windows D3D11 overlay lifecycle, non-blocking rendering and recovery seek handling improvements. Subtitles are synthesized within the video viewport, and the danmaku maintain the full-window viewport.</li>
+      <li>The shared playback clock is now published directly, and frame snapshots sample time, state, and generation atomically. Danmaku, subtitles, and rendering share a single time base.</li>
+      <li>Seeking while paused now decodes and presents a preview frame while the media clock stays frozen. Race conditions around seek preroll, EOF, and a pause or resume right after a seek no longer cause clock rollback, an idle worker, or long black frames.</li>
+      <li>Demux demand for audio and video is now separate, so audio backpressure no longer blocks video packet scanning. Switching or adding subtitles does not reset the audio and video demux selection.</li>
+      <li>macOS presentation was rebuilt on <code>CVDisplayLink</code>, with slow-frame coalescing and a display link reset after a screen change. Redundant overlay attachment and GPU resource work during resize and window migration are reduced.</li>
+      <li>The desktop overlay API supports multiple <code>FlutterView</code>s and secondary windows. The player keeps its surface, visibility, generation, and aspect-fit state when it migrates between host windows.</li>
+      <li>Improved the Windows D3D11 overlay lifecycle, non-blocking presentation, and seek recovery. Subtitles are composited inside the video viewport, while danmaku keep the full-window viewport.</li>
     </ul>
     <h3>Danmaku and subtitles</h3>
     <ul class="body">
-      <li>Align danmaku collision boundaries with rasterized strokes, correct shadow/stroke/text ordering, stabilize track preferences, and limit high-density overlap to overflow tracks.</li>
-      <li>During asynchronous reflow, the old danmaku plan continues to move; pure drawing settings reuse the layout, and the visibility takes effect immediately.</li>
-      <li>Incremental glyph atlas is uploaded and reusable Metal instance buffer, reducing the DFM allocation and candidate traversal overhead per frame.</li>
-      <li>Character set detection and transcoding of plug-in text subtitles, covering GBK, Big5, Shift_JIS, UTF-16, UTF-8 pass-through, low confidence or binary input fallback protection.</li>
-      <li>libass is registered on all platforms. liberika is built-in. Droid Sans Fallback; the target of non-system font providers defaults to this family and no longer falls into the unparsable category. <code>Arial</code>。</li>
-      <li>Subtitle fallback and selective style overrides: custom font families and files, RGBA color, metrics, text properties, borders, alignment, margins, blur. The entrance is <code>erika_presenter_set_subtitle_font</code>、<code>erika_presenter_set_subtitle_style</code> with <code>ErikaPlayer.setSubtitleStyle</code>。</li>
+      <li>Danmaku collision bounds now align with the rasterized outline. Fixed the shadow / outline / text layer order, stabilized track preference, and confined high-density overlap to overflow tracks.</li>
+      <li>During an asynchronous reflow, the old danmaku plan keeps moving. Draw-only settings reuse the layout and take effect immediately.</li>
+      <li>Incremental glyph atlas uploads and a reusable Metal instance buffer reduce per-frame DFM allocation and candidate-traversal cost.</li>
+      <li>Charset detection and transcoding for external text subtitles, covering GBK, Big5, Shift_JIS, and UTF-16, with UTF-8 passthrough and a fallback guard for low-confidence or binary input.</li>
+      <li>libass now registers liberika’s built-in Droid Sans Fallback on all platforms. Targets without a system font provider default to that family instead of falling through to an unresolvable <code>Arial</code>.</li>
+      <li>Subtitle fallback and selective style overrides: custom font family and file, RGBA colors, metrics, text attributes, borders, alignment, margins, and blur. The entry points are <code>erika_presenter_set_subtitle_font</code>, <code>erika_presenter_set_subtitle_style</code>, and <code>ErikaPlayer.setSubtitleStyle</code>.</li>
     </ul>
-    <h3>Network and Media Diagnostics</h3>
+    <h3>Network and media diagnostics</h3>
     <ul class="body">
-      <li><code>erika_open_with_headers</code> with <code>erika_presenter_open_with_headers</code>. The request header is applied to probe, range reading, retrying and prefetching, but is not passed to subtitles and danmaku sidecar.</li>
-      <li>Reject the host's incoming liberika managed transport header and illegal HTTP field. HTTP range input hardening: ignored <code>Range</code>, error offset, transient failure, partial response, repeated prefetch with false EOF, retry bounded.</li>
-      <li>Track bitrate and rational frame rate metadata pass through Rust, C, Dart. Optional native debug HUD covers decoder, renderer, GPU, audio, output and HDR, danmaku diagnostics.</li>
+      <li>Added <code>erika_open_with_headers</code> and <code>erika_presenter_open_with_headers</code>. Request headers apply to probing, range reads, retries, and prefetching, but are not forwarded to subtitle and danmaku sidecars.</li>
+      <li>Host-supplied headers that liberika manages for transport, and invalid HTTP fields, are now rejected. Hardened HTTP range input handling: ignored <code>Range</code>, wrong offsets, transient failures, partial responses, and repeated prefetch with false EOF; retries are bounded.</li>
+      <li>Track bitrate and rational frame rate metadata now flow through Rust, C, and Dart. An optional native debug HUD covers the decoder, renderer, GPU, audio, output and HDR, and danmaku diagnostics.</li>
     </ul>
-    <h3>Audio, color and codecs</h3>
+    <h3>Audio, color, and codecs</h3>
     <ul class="body">
-      <li>Surround to stereo downmix matrix normalization to prevent clipping.</li>
-      <li>Added callback volume ramping to all audio backends; WASAPI device loss recovery with observable recovery status and bounded backoff.</li>
-      <li>Metal, WGPU, D3D11 support BT.2100 HLG decoding; D3D11 overlay correctly encodes PQ on HDR10 output.</li>
-      <li>FFmpeg is upgraded to 8.1.2; Darwin AV1 hardware decoding import is improved; seek retains the last frame during loading and no longer flashes to black.</li>
+      <li>Normalized the surround-to-stereo downmix matrix to prevent clipping.</li>
+      <li>All audio backends now apply a per-callback volume ramp. WASAPI device-loss recovery reports observable recovery state and uses bounded backoff.</li>
+      <li>Metal, WGPU, and D3D11 now decode BT.2100 HLG, and the D3D11 overlay correctly encodes PQ on HDR10 output.</li>
+      <li>Upgraded FFmpeg to 8.1.2. Improved Darwin AV1 hardware-decode import. The last frame is now kept while a seek loads, so the picture no longer flashes black.</li>
     </ul>
   </section>
 
   <section id="earlier">
-    <h2>0.1.3 and earlier<span class="jp">before</span><a class="anchor" href="#earlier">#</a></h2>
-    <p>0.1.3 Introduce Android complete playback path (MediaCodec, AHardwareBuffer / wgpu, AAudio, PlatformView, subtitles, danmaku, screenshots, SDR / HDR). Two of them, breaking change, are valid so far:</p>
+    <h2>0.1.3 and earlier<span class="jp">以前</span><a class="anchor" href="#earlier">#</a></h2>
+    <p>Version 0.1.3 introduced the full Android playback path (MediaCodec, AHardwareBuffer / wgpu, AAudio, PlatformView, subtitles, danmaku, screenshots, SDR / HDR). Two of its breaking changes are still in effect:</p>
     <ul class="body">
-      <li><b>Surface size semantics.</b> attach and resize <code>width</code> / <code>height</code> Represents the exact drawable size of the physical pixel, no longer multiplied by <code>scale</code>。<code>scale</code> Only affects logical UI content such as danmaku.</li>
-      <li><b>play asynchronous.</b> <code>play</code> Queue execution and no longer wait to play worker. The final result is <code>StateChanged</code> with <code>Error</code> The event shall prevail.</li>
+      <li><b>Surface size semantics.</b> The <code>width</code> / <code>height</code> passed to attach and resize are the exact drawable size in physical pixels and are no longer multiplied by <code>scale</code>. <code>scale</code> now affects only logical UI content such as danmaku.</li>
+      <li><b>Asynchronous play.</b> <code>play</code> is now queued and no longer waits for the playback worker. The final outcome is reported by the <code>StateChanged</code> and <code>Error</code> events.</li>
     </ul>
   </section>
 
@@ -257,7 +256,7 @@
   </footer>
 
   <nav class="pager">
-    <a href="contributing.en.html"><span class="dir">Prev</span>Contribution Guide</a>
+    <a href="contributing.en.html"><span class="dir">Prev</span>Contributing</a>
     <a class="nx" href="../guide/quickstart.en.html"><span class="dir">Next</span>Quick start</a>
   </nav>
 </main>

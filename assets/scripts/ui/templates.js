@@ -7,6 +7,12 @@ const escapeHTML = (value = '') =>
     (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character],
   );
 
+const languages = [
+  { value: 'zh', lang: 'zh-CN', mark: '中', name: '中文' },
+  { value: 'en', lang: 'en', mark: 'EN', name: 'English' },
+  { value: 'ja', lang: 'ja', mark: '日', name: '日本語' },
+];
+
 const sectionHeading = ({ eyebrow, title, lead }) => `
   <header class="section-heading reveal">
     <p class="section-eyebrow">${escapeHTML(eyebrow)}</p>
@@ -31,11 +37,9 @@ function renderHeader(content) {
           ${navigation.map(({ label, href }) => `<a href="${href}">${escapeHTML(label)}</a>`).join('')}
           <a class="nav-repo" href="${brand.repoUrl}" target="_blank" rel="noreferrer">${icon('github')} GitHub</a>
         </nav>
-        <label class="language-switch"><span class="language-label" aria-hidden="true">Language</span>
-          <select data-language aria-label="${escapeHTML(ui.language)}">
-            ${[['zh', '中文'], ['en', 'English'], ['ja', '日本語']].map(([value, label]) => `<option value="${value}" ${app.language === value ? 'selected' : ''}>${label}</option>`).join('')}
-          </select>
-        </label>
+        <div class="language-switch" role="group" aria-label="${escapeHTML(ui.language)}">
+          ${languages.map(({ value, lang, mark, name }) => `<button type="button" lang="${lang}" title="${name}" aria-label="${name}" aria-pressed="${app.language === value}" data-language="${value}">${mark}</button>`).join('')}
+        </div>
         <button class="nav-toggle" type="button" aria-label="${escapeHTML(ui.openMenu)}" aria-expanded="false" data-nav-toggle>
           ${icon('menu')}
         </button>

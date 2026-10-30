@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Zero-copy import — liberika Developer Documentation</title>
+<title>Zero-copy import — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -14,7 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
-  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="zero-copy.html">中文</option><option value="zero-copy.en.html">English</option><option value="zero-copy.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="zero-copy.html">中文</a> · <a href="zero-copy.en.html">English</a> · <a href="zero-copy.ja.html">日本語</a></nav></noscript></div>
+  <div class="language-switch" role="group" aria-label="Language"><a href="zero-copy.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="zero-copy.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="zero-copy.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
     <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
     <ul>
@@ -57,59 +57,58 @@
 </aside>
 
 <main>
-  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
-  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>Zero copy import</p>
-  <h1>Zero copy import</h1>
+  <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>Zero-copy import</p>
+  <h1>Zero-copy import</h1>
   <p class="kicker">Zero-copy Import</p>
-  <p class="lead">The output of the hardware decoder is directly imported into the renderer in the form of a native texture or buffer handle, without a CPU copy in between. Each import path has a one-to-one fallback: CPU upload when import cannot be performed, and the frame count truly reflects the usage ratio of the two paths.</p>
+  <p class="lead">The hardware decoder's output is imported directly into the renderer as a native texture or buffer handle, with no CPU copy in between. Each import path has a matching fallback: when a frame cannot be imported, it goes through CPU upload instead, and the frame counters accurately reflect how often each path is used.</p>
 
   <ul class="meta-strip">
-    <li>import path <b>4</b> Article</li>
-    <li>rollback <b>CPU upload</b></li>
-    <li>count <b>zero_copy / cpu_fallback</b></li>
+    <li>Import paths <b>4</b></li>
+    <li>Fallback <b>CPU upload</b></li>
+    <li>Counters <b>zero_copy / cpu_fallback</b></li>
   </ul>
 
   <section id="paths">
-    <h2>Import paths for each platform<span class="jp">Take り込み経路</span><a class="anchor" href="#paths">#</a></h2>
+    <h2>Import paths by platform<span class="jp">取り込み経路</span><a class="anchor" href="#paths">#</a></h2>
     <div class="tw">
       <table>
-        <thead><tr><th>platform</th><th>decode output</th><th>import target</th><th>mechanism</th></tr></thead>
+        <thead><tr><th>Platform</th><th>Decoder output</th><th>Import target</th><th>Mechanism</th></tr></thead>
         <tbody>
-          <tr><td class="p">macOS / iOS / tvOS</td><td class="m">CVPixelBuffer</td><td class="m">MTLTexture</td><td>Metal directly holds the texture of pixel buffer, referenced by iosurface or shared memory zero copy.</td></tr>
-          <tr><td class="p">Windows</td><td class="m">D3D11VA texture</td><td class="m">D3D11 texture</td><td>The decoder texture interoperates with the renderer texture, rendering pass directly sampling the decoded output.</td></tr>
-          <tr><td class="p">Android</td><td class="m">MediaCodec Surface</td><td class="m">AHardwareBuffer → Vulkan</td><td>surface frame <code>AHardwareBuffer</code> The handle imports wgpu/Vulkan and maps to VkImage.</td></tr>
-          <tr><td class="p">HarmonyOS</td><td class="m">AVCodec Surface</td><td class="m">OHNativeBuffer → Vulkan</td><td>OHNativeBuffer zero-copy import, rendered by wgpu/Vulkan.</td></tr>
+          <tr><td class="p">macOS / iOS / tvOS</td><td class="m">CVPixelBuffer</td><td class="m">MTLTexture</td><td>Metal holds the pixel buffer's texture directly and references it with zero copy through IOSurface or shared memory.</td></tr>
+          <tr><td class="p">Windows</td><td class="m">D3D11VA texture</td><td class="m">D3D11 texture</td><td>The decoder texture interoperates with the renderer texture, and the render pass samples the decoded output directly.</td></tr>
+          <tr><td class="p">Android</td><td class="m">MediaCodec Surface</td><td class="m">AHardwareBuffer → Vulkan</td><td>Surface frames are imported into wgpu / Vulkan through an <code>AHardwareBuffer</code> handle and mapped to a VkImage.</td></tr>
+          <tr><td class="p">HarmonyOS</td><td class="m">AVCodec Surface</td><td class="m">OHNativeBuffer → Vulkan</td><td>Imported from OHNativeBuffer with zero copy and presented through wgpu / Vulkan.</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
   <section id="fallback">
-    <h2>Rollback and counting<span class="jp">フォールバック</span><a class="anchor" href="#fallback">#</a></h2>
-    <p>Frames that failed to import are returned to CPU upload: decoded output <code>avcodec</code> Copy it to the CPU side memory, and then upload it as a normal texture. The renderer does not distinguish the source of the frame, and the two paths follow the same set of rendering pipelines.</p>
-    <p>Reasons for rollback include handle acquisition failure, format incompatibility, video memory allocation failure, etc. Frame counting separates the two paths:</p>
+    <h2>Fallback and counters<span class="jp">フォールバック</span><a class="anchor" href="#fallback">#</a></h2>
+    <p>A frame that fails to import falls back to CPU upload: the decoded output is copied through <code>avcodec</code> into CPU-side memory and then uploaded as an ordinary texture. The renderer does not distinguish where a frame came from, and both paths use the same rendering pipeline.</p>
+    <p>Fallbacks happen for reasons such as failing to obtain a handle, an incompatible format, or a failed video memory allocation. The frame counters track the two paths separately:</p>
     <div class="tw">
       <table>
-        <thead><tr><th>Field</th><th>meaning</th></tr></thead>
+        <thead><tr><th>Field</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td class="m">zero_copy_video_frames</td><td>The number of frames for successful zero-copy import.</td></tr>
-          <tr><td class="m">direct_zero_copy_video_frames</td><td>Directly reference the frame number of the decoded output (no copying).</td></tr>
-          <tr><td class="m">shared_handle_video_frames</td><td>Number of frames imported via shared handle (AHardwareBuffer / OHNativeBuffer, etc.).</td></tr>
-          <tr><td class="m">cpu_video_frame_fallbacks</td><td>Return the number of frames CPU upload.</td></tr>
-          <tr><td class="m">import_failures</td><td>The number of import failures, including successful rollback after failure.</td></tr>
+          <tr><td class="m">zero_copy_video_frames</td><td>Number of frames imported successfully with zero copy.</td></tr>
+          <tr><td class="m">direct_zero_copy_video_frames</td><td>Number of frames that reference the decoder output directly (no copy).</td></tr>
+          <tr><td class="m">shared_handle_video_frames</td><td>Number of frames imported through a shared handle (AHardwareBuffer, OHNativeBuffer, and so on).</td></tr>
+          <tr><td class="m">cpu_video_frame_fallbacks</td><td>Number of frames that fell back to CPU upload.</td></tr>
+          <tr><td class="m">import_failures</td><td>Number of import failures, including those where the fallback then succeeded.</td></tr>
         </tbody>
       </table>
     </div>
-    <p>use <code>zero_copy_video_frames / (zero_copy_video_frames + cpu_video_frame_fallbacks)</code> You can get a zero copy hit rate within a period of time,<code>windows_native_demo --smoke-seconds 3</code> will print these counters (macOS's <code>macos_native_demo</code> smoke mode only sets the running time and does not print the counter).</p>
+    <p><code>zero_copy_video_frames / (zero_copy_video_frames + cpu_video_frame_fallbacks)</code> gives the zero-copy hit rate over a period of time. <code>windows_native_demo --smoke-seconds 3</code> prints these counters before it exits (the smoke mode of macOS's <code>macos_native_demo</code> only sets the run time and does not print the counters).</p>
     <div class="note">
-      <p><b>Playback will not roll back if the import fails.</b> Failure to import a single frame only triggers the CPU rollback of that frame without interrupting playback. Continuous failure is mostly caused by insufficient video memory or driver abnormality, which is reflected in <code>import_failures</code> on the growth.</p>
+      <p><b>A failed import does not interrupt playback.</b> When a single frame fails to import, only that frame falls back to the CPU path and playback continues. Persistent failures are usually caused by insufficient video memory or a driver fault, and show up as growth in <code>import_failures</code>.</p>
     </div>
   </section>
 
   <section id="linux">
     <h2>Linux GPU import<a class="anchor" href="#linux">#</a></h2>
-    <p>Linux VA-API can be passed FFmpeg <code>AV_HWFRAME_MAP_DIRECT</code> Map NV12 / P010 to the Vulkan image, which is directly sampled by wgpu; this experimental path requires compatible equipment, external video memory, semaphore and other capabilities.</p>
-    <p>Normal NVDEC / WSL OpenGL paths use CPU plane transfer; optional WSL D3D12 paths use GPU replication. Wayland native video layer can reduce Flutter RGBA readback, and whether the decoded frame has zero copies are two different things. The build steps are included in <a href="../guide/linux.en.html">Linux access</a>。</p>
+    <p>On Linux, VA-API can map NV12 / P010 to a Vulkan image through FFmpeg's <code>AV_HWFRAME_MAP_DIRECT</code>, and wgpu samples it directly. This experimental path requires a compatible device with external memory, semaphores, and related capabilities.</p>
+    <p>The regular NVDEC and WSL OpenGL paths pass planes through the CPU; the optional WSL D3D12 path uses a GPU copy. A native Wayland video layer can reduce Flutter RGBA readback, but that is a separate matter from whether decoded frames are zero-copy. For build steps, see <a href="../guide/linux.en.html">Linux integration</a>.</p>
   </section>
 
   <footer class="doc-foot">
@@ -120,7 +119,7 @@
 
   <nav class="pager">
     <a href="decode.en.html"><span class="dir">Prev</span>Hardware decoding</a>
-    <a class="nx" href="render.en.html"><span class="dir">Next</span>rendering pipeline</a>
+    <a class="nx" href="render.en.html"><span class="dir">Next</span>Rendering pipeline</a>
   </nav>
 </main>
 

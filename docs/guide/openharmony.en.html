@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>OpenHarmony / OHPM access — liberika developer documentation</title>
+<title>OpenHarmony / OHPM integration — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -14,7 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
-  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="openharmony.html">中文</option><option value="openharmony.en.html">English</option><option value="openharmony.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="openharmony.html">中文</a> · <a href="openharmony.en.html">English</a> · <a href="openharmony.ja.html">日本語</a></nav></noscript></div>
+  <div class="language-switch" role="group" aria-label="Language"><a href="openharmony.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="openharmony.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="openharmony.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
     <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
     <ul>
@@ -57,31 +57,30 @@
 </aside>
 
 <main>
-  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
-  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>OpenHarmony / OHPM</p>
-  <h1>OpenHarmony / OHPM access</h1>
+  <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>OpenHarmony / OHPM</p>
+  <h1>OpenHarmony / OHPM integration</h1>
   <p class="kicker">Native ArkTS SDK</p>
-  <p class="lead"><code>erika</code> is OpenHarmony native ArkTS SDK. Application passed <code>XComponent</code> To get the native surface, use <code>ErikaPlayer</code> Drive playback control, event handling and per-frame rendering scheduling.</p>
+  <p class="lead"><code>erika</code> is the native ArkTS SDK for OpenHarmony. Your app obtains a native surface through <code>XComponent</code> and uses <code>ErikaPlayer</code> to drive playback control, event handling, and per-frame render scheduling.</p>
 
   <ul class="meta-strip">
-    <li>Public version <b>erika 0.3.0</b></li>
-    <li>target architecture <b>arm64</b></li>
+    <li>Public release <b>erika 0.3.0</b></li>
+    <li>Target architecture <b>arm64</b></li>
     <li>Minimum API <b>API 18</b></li>
   </ul>
 
   <section id="install">
-    <h2>Installation and introduction<span class="jp">インストール</span><a class="anchor" href="#install">#</a></h2>
-    <p>Install the public version 0.3.0 in the DevEco Studio project root directory:</p>
+    <h2>Installation and import<span class="jp">インストール</span><a class="anchor" href="#install">#</a></h2>
+    <p>Install the public release 0.3.0 from the root directory of your DevEco Studio project:</p>
     <div class="code">
       <p class="lbl">shell</p>
 <pre>ohpm install erika@0.3.0</pre>
     </div>
-    <p>For package details, see <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM details page</a>;See the official warehouse for source code modules. <code>packages/erika_ohos</code> Table of contents.</p>
+    <p>For package details, see the <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM details page</a>. The source module is in the <code>packages/erika_ohos</code> directory of the official repository.</p>
   </section>
 
   <section id="surface">
-    <h2>Surface lifecycle and controllers<span class="jp">サーフェスcontrol</span><a class="anchor" href="#surface">#</a></h2>
-    <p><code>ErikaPlayer</code> Encapsulates the underlying Presenter instance. The host is <code>XComponentController</code> Bind the native surface in the callback and synchronize the size:</p>
+    <h2>Surface lifecycle and controller<span class="jp">サーフェス制御</span><a class="anchor" href="#surface">#</a></h2>
+    <p><code>ErikaPlayer</code> wraps the underlying Presenter instance. In the <code>XComponentController</code> callbacks, the host binds the native surface and keeps its size in sync:</p>
     <div class="code">
       <p class="lbl">ErikaSurfaceController.ets</p>
 <pre><span class="k">import</span> { ErikaNativeResponse, ErikaPlayer } <span class="k">from</span> <span class="s">'erika'</span>;
@@ -92,7 +91,7 @@
   <span class="k">private</span> pendingUri: string = <span class="s">''</span>;
 
   onSurfaceCreated(surfaceId: string): <span class="k">void</span> {
-    <span class="c">/* 记录表面创建 */</span>
+    <span class="c">/* Record surface creation */</span>
   }
 
   onSurfaceChanged(surfaceId: string, rect: SurfaceRect): <span class="k">void</span> {
@@ -141,7 +140,7 @@
   </section>
 
   <section id="arkui">
-    <h2>Used in ArkUI page<span class="jp">ArkUI linked</span><a class="anchor" href="#arkui">#</a></h2>
+    <h2>Using it in an ArkUI page<span class="jp">ArkUI 連携</span><a class="anchor" href="#arkui">#</a></h2>
     <div class="code">
       <p class="lbl">Index.ets</p>
 <pre><span class="k">import</span> { ErikaSurfaceController } <span class="k">from</span> <span class="s">'./ErikaSurfaceController'</span>;
@@ -153,7 +152,7 @@
   <span class="k">private</span> timerId: number = -1;
 
   aboutToAppear(): <span class="k">void</span> {
-    <span class="c">/* 简化示例：用定时器调用 renderTick，应用可改用显示帧回调 */</span>
+    <span class="c">/* Simplified example: call renderTick from a timer. Your app can use a display frame callback instead */</span>
     <span class="k">let</span> startTime = Date.now();
     <span class="k">this</span>.timerId = setInterval(() =&gt; {
       <span class="k">const</span> nowSeconds = (Date.now() - startTime) / 1000.0;
@@ -189,25 +188,25 @@
   </section>
 
   <section id="api">
-    <h2>ArkTS ErikaPlayer Public API<span class="jp">Public API</span><a class="anchor" href="#api">#</a></h2>
+    <h2>ArkTS ErikaPlayer public API<span class="jp">公開 API</span><a class="anchor" href="#api">#</a></h2>
     <div class="tw">
       <table>
-        <thead><tr><th>Classification</th><th>method</th><th>Function description</th></tr></thead>
+        <thead><tr><th>Category</th><th>Methods</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td class="k">Playback controls</td><td class="m">open(uri) / play() / pause() / stop() / close() / seek(positionMicros) / setPlaybackRate(rate) / setVolume(volume)</td><td>Open the media source, play, pause, jump progress (microseconds), adjust speed and volume.</td></tr>
-          <tr><td class="k">surface management</td><td class="m">attachSurface(options) / resizeSurface(w, h, scale) / detachSurface()</td><td>Bind the XComponent native surface, synchronize the pixel size, and release the surface.</td></tr>
-          <tr><td class="k">Rendering schedule</td><td class="m">renderTick(timeSeconds) / audioOnlyTick() / pollEvent()</td><td>Drivers display clock rendering frames, audio and pictureless scheduling and polling status events.</td></tr>
-          <tr><td class="k">Additional capabilities</td><td class="m">captureFrame(w, h) / registerSubtitleMemoryFont(bytes) / dispose()</td><td>Grab the current frame pixels, register the memory subtitle font and destroy the player instance.</td></tr>
+          <tr><td class="k">Playback control</td><td class="m">open(uri) / play() / pause() / stop() / close() / seek(positionMicros) / setPlaybackRate(rate) / setVolume(volume)</td><td>Opens a media source, plays, pauses, seeks (in microseconds), and sets the playback rate and volume.</td></tr>
+          <tr><td class="k">Surface management</td><td class="m">attachSurface(options) / resizeSurface(w, h, scale) / detachSurface()</td><td>Binds the XComponent native surface, syncs the pixel size, and releases the surface.</td></tr>
+          <tr><td class="k">Render scheduling</td><td class="m">renderTick(timeSeconds) / audioOnlyTick() / pollEvent()</td><td>Renders frames on the display clock, schedules audio-only playback (no video), and polls state events.</td></tr>
+          <tr><td class="k">Additional features</td><td class="m">captureFrame(w, h) / registerSubtitleMemoryFont(bytes) / dispose()</td><td>Captures the current frame's pixels, registers an in-memory subtitle font, and destroys the player instance.</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
   <section id="http-cache">
-    <h2>0.2.1 HTTP cache option<a class="anchor" href="#http-cache">#</a></h2>
-    <p>As of 2026-10-30, OHPM 0.3.0 is publicly available and contains the following HTTP fallback cache parameters.</p>
-    <p><code>httpReadAheadBytes</code> Determines the number of bytes to read forward, the default is 2 MiB;<code>httpBackBufferBytes</code> Determine how much played data to keep, the default is 16 MiB. Omit both or pass 0 to use the default value. The readahead default value can also be given by <code>ERIKA_HTTP_READAHEAD_BYTES</code> set up.</p>
-    <p>A backward seek within the rewind cache can reuse downloaded data directly. High bitrate videos require a larger budget: a video of 80 Mbit/s would require about 100 MB to retain for about 10 seconds. The cache is limited by bytes and does not represent a fixed number of playback seconds.</p>
+    <h2>HTTP cache options (since 0.2.1)<a class="anchor" href="#http-cache">#</a></h2>
+    <p>As of 2026-10-30, OHPM 0.3.0 is publicly available and includes the following HTTP back-buffer parameters.</p>
+    <p><code>httpReadAheadBytes</code> sets how many bytes to read ahead (default 2 MiB). <code>httpBackBufferBytes</code> sets how much already-played data to keep (default 16 MiB). Omit either field or pass 0 to use its default. You can also set the read-ahead default with <code>ERIKA_HTTP_READAHEAD_BYTES</code>.</p>
+    <p>Backward seeks within the back buffer reuse data that is already downloaded. High-bitrate video needs a larger budget: keeping about 10 seconds of an 80 Mbit/s video takes about 100 MB. The cache is limited by bytes, so it does not correspond to a fixed number of playback seconds.</p>
     <div class="code">
       <p class="lbl">ArkTS</p>
 <pre>player.open(&#x27;https://example.com/video.mp4&#x27;, {
@@ -225,8 +224,8 @@ player.play();</pre>
   </footer>
 
   <nav class="pager">
-    <a href="swift.en.html"><span class="dir">Prev</span>Swift access</a>
-    <a class="nx" href="rust.en.html"><span class="dir">Next</span>Rust embedded</a>
+    <a href="swift.en.html"><span class="dir">Prev</span>Swift integration</a>
+    <a class="nx" href="rust.en.html"><span class="dir">Next</span>Rust integration</a>
   </nav>
 </main>
 

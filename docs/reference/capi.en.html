@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>C ABI Overview — liberika Developer Documentation</title>
+<title>C ABI overview — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -14,7 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
-  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="capi.html">中文</option><option value="capi.en.html">English</option><option value="capi.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="capi.html">中文</a> · <a href="capi.en.html">English</a> · <a href="capi.ja.html">日本語</a></nav></noscript></div>
+  <div class="language-switch" role="group" aria-label="Language"><a href="capi.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="capi.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="capi.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
     <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
     <ul>
@@ -57,34 +57,33 @@
 </aside>
 
 <main>
-  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
-  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>C ABI Overview</p>
-  <h1>C ABI Overview</h1>
+  <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>C ABI overview</p>
+  <h1>C ABI overview</h1>
   <p class="kicker">C ABI Overview</p>
-  <p class="lead">Global convention and type definition of C ABI. The function list is paginated by entry family:<a href="capi-handle.en.html">ErikaHandle</a>(23),<a href="capi-presenter.en.html">ErikaPresenterHandle</a>(72), general and independent entrances (13). to <code>crates/erika_capi/include/erika.h</code> as the sole authority.</p>
+  <p class="lead">Global conventions and type definitions for the C ABI. The function lists are split by entry family: <a href="capi-handle.en.html">ErikaHandle</a> (23), <a href="capi-presenter.en.html">ErikaPresenterHandle</a> (72), and general and standalone entry points (13). <code>crates/erika_capi/include/erika.h</code> is the sole authority.</p>
 
   <ul class="meta-strip">
-    <li>Export function <b>108</b></li>
-    <li>Type <b>45</b></li>
-    <li>event <b>12</b> kind</li>
+    <li>Exported functions <b>108</b></li>
+    <li>Types <b>45</b></li>
+    <li>Event kinds <b>12</b></li>
   </ul>
 
   <section id="entry">
-    <h2>Entrance and Agreement<span class="jp">Entrance and regulations</span><a class="anchor" href="#entry">#</a></h2>
-    <p>Two independent entrance families, integrate one of the two at a time:</p>
+    <h2>Entry points and conventions<span class="jp">入口と規約</span><a class="anchor" href="#entry">#</a></h2>
+    <p>There are two independent entry families. Integrate one or the other, not both:</p>
     <ul class="body">
       <li><b>ErikaHandle</b> — pull model. The host renders and polls state.</li>
       <li><b>ErikaPresenterHandle</b> — push model. The engine manages decoding, timing, audio, and rendering; the host provides a surface and calls <code>render_tick</code>. Available on macOS / iOS / tvOS / Windows / Android / OpenHarmony / Linux; on other targets <code>create</code> returns NULL.</li>
     </ul>
-    <p>Global agreement:</p>
+    <p>Global conventions:</p>
     <ul class="body">
       <li>Functions that return a status use <code>ErikaStatus</code>: <code>Ok</code> (0) and <code>NoEvent</code> (5) are non-error results. Other functions return pointers, values, or nothing; consult the header for their failure conventions. Many status-returning operations catch panics as <code>ErikaStatus_Panic</code>, but not every entry point catches panics, and panic-abort builds can terminate the process.</li>
-      <li>Some failures set a thread-local error message, but not every failure guarantees one; the slot may be empty or retain an earlier message. On the same thread, before another call, read any available message with <code>erika_last_error_message()</code> and free a non-null result with <code>erika_string_free()</code>. For example, <code>erika_add_external_subtitle</code> returns NullPointer directly when <code>out_track_id</code> is NULL, without updating the slot.</li>
+      <li>Some failures set a thread-local error message, but not every failure guarantees one; the slot may be empty or retain an earlier message. On the thread where the call failed, before making another call, read any available message with <code>erika_last_error_message()</code> and free a non-null result with <code>erika_string_free()</code>. For example, <code>erika_add_external_subtitle</code> returns NullPointer directly when <code>out_track_id</code> is NULL, without updating the slot.</li>
       <li>A <code>char*</code> returned by liberika belongs to the caller. Free independent strings with <code>erika_string_free()</code>; release strings inside <code>ErikaTrackInfo</code> / <code>ErikaDanmakuTrackInfo</code> with the matching <code>*_info_free()</code>.</li>
-      <li><code>const char*</code> Parameters are only borrowed during the call and must be UTF-8 ending in NUL.</li>
-      <li>List queries use the counted array idiom:<code>(buf, capacity, &amp;len)</code>。<code>len</code> Set to total number, write at most <code>capacity</code> Bar; when capacity is 0 and buf is NULL, only the quantity is queried.</li>
-      <li>The width and height of attach and resize are physical pixels. scale is the logical content of UI (danmaku, etc.) / DPI ratio, without scaling the surface range.</li>
-      <li>A handle provides no internal synchronization and may not be called concurrently from multiple threads.</li>
+      <li><code>const char*</code> parameters are borrowed only for the duration of the call and must be NUL-terminated UTF-8.</li>
+      <li>List queries use the counted-array idiom <code>(buf, capacity, &amp;len)</code>. <code>len</code> is set to the total count, and at most <code>capacity</code> entries are written. When capacity is 0 and buf is NULL, the call only queries the count.</li>
+      <li>The width and height passed to attach and resize are in physical pixels. scale is the DPI ratio for logical content such as UI and danmaku; it does not scale the surface extent.</li>
+      <li>A handle has no internal synchronization and must not be called concurrently from multiple threads.</li>
     </ul>
   </section>
 
@@ -92,13 +91,13 @@
     <h2>ErikaStatus<span class="jp">ステータス</span><a class="anchor" href="#status">#</a></h2>
     <div class="tw">
       <table>
-        <thead><tr><th>value</th><th>Name</th><th>meaning</th></tr></thead>
+        <thead><tr><th>Value</th><th>Name</th><th>Description</th></tr></thead>
         <tbody>
           <tr><td class="m">0</td><td class="k">Ok</td><td>Success.</td></tr>
-          <tr><td class="m">1</td><td class="k">NullPointer</td><td>The parameter is a null pointer.</td></tr>
-          <tr><td class="m">2</td><td class="k">InvalidUtf8</td><td>The string parameter is not legal UTF-8.</td></tr>
+          <tr><td class="m">1</td><td class="k">NullPointer</td><td>A parameter is a null pointer.</td></tr>
+          <tr><td class="m">2</td><td class="k">InvalidUtf8</td><td>A string parameter is not valid UTF-8.</td></tr>
           <tr><td class="m">3</td><td class="k">PlayerError</td><td>Player error.</td></tr>
-          <tr><td class="m">4</td><td class="k">Panic</td><td>Internal panic, captured.</td></tr>
+          <tr><td class="m">4</td><td class="k">Panic</td><td>Internal panic, caught.</td></tr>
           <tr><td class="m">5</td><td class="k">NoEvent</td><td>The event queue is empty (not an error).</td></tr>
         </tbody>
       </table>
@@ -106,10 +105,10 @@
   </section>
 
   <section id="state">
-    <h2>ErikaState<span class="jp">Status</span><a class="anchor" href="#state">#</a></h2>
+    <h2>ErikaState<span class="jp">状態</span><a class="anchor" href="#state">#</a></h2>
     <div class="tw">
       <table>
-        <thead><tr><th>value</th><th>Name</th><th>meaning</th></tr></thead>
+        <thead><tr><th>Value</th><th>Name</th><th>Description</th></tr></thead>
         <tbody>
           <tr><td class="m">0</td><td class="k">Idle</td><td>The initial state after creation.</td></tr>
           <tr><td class="m">1</td><td class="k">Opening</td><td>Opening.</td></tr>
@@ -118,7 +117,7 @@
           <tr><td class="m">4</td><td class="k">Paused</td><td>Paused.</td></tr>
           <tr><td class="m">5</td><td class="k">Stopped</td><td>Stopped.</td></tr>
           <tr><td class="m">6</td><td class="k">Closed</td><td>Closed.</td></tr>
-          <tr><td class="m">7</td><td class="k">Error</td><td>Error status.</td></tr>
+          <tr><td class="m">7</td><td class="k">Error</td><td>Error state.</td></tr>
         </tbody>
       </table>
     </div>
@@ -126,116 +125,117 @@
 
   <section id="events">
     <h2>ErikaEventKind<span class="jp">イベント</span><a class="anchor" href="#events">#</a></h2>
-    <p>event history <code>poll_event</code> take out. The queue is unbounded: a host that does not poll only accumulates events, no longer observes status, and does not lose packets.<code>ErikaEvent</code> Only one column of fields in is valid, represented by <code>kind</code> decision.<code>VideoDecoderChanged</code> with <code>AudioOutputChanged</code> There is no payload field, but a structured message will be written to the thread local error slot, which can be obtained from <code>erika_last_error_message</code> Read.</p>
+    <p>The enum has 13 values: 12 event kinds and <code>None</code>, which represents no event.</p>
+    <p>Events are retrieved with <code>poll_event</code>. The queue is unbounded: a host that never polls only accumulates events and stops observing state; no events are dropped. Only one group of fields in <code>ErikaEvent</code> is valid, as determined by <code>kind</code>. <code>VideoDecoderChanged</code> and <code>AudioOutputChanged</code> have no payload fields, but they write a structured message to the thread-local error slot, which you can read with <code>erika_last_error_message</code>.</p>
     <div class="tw">
       <table>
-        <thead><tr><th>value</th><th>Name</th><th>meaning</th><th>payload</th></tr></thead>
+        <thead><tr><th>Value</th><th>Name</th><th>Description</th><th>Payload</th></tr></thead>
         <tbody>
-          <tr><td class="m">0</td><td class="k">None</td><td>No events.</td><td class="m">—</td></tr>
-          <tr><td class="m">1</td><td class="k">StateChanged</td><td>Playback status changes.</td><td class="m">state</td></tr>
-          <tr><td class="m">2</td><td class="k">DurationChanged</td><td>Duration determined or varied.</td><td class="m">duration_micros</td></tr>
-          <tr><td class="m">3</td><td class="k">PositionChanged</td><td>The playback position is advanced, about once every 100ms during playback; it is sent separately when seek / play / EOF.</td><td class="m">position_micros</td></tr>
-          <tr><td class="m">4</td><td class="k">TracksChanged</td><td>Tracklist changes.</td><td class="m">tracks; Re-query the track thereafter</td></tr>
-          <tr><td class="m">5</td><td class="k">BufferingChanged</td><td>Buffer status switching.</td><td class="m">buffering</td></tr>
-          <tr><td class="m">6</td><td class="k">VideoParamsChanged</td><td>Video parameters change.</td><td class="m">video</td></tr>
-          <tr><td class="m">7</td><td class="k">SurfaceAttached</td><td>The surface is attached.</td><td class="m">—</td></tr>
-          <tr><td class="m">8</td><td class="k">SurfaceDetached</td><td>The surface is detached.</td><td class="m">—</td></tr>
-          <tr><td class="m">9</td><td class="k">Error</td><td>mistake.</td><td class="m">status; same thread <code>last_error_message</code> Details available</td></tr>
-          <tr><td class="m">10</td><td class="k">TrackSelectionChanged</td><td>Track changes selected.</td><td class="m">—</td></tr>
-          <tr><td class="m">11</td><td class="k">VideoDecoderChanged</td><td>Video decoding backend switching.</td><td class="m">—</td></tr>
-          <tr><td class="m">12</td><td class="k">AudioOutputChanged</td><td>Audio output status changes.</td><td class="m">—</td></tr>
+          <tr><td class="m">0</td><td class="k">None</td><td>No event.</td><td class="m">—</td></tr>
+          <tr><td class="m">1</td><td class="k">StateChanged</td><td>Playback state changed.</td><td class="m">state</td></tr>
+          <tr><td class="m">2</td><td class="k">DurationChanged</td><td>Duration determined or changed.</td><td class="m">duration_micros</td></tr>
+          <tr><td class="m">3</td><td class="k">PositionChanged</td><td>Playback position advanced. Sent about every 100 ms during playback, and separately on seek, play, and EOF.</td><td class="m">position_micros</td></tr>
+          <tr><td class="m">4</td><td class="k">TracksChanged</td><td>Track list changed.</td><td class="m">tracks; re-query the tracks afterward</td></tr>
+          <tr><td class="m">5</td><td class="k">BufferingChanged</td><td>Buffering state toggled.</td><td class="m">buffering</td></tr>
+          <tr><td class="m">6</td><td class="k">VideoParamsChanged</td><td>Video parameters changed.</td><td class="m">video</td></tr>
+          <tr><td class="m">7</td><td class="k">SurfaceAttached</td><td>Surface attached.</td><td class="m">—</td></tr>
+          <tr><td class="m">8</td><td class="k">SurfaceDetached</td><td>Surface detached.</td><td class="m">—</td></tr>
+          <tr><td class="m">9</td><td class="k">Error</td><td>Error.</td><td class="m">status; <code>last_error_message</code> on the same thread returns details</td></tr>
+          <tr><td class="m">10</td><td class="k">TrackSelectionChanged</td><td>Selected track changed.</td><td class="m">—</td></tr>
+          <tr><td class="m">11</td><td class="k">VideoDecoderChanged</td><td>Video decoding backend switched.</td><td class="m">—</td></tr>
+          <tr><td class="m">12</td><td class="k">AudioOutputChanged</td><td>Audio output state changed.</td><td class="m">—</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
   <section id="types">
-    <h2>Type list<span class="jp">type</span><a class="anchor" href="#types">#</a></h2>
-    <p>All 45 type definitions are located in <code>erika.h</code>. The main structure fields are shown in the tables below; the complete field and enumeration definitions are subject to the same version of the header file.</p>
-    <h3>handle</h3>
+    <h2>Type inventory<span class="jp">型</span><a class="anchor" href="#types">#</a></h2>
+    <p>All 45 type definitions are in <code>erika.h</code>. The tables below list the fields of the main structs; for complete field and enumeration definitions, the header of the same version is authoritative.</p>
+    <h3>Handles</h3>
     <ul class="body">
-      <li><code>ErikaHandle</code> — pull model handle.</li>
-      <li><code>ErikaPresenterHandle</code> — push model handle.</li>
-      <li><code>ErikaFrameExportSession</code> — Independent frame export session handle.</li>
+      <li><code>ErikaHandle</code> — Pull-model handle.</li>
+      <li><code>ErikaPresenterHandle</code> — Push-model handle.</li>
+      <li><code>ErikaFrameExportSession</code> — Standalone frame export session handle.</li>
     </ul>
-    <h3>Structure</h3>
+    <h3>Structs</h3>
     <div class="tw">
       <table>
         <thead><tr><th>Type</th><th>Purpose</th></tr></thead>
         <tbody>
-          <tr><td class="m">ErikaHttpHeader</td><td>HTTP request header when opened (name / value).</td></tr>
-          <tr><td class="m">ErikaPresenterConfig</td><td>Output mode, EDR headroom, super resolution and video alpha mode.</td></tr>
+          <tr><td class="m">ErikaHttpHeader</td><td>HTTP request header used when opening (name / value).</td></tr>
+          <tr><td class="m">ErikaPresenterConfig</td><td>Output mode, EDR headroom, upscaling, and video alpha mode.</td></tr>
           <tr><td class="m">ErikaSubtitleStyle</td><td>Subtitle style override, including override_mask.</td></tr>
-          <tr><td class="m">ErikaSurfaceOutputCapabilities</td><td>Surface output capability (extended-linear, direct composition, headroom).</td></tr>
-          <tr><td class="m">ErikaUpscalerStatus</td><td>Super resolution status and frame count.</td></tr>
-          <tr><td class="m">ErikaOutputStatus</td><td>Output encoding, headroom and fallback status.</td></tr>
+          <tr><td class="m">ErikaSurfaceOutputCapabilities</td><td>Surface output capabilities (extended-linear, direct composition, headroom).</td></tr>
+          <tr><td class="m">ErikaUpscalerStatus</td><td>Upscaling status and frame counts.</td></tr>
+          <tr><td class="m">ErikaOutputStatus</td><td>Output encoding, headroom, and fallback state.</td></tr>
           <tr><td class="m">ErikaPresenterResourceStatus</td><td>Renderer memory snapshot.</td></tr>
-          <tr><td class="m">ErikaSubtitleMemoryFontStatus</td><td>Memory font registration status.</td></tr>
-          <tr><td class="m">ErikaSubtitleMemoryFontFace / Info</td><td>Memory font face and metadata.</td></tr>
+          <tr><td class="m">ErikaSubtitleMemoryFontStatus</td><td>In-memory font registration status.</td></tr>
+          <tr><td class="m">ErikaSubtitleMemoryFontFace / Info</td><td>In-memory font face and metadata.</td></tr>
           <tr><td class="m">ErikaDanmakuConfig</td><td>Danmaku layout and display parameters.</td></tr>
           <tr><td class="m">ErikaDanmakuTrackInfo</td><td>Danmaku track information.</td></tr>
-          <tr><td class="m">ErikaVideoParams</td><td>Video size and primary color/transmission.</td></tr>
-          <tr><td class="m">ErikaTrackCounts / Selection / Info</td><td>Number of tracks, current selection, track information.</td></tr>
+          <tr><td class="m">ErikaVideoParams</td><td>Video size, color primaries, and transfer.</td></tr>
+          <tr><td class="m">ErikaTrackCounts / Selection / Info</td><td>Track counts, current selection, track info.</td></tr>
           <tr><td class="m">ErikaEvent</td><td>Event payload.</td></tr>
-          <tr><td class="m">ErikaPresenterStats</td><td>Rendering statistics, fields are shown in the table below.</td></tr>
+          <tr><td class="m">ErikaPresenterStats</td><td>Rendering statistics; fields are listed in the table below.</td></tr>
         </tbody>
       </table>
     </div>
 
-    <h3>0.3.0 new types</h3>
-    <p><code>ErikaFrameExportFormat</code> Define RGBA(0) and PNG(1);<code>ErikaFrameExportOptions</code>、<code>ErikaFrameExportResult</code>、<code>ErikaFrameExportSessionOptions</code>、<code>ErikaFrameExportRequest</code> Describe single export, results, session opening and frame-by-frame requests respectively;<code>ErikaFrameExportSession</code> Is an opaque session handle.<code>ErikaLogLevel</code> From Trace(0) to Error(4). For full disclaimer and ownership see<a href="capi-handle.en.html#frame-export">Frame export and log</a>。</p>
+    <h3>New types in 0.3.0</h3>
+    <p><code>ErikaFrameExportFormat</code> defines RGBA (0) and PNG (1). <code>ErikaFrameExportOptions</code>, <code>ErikaFrameExportResult</code>, <code>ErikaFrameExportSessionOptions</code>, and <code>ErikaFrameExportRequest</code> describe a single export, its result, opening a session, and per-frame requests, respectively. <code>ErikaFrameExportSession</code> is an opaque session handle. <code>ErikaLogLevel</code> runs from Trace (0) to Error (4). For the full declarations and ownership rules, see <a href="capi-handle.en.html#frame-export">Frame export and logging</a>.</p>
 
-    <h3>Structure fields</h3>
-    <p>The following table shows the fields, types and semantics of commonly used structures. Field name and <code>erika.h</code> consistent.</p>
+    <h3>Struct fields</h3>
+    <p>The tables below list the fields, types, and semantics of the commonly used structs. Field names match <code>erika.h</code>.</p>
 
     <h4>ErikaSubtitleStyle</h4>
-    <p>Subtitle fallback appearance defaults to opaque white text (<code>0xFFFFFFFF</code>) with a translucent black outline (<code>0x0000007F</code>). Out-of-range numeric metrics are clamped; out-of-range <code>border_style</code> and <code>alignment</code> use defaults 1 and 2. On container ASS tracks, these fields have no effect when <code>override_mask</code> is 0, except font-family fallback. Setting a bit overrides the corresponding style declared by ASS dialogue. For plain-text SRT/WebVTT, liberika bakes the entire style into its generated ASS header regardless of <code>override_mask</code>. All dimensions use ASS script units and are multiplied by <code>set_subtitle_scale</code>.</p>
+    <p>Fallback subtitle appearance defaults to opaque white text (<code>0xFFFFFFFF</code>) with a translucent black outline (<code>0x0000007F</code>). Out-of-range numeric metrics are clamped rather than rejected; an out-of-range <code>border_style</code> or <code>alignment</code> is replaced with its default (1 and 2, respectively). How the fields take effect depends on the subtitle type. On container ASS tracks, these fields have no effect when <code>override_mask</code> is 0, except for font-family fallback; setting a bit makes the corresponding field override the style declared by the ASS dialogue. For plain-text subtitles (SRT/WebVTT), liberika bakes the whole style into the ASS header it generates, regardless of <code>override_mask</code>. All dimensions are in ASS script units and are multiplied by the <code>set_subtitle_scale</code> factor.</p>
     <div class="tw">
       <table>
-        <thead><tr><th>Field</th><th>Type</th><th>Semantics</th></tr></thead>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td class="m">font_family</td><td class="m">const char*</td><td>NULL or empty string remains the platform default.</td></tr>
+          <tr><td class="m">font_family</td><td class="m">const char*</td><td>NULL or an empty string keeps the platform default.</td></tr>
           <tr><td class="m">font_file_path</td><td class="m">const char*</td><td>Font file path.</td></tr>
           <tr><td class="m">primary_color_rgba</td><td class="m">uint32_t</td><td>Text color, 0xRRGGBBAA.</td></tr>
-          <tr><td class="m">outline_color_rgba</td><td class="m">uint32_t</td><td>Stroke color, 0xRRGGBBAA.</td></tr>
+          <tr><td class="m">outline_color_rgba</td><td class="m">uint32_t</td><td>Outline color, 0xRRGGBBAA.</td></tr>
           <tr><td class="m">font_size</td><td class="m">double</td><td>8..400, default 48.</td></tr>
           <tr><td class="m">outline_width</td><td class="m">double</td><td>0..32, default 2.</td></tr>
           <tr><td class="m">bold / italic / underline / strike_out</td><td class="m">bool</td><td>Glyph attributes.</td></tr>
-          <tr><td class="m">spacing</td><td class="m">double</td><td>-100..100。</td></tr>
+          <tr><td class="m">spacing</td><td class="m">double</td><td>-100..100.</td></tr>
           <tr><td class="m">scale_x_percent / scale_y_percent</td><td class="m">double</td><td>1..1000, 100 = no scaling.</td></tr>
-          <tr><td class="m">border_style</td><td class="m">int32_t</td><td>1 = stroke + shadow, 3 = opaque color block.</td></tr>
-          <tr><td class="m">shadow_depth</td><td class="m">double</td><td>0..32。</td></tr>
-          <tr><td class="m">blur</td><td class="m">double</td><td>0..100。</td></tr>
-          <tr><td class="m">alignment</td><td class="m">int32_t</td><td>1..9, numeric keypad layout, 2 = bottom centered.</td></tr>
-          <tr><td class="m">margin_left / margin_right / margin_vertical</td><td class="m">int32_t</td><td>Margin, clamped to 0..10000.</td></tr>
-          <tr><td class="m">override_mask</td><td class="m">uint32_t</td><td>Override bit mask, see bit table below.</td></tr>
+          <tr><td class="m">border_style</td><td class="m">int32_t</td><td>1 = outline + shadow, 3 = opaque box.</td></tr>
+          <tr><td class="m">shadow_depth</td><td class="m">double</td><td>0..32.</td></tr>
+          <tr><td class="m">blur</td><td class="m">double</td><td>0..100.</td></tr>
+          <tr><td class="m">alignment</td><td class="m">int32_t</td><td>1..9, numeric keypad layout; 2 = bottom center.</td></tr>
+          <tr><td class="m">margin_left / margin_right / margin_vertical</td><td class="m">int32_t</td><td>Margins, clamped to 0..10000.</td></tr>
+          <tr><td class="m">override_mask</td><td class="m">uint32_t</td><td>Override bitmask; see the bit table below.</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="muted">With an override bit enabled, dimensions are resolution-independent: <code>font_size</code> 48 maps to the same pixel size regardless of the script’s declared <code>PlayResY</code>. Margins are an exception: container ASS margins scale with the script’s <code>PlayResY</code>, while plain-text subtitle margins use pixels (liberika generates their script for the frame size). With a zero mask, all fields remain fallback-only: they do not affect container tracks, and <code>erika_presenter_set_subtitle_style</code> only participates in font selection.</p>
+    <p class="muted">When an override bit is set, dimensions stay resolution-independent: a <code>font_size</code> of 48 yields the same pixel size regardless of the <code>PlayResY</code> the script declares. Margins are the exception: on container ASS tracks they scale with the script’s <code>PlayResY</code>, while on plain-text subtitles they are in pixels (liberika generates that script to match the frame size). With a zero mask, all fields stay fallback-only: they have no effect on container tracks, and <code>erika_presenter_set_subtitle_style</code> only influences font selection.</p>
 
     <h4>ErikaDanmakuConfig</h4>
-    <p class="muted">Scroll duration formula: Screen-passing milliseconds = <code>scroll_duration_seconds</code> × <code>clamp(逻辑宽 / 1280, 0.9, 1.3)</code> × 1000 / <code>scroll_speed_factor</code>;Speed = (viewport width + text width) / duration.<code>max_quantity</code> It is filtering within the scrolling window at the same time as the screen density, and only acts on the scrolling danmaku;<code>max_lines_per_mode</code> "Each category" refers to an upper limit in each of the four directions of scroll left, scroll right, top, and bottom.<code>set_danmaku_config</code> Replace C visible fields,<code>block_words</code> Fields with custom fonts are inherited from the current configuration.</p>
+    <p class="muted">Scroll duration formula: milliseconds to cross the screen = <code>scroll_duration_seconds</code> × <code>clamp(logical width / 1280, 0.9, 1.3)</code> × 1000 / <code>scroll_speed_factor</code>; speed = (viewport width + text width) / duration. <code>max_quantity</code> is a density filter on the number of items on screen at once within the scroll window, and applies only to scrolling danmaku. For <code>max_lines_per_mode</code>, “per mode” means one limit each for scroll-left, scroll-right, top, and bottom. <code>set_danmaku_config</code> replaces the fields visible from C; <code>block_words</code> and the custom font fields are inherited from the current configuration.</p>
     <div class="tw">
       <table>
-        <thead><tr><th>Field</th><th>Type</th><th>Default</th><th>Semantics</th></tr></thead>
+        <thead><tr><th>Field</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
         <tbody>
           <tr><td class="m">enabled</td><td class="m">bool</td><td>true</td><td>Danmaku master switch.</td></tr>
-          <tr><td class="m">font_size</td><td class="m">float</td><td>30</td><td>NipaPlay/Flutter logical font size, convert font pixels according to surface scale.</td></tr>
+          <tr><td class="m">font_size</td><td class="m">float</td><td>30</td><td>NipaPlay/Flutter logical font size; converted to glyph pixels using the surface scale.</td></tr>
           <tr><td class="m">opacity</td><td class="m">float</td><td>1.0</td><td>Opacity.</td></tr>
-          <tr><td class="m">display_area</td><td class="m">float</td><td>1.0</td><td>The ratio of the danmaku area to the height of the viewport, clamped to 0.1..1.0.</td></tr>
-          <tr><td class="m">scroll_duration_seconds</td><td class="m">float</td><td>10.0</td><td>The benchmark for the duration of scrolling danmaku across the screen, clamped to 1..60 seconds.</td></tr>
-          <tr><td class="m">scroll_speed_factor</td><td class="m">float</td><td>1.0</td><td>Rolling speed coefficient, clamped to 0.2..4.0, the larger, the faster.</td></tr>
-          <tr><td class="m">track_gap_ratio</td><td class="m">float</td><td>0.15</td><td>Track spacing = danmaku height × this ratio, clamped to 0..2.</td></tr>
-          <tr><td class="m">outline_width</td><td class="m">float</td><td>1.0</td><td>Stroke width.</td></tr>
+          <tr><td class="m">display_area</td><td class="m">float</td><td>1.0</td><td>Fraction of the viewport height used by the danmaku area, clamped to 0.1..1.0.</td></tr>
+          <tr><td class="m">scroll_duration_seconds</td><td class="m">float</td><td>10.0</td><td>Baseline time for scrolling danmaku to cross the screen, clamped to 1..60 seconds.</td></tr>
+          <tr><td class="m">scroll_speed_factor</td><td class="m">float</td><td>1.0</td><td>Scroll speed factor, clamped to 0.2..4.0; larger is faster.</td></tr>
+          <tr><td class="m">track_gap_ratio</td><td class="m">float</td><td>0.15</td><td>Track line spacing = danmaku height × this ratio, clamped to 0..2.</td></tr>
+          <tr><td class="m">outline_width</td><td class="m">float</td><td>1.0</td><td>Outline width.</td></tr>
           <tr><td class="m">shadow_offset_x / shadow_offset_y</td><td class="m">float</td><td>1.0 / 1.0</td><td>Shadow offset.</td></tr>
           <tr><td class="m">merge_duplicates</td><td class="m">bool</td><td>false</td><td>Merge duplicate danmaku.</td></tr>
-          <tr><td class="m">allow_stacking</td><td class="m">bool</td><td>false</td><td>Allows same track stacking.</td></tr>
-          <tr><td class="m">allow_scroll_overwrite</td><td class="m">bool</td><td>false</td><td>Allow scrolling danmaku overlay.</td></tr>
-          <tr><td class="m">max_quantity</td><td class="m">uint32_t</td><td>0</td><td>The upper limit of rolling danmaku density, 0 = no limit.</td></tr>
-          <tr><td class="m">max_lines_per_mode</td><td class="m">uint32_t</td><td>0</td><td>The maximum number of lines for each type of danmaku, 0 = no limit.</td></tr>
-          <tr><td class="m">block_top / block_bottom / block_scroll</td><td class="m">bool</td><td>false</td><td>Block top/bottom/scroll danmaku.</td></tr>
-          <tr><td class="m">shadow_style</td><td class="m">int32_t</td><td>3</td><td>0 None / 1 Soft / 2 Medium / 3 Strong, fallback to 3 for unknown values.</td></tr>
+          <tr><td class="m">allow_stacking</td><td class="m">bool</td><td>false</td><td>Allow stacking within the same track.</td></tr>
+          <tr><td class="m">allow_scroll_overwrite</td><td class="m">bool</td><td>false</td><td>Allow scrolling danmaku to overwrite one another.</td></tr>
+          <tr><td class="m">max_quantity</td><td class="m">uint32_t</td><td>0</td><td>Upper limit on scrolling danmaku density; 0 = unlimited.</td></tr>
+          <tr><td class="m">max_lines_per_mode</td><td class="m">uint32_t</td><td>0</td><td>Maximum number of lines per danmaku mode; 0 = unlimited.</td></tr>
+          <tr><td class="m">block_top / block_bottom / block_scroll</td><td class="m">bool</td><td>false</td><td>Block top / bottom / scrolling danmaku.</td></tr>
+          <tr><td class="m">shadow_style</td><td class="m">int32_t</td><td>3</td><td>0 None / 1 Soft / 2 Medium / 3 Strong; unknown values fall back to 3.</td></tr>
         </tbody>
       </table>
     </div>
@@ -243,26 +243,26 @@
     <h4>ErikaPresenterConfig</h4>
     <div class="tw">
       <table>
-        <thead><tr><th>Field</th><th>Type</th><th>Semantics</th></tr></thead>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td class="m">output_mode</td><td class="m">int32_t</td><td><code>ErikaPresenterOutputMode</code>。</td></tr>
-          <tr><td class="m">edr_headroom</td><td class="m">float</td><td>EDR headroom, 0 = automatic.</td></tr>
-          <tr><td class="m">luma_upscaler</td><td class="m">int32_t</td><td><code>ErikaLumaUpscalerMode</code>。</td></tr>
-          <tr><td class="m">video_alpha_mode</td><td class="m">int32_t</td><td><code>ErikaVideoAlphaMode</code>：0 = Opaque，1 = PackedAlphaRight。</td></tr>
+          <tr><td class="m">output_mode</td><td class="m">int32_t</td><td><code>ErikaPresenterOutputMode</code>.</td></tr>
+          <tr><td class="m">edr_headroom</td><td class="m">float</td><td>EDR headroom; 0 = automatic.</td></tr>
+          <tr><td class="m">luma_upscaler</td><td class="m">int32_t</td><td><code>ErikaLumaUpscalerMode</code>.</td></tr>
+          <tr><td class="m">video_alpha_mode</td><td class="m">int32_t</td><td><code>ErikaVideoAlphaMode</code>: 0 = Opaque, 1 = PackedAlphaRight.</td></tr>
         </tbody>
       </table>
     </div>
 
     <h4>ErikaSurfaceOutputCapabilities</h4>
-    <p>Display/surface detection results provided by the host at attach.</p>
+    <p>Display and surface probe results that the host provides at attach.</p>
     <div class="tw">
       <table>
-        <thead><tr><th>Field</th><th>Type</th><th>Semantics</th></tr></thead>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td class="m">extended_linear</td><td class="m">bool</td><td>Surface supports extended-linear.</td></tr>
-          <tr><td class="m">direct_composition</td><td class="m">bool</td><td>Direct synthesis is supported.</td></tr>
-          <tr><td class="m">desired_headroom</td><td class="m">float</td><td>Expect headroom, 0 = system automatic.</td></tr>
-          <tr><td class="m">fallback_reason</td><td class="m">int32_t</td><td><code>ErikaOutputFallbackReason</code>。</td></tr>
+          <tr><td class="m">extended_linear</td><td class="m">bool</td><td>The surface supports extended-linear.</td></tr>
+          <tr><td class="m">direct_composition</td><td class="m">bool</td><td>Direct composition is supported.</td></tr>
+          <tr><td class="m">desired_headroom</td><td class="m">float</td><td>Desired headroom; 0 = system automatic.</td></tr>
+          <tr><td class="m">fallback_reason</td><td class="m">int32_t</td><td><code>ErikaOutputFallbackReason</code>.</td></tr>
         </tbody>
       </table>
     </div>
@@ -270,14 +270,14 @@
     <h4>ErikaUpscalerStatus</h4>
     <div class="tw">
       <table>
-        <thead><tr><th>Field</th><th>Type</th><th>Semantics</th></tr></thead>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td class="m">requested_mode</td><td class="m">int32_t</td><td>the requested mode,<code>ErikaLumaUpscalerMode</code>。</td></tr>
-          <tr><td class="m">active_backend</td><td class="m">int32_t</td><td>actual backend,<code>ErikaUpscalerBackendStatus</code>。</td></tr>
-          <tr><td class="m">fallback_count</td><td class="m">uint64_t</td><td>Number of fallbacks.</td></tr>
-          <tr><td class="m">upscaled_frames</td><td class="m">uint64_t</td><td>Number of frames upscaled.</td></tr>
-          <tr><td class="m">last_encode_micros</td><td class="m">uint64_t</td><td>Duration of the last encoding operation in microseconds.</td></tr>
-          <tr><td class="m">last_gpu_micros</td><td class="m">uint64_t</td><td>Duration of the last GPU operation in microseconds.</td></tr>
+          <tr><td class="m">requested_mode</td><td class="m">int32_t</td><td>Requested mode, <code>ErikaLumaUpscalerMode</code>.</td></tr>
+          <tr><td class="m">active_backend</td><td class="m">int32_t</td><td>Active backend, <code>ErikaUpscalerBackendStatus</code>.</td></tr>
+          <tr><td class="m">fallback_count</td><td class="m">uint64_t</td><td>Fallback count.</td></tr>
+          <tr><td class="m">upscaled_frames</td><td class="m">uint64_t</td><td>Number of upscaled frames.</td></tr>
+          <tr><td class="m">last_encode_micros</td><td class="m">uint64_t</td><td>Duration of the last encode, in microseconds.</td></tr>
+          <tr><td class="m">last_gpu_micros</td><td class="m">uint64_t</td><td>Duration of the last GPU pass, in microseconds.</td></tr>
         </tbody>
       </table>
     </div>
@@ -285,43 +285,43 @@
     <h4>ErikaOutputStatus</h4>
     <div class="tw">
       <table>
-        <thead><tr><th>Field</th><th>Type</th><th>Semantics</th></tr></thead>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td class="m">requested_mode</td><td class="m">int32_t</td><td><code>ErikaPresenterOutputMode</code>。</td></tr>
-          <tr><td class="m">active_encoding</td><td class="m">int32_t</td><td><code>ErikaActiveOutputEncoding</code>。</td></tr>
-          <tr><td class="m">surface_format</td><td class="m">int32_t</td><td><code>ErikaOutputSurfaceFormat</code>。</td></tr>
+          <tr><td class="m">requested_mode</td><td class="m">int32_t</td><td><code>ErikaPresenterOutputMode</code>.</td></tr>
+          <tr><td class="m">active_encoding</td><td class="m">int32_t</td><td><code>ErikaActiveOutputEncoding</code>.</td></tr>
+          <tr><td class="m">surface_format</td><td class="m">int32_t</td><td><code>ErikaOutputSurfaceFormat</code>.</td></tr>
           <tr><td class="m">native_data_space</td><td class="m">int32_t</td><td>Native data-space handle.</td></tr>
           <tr><td class="m">requested_headroom</td><td class="m">float</td><td>Requested headroom.</td></tr>
-          <tr><td class="m">active_headroom</td><td class="m">float</td><td>The actual effective headroom.</td></tr>
-          <tr><td class="m">active_headroom_known</td><td class="m">bool</td><td>Is headroom known?</td></tr>
-          <tr><td class="m">extended_linear_active</td><td class="m">bool</td><td>Is extended-linear effective?</td></tr>
-          <tr><td class="m">fallback_reason</td><td class="m">int32_t</td><td><code>ErikaOutputFallbackReason</code>。</td></tr>
-          <tr><td class="m">fallback_count</td><td class="m">uint64_t</td><td>Number of fallbacks.</td></tr>
-          <tr><td class="m">data_space_failures</td><td class="m">uint64_t</td><td>data-space Number of failures.</td></tr>
-          <tr><td class="m">headroom_updates</td><td class="m">uint64_t</td><td>headroom update times.</td></tr>
-          <tr><td class="m">extended_linear_frames</td><td class="m">uint64_t</td><td>extended-linear frame number.</td></tr>
+          <tr><td class="m">active_headroom</td><td class="m">float</td><td>Headroom currently in effect.</td></tr>
+          <tr><td class="m">active_headroom_known</td><td class="m">bool</td><td>Whether the headroom is known.</td></tr>
+          <tr><td class="m">extended_linear_active</td><td class="m">bool</td><td>Whether extended-linear is active.</td></tr>
+          <tr><td class="m">fallback_reason</td><td class="m">int32_t</td><td><code>ErikaOutputFallbackReason</code>.</td></tr>
+          <tr><td class="m">fallback_count</td><td class="m">uint64_t</td><td>Fallback count.</td></tr>
+          <tr><td class="m">data_space_failures</td><td class="m">uint64_t</td><td>Number of data-space failures.</td></tr>
+          <tr><td class="m">headroom_updates</td><td class="m">uint64_t</td><td>Number of headroom updates.</td></tr>
+          <tr><td class="m">extended_linear_frames</td><td class="m">uint64_t</td><td>Number of extended-linear frames.</td></tr>
         </tbody>
       </table>
     </div>
 
     <h4>ErikaPresenterResourceStatus</h4>
-    <p>Renderer memory snapshot.<code>device_current_allocated_bytes</code> Is the Metal device-level process counter, which may contain allocations of other presenter.</p>
+    <p>Renderer memory snapshot. <code>device_current_allocated_bytes</code> is the Metal device-level process counter and may include allocations made by other Presenters.</p>
     <div class="tw">
       <table>
-        <thead><tr><th>Field</th><th>Type</th><th>Semantics</th></tr></thead>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td class="m">device_current_allocated_bytes</td><td class="m">uint64_t</td><td>The device currently allocates bytes.</td></tr>
-          <tr><td class="m">device_recommended_working_set_bytes</td><td class="m">uint64_t</td><td>Equipment recommendation working set.</td></tr>
-          <tr><td class="m">drawable_estimated_bytes</td><td class="m">uint64_t</td><td>drawable estimated bytes.</td></tr>
+          <tr><td class="m">device_current_allocated_bytes</td><td class="m">uint64_t</td><td>Bytes currently allocated on the device.</td></tr>
+          <tr><td class="m">device_recommended_working_set_bytes</td><td class="m">uint64_t</td><td>Device-recommended working set, in bytes.</td></tr>
+          <tr><td class="m">drawable_estimated_bytes</td><td class="m">uint64_t</td><td>Estimated drawable bytes.</td></tr>
           <tr><td class="m">video_frame_bytes</td><td class="m">uint64_t</td><td>Video frame bytes.</td></tr>
-          <tr><td class="m">overlay_atlas_bytes</td><td class="m">uint64_t</td><td>Subtitles atlas bytes.</td></tr>
+          <tr><td class="m">overlay_atlas_bytes</td><td class="m">uint64_t</td><td>Subtitle atlas bytes.</td></tr>
           <tr><td class="m">danmaku_atlas_bytes</td><td class="m">uint64_t</td><td>Danmaku atlas bytes.</td></tr>
           <tr><td class="m">danmaku_vertex_buffer_bytes</td><td class="m">uint64_t</td><td>Danmaku vertex buffer bytes.</td></tr>
-          <tr><td class="m">upscaler_bytes</td><td class="m">uint64_t</td><td>Hyperscaler bytes.</td></tr>
-          <tr><td class="m">renderer_tracked_bytes</td><td class="m">uint64_t</td><td>The renderer tracks total bytes.</td></tr>
-          <tr><td class="m">presenter_cpu_danmaku_atlas_bytes</td><td class="m">uint64_t</td><td>presenter side CPU danmaku atlas bytes.</td></tr>
-          <tr><td class="m">drawable_count</td><td class="m">uint32_t</td><td>drawable quantity.</td></tr>
-          <tr><td class="m">output_mode_switches</td><td class="m">uint64_t</td><td>The number of output mode switching times.</td></tr>
+          <tr><td class="m">upscaler_bytes</td><td class="m">uint64_t</td><td>Upscaler bytes.</td></tr>
+          <tr><td class="m">renderer_tracked_bytes</td><td class="m">uint64_t</td><td>Total bytes tracked by the renderer.</td></tr>
+          <tr><td class="m">presenter_cpu_danmaku_atlas_bytes</td><td class="m">uint64_t</td><td>CPU-side danmaku atlas bytes in the Presenter.</td></tr>
+          <tr><td class="m">drawable_count</td><td class="m">uint32_t</td><td>Drawable count.</td></tr>
+          <tr><td class="m">output_mode_switches</td><td class="m">uint64_t</td><td>Number of output mode switches.</td></tr>
         </tbody>
       </table>
     </div>
@@ -329,37 +329,37 @@
     <h4>ErikaSubtitleMemoryFont*</h4>
     <div class="tw">
       <table>
-        <thead><tr><th>Type</th><th>Field</th><th>Type</th><th>Semantics</th></tr></thead>
+        <thead><tr><th>Type</th><th>Field</th><th>Type</th><th>Description</th></tr></thead>
         <tbody>
           <tr><td rowspan="5" class="m">Status</td><td class="m">registered_count</td><td class="m">uintptr_t</td><td>Number of registered fonts.</td></tr>
-          <tr><td class="m">registered_bytes</td><td class="m">uintptr_t</td><td>Total bytes registered.</td></tr>
+          <tr><td class="m">registered_bytes</td><td class="m">uintptr_t</td><td>Total registered bytes.</td></tr>
           <tr><td class="m">selected_count</td><td class="m">uintptr_t</td><td>Number of selected fonts.</td></tr>
-          <tr><td class="m">generation</td><td class="m">uint64_t</td><td>Registration generation, change means the registry has been updated.</td></tr>
-          <tr><td class="m">selected_ids</td><td class="m">uint64_t*</td><td>Selected font id array.</td></tr>
+          <tr><td class="m">generation</td><td class="m">uint64_t</td><td>Registration generation; a change means the registry was updated.</td></tr>
+          <tr><td class="m">selected_ids</td><td class="m">uint64_t*</td><td>Array of selected font ids.</td></tr>
           <tr><td rowspan="6" class="m">Face</td><td class="m">index</td><td class="m">uint32_t</td><td>Index within the font collection.</td></tr>
-          <tr><td class="m">families_json</td><td class="m">char*</td><td>family list JSON.</td></tr>
+          <tr><td class="m">families_json</td><td class="m">char*</td><td>Family list, as JSON.</td></tr>
           <tr><td class="m">post_script_name</td><td class="m">char*</td><td>PostScript name.</td></tr>
           <tr><td class="m">weight</td><td class="m">uint16_t</td><td>Font weight.</td></tr>
-          <tr><td class="m">italic</td><td class="m">bool</td><td>Is it italicized?</td></tr>
-          <tr><td class="m">monospaced</td><td class="m">bool</td><td>Whether the width is equal.</td></tr>
+          <tr><td class="m">italic</td><td class="m">bool</td><td>Whether the face is italic.</td></tr>
+          <tr><td class="m">monospaced</td><td class="m">bool</td><td>Whether the face is monospaced.</td></tr>
           <tr><td rowspan="4" class="m">Info</td><td class="m">id</td><td class="m">uint64_t</td><td>Font id.</td></tr>
-          <tr><td class="m">byte_len</td><td class="m">uintptr_t</td><td>Number of bytes of font data.</td></tr>
-          <tr><td class="m">faces</td><td class="m">Face*</td><td>face array.</td></tr>
-          <tr><td class="m">face_count</td><td class="m">uintptr_t</td><td>face quantity.</td></tr>
+          <tr><td class="m">byte_len</td><td class="m">uintptr_t</td><td>Font data size, in bytes.</td></tr>
+          <tr><td class="m">faces</td><td class="m">Face*</td><td>Array of faces.</td></tr>
+          <tr><td class="m">face_count</td><td class="m">uintptr_t</td><td>Number of faces.</td></tr>
         </tbody>
       </table>
     </div>
 
     <h4>ErikaDanmakuTrackInfo</h4>
-    <p>After returning to the caller, the string is owned by the caller. Use <code>erika_danmaku_track_info_free</code> release.</p>
+    <p>The caller owns the strings after the call returns. Release them with <code>erika_danmaku_track_info_free</code>.</p>
     <div class="tw">
       <table>
-        <thead><tr><th>Field</th><th>Type</th><th>Semantics</th></tr></thead>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
         <tbody>
           <tr><td class="m">id</td><td class="m">uint64_t</td><td>Track id.</td></tr>
           <tr><td class="m">enabled</td><td class="m">bool</td><td>Whether the track is enabled.</td></tr>
-          <tr><td class="m">offset_micros</td><td class="m">int64_t</td><td>Orbital time offset, microseconds.</td></tr>
-          <tr><td class="m">item_count</td><td class="m">uintptr_t</td><td>Number of danmaku.</td></tr>
+          <tr><td class="m">offset_micros</td><td class="m">int64_t</td><td>Track time offset, in microseconds.</td></tr>
+          <tr><td class="m">item_count</td><td class="m">uintptr_t</td><td>Number of danmaku items.</td></tr>
           <tr><td class="m">name</td><td class="m">char*</td><td>Track name.</td></tr>
           <tr><td class="m">source</td><td class="m">char*</td><td>Source description.</td></tr>
         </tbody>
@@ -367,28 +367,28 @@
     </div>
 
     <h4>ErikaVideoParams</h4>
-    <p>Video size and color metadata, via <code>VideoParamsChanged</code> Incident reporting.<code>primaries</code> with <code>transfer</code> It is the project's own enumeration number, converted from the FFmpeg enumeration, not the original constant value of FFmpeg.</p>
+    <p>Video size and color metadata, reported through the <code>VideoParamsChanged</code> event. <code>primaries</code> and <code>transfer</code> are the project’s own enumeration values, converted from FFmpeg enumerations; they are not FFmpeg’s raw constants.</p>
     <div class="tw">
       <table>
-        <thead><tr><th>Field</th><th>Type</th><th>Semantics</th></tr></thead>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
         <tbody>
           <tr><td class="m">width / height</td><td class="m">uint32_t</td><td>Video pixel size.</td></tr>
-          <tr><td class="m">primaries</td><td class="m">uint32_t</td><td>0 Unknown / 1 Bt709 / 2 DisplayP3 / 3 Bt2020。</td></tr>
-          <tr><td class="m">transfer</td><td class="m">uint32_t</td><td>0 Unknown / 1 Srgb / 2 Bt1886 / 3 Pq / 4 Hlg。</td></tr>
+          <tr><td class="m">primaries</td><td class="m">uint32_t</td><td>0 Unknown / 1 Bt709 / 2 DisplayP3 / 3 Bt2020.</td></tr>
+          <tr><td class="m">transfer</td><td class="m">uint32_t</td><td>0 Unknown / 1 Srgb / 2 Bt1886 / 3 Pq / 4 Hlg.</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="muted">Mapping: BT.709 transfer function falls into Bt1886; unknown values are always 0. The value comes from the video track <code>AVCodecParameters</code> level color information.</p>
+    <p class="muted">Mapping: the BT.709 transfer function maps to Bt1886, and anything unrecognized maps to 0. The values come from the color information in the video track’s <code>AVCodecParameters</code>.</p>
 
     <h4>ErikaTrackCounts / ErikaTrackSelection</h4>
     <div class="tw">
       <table>
-        <thead><tr><th>Type</th><th>Field</th><th>Type</th><th>Semantics</th></tr></thead>
+        <thead><tr><th>Type</th><th>Field</th><th>Type</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td rowspan="3" class="m">Counts</td><td class="m">video / audio / subtitle</td><td class="m">uint32_t</td><td>Number of tracks of each type.</td></tr>
+          <tr><td rowspan="3" class="m">Counts</td><td class="m">video / audio / subtitle</td><td class="m">uint32_t</td><td>Number of tracks of each kind.</td></tr>
           <tr><td></td><td></td><td></td></tr>
           <tr><td></td><td></td><td></td></tr>
-          <tr><td rowspan="3" class="m">Selection</td><td class="m">video / audio / subtitle</td><td class="m">int64_t</td><td>Selected tracks of each type are id, -1 = None.</td></tr>
+          <tr><td rowspan="3" class="m">Selection</td><td class="m">video / audio / subtitle</td><td class="m">int64_t</td><td>Id of the selected track of each kind; -1 = none.</td></tr>
           <tr><td></td><td></td><td></td></tr>
           <tr><td></td><td></td><td></td></tr>
         </tbody>
@@ -396,114 +396,114 @@
     </div>
 
     <h4>ErikaTrackInfo</h4>
-    <p>The six string fields are owned by the caller, using <code>erika_track_info_free</code> release.<code>bit_rate</code>(bit/s) is populated for all track types; the frame rate field is only available for video tracks (<code>frame_rate_numerator / frame_rate_denominator</code>, 0 = unknown).</p>
+    <p>The caller owns the six string fields; release them with <code>erika_track_info_free</code>. <code>bit_rate</code> (bit/s) is populated for all track kinds; the frame rate fields apply only to video tracks (<code>frame_rate_numerator / frame_rate_denominator</code>, 0 = unknown).</p>
     <div class="tw">
       <table>
-        <thead><tr><th>Field</th><th>Type</th><th>Semantics</th></tr></thead>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
         <tbody>
           <tr><td class="m">id</td><td class="m">int64_t</td><td>Track id.</td></tr>
-          <tr><td class="m">kind</td><td class="m">ErikaTrackKind</td><td>Video / Audio / Subtitles.</td></tr>
-          <tr><td class="m">source</td><td class="m">ErikaTrackSource</td><td>Embed/plug-in.</td></tr>
-          <tr><td class="m">selected</td><td class="m">bool</td><td>Checked or not.</td></tr>
-          <tr><td class="m">can_remove</td><td class="m">bool</td><td>Whether it is removable (external hanging rail is true).</td></tr>
-          <tr><td class="m">title</td><td class="m">char*</td><td>title.</td></tr>
+          <tr><td class="m">kind</td><td class="m">ErikaTrackKind</td><td>Video / Audio / Subtitle.</td></tr>
+          <tr><td class="m">source</td><td class="m">ErikaTrackSource</td><td>Embedded / external.</td></tr>
+          <tr><td class="m">selected</td><td class="m">bool</td><td>Whether the track is selected.</td></tr>
+          <tr><td class="m">can_remove</td><td class="m">bool</td><td>Whether the track can be removed (true for external tracks).</td></tr>
+          <tr><td class="m">title</td><td class="m">char*</td><td>Title.</td></tr>
           <tr><td class="m">language</td><td class="m">char*</td><td>Language code.</td></tr>
           <tr><td class="m">codec</td><td class="m">char*</td><td>Codec name.</td></tr>
           <tr><td class="m">width / height</td><td class="m">uint32_t</td><td>Video track pixel size.</td></tr>
-          <tr><td class="m">sample_rate / channels</td><td class="m">uint32_t</td><td>Audio track sample rate/number of channels.</td></tr>
+          <tr><td class="m">sample_rate / channels</td><td class="m">uint32_t</td><td>Audio track sample rate / channel count.</td></tr>
           <tr><td class="m">pixel_format</td><td class="m">char*</td><td>Video pixel format.</td></tr>
-          <tr><td class="m">sample_format</td><td class="m">char*</td><td>Audio sampling format.</td></tr>
-          <tr><td class="m">profile</td><td class="m">char*</td><td>Code profile.</td></tr>
-          <tr><td class="m">level</td><td class="m">int32_t</td><td>Code level.</td></tr>
+          <tr><td class="m">sample_format</td><td class="m">char*</td><td>Audio sample format.</td></tr>
+          <tr><td class="m">profile</td><td class="m">char*</td><td>Codec profile.</td></tr>
+          <tr><td class="m">level</td><td class="m">int32_t</td><td>Codec level.</td></tr>
           <tr><td class="m">bit_rate</td><td class="m">uint64_t</td><td>Bit rate, bit/s.</td></tr>
-          <tr><td class="m">frame_rate_numerator / frame_rate_denominator</td><td class="m">uint32_t</td><td>Frame rate fraction, 0/0 = unknown.</td></tr>
+          <tr><td class="m">frame_rate_numerator / frame_rate_denominator</td><td class="m">uint32_t</td><td>Frame rate as a fraction; 0/0 = unknown.</td></tr>
         </tbody>
       </table>
     </div>
 
     <h4>ErikaEvent</h4>
-    <p>press <code>kind</code> Determine the union structure of the valid fields, see<a href="#events">event table</a>。</p>
+    <p>The valid fields form a union selected by <code>kind</code>; see the <a href="#events">event table</a>.</p>
     <div class="tw">
       <table>
-        <thead><tr><th>Field</th><th>Type</th><th>Semantics</th></tr></thead>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td class="m">kind</td><td class="m">ErikaEventKind</td><td>The event type determines the validity of other fields.</td></tr>
-          <tr><td class="m">status</td><td class="m">ErikaStatus</td><td><code>Error</code> The error code carried by the event.</td></tr>
-          <tr><td class="m">state</td><td class="m">ErikaState</td><td><code>StateChanged</code> The new status carried.</td></tr>
-          <tr><td class="m">duration_micros</td><td class="m">int64_t</td><td><code>DurationChanged</code> Duration of carry.</td></tr>
-          <tr><td class="m">position_micros</td><td class="m">uint64_t</td><td><code>PositionChanged</code> Carrying position.</td></tr>
-          <tr><td class="m">buffering</td><td class="m">bool</td><td><code>BufferingChanged</code> Carried buffer status.</td></tr>
-          <tr><td class="m">video</td><td class="m">ErikaVideoParams</td><td><code>VideoParamsChanged</code> carried parameters.</td></tr>
-          <tr><td class="m">tracks</td><td class="m">ErikaTrackCounts</td><td><code>TracksChanged</code> Carrying count.</td></tr>
+          <tr><td class="m">kind</td><td class="m">ErikaEventKind</td><td>Event kind; determines which other fields are valid.</td></tr>
+          <tr><td class="m">status</td><td class="m">ErikaStatus</td><td>Error code carried by an <code>Error</code> event.</td></tr>
+          <tr><td class="m">state</td><td class="m">ErikaState</td><td>New state carried by <code>StateChanged</code>.</td></tr>
+          <tr><td class="m">duration_micros</td><td class="m">int64_t</td><td>Duration carried by <code>DurationChanged</code>.</td></tr>
+          <tr><td class="m">position_micros</td><td class="m">uint64_t</td><td>Position carried by <code>PositionChanged</code>.</td></tr>
+          <tr><td class="m">buffering</td><td class="m">bool</td><td>Buffering state carried by <code>BufferingChanged</code>.</td></tr>
+          <tr><td class="m">video</td><td class="m">ErikaVideoParams</td><td>Parameters carried by <code>VideoParamsChanged</code>.</td></tr>
+          <tr><td class="m">tracks</td><td class="m">ErikaTrackCounts</td><td>Counts carried by <code>TracksChanged</code>.</td></tr>
         </tbody>
       </table>
     </div>
 
     <h4>ErikaPresenterStats</h4>
-    <p>Render pipeline counter. Decoding/rendering/audio/overlay counting, soft/hard decomposition vs. zero-copy decomposition, and breakdown of HDR vs. audio recovery.<code>audio_recovery_state</code> Values: 0 stable / 1 disconnected / 2 recovering / 3 failed.</p>
+    <p>Render pipeline counters: decode, render, audio, and overlay counts; software versus hardware decoding and zero-copy breakdowns; and HDR and audio recovery breakdowns. <code>audio_recovery_state</code> values: 0 stable / 1 disconnected / 2 recovering / 3 failed.</p>
     <div class="tw">
       <table>
-        <thead><tr><th>Field</th><th>Type</th><th>Semantics</th></tr></thead>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td class="m">decoded_video_frames</td><td class="m">uint64_t</td><td>Decoded video frame.</td></tr>
-          <tr><td class="m">rendered_video_frames</td><td class="m">uint64_t</td><td>Video frame rendered.</td></tr>
-          <tr><td class="m">rendered_test_frames</td><td class="m">uint64_t</td><td>Test frame.</td></tr>
-          <tr><td class="m">pushed_audio_frames</td><td class="m">uint64_t</td><td>Audio frame pushed.</td></tr>
+          <tr><td class="m">decoded_video_frames</td><td class="m">uint64_t</td><td>Decoded video frames.</td></tr>
+          <tr><td class="m">rendered_video_frames</td><td class="m">uint64_t</td><td>Rendered video frames.</td></tr>
+          <tr><td class="m">rendered_test_frames</td><td class="m">uint64_t</td><td>Rendered test frames.</td></tr>
+          <tr><td class="m">pushed_audio_frames</td><td class="m">uint64_t</td><td>Pushed audio frames.</td></tr>
           <tr><td class="m">overlay_frames</td><td class="m">uint64_t</td><td>Subtitle overlay frames.</td></tr>
           <tr><td class="m">danmaku_frames / danmaku_items</td><td class="m">uint64_t</td><td>Danmaku rendered frames / item count.</td></tr>
-          <tr><td class="m">import_failures / render_failures / audio_failures</td><td class="m">uint64_t</td><td>Number of import/rendering/audio failures.</td></tr>
+          <tr><td class="m">import_failures / render_failures / audio_failures</td><td class="m">uint64_t</td><td>Import / render / audio failure counts.</td></tr>
           <tr><td class="m">software_video_frames / hardware_video_frames</td><td class="m">uint64_t</td><td>Software-decoded / hardware-decoded frames.</td></tr>
-          <tr><td class="m">zero_copy_video_frames</td><td class="m">uint64_t</td><td>Zero copy frames.</td></tr>
-          <tr><td class="m">cpu_video_frame_fallbacks</td><td class="m">uint64_t</td><td>Number of frames to fall back to CPU.</td></tr>
-          <tr><td class="m">last_render_micros / last_render_current_micros</td><td class="m">uint64_t</td><td>The last complete tick / renderer call took, in microseconds.</td></tr>
-          <tr><td class="m">audio_clock_read_frames / audio_clock_queued_frames / audio_clock_underflow_frames</td><td class="m">uint64_t</td><td>Audio clock read frame/queue/underrun.</td></tr>
+          <tr><td class="m">zero_copy_video_frames</td><td class="m">uint64_t</td><td>Zero-copy frames.</td></tr>
+          <tr><td class="m">cpu_video_frame_fallbacks</td><td class="m">uint64_t</td><td>Number of frames that fell back to the CPU.</td></tr>
+          <tr><td class="m">last_render_micros / last_render_current_micros</td><td class="m">uint64_t</td><td>Duration of the last full tick / renderer call, in microseconds.</td></tr>
+          <tr><td class="m">audio_clock_read_frames / audio_clock_queued_frames / audio_clock_underflow_frames</td><td class="m">uint64_t</td><td>Audio clock frames read / queued / underrun.</td></tr>
           <tr><td class="m">audio_recovery_state</td><td class="m">int32_t</td><td>0 stable / 1 disconnected / 2 recovering / 3 failed.</td></tr>
           <tr><td class="m">audio_last_error_code</td><td class="m">int32_t</td><td>Last audio error code.</td></tr>
-          <tr><td class="m">audio_recovery_attempts / audio_recovery_count / audio_recovery_failures</td><td class="m">uint64_t</td><td>Audio recovery attempt/success/failed.</td></tr>
-          <tr><td class="m">direct_zero_copy_video_frames / shared_handle_video_frames</td><td class="m">uint64_t</td><td>Direct zero copy/shared handle frame.</td></tr>
-          <tr><td class="m">hdr_source_frames / hdr10_output_frames / sdr_tonemap_frames</td><td class="m">uint64_t</td><td>HDR source / HDR10 output / SDR tone mapped frame.</td></tr>
-          <tr><td class="m">hdr10_metadata_updates / hdr10_metadata_failures / hdr10_output_failures</td><td class="m">uint64_t</td><td>HDR10 Metadata update/failed/output failed.</td></tr>
-          <tr><td class="m">hdr10_output_active</td><td class="m">bool</td><td>Whether the HDR10 output is valid.</td></tr>
-          <tr><td class="m">video_frame_backpressure_drops</td><td class="m">uint64_t</td><td>Number of frames dropped by backpressure.</td></tr>
+          <tr><td class="m">audio_recovery_attempts / audio_recovery_count / audio_recovery_failures</td><td class="m">uint64_t</td><td>Audio recovery attempts / successes / failures.</td></tr>
+          <tr><td class="m">direct_zero_copy_video_frames / shared_handle_video_frames</td><td class="m">uint64_t</td><td>Direct zero-copy / shared-handle frames.</td></tr>
+          <tr><td class="m">hdr_source_frames / hdr10_output_frames / sdr_tonemap_frames</td><td class="m">uint64_t</td><td>HDR source / HDR10 output / SDR tone-mapped frames.</td></tr>
+          <tr><td class="m">hdr10_metadata_updates / hdr10_metadata_failures / hdr10_output_failures</td><td class="m">uint64_t</td><td>HDR10 metadata updates / metadata failures / output failures.</td></tr>
+          <tr><td class="m">hdr10_output_active</td><td class="m">bool</td><td>Whether HDR10 output is active.</td></tr>
+          <tr><td class="m">video_frame_backpressure_drops</td><td class="m">uint64_t</td><td>Frames dropped due to backpressure.</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="muted">Platform differences: wgpu backend <code>last_gpu_micros</code> with <code>direct_zero_copy_video_frames</code> Always 0 (only Metal reports GPU time-consuming, direct connection count only D3D11 increments);<code>shared_handle_video_frames</code> Only increment at wgpu(Android / OpenHarmony);<code>hdr10_output_frames</code> Only increments at D3D11.<code>decoded_video_frames</code> It is the decoded frame that has been uploaded by the renderer.<code>rendered_video_frames</code> is the frame that was successfully drawn to the surface, and the difference between the two is the part that was not rendered.</p>
+    <p class="muted">Platform differences: on the wgpu backend, <code>last_gpu_micros</code> and <code>direct_zero_copy_video_frames</code> are always 0 (only Metal reports GPU time, and the direct-import count increments only on D3D11). <code>shared_handle_video_frames</code> increments only on wgpu (Android / OpenHarmony), and <code>hdr10_output_frames</code> increments only on D3D11. <code>decoded_video_frames</code> counts decoded frames sent to the renderer for upload; <code>rendered_video_frames</code> counts frames successfully drawn to the surface. The difference is the number of frames that were never presented.</p>
     <h3>Subtitle style override mask</h3>
-    <p><code>override_mask</code> Yes <code>ERIKA_SUBTITLE_OVERRIDE_*</code> Bit OR, mirror of libass <code>ASS_OVERRIDE_BIT_*</code> value. Setting this bit causes the corresponding field to no longer be fallback, but replaces the ASS dialog event request style; 0 makes all fields remain fallback. Unknown bits are discarded.</p>
+    <p><code>override_mask</code> is a bitwise OR of <code>ERIKA_SUBTITLE_OVERRIDE_*</code> values, which mirror libass’s <code>ASS_OVERRIDE_BIT_*</code> values. Setting a bit makes the corresponding fields override the style that an ASS dialogue event requests, instead of acting as a fallback; 0 keeps all fields as fallbacks. Unknown bits are discarded.</p>
     <div class="tw">
       <table>
-        <thead><tr><th>Macro</th><th>Bit</th><th>Covered fields</th></tr></thead>
+        <thead><tr><th>Macro</th><th>Bit</th><th>Fields covered</th></tr></thead>
         <tbody>
-          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_FONT_SIZE_FIELDS</td><td class="m">1u&lt;&lt;2</td><td>font_size、spacing、scale_x_percent、scale_y_percent</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_FONT_SIZE_FIELDS</td><td class="m">1u&lt;&lt;2</td><td>font_size, spacing, scale_x_percent, scale_y_percent</td></tr>
           <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_FONT_NAME</td><td class="m">1u&lt;&lt;3</td><td>font_family</td></tr>
-          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_COLORS</td><td class="m">1u&lt;&lt;4</td><td>primary_color_rgba、outline_color_rgba</td></tr>
-          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_ATTRIBUTES</td><td class="m">1u&lt;&lt;5</td><td>bold、italic、underline、strike_out</td></tr>
-          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_BORDER</td><td class="m">1u&lt;&lt;6</td><td>border_style、outline_width、shadow_depth</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_COLORS</td><td class="m">1u&lt;&lt;4</td><td>primary_color_rgba, outline_color_rgba</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_ATTRIBUTES</td><td class="m">1u&lt;&lt;5</td><td>bold, italic, underline, strike_out</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_BORDER</td><td class="m">1u&lt;&lt;6</td><td>border_style, outline_width, shadow_depth</td></tr>
           <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_ALIGNMENT</td><td class="m">1u&lt;&lt;7</td><td>alignment</td></tr>
-          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_MARGINS</td><td class="m">1u&lt;&lt;8</td><td>margin_left、margin_right、margin_vertical</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_MARGINS</td><td class="m">1u&lt;&lt;8</td><td>margin_left, margin_right, margin_vertical</td></tr>
           <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_BLUR</td><td class="m">1u&lt;&lt;11</td><td>blur</td></tr>
           <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_ALL</td><td class="m">All bits</td><td>All of the above</td></tr>
         </tbody>
       </table>
     </div>
 
-    <h3>enumeration</h3>
+    <h3>Enumerations</h3>
     <div class="tw">
       <table>
         <thead><tr><th>Type</th><th>Purpose</th></tr></thead>
         <tbody>
-          <tr><td class="m">ErikaStatus / ErikaState / ErikaEventKind</td><td>See sections above.</td></tr>
-          <tr><td class="m">ErikaTrackKind</td><td>Video / Audio / Subtitles.</td></tr>
-          <tr><td class="m">ErikaTrackSource</td><td>Embed/plug-in.</td></tr>
-          <tr><td class="m">ErikaWgpuSurfaceKind</td><td>wgpu surface type, 9 members.</td></tr>
-          <tr><td class="m">ErikaFlutterTextureKind</td><td>Flutter texture type, 6 members.</td></tr>
-          <tr><td class="m">ErikaPresenterOutputMode</td><td>SDR / Apple EDR / extended-linear / Auto。</td></tr>
-          <tr><td class="m">ErikaActiveOutputEncoding</td><td>SDR sRGB / Apple EDR / Android scRGB / HDR10 PQ / Linux scRGB。</td></tr>
-          <tr><td class="m">ErikaOutputFallbackReason</td><td>HDR Fallback reason, 9 members.</td></tr>
-          <tr><td class="m">ErikaOutputSurfaceFormat</td><td>8-bit UNORM / 10-bit UNORM / 16-bit float。</td></tr>
-          <tr><td class="m">ErikaLumaUpscalerMode</td><td>Off / ArtCNN F16 / ArtCNN F32 / ArtCNN F16 DS。</td></tr>
-          <tr><td class="m">ErikaUpscalerBackendStatus</td><td>Upscaling backend status, 5 types.</td></tr>
+          <tr><td class="m">ErikaStatus / ErikaState / ErikaEventKind</td><td>See the sections above.</td></tr>
+          <tr><td class="m">ErikaTrackKind</td><td>Video / Audio / Subtitle.</td></tr>
+          <tr><td class="m">ErikaTrackSource</td><td>Embedded / external.</td></tr>
+          <tr><td class="m">ErikaWgpuSurfaceKind</td><td>wgpu surface kind, 9 members.</td></tr>
+          <tr><td class="m">ErikaFlutterTextureKind</td><td>Flutter texture kind, 6 members.</td></tr>
+          <tr><td class="m">ErikaPresenterOutputMode</td><td>SDR / Apple EDR / extended-linear / Auto.</td></tr>
+          <tr><td class="m">ErikaActiveOutputEncoding</td><td>SDR sRGB / Apple EDR / Android scRGB / HDR10 PQ / Linux scRGB.</td></tr>
+          <tr><td class="m">ErikaOutputFallbackReason</td><td>HDR fallback reason, 9 members.</td></tr>
+          <tr><td class="m">ErikaOutputSurfaceFormat</td><td>8-bit UNORM / 10-bit UNORM / 16-bit float.</td></tr>
+          <tr><td class="m">ErikaLumaUpscalerMode</td><td>Off / ArtCNN F16 / ArtCNN F32 / ArtCNN F16 DS.</td></tr>
+          <tr><td class="m">ErikaUpscalerBackendStatus</td><td>Upscaler backend status, 5 members.</td></tr>
         </tbody>
       </table>
     </div>
@@ -511,10 +511,10 @@
     <h4>ErikaTrackKind / ErikaTrackSource</h4>
     <div class="tw">
       <table>
-        <thead><tr><th>value</th><th>TrackKind</th><th>value</th><th>TrackSource</th></tr></thead>
+        <thead><tr><th>Value</th><th>TrackKind</th><th>Value</th><th>TrackSource</th></tr></thead>
         <tbody>
           <tr><td class="m">0</td><td>Video</td><td class="m">0</td><td>Embedded (in the container)</td></tr>
-          <tr><td class="m">1</td><td>Audio</td><td class="m">1</td><td>External(plug-in)</td></tr>
+          <tr><td class="m">1</td><td>Audio</td><td class="m">1</td><td>External (sideloaded)</td></tr>
           <tr><td class="m">2</td><td>Subtitle</td><td></td><td></td></tr>
         </tbody>
       </table>
@@ -523,16 +523,16 @@
     <h4>ErikaWgpuSurfaceKind</h4>
     <div class="tw">
       <table>
-        <thead><tr><th>value</th><th>Name</th><th>platform</th></tr></thead>
+        <thead><tr><th>Value</th><th>Name</th><th>Platform</th></tr></thead>
         <tbody>
           <tr><td class="m">0</td><td class="m">Unknown</td><td>Unknown.</td></tr>
-          <tr><td class="m">1</td><td class="m">MacOsNsView</td><td>macOS NSView。</td></tr>
-          <tr><td class="m">2</td><td class="m">MacOsCaMetalLayer</td><td>macOS CAMetalLayer。</td></tr>
-          <tr><td class="m">3</td><td class="m">IosUiView</td><td>iOS UIView。</td></tr>
-          <tr><td class="m">4</td><td class="m">WindowsHwnd</td><td>Windows HWND。</td></tr>
-          <tr><td class="m">5</td><td class="m">XlibWindow</td><td>X11(Xlib) window.</td></tr>
+          <tr><td class="m">1</td><td class="m">MacOsNsView</td><td>macOS NSView.</td></tr>
+          <tr><td class="m">2</td><td class="m">MacOsCaMetalLayer</td><td>macOS CAMetalLayer.</td></tr>
+          <tr><td class="m">3</td><td class="m">IosUiView</td><td>iOS UIView.</td></tr>
+          <tr><td class="m">4</td><td class="m">WindowsHwnd</td><td>Windows HWND.</td></tr>
+          <tr><td class="m">5</td><td class="m">XlibWindow</td><td>X11 (Xlib) window.</td></tr>
           <tr><td class="m">6</td><td class="m">WaylandSurface</td><td>Wayland surface.</td></tr>
-          <tr><td class="m">7</td><td class="m">AndroidNativeWindow</td><td>Android ANativeWindow。</td></tr>
+          <tr><td class="m">7</td><td class="m">AndroidNativeWindow</td><td>Android ANativeWindow.</td></tr>
           <tr><td class="m">8</td><td class="m">OhosNativeWindow</td><td>OpenHarmony native window.</td></tr>
         </tbody>
       </table>
@@ -541,14 +541,14 @@
     <h4>ErikaFlutterTextureKind</h4>
     <div class="tw">
       <table>
-        <thead><tr><th>value</th><th>Name</th><th>platform</th></tr></thead>
+        <thead><tr><th>Value</th><th>Name</th><th>Platform</th></tr></thead>
         <tbody>
           <tr><td class="m">0</td><td class="m">Unknown</td><td>Unknown.</td></tr>
-          <tr><td class="m">1</td><td class="m">MacOsTextureRegistrar</td><td>macOS Flutter texture register.</td></tr>
-          <tr><td class="m">2</td><td class="m">IosTextureRegistrar</td><td>iOS Flutter texture register.</td></tr>
-          <tr><td class="m">3</td><td class="m">AndroidSurfaceTexture</td><td>Android SurfaceTexture。</td></tr>
-          <tr><td class="m">4</td><td class="m">WindowsTextureRegistrar</td><td>Windows Flutter texture register.</td></tr>
-          <tr><td class="m">5</td><td class="m">LinuxTextureRegistrar</td><td>Linux Flutter texture register.</td></tr>
+          <tr><td class="m">1</td><td class="m">MacOsTextureRegistrar</td><td>macOS Flutter texture registrar.</td></tr>
+          <tr><td class="m">2</td><td class="m">IosTextureRegistrar</td><td>iOS Flutter texture registrar.</td></tr>
+          <tr><td class="m">3</td><td class="m">AndroidSurfaceTexture</td><td>Android SurfaceTexture.</td></tr>
+          <tr><td class="m">4</td><td class="m">WindowsTextureRegistrar</td><td>Windows Flutter texture registrar.</td></tr>
+          <tr><td class="m">5</td><td class="m">LinuxTextureRegistrar</td><td>Linux Flutter texture registrar.</td></tr>
         </tbody>
       </table>
     </div>
@@ -556,7 +556,7 @@
     <h4>ErikaPresenterOutputMode / ErikaActiveOutputEncoding</h4>
     <div class="tw">
       <table>
-        <thead><tr><th>value</th><th>PresenterOutputMode</th><th>value</th><th>ActiveOutputEncoding</th></tr></thead>
+        <thead><tr><th>Value</th><th>PresenterOutputMode</th><th>Value</th><th>ActiveOutputEncoding</th></tr></thead>
         <tbody>
           <tr><td class="m">0</td><td>Sdr</td><td class="m">0</td><td>SdrSrgb</td></tr>
           <tr><td class="m">1</td><td>AppleEdr</td><td class="m">1</td><td>AppleEdr</td></tr>
@@ -570,17 +570,17 @@
     <h4>ErikaOutputFallbackReason</h4>
     <div class="tw">
       <table>
-        <thead><tr><th>value</th><th>Name</th><th>meaning</th></tr></thead>
+        <thead><tr><th>Value</th><th>Name</th><th>Description</th></tr></thead>
         <tbody>
           <tr><td class="m">0</td><td class="m">None</td><td>No fallback.</td></tr>
-          <tr><td class="m">1</td><td class="m">DisplayHdrUnsupported</td><td>The monitor does not support HDR.</td></tr>
-          <tr><td class="m">2</td><td class="m">HybridCompositionRequired</td><td>Requires mixed synthesis.</td></tr>
+          <tr><td class="m">1</td><td class="m">DisplayHdrUnsupported</td><td>The display does not support HDR.</td></tr>
+          <tr><td class="m">2</td><td class="m">HybridCompositionRequired</td><td>Hybrid composition is required.</td></tr>
           <tr><td class="m">3</td><td class="m">WgpuBackendNotVulkan</td><td>The wgpu backend is not Vulkan.</td></tr>
           <tr><td class="m">4</td><td class="m">Rgba16FloatSurfaceFormatUnavailable</td><td>RGBA16F surface format is not available.</td></tr>
-          <tr><td class="m">5</td><td class="m">NativeWindowDataSpaceApiUnavailable</td><td>Native windows data-space API are not available.</td></tr>
-          <tr><td class="m">6</td><td class="m">ScrgbDataSpaceVerificationFailed</td><td>scRGB data-space Authentication failed.</td></tr>
+          <tr><td class="m">5</td><td class="m">NativeWindowDataSpaceApiUnavailable</td><td>The native window data-space API is unavailable.</td></tr>
+          <tr><td class="m">6</td><td class="m">ScrgbDataSpaceVerificationFailed</td><td>scRGB data-space verification failed.</td></tr>
           <tr><td class="m">7</td><td class="m">SurfaceConfigureFailed</td><td>Surface configuration failed.</td></tr>
-          <tr><td class="m">8</td><td class="m">LegacyAppleEdrUnsupported</td><td>Old style Apple EDR is not supported.</td></tr>
+          <tr><td class="m">8</td><td class="m">LegacyAppleEdrUnsupported</td><td>Legacy Apple EDR is not supported.</td></tr>
         </tbody>
       </table>
     </div>
@@ -588,10 +588,10 @@
     <h4>ErikaOutputSurfaceFormat / ErikaLumaUpscalerMode / ErikaUpscalerBackendStatus</h4>
     <div class="tw">
       <table>
-        <thead><tr><th>value</th><th>OutputSurfaceFormat</th><th>value</th><th>LumaUpscalerMode</th><th>value</th><th>UpscalerBackendStatus</th></tr></thead>
+        <thead><tr><th>Value</th><th>OutputSurfaceFormat</th><th>Value</th><th>LumaUpscalerMode</th><th>Value</th><th>UpscalerBackendStatus</th></tr></thead>
         <tbody>
           <tr><td class="m">0</td><td>EightBitUnorm</td><td class="m">0</td><td>Off</td><td class="m">0</td><td>Off</td></tr>
-          <tr><td class="m">1</td><td>TenBitUnorm</td><td class="m">1</td><td>ArtCnnC4F16</td><td class="m">1</td><td>Inactive (the backend does not execute ArtCNN and retains the native brightness sampling)</td></tr>
+          <tr><td class="m">1</td><td>TenBitUnorm</td><td class="m">1</td><td>ArtCnnC4F16</td><td class="m">1</td><td>Inactive (the backend does not run ArtCNN and keeps native luma sampling)</td></tr>
           <tr><td class="m">2</td><td>SixteenBitFloat</td><td class="m">2</td><td>ArtCnnC4F32</td><td class="m">2</td><td>Building</td></tr>
           <tr><td></td><td></td><td class="m">3</td><td>ArtCnnC4F16Ds</td><td class="m">3</td><td>Scalar</td></tr>
           <tr><td></td><td></td><td></td><td></td><td class="m">4</td><td>SimdgroupMatrix</td></tr>
@@ -601,8 +601,8 @@
   </section>
 
   <section id="open-and-export">
-    <h2>Open options with GIF export type<a class="anchor" href="#open-and-export">#</a></h2>
-    <p>The following definitions are from 0.3.0 <code>erika.h</code>. The complete fields for the HTTP window and GIF export are as follows:</p>
+    <h2>Open options and GIF export types<a class="anchor" href="#open-and-export">#</a></h2>
+    <p>The following definitions come from <code>erika.h</code> in 0.3.0. They give the complete fields for the HTTP read-ahead window and GIF export:</p>
     <h3>ErikaOpenOptions</h3>
     <div class="code">
 <pre>typedef struct ErikaOpenOptions {
@@ -655,8 +655,8 @@
   uint64_t file_size;
 } ErikaGifExportResult;</pre>
     </div>
-    <p><code>http_read_ahead_bytes</code> Determines the number of bytes to read forward, the default is 2 MiB;<code>http_back_buffer_bytes</code> Determine how much played data to keep, the default is 16 MiB. Omit both or pass 0 to use the default value. The readahead default value can also be given by <code>ERIKA_HTTP_READAHEAD_BYTES</code> set up.</p>
-    <p>A backward seek within the rewind cache can directly reuse the downloaded data. High bitrate videos require a larger budget: a video of 80 Mbit/s would require about 100 MB to retain for about 10 seconds. The cache is limited by bytes and does not represent a fixed number of playback seconds.</p>
+    <p><code>http_read_ahead_bytes</code> sets how many bytes to read ahead (default 2 MiB). <code>http_back_buffer_bytes</code> sets how much already-played data to keep (default 16 MiB). Omit either one or pass 0 to use its default. You can also set the read-ahead default with <code>ERIKA_HTTP_READAHEAD_BYTES</code>.</p>
+    <p>A backward seek that lands inside the back buffer reuses the data already downloaded. High-bitrate video needs a larger budget: keeping about 10 seconds of an 80 Mbit/s stream takes roughly 100 MB. The cache is limited by bytes, not by a fixed number of seconds of playback.</p>
   </section>
 
   <footer class="doc-foot">
@@ -667,7 +667,7 @@
 
   <nav class="pager">
     <a href="../kernel/clock.en.html"><span class="dir">Prev</span>Clock and scheduling</a>
-    <a class="nx" href="capi-handle.en.html"><span class="dir">Next</span>ErikaHandle reference</a>
+    <a class="nx" href="capi-handle.en.html"><span class="dir">Next</span>ErikaHandle</a>
   </nav>
 </main>
 

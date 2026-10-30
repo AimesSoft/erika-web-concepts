@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Releases and Products — liberika Developer Documentation</title>
+<title>Releases and artifacts — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -14,7 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
-  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="releasing.html">中文</option><option value="releasing.en.html">English</option><option value="releasing.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="releasing.html">中文</a> · <a href="releasing.en.html">English</a> · <a href="releasing.ja.html">日本語</a></nav></noscript></div>
+  <div class="language-switch" role="group" aria-label="Language"><a href="releasing.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="releasing.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="releasing.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
     <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
     <ul>
@@ -57,21 +57,20 @@
 </aside>
 
 <main>
-  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
-  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>project<span class="sep">/</span>releases and products</p>
-  <h1>releases and products</h1>
+  <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>project<span class="sep">/</span>Releases and artifacts</p>
+  <h1>Releases and artifacts</h1>
   <p class="kicker">Releasing and Artifacts</p>
-  <p class="lead">release workflow build native <code>erika_capi</code> Precompile the product with Web / WASM and hook it to GitHub Release. Each bundle contains library files,<code>erika.h</code>, MPL-2.0 License and Dependency Statement. Desktop Linux is not released yet.</p>
+  <p class="lead">The release workflow builds the native <code>erika_capi</code> and Web / WASM prebuilt artifacts and attaches them to a GitHub Release. Each bundle contains the library files, <code>erika.h</code>, the MPL-2.0 license, and dependency notices. Desktop Linux is not released yet.</p>
 
   <ul class="meta-strip">
-    <li>platform <b>6 native + Web</b></li>
-    <li>ZIP Archive <b>15</b> a</li>
-    <li>profile <b>lgpl</b></li>
+    <li>Platforms <b>6 native + Web</b></li>
+    <li>ZIP archives <b>15</b></li>
+    <li>Profile <b>lgpl</b></li>
   </ul>
 
   <section id="trigger">
-    <h2>trigger<span class="jp">トリガー</span><a class="anchor" href="#trigger">#</a></h2>
-    <p>push in <code>v*</code> The tag triggers the official release, and after the build is completed, it is released to GitHub Releases. workflow_dispatch Manually runs only build without publishing, used for pre-release checking. Execute on local machine before publishing <a href="building.en.html">Build process</a> verify.</p>
+    <h2>Triggers<span class="jp">トリガー</span><a class="anchor" href="#trigger">#</a></h2>
+    <p>Pushing a <code>v*</code> tag triggers an official release, which is published to GitHub Releases once the build finishes. A manual workflow_dispatch run only builds and does not publish; use it for pre-release checks. Before releasing, verify locally with the <a href="building.en.html">build process</a>.</p>
     <div class="code">
 <pre>git tag v0.3.0
 git push origin v0.3.0</pre>
@@ -79,81 +78,81 @@ git push origin v0.3.0</pre>
   </section>
 
   <section id="prepare">
-    <h2>Preparation before labeling<a class="anchor" href="#prepare">#</a></h2>
-    <p>first root <code>Cargo.toml</code> of <code>[workspace.package].version</code> Change to the target version and execute again <code>cargo update -w</code> and submit together <code>Cargo.lock</code>. CI of <code>--locked</code> The build requires both to be consistent. Keep the version of vendored upstream dependency.</p>
-    <p>Update the CHANGELOG and installation documentation of the root directory, Flutter and OHPM, confirm that the main branch CI passes, and complete the formatting, testing, clippy and Dart release checks required by the releasing documentation. Release checks the tag version at the entrance and Cargo workspace version; fails immediately if they are inconsistent.</p>
-    <p>The versions and native summaries of Flutter, OHPM and Swift are synchronized by subsequent workflows. After GitHub Release is completed, the public versions of pub.dev, SwiftPM and OHPM need to be confirmed respectively; the successful upload of OHPM does not mean that the review is completed.</p>
+    <h2>Before you tag<a class="anchor" href="#prepare">#</a></h2>
+    <p>First set <code>[workspace.package].version</code> in the root <code>Cargo.toml</code> to the target version, then run <code>cargo update -w</code> and commit <code>Cargo.lock</code> together with it. The <code>--locked</code> build in CI requires the two to match. Leave the versions of vendored upstream dependencies unchanged.</p>
+    <p>Update the CHANGELOG and installation docs for the repository root, Flutter, and OHPM. Confirm that CI passes on the main branch, and complete the formatting, test, clippy, and Dart publish checks that the releasing documentation requires. At its entry point, the release workflow compares the tag version with the Cargo workspace version and fails immediately if they differ.</p>
+    <p>Later workflows sync the Flutter, OHPM, and Swift versions and native digests. After the GitHub Release completes, confirm the public versions on pub.dev, SwiftPM, and OHPM separately. A successful OHPM upload does not mean the review is complete.</p>
   </section>
 
   <section id="bundles">
-    <h2>product<span class="jp">アーティファクト</span><a class="anchor" href="#bundles">#</a></h2>
+    <h2>Artifacts<span class="jp">アーティファクト</span><a class="anchor" href="#bundles">#</a></h2>
     <div class="tw">
       <table>
-        <thead><tr><th>platform</th><th>bundle name</th><th>content</th></tr></thead>
+        <thead><tr><th>Platform</th><th>Bundle name</th><th>Contents</th></tr></thead>
         <tbody>
-          <tr><td class="k">macOS</td><td class="m">erika-capi-macos-arm64<br>erika-capi-macos-x64</td><td><code>liberika_capi.dylib</code> + <code>liberika_capi.a</code>, divided into volumes according to architecture.</td></tr>
-          <tr><td class="k">macOS General</td><td class="m">erika-capi-macos-universal</td><td>lipo merges the generic dylib with the static library.</td></tr>
-          <tr><td class="k">iOS</td><td class="m">erika-capi-ios</td><td><code>erika_capi.xcframework</code>, real machine + simulator.</td></tr>
-          <tr><td class="k">tvOS</td><td class="m">erika-capi-tvos</td><td><code>erika_capi.xcframework</code>。</td></tr>
-          <tr><td class="k">Windows</td><td class="m">erika-capi-windows-x64<br>erika-capi-windows-arm64</td><td>DLL and import libraries.</td></tr>
-          <tr><td class="k">Android</td><td class="m">erika-capi-android</td><td>arm64 / armv7 / x86_64 / x86 four ABI in one.</td></tr>
-          <tr><td class="k">OpenHarmony</td><td class="m">erika-capi-openharmony-arm64</td><td>Flutter plugin runtime archive; standalone ArkTS SDK released via OHPM.</td></tr>
+          <tr><td class="k">macOS</td><td class="m">erika-capi-macos-arm64<br>erika-capi-macos-x64</td><td><code>liberika_capi.dylib</code> + <code>liberika_capi.a</code>, one archive per architecture.</td></tr>
+          <tr><td class="k">macOS universal</td><td class="m">erika-capi-macos-universal</td><td>Universal dylib and static library merged with lipo.</td></tr>
+          <tr><td class="k">iOS</td><td class="m">erika-capi-ios</td><td><code>erika_capi.xcframework</code>, device + simulator.</td></tr>
+          <tr><td class="k">tvOS</td><td class="m">erika-capi-tvos</td><td><code>erika_capi.xcframework</code>.</td></tr>
+          <tr><td class="k">Windows</td><td class="m">erika-capi-windows-x64<br>erika-capi-windows-arm64</td><td>DLL and import library.</td></tr>
+          <tr><td class="k">Android</td><td class="m">erika-capi-android</td><td>All four ABIs (arm64 / armv7 / x86_64 / x86) in one archive.</td></tr>
+          <tr><td class="k">OpenHarmony</td><td class="m">erika-capi-openharmony-arm64</td><td>Runtime archive for the Flutter plugin. The standalone ArkTS SDK is published through OHPM.</td></tr>
         </tbody>
       </table>
     </div>
-    <p>Native dependencies (FFmpeg, dav1d, libass, etc.) are statically linked into the library as lgpl profile, and do not depend on system installation during runtime.</p>
+    <p>Native dependencies (FFmpeg, dav1d, libass, and others) are statically linked into the library under the lgpl profile, so nothing needs to be installed on the system at runtime.</p>
   </section>
 
   <section id="web">
-    <h2>Web / WASM Archive<a class="anchor" href="#web">#</a></h2>
-    <p><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/liberika-web-0.3.0.zip">liberika-web-0.3.0.zip</a> by <code>cargo run -p xtask -- web build</code> Generate, containing JavaScript, two WASM, Worker, license,<code>build-manifest.json</code> and <code>index.html</code> Demo page. Write with native ZIP <code>SHA256SUMS</code>。</p>
-    <p>After complete decompression, access through HTTPS or localhost; independent static deployment can select local MKV playback. The Web package has not yet been released to npm. See the access and compatibility range. <a href="../guide/web.en.html">Web Guide</a>。</p>
+    <h2>Web / WASM archive<a class="anchor" href="#web">#</a></h2>
+    <p><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/liberika-web-0.3.0.zip">liberika-web-0.3.0.zip</a> is generated by <code>cargo run -p xtask -- web build</code>. It contains the JavaScript, two WASM modules, the Worker, licenses, <code>build-manifest.json</code>, and the <code>index.html</code> demo page. Its digest is written to <code>SHA256SUMS</code> together with the native ZIPs.</p>
+    <p>After extracting the archive completely, open it over HTTPS or localhost. A standalone static deployment is enough to play a local MKV file. The Web package is not yet published to npm. For integration and compatibility, see <a href="../guide/web.en.html">Web / WASM integration</a>.</p>
   </section>
 
   <section id="ohpm">
     <h2>OpenHarmony OHPM package<span class="jp">OHPM パッケージ</span><a class="anchor" href="#ohpm">#</a></h2>
-    <p>OpenHarmony arm64's native ArkTS package <code>erika</code> Pass <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM</a> Distribution, minimum compatible with API 18. As of 2026-10-30, 0.3.0 has been reviewed and publicly available:</p>
+    <p>The native ArkTS package <code>erika</code> for OpenHarmony arm64 is distributed through <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM</a> and supports API 18 and later. As of 2026-10-30, 0.3.0 has passed review and is publicly available:</p>
     <div class="code">
       <p class="lbl">shell</p>
 <pre>ohpm install erika@0.3.0</pre>
     </div>
-    <p>Package contains N-API bridge with matching <code>liberika_capi.so</code>, the interface is with <code>XComponent</code> surface life cycle see <a href="https://github.com/AimesSoft/liberika/blob/main/packages/erika_ohos/README.md">OpenHarmony package guide</a>。</p>
+    <p>The package contains the N-API bridge and a matching <code>liberika_capi.so</code>. For the API and the <code>XComponent</code> surface lifecycle, see the <a href="https://github.com/AimesSoft/liberika/blob/main/packages/erika_ohos/README.md">OpenHarmony package guide</a>.</p>
   </section>
 
   <section id="layout">
-    <h2>bundle structure<span class="jp">constitute</span><a class="anchor" href="#layout">#</a></h2>
-    <p>C ABI bundle by <code>packaging/bundle.sh</code> Generated with the same structure:</p>
+    <h2>Bundle layout<span class="jp">構成</span><a class="anchor" href="#layout">#</a></h2>
+    <p><code>packaging/bundle.sh</code> generates the C ABI bundles, and they all share the same layout:</p>
     <div class="code">
 <pre>&lt;bundle-name&gt;/
-  lib/                    <span class="c"># 库文件或 xcframework</span>
-  include/erika.h         <span class="c"># C ABI 头文件</span>
+  lib/                    <span class="c"># Library files or xcframework</span>
+  include/erika.h         <span class="c"># C ABI header</span>
   LICENSE                 <span class="c"># MPL-2.0</span>
-  THIRD_PARTY_NOTICES.md  <span class="c"># 依赖许可证声明与 LGPL relink 说明</span>
-  licenses/               <span class="c"># 各依赖的许可证原文</span>
-  MANIFEST.txt            <span class="c"># ref / commit / profile / 构建时间</span></pre>
+  THIRD_PARTY_NOTICES.md  <span class="c"># Dependency license notices and LGPL relink notes</span>
+  licenses/               <span class="c"># Full license text of each dependency</span>
+  MANIFEST.txt            <span class="c"># ref / commit / profile / build time</span></pre>
     </div>
-    <p>MANIFEST.txt record construction source: bundle name, git ref, commit, profile and UTC time. Read it first when troubleshooting product sources.</p>
-    <p class="note">THIRD_PARTY_NOTICES.md Description relink obligations of LGPL components: The library is distributed with static linking, and the host that changes the dynamic linking needs to be able to replace these components.</p>
+    <p>MANIFEST.txt records where the build came from: bundle name, git ref, commit, profile, and UTC time. Read it first when you trace an artifact's origin.</p>
+    <p class="note">THIRD_PARTY_NOTICES.md describes the relink obligations for LGPL components. The library is distributed statically linked, so a host that switches to dynamic linking must be able to replace these components.</p>
   </section>
 
   <section id="consume">
-    <h2>Precompiled consumption<span class="jp">Use of プレビルト</span><a class="anchor" href="#consume">#</a></h2>
-    <p>The precompiled runtime is downloaded by default when the Flutter plug-in is built (<code>erika_flutter</code> The pub.dev version comes with verification and caching); it needs to be explicitly exported when building from source code:</p>
+    <h2>Consuming prebuilt artifacts<span class="jp">プレビルト利用</span><a class="anchor" href="#consume">#</a></h2>
+    <p>The Flutter plugin downloads the prebuilt runtime by default during its build (the pub.dev version of <code>erika_flutter</code> includes verification and caching). To build from source instead, export the following explicitly:</p>
     <div class="code">
-<pre><span class="k">export</span> ERIKA_FORCE_SOURCE_BUILD=1    <span class="c"># 改为源码构建（需 ERIKA_REPO_ROOT 指向仓库检出）</span>
-<span class="k">export</span> ERIKA_PREBUILT_TAG=v0.3.0       <span class="c"># 自定义预编译版本标签，默认匹配当前版本</span></pre>
+<pre><span class="k">export</span> ERIKA_FORCE_SOURCE_BUILD=1    <span class="c"># Build from source instead (ERIKA_REPO_ROOT must point to a repository checkout)</span>
+<span class="k">export</span> ERIKA_PREBUILT_TAG=v0.3.0       <span class="c"># Custom prebuilt version tag; defaults to the current version</span></pre>
     </div>
-    <p>Explicit override <code>ERIKA_PREBUILT_TAG</code> , you must also set the <code>ERIKA_PREBUILT_SHA256</code>;From the same Release <code>SHA256SUMS</code> Read the corresponding platform summary. Source code build and custom precompiled version are two independent configuration methods.</p>
-    <p>Build scripts by platform from <code>github.com/AimesSoft/liberika/releases/download/&lt;tag&gt;/</code> Download the corresponding bundle and unpack it, and press the release level <code>SHA256SUMS</code> Verification summary.</p>
-    <p>Consumption method of native host: Unpack bundle,<code>include/erika.h</code> As the only header file,<code>lib/</code> Link the library within the host into the host, see<a href="../guide/c.en.html">C ABI embedded</a>。</p>
+    <p>When you override <code>ERIKA_PREBUILT_TAG</code> explicitly, you must also set the matching <code>ERIKA_PREBUILT_SHA256</code> for that archive; read the digest for your platform from <code>SHA256SUMS</code> in the same release. Building from source and using a custom prebuilt version are two independent configuration options.</p>
+    <p>The build scripts download the bundle for the platform from <code>github.com/AimesSoft/liberika/releases/download/&lt;tag&gt;/</code>, unpack it, and verify its digest against the release-level <code>SHA256SUMS</code>.</p>
+    <p>For a native host, unpack the bundle, use <code>include/erika.h</code> as the only header, and link the library in <code>lib/</code> into the host. See <a href="../guide/c.en.html">C ABI integration</a>.</p>
   </section>
 
   <section id="pipeline">
-    <h2>Build and package release process<a class="anchor" href="#pipeline">#</a></h2>
-    <p>The current Release workflow of main will build two structures of macOS, three slice, tvOS three, slice, Android four, ABI, Windows and OpenHarmony separately, and then merge them after completion. universal / XCFramework or packaged as ABI. The native dependency cache is saved according to the target, and CI and Release are reused.</p>
-    <p>The release generated a total of 15 ZIP: 9 C ABI archives, 4 Flutter Android runtimes split by ABI, 1 Swift XCFramework, and 1 Web / WASM package.<code>SHA256SUMS</code> Record all archive summaries.</p>
-    <p>After the native tag is successfully published,<code>Release ecosystem packages</code> Update the Flutter / OHPM version and native product summary, and then release pub.dev and OHPM; Swift XCFramework construction and SwiftPM release are promoted in parallel. After OHPM is successfully uploaded, it still needs to complete the platform review. The public version shall be subject to registry.</p>
-    <p>The main branch CI selects native tasks according to the change path; the old branch build can be cancelled. When only the documentation or ecological package release script is changed, the main CI will skip the native build; changes to the native source code, dependency patches, and CI / Release build scripts will still be triggered.</p>
+    <h2>Build and publish pipeline<a class="anchor" href="#pipeline">#</a></h2>
+    <p>On main, the Release workflow builds each of these separately: two macOS architectures, three iOS slices, three tvOS slices, four Android ABIs, two Windows architectures, and OpenHarmony. Afterward it merges the universal binaries and XCFrameworks, or packages per ABI. The native dependency cache is saved per target and shared between CI and Release.</p>
+    <p>A release produces 15 ZIP archives in total: 9 C ABI archives, 4 Flutter Android runtimes split by ABI, 1 Swift XCFramework, and 1 Web / WASM package. <code>SHA256SUMS</code> records the digests of all archives.</p>
+    <p>After the native tag release succeeds, the <code>Release ecosystem packages</code> workflow updates the Flutter and OHPM versions and the native artifact digests, then publishes to pub.dev and OHPM. The Swift XCFramework build and the SwiftPM release proceed in parallel. After an OHPM upload succeeds, the platform review must still complete; the registry is the authority on the public version.</p>
+    <p>CI on the main branch selects native jobs based on the changed paths, and superseded builds on a branch can be cancelled. When a change touches only documentation or the ecosystem package publishing scripts, main CI skips the native build. Changes to native source, dependency patches, or the CI / Release build scripts still trigger it.</p>
   </section>
 
   <footer class="doc-foot">
@@ -163,8 +162,8 @@ git push origin v0.3.0</pre>
   </footer>
 
   <nav class="pager">
-    <a href="building.en.html"><span class="dir">Prev</span>Build and dependencies</a>
-    <a class="nx" href="contributing.en.html"><span class="dir">Next</span>Contribution Guide</a>
+    <a href="building.en.html"><span class="dir">Prev</span>Building and dependencies</a>
+    <a class="nx" href="contributing.en.html"><span class="dir">Next</span>Contributing</a>
   </nav>
 </main>
 

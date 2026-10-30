@@ -14,7 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
-  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="rust.html">中文</option><option value="rust.en.html">English</option><option value="rust.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="rust.html">中文</a> · <a href="rust.en.html">English</a> · <a href="rust.ja.html">日本語</a></nav></noscript></div>
+  <div class="language-switch" role="group" aria-label="语言"><a href="rust.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="rust.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="rust.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
     <ul>
@@ -64,7 +64,7 @@
 
   <ul class="meta-strip">
     <li>入口 <b>Player / PresenterRuntime</b></li>
-    <li>事件 <b>12 种</b></li>
+    <li>PlayerEvent <b>12 种</b></li>
     <li>帧订阅 <b>3 通道</b></li>
   </ul>
 
@@ -206,7 +206,7 @@ presenter.play()?;
         <thead><tr><th>字段</th><th>默认值</th><th>含义</th></tr></thead>
         <tbody>
           <tr><td class="m">name</td><td class="m">"Erika"</td><td>播放器实例名称，用于多实例日志标识。</td></tr>
-          <tr><td class="m">event_channel_capacity</td><td class="m">1024</td><td>内部播放控制命令队列容量。</td></tr>
+          <tr><td class="m">event_channel_capacity</td><td class="m">1024</td><td>内部播放控制命令队列容量；尽管字段名为 event，订阅事件队列不受此值限制。</td></tr>
           <tr><td class="m">playback</td><td class="m">PlaybackSessionConfig</td><td>解码器与播放会话底层配置（硬件加速偏好、缓冲深度等）。</td></tr>
           <tr><td class="m">renderer</td><td class="m">Auto</td><td>渲染后端偏好设置。</td></tr>
           <tr><td class="m">video_frame_queue_capacity</td><td class="m">3</td><td>视频输出帧队列缓冲深度。</td></tr>

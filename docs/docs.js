@@ -2,9 +2,9 @@
   var pageLanguage = document.documentElement.lang === 'ja' ? 'ja' :
     document.documentElement.lang === 'en' ? 'en' : 'zh';
   try { localStorage.setItem('liberika-language', pageLanguage); } catch (error) { /* Storage is optional. */ }
-  document.querySelectorAll('.language-switch select').forEach(function languageMenu(menu) {
-    menu.addEventListener('change', function () {
-      if (menu.value) window.location.href = menu.value + window.location.hash;
+  document.querySelectorAll('.language-switch a').forEach(function keepSection(link) {
+    link.addEventListener('click', function () {
+      link.hash = window.location.hash;
     });
   });
   var copyLabels = {

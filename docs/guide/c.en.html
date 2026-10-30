@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>C ABI Embedding — liberika Developer Documentation</title>
+<title>C ABI integration — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -14,7 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
-  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="c.html">中文</option><option value="c.en.html">English</option><option value="c.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="c.html">中文</a> · <a href="c.en.html">English</a> · <a href="c.ja.html">日本語</a></nav></noscript></div>
+  <div class="language-switch" role="group" aria-label="Language"><a href="c.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="c.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="c.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
     <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
     <ul>
@@ -57,60 +57,58 @@
 </aside>
 
 <main>
-  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
-  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>C ABI embedded</p>
-  <h1>C ABI embedded</h1>
+  <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>C ABI integration</p>
+  <h1>C ABI integration</h1>
   <p class="kicker">C ABI Embedding</p>
-  <p class="lead">C / C++ / native host experience <code>erika.h</code> access. The interface provides two entry families: standard application access uses kernel-hosted rendering and audio <code>ErikaPresenterHandle</code>;Headless control and lightweight hosting can be used <code>ErikaHandle</code>。</p>
+  <p class="lead">C, C++, and other native hosts integrate through <code>erika.h</code>. The interface provides two families of entry points. Standard apps use <code>ErikaPresenterHandle</code>, where the kernel manages rendering and audio. Headless control and lightweight hosts can use <code>ErikaHandle</code>.</p>
 
   <ul class="meta-strip">
-    <li>header file <b>crates/erika_capi/include/erika.h</b></li>
-    <li>Export <b>108</b> function</li>
-    <li>entrance <b>2</b> clan</li>
+    <li>Header <b>crates/erika_capi/include/erika.h</b></li>
+    <li>Exports <b>108</b> functions</li>
+    <li>Entry point families <b>2</b></li>
   </ul>
 
   <section id="choice">
-    <h2>Entrance selection<span class="jp">Entrance selection</span><a class="anchor" href="#choice">#</a></h2>
+    <h2>Choosing an entry point<span class="jp">入口の選択</span><a class="anchor" href="#choice">#</a></h2>
     <div class="tw">
       <table>
         <thead><tr><th></th><th>ErikaPresenterHandle (recommended)</th><th>ErikaHandle</th></tr></thead>
         <tbody>
-          <tr><td class="k">architectural model</td><td>Push model (Push). The kernel hosts hardware decoding, audio output, rendering pipeline, subtitles and danmaku.</td><td>Headless control model. Provides state machines, transfer controls and event receivers.</td></tr>
-          <tr><td class="k">Host responsibilities</td><td>Provides native surfaces (CAMetalLayer/HWND/wgpu) and is driven by the display clock <code>render_tick</code>。</td><td>Calls playback controls and polls for events; no built-in rendering or audio device output.</td></tr>
-          <tr><td class="k">Applicable scenarios</td><td>GUI native player, game engine embedding, desktop/mobile application.</td><td>Headless player, backend service control or basic event bridging.</td></tr>
-          <tr><td class="k">Platform support</td><td>macOS / iOS / tvOS / Windows / Android / OpenHarmony。</td><td>All platforms.</td></tr>
+          <tr><td class="k">Architecture</td><td>Push model. The kernel manages hardware decoding, audio output, the rendering pipeline, subtitles, and danmaku.</td><td>Headless control model. Provides the state machine, transport controls, and an event receiver.</td></tr>
+          <tr><td class="k">Host responsibilities</td><td>Provide a native surface (CAMetalLayer / HWND / wgpu) and call <code>render_tick</code> from the display clock.</td><td>Call playback controls and poll for events. There is no built-in rendering or audio device output.</td></tr>
+          <tr><td class="k">Use cases</td><td>Native GUI players, game engine embedding, desktop and mobile apps.</td><td>Headless players, backend service control, or basic event bridging.</td></tr>
+          <tr><td class="k">Platform support</td><td>macOS / iOS / tvOS / Windows / Android / OpenHarmony.</td><td>All platforms.</td></tr>
         </tbody>
       </table>
     </div>
-    <p>Note: Currently C ABI does not export the bare pixel frame pulling interface. If you need to display the video screen on the host's native window, please use <code>ErikaPresenterHandle</code>。</p>
+    <p>Note: The C ABI does not currently export an interface for pulling raw pixel frames. To display video in a native host window, use <code>ErikaPresenterHandle</code>.</p>
   </section>
 
   <section id="conventions">
-    <h2>public agreement<span class="jp">common regulations</span><a class="anchor" href="#conventions">#</a></h2>
+    <h2>Common conventions<span class="jp">共通規約</span><a class="anchor" href="#conventions">#</a></h2>
     <ul class="body">
-      <li><b>Return values.</b> Status-returning functions use <code>ErikaStatus</code>: <code>ErikaStatus_Ok</code> (0) indicates success and <code>ErikaStatus_NoEvent</code> (5) indicates an empty event queue; other statuses indicate errors. Check the header for pointer, value, and void return conventions.</li>
-      <li><b>Error messages.</b> Some failures set a thread-local error, but not all do; the slot may be empty or retain an earlier message. On the same thread, before another call, read any available message using <code>erika_last_error_message()</code> and free a non-null result using <code>erika_string_free()</code>. For example, <code>erika_add_external_subtitle</code> returns NullPointer directly when <code>out_track_id</code> is NULL, without updating the slot.</li>
-      <li><b>Ownership.</b> Returned by liberika <code>char*</code> Heap memory is owned by the caller. Independent string usage <code>erika_string_free()</code>;Structure (such as <code>ErikaTrackInfo</code>) The string contained inside uses the matching <code>erika_track_info_free()</code>。</li>
-      <li><b>Parameter borrowing.</b> <code>const char*</code> Parameters are only borrowed during function calls and must be UTF-8 strings ending with NUL.</li>
-      <li><b>Count array.</b> List query uses <code>(buf, capacity, &amp;len)</code> Mode:<code>len</code> Always returns the actual total amount in the stream, while writing <code>buf</code> The maximum number of <code>capacity</code>. When traversing, it should be <code>min(len, capacity)</code> as a boundary to avoid cross-border access.</li>
-      <li><b>Thread safe.</b> A single handle does not contain a synchronization lock internally, and it is prohibited to call methods of the same handle concurrently in multiple threads.</li>
+      <li><b>Return values.</b> Status-returning functions use <code>ErikaStatus</code>: <code>ErikaStatus_Ok</code> (0) indicates success and <code>ErikaStatus_NoEvent</code> (5) indicates an empty event queue; other statuses indicate errors. For functions that return a pointer, a value, or nothing, check the header for their individual conventions.</li>
+      <li><b>Error messages.</b> Some failures set a thread-local error, but not all of them provide a message. The slot may be empty or may retain an earlier value. On the same thread as the failed call, and before making another call, read any available message with <code>erika_last_error_message()</code> and free a non-null result with <code>erika_string_free()</code>. For example, <code>erika_add_external_subtitle</code> returns NullPointer directly when <code>out_track_id</code> is NULL, without writing to the slot.</li>
+      <li><b>Ownership.</b> Heap memory behind a <code>char*</code> returned by liberika belongs to the caller. Free standalone strings with <code>erika_string_free()</code>. Free strings contained in a struct (such as <code>ErikaTrackInfo</code>) with the matching <code>erika_track_info_free()</code>.</li>
+      <li><b>Parameter borrowing.</b> <code>const char*</code> parameters are borrowed only for the duration of the call and must be NUL-terminated UTF-8 strings.</li>
+      <li><b>Counted arrays.</b> List queries use the <code>(buf, capacity, &amp;len)</code> pattern: <code>len</code> always receives the actual total count in the stream, while at most <code>capacity</code> items are written to <code>buf</code>. Bound your iteration by <code>min(len, capacity)</code> to avoid out-of-bounds access.</li>
+      <li><b>Thread safety.</b> A handle has no internal lock. Do not call methods on the same handle concurrently from multiple threads.</li>
     </ul>
   </section>
 
   <section id="presenter">
     <h2>Presenter end-to-end example<span class="jp">Presenter の流れ</span><a class="anchor" href="#presenter">#</a></h2>
-    <p>Use in native apps <code>ErikaPresenterHandle</code> Driver full playback link:</p>
+    <p>Use <code>ErikaPresenterHandle</code> in a native app to drive the full playback path:</p>
     <div class="code">
-      <p class="lbl">C / C++ native playback access</p>
+      <p class="lbl">C / C++ native playback integration</p>
 <pre><span class="k">#include</span> <span class="s">&lt;stdio.h&gt;</span>
 <span class="k">#include</span> <span class="s">&lt;stdint.h&gt;</span>
 <span class="k">#include</span> <span class="s">"erika.h"</span>
 
-<span class="c">/* 辅助函数：读取并打印线程局部错误信息 */</span>
+<span class="c">/* Helper: read and print the thread-local error message */</span>
 <span class="k">static void</span> print_last_error(<span class="k">const char</span> *action, ErikaStatus status) {
     <span class="k">char</span> *msg = erika_last_error_message();
-    fprintf(stderr, <span class="s">"[liberika Error] %s failed (status=%d): %s
-"</span>,
+    fprintf(stderr, <span class="s">"[liberika Error] %s failed (status=%d): %s\n"</span>,
             action, status, msg ? msg : <span class="s">"unknown"</span>);
     <span class="k">if</span> (msg) {
         erika_string_free(msg);
@@ -118,15 +116,14 @@
 }
 
 <span class="k">void</span> play_video(<span class="k">void</span> *metal_layer, <span class="k">int</span> pixel_w, <span class="k">int</span> pixel_h, <span class="k">double</span> scale) {
-    <span class="c">/* 1. 创建 Presenter 句柄 */</span>
+    <span class="c">/* 1. Create a Presenter handle */</span>
     ErikaPresenterHandle *p = erika_presenter_create();
     <span class="k">if</span> (!p) {
-        fprintf(stderr, <span class="s">"创建 liberika Presenter 失败
-"</span>);
+        fprintf(stderr, <span class="s">"Failed to create liberika Presenter\n"</span>);
         <span class="k">return</span>;
     }
 
-    <span class="c">/* 2. 绑定原生渲染表面 (以 Apple CAMetalLayer 为例) */</span>
+    <span class="c">/* 2. Bind a native render surface (Apple CAMetalLayer as an example) */</span>
     ErikaStatus st = erika_presenter_attach_metal_layer(
         p, (uint64_t)(uintptr_t)metal_layer, pixel_w, pixel_h, scale);
     <span class="k">if</span> (st != ErikaStatus_Ok) {
@@ -135,7 +132,7 @@
         <span class="k">return</span>;
     }
 
-    <span class="c">/* 3. 同步打开媒体（完成流探测与轨道解析，进入 Ready 状态） */</span>
+    <span class="c">/* 3. Open the media synchronously (probes streams, parses tracks, and enters the Ready state) */</span>
     st = erika_presenter_open(p, <span class="s">"https://example.com/video.mp4"</span>);
     <span class="k">if</span> (st != ErikaStatus_Ok) {
         print_last_error(<span class="s">"open"</span>, st);
@@ -144,35 +141,32 @@
         <span class="k">return</span>;
     }
 
-    <span class="c">/* 4. 启动异步解码与播放呈现 */</span>
+    <span class="c">/* 4. Start asynchronous decoding and playback presentation */</span>
     st = erika_presenter_play(p);
     <span class="k">if</span> (st != ErikaStatus_Ok) {
         print_last_error(<span class="s">"play"</span>, st);
     }
 
-    <span class="c">/* 5. 显示时钟驱动回调 (通常由 CADisplayLink / CVDisplayLink 驱动) */</span>
+    <span class="c">/* 5. Display clock callback (typically driven by CADisplayLink / CVDisplayLink) */</span>
     <span class="k">double</span> host_time_seconds = 1000.0;
     ErikaPresenterStats stats;
     erika_presenter_render_tick(p, host_time_seconds, &amp;stats);
 
-    <span class="c">/* 6. 消费事件 (ErikaEvent 是平铺结构) */</span>
+    <span class="c">/* 6. Consume events (ErikaEvent is a flat struct) */</span>
     ErikaEvent ev;
     <span class="k">while</span> (erika_presenter_poll_event(p, &amp;ev) == ErikaStatus_Ok) {
         <span class="k">if</span> (ev.kind == ErikaEventKind_StateChanged) {
-            printf(<span class="s">"状态迁移: %d
-"</span>, ev.state);
+            printf(<span class="s">"State changed: %d\n"</span>, ev.state);
         } <span class="k">else if</span> (ev.kind == ErikaEventKind_DurationChanged) {
-            printf(<span class="s">"媒体总时长: %lld us
-"</span>, (<span class="k">long long</span>)ev.duration_micros);
+            printf(<span class="s">"Media duration: %lld us\n"</span>, (<span class="k">long long</span>)ev.duration_micros);
         } <span class="k">else if</span> (ev.kind == ErikaEventKind_PositionChanged) {
-            printf(<span class="s">"当前进度: %llu us
-"</span>, (<span class="k">unsigned long long</span>)ev.position_micros);
+            printf(<span class="s">"Position: %llu us\n"</span>, (<span class="k">unsigned long long</span>)ev.position_micros);
         } <span class="k">else if</span> (ev.kind == ErikaEventKind_Error) {
             print_last_error(<span class="s">"event_error"</span>, ev.status);
         }
     }
 
-    <span class="c">/* 7. 安全退出：先分离渲染表面，再销毁句柄 */</span>
+    <span class="c">/* 7. Shut down safely: detach the render surface first, then destroy the handle */</span>
     erika_presenter_detach_surface(p);
     erika_presenter_destroy(p);
 }
@@ -181,24 +175,24 @@
   </section>
 
   <section id="tracks">
-    <h2>Safely query media tracks<span class="jp">Acquisition of Toroku information</span><a class="anchor" href="#tracks">#</a></h2>
-    <p>When querying audio and subtitle track lists, use safe array bounds checking:</p>
+    <h2>Querying media tracks safely<span class="jp">トラック情報取得</span><a class="anchor" href="#tracks">#</a></h2>
+    <p>When you query the audio and subtitle track lists, check array bounds:</p>
     <div class="code">
       <p class="lbl">Query and release track information</p>
 <pre>ErikaTrackInfo tracks[16];
 uintptr_t total_count = 0;
 
-<span class="c">/* 最多填充 16 条，total_count 接收流中的实际总轨道数 */</span>
+<span class="c">/* Fills at most 16 entries; total_count receives the actual number of tracks in the stream */</span>
 ErikaStatus st = erika_presenter_tracks(p, tracks, 16, &amp;total_count);
 <span class="k">if</span> (st == ErikaStatus_Ok) {
     uintptr_t available = total_count &lt; 16 ? total_count : 16;
     <span class="k">for</span> (uintptr_t i = 0; i &lt; available; i++) {
-        printf(<span class="s">"轨道 #%lld: %s (语言: %s)\n"</span>,
+        printf(<span class="s">"Track #%lld: %s (language: %s)\n"</span>,
                (long long)tracks[i].id,
-               tracks[i].title ? tracks[i].title : <span class="s">"无标题"</span>,
-               tracks[i].language ? tracks[i].language : <span class="s">"未知"</span>);
+               tracks[i].title ? tracks[i].title : <span class="s">"Untitled"</span>,
+               tracks[i].language ? tracks[i].language : <span class="s">"Unknown"</span>);
 
-        <span class="c">/* 释放结构体内部的堆字符串 */</span>
+        <span class="c">/* Free the heap strings inside the struct */</span>
         erika_track_info_free(&amp;tracks[i]);
     }
 }</pre>
@@ -206,8 +200,8 @@ ErikaStatus st = erika_presenter_tracks(p, tracks, 16, &amp;total_count);
   </section>
 
   <section id="handle">
-    <h2>Handle mode (headless control)<span class="jp">Handle Summary</span><a class="anchor" href="#handle">#</a></h2>
-    <p>Lightweight scenarios that only require state machine and media control, and do not need liberika to drive the screen and audio, can be used <code>ErikaHandle</code>：</p>
+    <h2>Handle mode (headless control)<span class="jp">Handle 概要</span><a class="anchor" href="#handle">#</a></h2>
+    <p>For lightweight cases that need only the state machine and media control, and where liberika does not drive the display or audio, use <code>ErikaHandle</code>:</p>
     <div class="code">
       <p class="lbl">ErikaHandle control example</p>
 <pre>ErikaHandle *h = erika_create();
@@ -218,7 +212,7 @@ ErikaStatus st = erika_open(h, <span class="s">"https://example.com/video.mp4"</
 
     ErikaEvent ev;
     <span class="k">while</span> (erika_poll_event(h, &amp;ev) == ErikaStatus_Ok) {
-        <span class="c">/* 处理就绪与播放事件 */</span>
+        <span class="c">/* Handle ready and playback events */</span>
     }
 }
 
@@ -228,8 +222,8 @@ erika_destroy(h);</pre>
 
   <section id="http-cache">
     <h2>HTTP cache<a class="anchor" href="#http-cache">#</a></h2>
-    <p><code>http_read_ahead_bytes</code> Determines the number of bytes to read forward, the default is 2 MiB;<code>http_back_buffer_bytes</code> Determine how much played data to keep, the default is 16 MiB. Omit both or pass 0 to use the default value. The readahead default value can also be given by <code>ERIKA_HTTP_READAHEAD_BYTES</code> set up.</p>
-    <p>The fallback seek in the rollback cache can directly reuse the downloaded data. High bitrate videos require a larger budget: a video of 80 Mbit/s would require about 100 MB to retain for about 10 seconds. The cache is limited by bytes and does not represent a fixed number of playback seconds.</p>
+    <p><code>http_read_ahead_bytes</code> sets how many bytes to read ahead (default 2 MiB). <code>http_back_buffer_bytes</code> sets how much already-played data to keep (default 16 MiB). Omit either field or pass 0 to use its default. You can also set the read-ahead default with <code>ERIKA_HTTP_READAHEAD_BYTES</code>.</p>
+    <p>Backward seeks within the back buffer reuse data that is already downloaded. High-bitrate video needs a larger budget: keeping about 10 seconds of an 80 Mbit/s video takes about 100 MB. The cache is limited by bytes, so it does not correspond to a fixed number of playback seconds.</p>
     <div class="code">
       <p class="lbl">C</p>
 <pre>ErikaOpenOptions options = {0};
@@ -238,7 +232,7 @@ options.http_back_buffer_bytes = 128 * 1024 * 1024;
 ErikaStatus status = erika_presenter_open_with_options(
     player, &quot;https://example.com/video.mp4&quot;, &amp;options);</pre>
     </div>
-    <p>The header files use the same release version as the kernel. Starting from 0.1.8 <code>ErikaPresenterConfig</code> contains <code>video_alpha_mode</code>;0.2.1 of <code>ErikaOpenOptions</code> Use the original reserved location to provide fallback cache fields, and the rest <code>reserved</code> The field is set to zero.</p>
+    <p>The header uses the same release version as the kernel. Since 0.1.8, <code>ErikaPresenterConfig</code> includes <code>video_alpha_mode</code>. In 0.2.1, <code>ErikaOpenOptions</code> added the back-buffer fields in previously reserved space; set the remaining <code>reserved</code> fields to zero.</p>
   </section>
 
   <footer class="doc-foot">
@@ -248,8 +242,8 @@ ErikaStatus status = erika_presenter_open_with_options(
   </footer>
 
   <nav class="pager">
-    <a href="rust.en.html"><span class="dir">Prev</span>Rust embedded</a>
-    <a class="nx" href="linux.en.html"><span class="dir">Next</span>Linux access</a>
+    <a href="rust.en.html"><span class="dir">Prev</span>Rust integration</a>
+    <a class="nx" href="linux.en.html"><span class="dir">Next</span>Linux integration</a>
   </nav>
 </main>
 

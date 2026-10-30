@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>JSON bridge — liberika Developer Documentation</title>
+<title>JSON bridge — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../docs.css">
 <script defer src="../docs.js"></script>
@@ -14,7 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
-  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="capi-json.html">中文</option><option value="capi-json.en.html">English</option><option value="capi-json.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="capi-json.html">中文</a> · <a href="capi-json.en.html">English</a> · <a href="capi-json.ja.html">日本語</a></nav></noscript></div>
+  <div class="language-switch" role="group" aria-label="Language"><a href="capi-json.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="capi-json.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="capi-json.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
     <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
     <ul>
@@ -57,73 +57,72 @@
 </aside>
 
 <main>
-  <p class="translation-note">Machine translation. For the authoritative text, see the Chinese version.</p>
-  <p class="crumb"><a href="../../index.html">Home page</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>JSON bridge</p>
+  <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>JSON bridge</p>
   <h1>JSON bridge</h1>
   <p class="kicker">JSON Bridge Reference</p>
-  <p class="lead">Three JSON variant functions with 47 named methods. For use by hosts that have used platform channels to serialize structured parameters, such as Dart FFI hosts <code>MethodChannel</code> one side. The method covers Presenter operation, global log and frame export, and the parameters are passed in through the JSON object; use listMethods to query the interfaces supported by the runtime.</p>
+  <p class="lead">Three JSON variant functions and 47 named methods, for hosts that already serialize structured parameters over a platform channel, such as the <code>MethodChannel</code> side of a Dart FFI host. The methods cover Presenter operations, global logging, and frame export. Parameters are passed as a JSON object; call listMethods to query the interfaces the runtime supports.</p>
 
   <ul class="meta-strip">
-    <li>method <b>47</b> a</li>
-    <li>Name <b>camelCase</b></li>
+    <li>Methods <b>47</b></li>
+    <li>Naming <b>camelCase</b></li>
   </ul>
 
   <section id="entries">
-    <h2>Entry function<span class="jp">Number of entrance levels</span><a class="anchor" href="#entries">#</a></h2>
+    <h2>Entry functions<span class="jp">入口関数</span><a class="anchor" href="#entries">#</a></h2>
 
     <div class="api" id="erika_presenter_invoke_json">
       <p class="sig"><b>char *erika_presenter_invoke_json</b>(ErikaPresenterHandle *handle, const char *method, const char *arguments_json)</p>
-      <p class="desc">Call the named method. The returned JSON string is owned by the caller and is <code>erika_string_free</code> release.</p>
+      <p class="desc">Calls a named method. The returned JSON string is owned by the caller; release it with <code>erika_string_free</code>.</p>
     </div>
 
     <div class="api" id="erika_presenter_render_tick_json">
       <p class="sig"><b>char *erika_presenter_render_tick_json</b>(ErikaPresenterHandle *handle, double time_seconds)</p>
-      <p class="desc"><code>render_tick</code> The JSON variant, returns the statistic JSON.</p>
+      <p class="desc">JSON variant of <code>render_tick</code>; returns the statistics as JSON.</p>
     </div>
 
     <div class="api" id="erika_presenter_poll_event_json">
       <p class="sig"><b>char *erika_presenter_poll_event_json</b>(ErikaPresenterHandle *handle)</p>
-      <p class="desc"><code>poll_event</code> The JSON variant. Returns NULL when the event queue is empty.</p>
+      <p class="desc">JSON variant of <code>poll_event</code>. Returns NULL when the event queue is empty.</p>
     </div>
 
-    <p class="note">The release rules of the returned string are consistent with C:<code>invoke_json</code> / <code>render_tick_json</code> The result of <code>erika_string_free</code>；<code>poll_event_json</code> The free NULL does not need to be released. Unknown method name returns error response.</p>
+    <p class="note">Ownership of returned strings follows the same rules as the C API: release results from <code>invoke_json</code> and <code>render_tick_json</code> with <code>erika_string_free</code>; the NULL that <code>poll_event_json</code> returns when idle needs no release. An unknown method name returns an error response.</p>
   </section>
 
   <section id="envelope">
-    <h2>response envelope<span class="jp">レスポンス</span><a class="anchor" href="#envelope">#</a></h2>
-    <p>Successful response:</p>
+    <h2>Response envelope<span class="jp">レスポンス</span><a class="anchor" href="#envelope">#</a></h2>
+    <p>Success response:</p>
     <div class="code">
-<pre>{ "ok": true, "status": 0, "value": <span class="c">/* 方法返回值，无值时为 null */</span> }</pre>
+<pre>{ "ok": true, "status": 0, "value": <span class="c">/* method return value; null when there is none */</span> }</pre>
     </div>
     <p>Failure response:</p>
     <div class="code">
 <pre>{ "ok": false, "status": 3, "error": "human readable message" }</pre>
     </div>
-    <p>Check <code>ok</code>. The bridge may generate argument or method errors itself. For C API failures it reads the thread-local message, falling back to a status description if the slot is empty. A caught panic becomes an error response; uncaught panics or panic-abort builds may terminate the process. C API non-Ok statuses are mapped to <code>status: 3</code>.</p>
+    <p>Check the <code>ok</code> field. The bridge layer can generate argument or method errors on its own. When a C call fails, it reads the thread-local message and, if that is empty, generates a description from the status. A caught panic becomes an error response; a panic outside the catch scope, or a panic-abort build, may terminate the process. Any non-Ok status from the C layer maps to <code>status: 3</code>.</p>
   </section>
 
   <section id="events">
-    <h2>event return shape<span class="jp">イベント</span><a class="anchor" href="#events">#</a></h2>
-    <p><code>poll_event_json</code> The event object fields are the same as <code>ErikaEvent</code> One-to-one correspondence, kind is an integer (0–12, see<a href="capi.en.html#events">C ABI Overview</a>event table):</p>
+    <h2>Event return shape<span class="jp">イベント</span><a class="anchor" href="#events">#</a></h2>
+    <p>The fields of the event object from <code>poll_event_json</code> correspond one-to-one to <code>ErikaEvent</code>. kind is an integer (0–12; see the event table in the <a href="capi.en.html#events">C ABI overview</a>):</p>
     <div class="code">
 <pre>{ "kind": 1, "status": 0, "state": 2, "durationMicros": 0,
   "positionMicros": 0, "buffering": false,
   "video": { "width": 0, "height": 0, "primaries": 0, "transfer": 0 },
   "tracks": { "video": 0, "audio": 0, "subtitle": 0 } }</pre>
     </div>
-    <p>Three kind come with extra fields:<code>Error</code>(9)Attachment <code>error</code> string;<code>VideoDecoderChanged</code>(11)Attachment <code>decoder</code> with <code>message</code>;<code>AudioOutputChanged</code>(12)Attachment <code>audio</code> with <code>message</code>. Returns NULL when the queue is empty.</p>
+    <p>Three kinds carry extra fields: <code>Error</code> (9) adds an <code>error</code> string; <code>VideoDecoderChanged</code> (11) adds <code>decoder</code> and <code>message</code>; <code>AudioOutputChanged</code> (12) adds <code>audio</code> and <code>message</code>. Returns NULL when the queue is empty.</p>
   </section>
 
   <section id="methods">
-    <h2>method list<span class="jp">メソッド</span><a class="anchor" href="#methods">#</a></h2>
-    <p>The parameter names are always camelCase. Optional parameters are enclosed in square brackets. When omitted, the C function default value is used. Only parameters and returns are listed, and the semantics are the same as those with the same name. <a href="capi-presenter.en.html">C function</a>consistent.</p>
+    <h2>Method list<span class="jp">メソッド</span><a class="anchor" href="#methods">#</a></h2>
+    <p>Parameter names are always camelCase. Optional parameters are in square brackets; when omitted, the C function’s default is used. Only parameters and return values are listed; the semantics match the <a href="capi-presenter.en.html">C function</a> of the same name.</p>
 
     <h3>Playback controls</h3>
     <div class="tw">
       <table>
-        <thead><tr><th>method</th><th>parameters</th><th>Return</th><th>Corresponding to C function</th></tr></thead>
+        <thead><tr><th>Method</th><th>Parameters</th><th>Returns</th><th>C function</th></tr></thead>
         <tbody>
-          <tr><td class="k">open</td><td class="m">uri，[httpHeaders]，[httpReadAheadBytes]，[httpBackBufferBytes]</td><td class="m">null</td><td class="m">erika_presenter_open_with_options</td></tr>
+          <tr><td class="k">open</td><td class="m">uri, [httpHeaders], [httpReadAheadBytes], [httpBackBufferBytes]</td><td class="m">null</td><td class="m">erika_presenter_open_with_options</td></tr>
           <tr><td class="k">play / pause / stop / close</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_play / pause / stop / close</td></tr>
           <tr><td class="k">seek</td><td class="m">positionMicros</td><td class="m">null</td><td class="m">erika_presenter_seek</td></tr>
           <tr><td class="k">setPlaybackRate</td><td class="m">rate</td><td class="m">null</td><td class="m">erika_presenter_set_playback_rate</td></tr>
@@ -134,12 +133,12 @@
       </table>
     </div>
 
-    <h3>Orbit</h3>
+    <h3>Tracks</h3>
     <div class="tw">
       <table>
-        <thead><tr><th>method</th><th>parameters</th><th>Return</th><th>Corresponding to C function</th></tr></thead>
+        <thead><tr><th>Method</th><th>Parameters</th><th>Returns</th><th>C function</th></tr></thead>
         <tbody>
-          <tr><td class="k">tracks</td><td class="m">—</td><td class="m">Orbital array</td><td class="m">erika_presenter_tracks</td></tr>
+          <tr><td class="k">tracks</td><td class="m">—</td><td class="m">Track array</td><td class="m">erika_presenter_tracks</td></tr>
           <tr><td class="k">addExternalSubtitle</td><td class="m">uri</td><td class="m">trackId</td><td class="m">erika_presenter_add_external_subtitle</td></tr>
           <tr><td class="k">removeSubtitleTrack</td><td class="m">trackId (signed)</td><td class="m">null</td><td class="m">erika_presenter_remove_subtitle_track</td></tr>
           <tr><td class="k">selectAudioTrack / selectSubtitleTrack</td><td class="m">[trackId], default -1</td><td class="m">null</td><td class="m">erika_presenter_select_audio_track / select_subtitle_track</td></tr>
@@ -147,14 +146,14 @@
       </table>
     </div>
 
-    <h3>Memory font</h3>
+    <h3>In-memory fonts</h3>
     <div class="tw">
       <table>
-        <thead><tr><th>method</th><th>parameters</th><th>Return</th><th>Corresponding to C function</th></tr></thead>
+        <thead><tr><th>Method</th><th>Parameters</th><th>Returns</th><th>C function</th></tr></thead>
         <tbody>
           <tr><td class="k">selectSubtitleMemoryFonts</td><td class="m">fontIds</td><td class="m">null</td><td class="m">erika_presenter_select_subtitle_memory_fonts</td></tr>
           <tr><td class="k">clearSubtitleMemoryFonts</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_clear_subtitle_memory_fonts</td></tr>
-          <tr><td class="k">getSubtitleMemoryFontStatus</td><td class="m">—</td><td class="m">registeredCount、registeredBytes、selectedCount、generation、selectedIds</td><td class="m">erika_presenter_get_subtitle_memory_font_status</td></tr>
+          <tr><td class="k">getSubtitleMemoryFontStatus</td><td class="m">—</td><td class="m">registeredCount, registeredBytes, selectedCount, generation, selectedIds</td><td class="m">erika_presenter_get_subtitle_memory_font_status</td></tr>
         </tbody>
       </table>
     </div>
@@ -162,34 +161,34 @@
     <h3>Danmaku</h3>
     <div class="tw">
       <table>
-        <thead><tr><th>method</th><th>parameters</th><th>Return</th><th>Corresponding to C function</th></tr></thead>
+        <thead><tr><th>Method</th><th>Parameters</th><th>Returns</th><th>C function</th></tr></thead>
         <tbody>
           <tr><td class="k">loadDanmakuFile</td><td class="m">uri</td><td class="m">null</td><td class="m">erika_presenter_load_danmaku_file</td></tr>
           <tr><td class="k">loadDanmakuJson</td><td class="m">json</td><td class="m">null</td><td class="m">erika_presenter_load_danmaku_json</td></tr>
-          <tr><td class="k">addDanmakuTrackFile</td><td class="m">uri，[name]，[offsetMicros]</td><td class="m">trackId</td><td class="m">erika_presenter_add_danmaku_track_file</td></tr>
-          <tr><td class="k">addDanmakuTrackJson</td><td class="m">json，[name]，[offsetMicros]</td><td class="m">trackId</td><td class="m">erika_presenter_add_danmaku_track_json</td></tr>
+          <tr><td class="k">addDanmakuTrackFile</td><td class="m">uri, [name], [offsetMicros]</td><td class="m">trackId</td><td class="m">erika_presenter_add_danmaku_track_file</td></tr>
+          <tr><td class="k">addDanmakuTrackJson</td><td class="m">json, [name], [offsetMicros]</td><td class="m">trackId</td><td class="m">erika_presenter_add_danmaku_track_json</td></tr>
           <tr><td class="k">removeDanmakuTrack</td><td class="m">trackId (unsigned)</td><td class="m">null</td><td class="m">erika_presenter_remove_danmaku_track</td></tr>
           <tr><td class="k">setDanmakuTrackEnabled</td><td class="m">trackId, [enabled], default true</td><td class="m">null</td><td class="m">erika_presenter_set_danmaku_track_enabled</td></tr>
-          <tr><td class="k">setDanmakuTrackOffset</td><td class="m">trackId，[offsetMicros]</td><td class="m">null</td><td class="m">erika_presenter_set_danmaku_track_offset</td></tr>
+          <tr><td class="k">setDanmakuTrackOffset</td><td class="m">trackId, [offsetMicros]</td><td class="m">null</td><td class="m">erika_presenter_set_danmaku_track_offset</td></tr>
           <tr><td class="k">setDanmakuGlobalOffset</td><td class="m">[offsetMicros]</td><td class="m">null</td><td class="m">erika_presenter_set_danmaku_global_offset</td></tr>
           <tr><td class="k">danmakuTracks</td><td class="m">—</td><td class="m">Danmaku track array (id, enabled, offsetMicros, itemCount, name, source)</td><td class="m">erika_presenter_danmaku_tracks</td></tr>
           <tr><td class="k">clearDanmaku</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_clear_danmaku</td></tr>
           <tr><td class="k">setDanmakuEnabled</td><td class="m">[enabled], default true</td><td class="m">null</td><td class="m">erika_presenter_set_danmaku_enabled</td></tr>
-          <tr><td class="k">setDanmakuConfig</td><td class="m">Partially covered fields</td><td class="m">null</td><td class="m">erika_presenter_get_danmaku_config + set_danmaku_config (read-modify-write)</td></tr>
+          <tr><td class="k">setDanmakuConfig</td><td class="m">Fields to override (partial)</td><td class="m">null</td><td class="m">erika_presenter_get_danmaku_config + set_danmaku_config (read-modify-write)</td></tr>
         </tbody>
       </table>
     </div>
-    <p>Note:<code>loadDanmakuJson</code> with <code>addDanmakuTrackJson</code> of <code>json</code> Parameters follow a unified<a href="../kernel/subtitle-danmaku.en.html#json-schema">Danmaku JSON Contract Specifications</a>, you can directly pass in the standard item array, including <code>comments</code> / <code>danmaku</code> / <code>items</code> The root object of the array or the JSON Lines string.</p>
-    <p><code>setDanmakuConfig</code> Is read-modify-write: only the incoming keys are overwritten, and the fields not provided keep their current values. Boolean key:<code>enabled</code>、<code>mergeDuplicates</code>、<code>allowStacking</code>、<code>allowScrollOverwrite</code>、<code>blockTop</code>、<code>blockBottom</code>、<code>blockScroll</code>;Numerical keys:<code>fontSize</code>、<code>opacity</code>、<code>displayArea</code>、<code>scrollDurationSeconds</code>、<code>scrollSpeedFactor</code>、<code>trackGapRatio</code>、<code>outlineWidth</code>、<code>shadowOffsetX</code>、<code>shadowOffsetY</code>、<code>maxQuantity</code>、<code>maxLinesPerMode</code>、<code>shadowStyle</code>. There are also two condition keys:<code>customFontFamily</code> or <code>customFontFilePath</code> Go when present <code>erika_presenter_set_danmaku_font</code>,<code>blockWordsJson</code> Go when present <code>erika_presenter_set_danmaku_block_words_json</code>。</p>
+    <p>Note: the <code>json</code> parameter of <code>loadDanmakuJson</code> and <code>addDanmakuTrackJson</code> follows the unified <a href="../kernel/subtitle-danmaku.en.html#json-schema">Danmaku JSON contract</a>. You can pass a standard item array, a root object containing a <code>comments</code> / <code>danmaku</code> / <code>items</code> array, or a JSON Lines string.</p>
+    <p><code>setDanmakuConfig</code> is read-modify-write: only the keys you pass are overwritten, and fields you omit keep their current values. Boolean keys: <code>enabled</code>, <code>mergeDuplicates</code>, <code>allowStacking</code>, <code>allowScrollOverwrite</code>, <code>blockTop</code>, <code>blockBottom</code>, <code>blockScroll</code>; numeric keys: <code>fontSize</code>, <code>opacity</code>, <code>displayArea</code>, <code>scrollDurationSeconds</code>, <code>scrollSpeedFactor</code>, <code>trackGapRatio</code>, <code>outlineWidth</code>, <code>shadowOffsetX</code>, <code>shadowOffsetY</code>, <code>maxQuantity</code>, <code>maxLinesPerMode</code>, <code>shadowStyle</code>. There are also two conditional keys: when <code>customFontFamily</code> or <code>customFontFilePath</code> is present, the call goes through <code>erika_presenter_set_danmaku_font</code>; when <code>blockWordsJson</code> is present, it goes through <code>erika_presenter_set_danmaku_block_words_json</code>.</p>
 
-    <h3>Status query</h3>
+    <h3>Status queries</h3>
     <div class="tw">
       <table>
-        <thead><tr><th>method</th><th>parameters</th><th>Return</th><th>Corresponding to C function</th></tr></thead>
+        <thead><tr><th>Method</th><th>Parameters</th><th>Returns</th><th>C function</th></tr></thead>
         <tbody>
-          <tr><td class="k">getUpscalerStatus</td><td class="m">—</td><td class="m">Upscaling status</td><td class="m">erika_presenter_get_upscaler_status</td></tr>
+          <tr><td class="k">getUpscalerStatus</td><td class="m">—</td><td class="m">Upscaler status</td><td class="m">erika_presenter_get_upscaler_status</td></tr>
           <tr><td class="k">getOutputStatus</td><td class="m">—</td><td class="m">Output status</td><td class="m">erika_presenter_get_output_status</td></tr>
-          <tr><td class="k">getPresenterStats</td><td class="m">—</td><td class="m">Rendering statistics</td><td class="m">erika_presenter_get_stats</td></tr>
+          <tr><td class="k">getPresenterStats</td><td class="m">—</td><td class="m">Render statistics</td><td class="m">erika_presenter_get_stats</td></tr>
           <tr><td class="k">getResourceStatus</td><td class="m">—</td><td class="m">Resource status</td><td class="m">erika_presenter_get_resource_status</td></tr>
         </tbody>
       </table>
@@ -197,46 +196,46 @@
   </section>
 
   <section id="discovery">
-    <h2>Interface Discovery, Chapters and Diagnostics · 0.3.0<a class="anchor" href="#discovery">#</a></h2>
-    <p><code>listMethods</code> Return <code>{schema, methods}</code>. Each item contains name, scope, summary, arguments (name / type / required), returns, blocking and writesFiles; whichever table is returned during the current run. The global method does not require handle, and the Presenter method needs to be valid handle; the table entry describes the behavior of synchronous blocking and possible file writing, and does not represent asynchronous task scheduling.</p>
+    <h2>Method discovery, chapters, and diagnostics · 0.3.0<a class="anchor" href="#discovery">#</a></h2>
+    <p><code>listMethods</code> returns <code>{schema, methods}</code>. Each entry contains name, scope, summary, arguments (name / type / required), returns, blocking, and writesFiles; the table that the current runtime returns is authoritative. Global methods need no handle; Presenter methods need a valid handle. The entries describe synchronous blocking and possible file writes; they do not imply asynchronous task scheduling.</p>
     <div class="code"><p class="lbl">C</p><pre>char *methods = erika_presenter_invoke_json(NULL, "listMethods", "{}");
-// 解析后释放
+// Parse, then free
 erika_string_free(methods);</pre></div>
-    <div class="tw"><table><thead><tr><th>method</th><th>parameters/return</th><th>Scope</th></tr></thead><tbody>
-      <tr><td class="m">listMethods</td><td>No parameters; returns the complete interface table.</td><td>global</td></tr>
-      <tr><td class="m">invokeJson</td><td>method, [arguments]; Returns the complete response envelope of the called method.</td><td>presenter</td></tr>
-      <tr><td class="m">setDebugHudEnabled</td><td>enabled;return null.</td><td>presenter</td></tr>
-      <tr><td class="m">setOutputHeadroom</td><td>headroom, known; return null.</td><td>presenter</td></tr>
-      <tr><td class="m">trackSelection</td><td>No parameters; returns {video, audio, subtitle}, null is not selected.</td><td>presenter</td></tr>
-      <tr><td class="m">setSubtitleFont</td><td>[fontFamily], [fontFilePath]; return null.</td><td>presenter</td></tr>
-      <tr><td class="m">setSubtitleStyle</td><td>camelCase field corresponding to ErikaSubtitleStyle; returns null.</td><td>presenter</td></tr>
+    <div class="tw"><table><thead><tr><th>Method</th><th>Parameters / returns</th><th>Scope</th></tr></thead><tbody>
+      <tr><td class="m">listMethods</td><td>No parameters; returns the full method table.</td><td>global</td></tr>
+      <tr><td class="m">invokeJson</td><td>method, [arguments]; returns the full response envelope of the invoked method.</td><td>presenter</td></tr>
+      <tr><td class="m">setDebugHudEnabled</td><td>enabled; returns null.</td><td>presenter</td></tr>
+      <tr><td class="m">setOutputHeadroom</td><td>headroom, known; returns null.</td><td>presenter</td></tr>
+      <tr><td class="m">trackSelection</td><td>No parameters; returns {video, audio, subtitle}; null means nothing is selected.</td><td>presenter</td></tr>
+      <tr><td class="m">setSubtitleFont</td><td>[fontFamily], [fontFilePath]; returns null.</td><td>presenter</td></tr>
+      <tr><td class="m">setSubtitleStyle</td><td>The camelCase fields of ErikaSubtitleStyle; returns null.</td><td>presenter</td></tr>
       <tr><td class="m">getDanmakuConfig</td><td>No parameters; returns the current layout configuration.</td><td>presenter</td></tr>
       <tr><td class="m">chapters</td><td>No parameters; returns {chapters:[{index,title,startMs,endMs}], mediaOpen}.</td><td>presenter</td></tr>
-      <tr><td class="m">getDiagnosticsSnapshot</td><td>No parameters; returns schema 1 diagnostic document, including actual decoding path, output, audio, buffering and time statistics.</td><td>presenter</td></tr>
-      <tr><td class="m">getLogs</td><td>[limit], [minLevel] (trace/debug/info/warn/error), [sinceSeq]; return the desensitization log document and nextSeq.</td><td>global</td></tr>
+      <tr><td class="m">getDiagnosticsSnapshot</td><td>No parameters; returns a schema 1 diagnostics document with the actual decoding path, output, audio, buffering, and timing statistics.</td><td>presenter</td></tr>
+      <tr><td class="m">getLogs</td><td>[limit], [minLevel] (trace/debug/info/warn/error), [sinceSeq]; returns a redacted log document and nextSeq.</td><td>global</td></tr>
       <tr><td class="m">exportFrame</td><td>uri, positionMillis; optional width, height, format (png / rgba), outputPath, overwrite, httpHeaders, httpReadAheadBytes. Returns dataBase64 when no path is specified.</td><td>global</td></tr>
-      <tr><td class="m">exportFrames</td><td>uri, positionsMillis, outputDir; the other options are the same as single frame export. Returns source size, duration, seek/ decoding count and frame-by-frame results.</td><td>global</td></tr>
+      <tr><td class="m">exportFrames</td><td>uri, positionsMillis, outputDir; the other options are the same as for single-frame export. Returns the source size, duration, seek and decode counts, and per-frame results.</td><td>global</td></tr>
     </tbody></table></div>
-    <p>Chapter position in milliseconds, endMs can be null; passed to <code>seek</code> Convert startMs to microseconds. Single frame and batch export are synchronous blocking operations that can write files and must be executed in the UI working thread. Export multiplexing decoders in batches. Failure of a single frame will be recorded in the corresponding entry, and the rest will continue.</p>
-    <p>The export includes timestampMicros, source dimensions, and toneMapped; HDR maps to SDR. For detailed memory and thread rules, see<a href="capi-handle.en.html#frame-export">Frame export C entry</a>. limit=0 of the log reads all reserved entries, sinceSeq uses the last nextSeq; the log ring can retain up to 2000 entries / 512 KiB.</p>
+    <p>Chapter positions are in milliseconds, and endMs can be null; to pass one to <code>seek</code>, convert startMs to microseconds. Single-frame and batch export are synchronous, blocking operations that may write files, so run them on a worker thread, not the UI thread. Batch export reuses the decoder; if a single frame fails, the failure is recorded on its entry and the rest continue.</p>
+    <p>Export results include timestampMicros, the source dimensions, and toneMapped; HDR is tone-mapped to SDR. For the detailed memory and threading rules, see <a href="capi-handle.en.html#frame-export">Frame export C entry points</a>. A log limit of 0 reads all retained entries, and sinceSeq takes the nextSeq from the previous call. The log ring keeps at most 2000 entries / 512 KiB.</p>
   </section>
 
   <section id="example">
-    <h2>Example<span class="jp">Example</span><a class="anchor" href="#example">#</a></h2>
+    <h2>Example<span class="jp">例</span><a class="anchor" href="#example">#</a></h2>
     <div class="code">
-<pre><span class="c">// seek 到 30 秒</span>
+<pre><span class="c">// Seek to 30 seconds</span>
 char *out = erika_presenter_invoke_json(p,
     <span class="s">"seek"</span>, <span class="s">"{ \"positionMicros\": 30000000 }"</span>);
 <span class="c">// {"ok":true,"status":0,"value":null}</span>
 erika_string_free(out);
 
-<span class="c">// 打开并附带请求头:httpHeaders 是"名称:值"对象,不是数组</span>
+<span class="c">// Open with request headers: httpHeaders is a name-to-value object, not an array</span>
 out = erika_presenter_invoke_json(p, <span class="s">"open"</span>,
     <span class="s">"{ \"uri\": \"https://example.com/v.mp4\", "</span>
     <span class="s">"\"httpHeaders\": { \"Referer\": \"https://example.com\" } }"</span>);
 erika_string_free(out);
 
-<span class="c">// 事件轮询：队列为空时返回 NULL</span>
+<span class="c">// Poll for events: returns NULL when the queue is empty</span>
 char *ev = erika_presenter_poll_event_json(p);
 <span class="k">if</span> (ev) { erika_string_free(ev); }</pre>
     </div>
@@ -249,8 +248,8 @@ char *ev = erika_presenter_poll_event_json(p);
   </footer>
 
   <nav class="pager">
-    <a href="capi-presenter.en.html"><span class="dir">Prev</span>ErikaPresenterHandle reference</a>
-    <a class="nx" href="../project/building.en.html"><span class="dir">Next</span>Build and dependencies</a>
+    <a href="capi-presenter.en.html"><span class="dir">Prev</span>ErikaPresenterHandle</a>
+    <a class="nx" href="../project/building.en.html"><span class="dir">Next</span>Building and dependencies</a>
   </nav>
 </main>
 

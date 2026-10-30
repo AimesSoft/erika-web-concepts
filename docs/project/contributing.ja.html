@@ -14,7 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
-  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="contributing.html">中文</option><option value="contributing.en.html">English</option><option value="contributing.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="contributing.html">中文</a> · <a href="contributing.en.html">English</a> · <a href="contributing.ja.html">日本語</a></nav></noscript></div>
+  <div class="language-switch" role="group" aria-label="言語"><a href="contributing.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="contributing.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="contributing.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
     <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
     <ul>
@@ -78,7 +78,7 @@
           <tr><td class="m">crates/erika</td><td>コアエンジン。 playback、renderer、audio、subtitle、danmaku、presenterおよびその他のモジュール。</td></tr>
           <tr><td class="m">crates/erika_capi</td><td>C ABI エクスポート レイヤー、生成 <code>erika.h</code>。</td></tr>
           <tr><td class="m">crates/erika_ffmpeg_sys</td><td>FFmpeg bindgen バインディング。</td></tr>
-          <tr><td class="m">packages/erika_flutter</td><td>Flutter プラグイン、6 つのプラットフォーム。</td></tr>
+          <tr><td class="m">packages/erika_flutter</td><td>Flutter プラグインは 7 プラットフォームに対応（Linux はソースからビルド）。</td></tr>
           <tr><td class="m">packages/erika_ohos</td><td>OpenHarmony ネイティブ ArkTS / OHPM SDK。</td></tr>
           <tr><td class="m">examples/</td><td>検証およびスモークプログラム。</td></tr>
           <tr><td class="m">xtask/</td><td>ネイティブの依存関係ビルド オーケストレーション。</td></tr>

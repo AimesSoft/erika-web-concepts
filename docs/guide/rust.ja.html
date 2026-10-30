@@ -14,7 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
-  <div class="language-switch"><label><span class="visually-hidden">Language</span><select aria-label="Language"><option value="" selected disabled>Language</option><option value="rust.html">中文</option><option value="rust.en.html">English</option><option value="rust.ja.html">日本語</option></select></label><noscript><style>.language-switch label{display:none}</style><nav aria-label="Language"><a href="rust.html">中文</a> · <a href="rust.en.html">English</a> · <a href="rust.ja.html">日本語</a></nav></noscript></div>
+  <div class="language-switch" role="group" aria-label="言語"><a href="rust.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="rust.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="rust.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
     <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
     <ul>
@@ -65,7 +65,7 @@
 
   <ul class="meta-strip">
     <li>入口 <b>Player / PresenterRuntime</b></li>
-    <li>イベント <b>12種類</b></li>
+    <li>PlayerEvent <b>12 種類</b></li>
     <li>フレームのサブスクリプション <b>3チャンネル</b></li>
   </ul>
 
@@ -207,7 +207,7 @@ presenter.play()?;
         <thead><tr><th>フィールド</th><th>デフォルト値</th><th>意味</th></tr></thead>
         <tbody>
           <tr><td class="m">name</td><td class="m">"Erika"</td><td>プレーヤー インスタンス名。マルチインスタンス ログの識別に使用されます。</td></tr>
-          <tr><td class="m">event_channel_capacity</td><td class="m">1024</td><td>内部再生制御コマンドキュー容量。</td></tr>
+          <tr><td class="m">event_channel_capacity</td><td class="m">1024</td><td>内部再生制御コマンドキューの容量。フィールド名と異なり、購読イベントキューの容量は制限しません。</td></tr>
           <tr><td class="m">playback</td><td class="m">PlaybackSessionConfig</td><td>デコーダおよび再生セッションの基礎となる構成 (ハードウェア アクセラレーション設定、バッファ深度など)。</td></tr>
           <tr><td class="m">renderer</td><td class="m">Auto</td><td>レンダリングのバックエンド設定。</td></tr>
           <tr><td class="m">video_frame_queue_capacity</td><td class="m">3</td><td>ビデオ出力フレームキューのバッファ深さ。</td></tr>
