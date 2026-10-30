@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>C ABI 总览 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <div class="language-switch" role="group" aria-label="语言"><a href="capi.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="capi.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="capi.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,19 +53,19 @@
       <li><a href="capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>C ABI 总览</p>
   <h1>C ABI 总览</h1>
   <p class="kicker">C ABI Overview</p>
-  <p class="lead">C ABI 的全局约定与类型定义。函数清单按入口族分页：<a href="capi-handle.html">ErikaHandle</a>（23 个）、<a href="capi-presenter.html">ErikaPresenterHandle</a>（72 个）、通用与独立入口（13 个）。以 <code>crates/erika_capi/include/erika.h</code> 为唯一权威。</p>
+  <p class="lead">C ABI 的全局约定与类型定义。函数清单按入口族分页：<a href="capi-handle.html">ErikaHandle</a>（23 个）、<a href="capi-presenter.html">ErikaPresenterHandle</a>（78 个）、通用与独立入口（15 个）。以 <code>crates/erika_capi/include/erika.h</code> 为唯一权威。</p>
 
   <ul class="meta-strip">
-    <li>导出函数 <b>108</b></li>
-    <li>类型 <b>45</b></li>
-    <li>事件 <b>12</b> 种</li>
+    <li>导出函数 <b>116</b></li>
+    <li>类型 <b>49</b></li>
+    <li>事件 <b>13</b> 种</li>
   </ul>
 
   <section id="entry">
@@ -125,7 +125,7 @@
 
   <section id="events">
     <h2>ErikaEventKind<span class="jp">イベント</span><a class="anchor" href="#events">#</a></h2>
-    <p>枚举有 13 个值：12 种事件，以及表示无事件的 <code>None</code>。</p>
+    <p>枚举有 14 个值：13 种事件和表示无事件的 <code>None</code>；13 供宿主使用，引擎不发送。</p>
     <p>事件经 <code>poll_event</code> 取出。队列无界:不轮询的宿主只是堆积事件、不再观察状态,不会丢包。<code>ErikaEvent</code> 中的字段只有一列有效,由 <code>kind</code> 决定。<code>VideoDecoderChanged</code> 与 <code>AudioOutputChanged</code> 没有载荷字段,但会把结构化消息写入线程局部错误槽,可从 <code>erika_last_error_message</code> 读取。</p>
     <div class="tw">
       <table>
@@ -144,6 +144,7 @@
           <tr><td class="m">10</td><td class="k">TrackSelectionChanged</td><td>选中轨道变化。</td><td class="m">—</td></tr>
           <tr><td class="m">11</td><td class="k">VideoDecoderChanged</td><td>视频解码后端切换。</td><td class="m">—</td></tr>
           <tr><td class="m">12</td><td class="k">AudioOutputChanged</td><td>音频输出状态变化。</td><td class="m">—</td></tr>
+          <tr><td class="m">14</td><td class="k">Ended</td><td>自然播放结束，在 Stopped 后发出；主动停止不发。</td><td class="m">—</td></tr>
         </tbody>
       </table>
     </div>
@@ -151,7 +152,7 @@
 
   <section id="types">
     <h2>类型清单<span class="jp">型</span><a class="anchor" href="#types">#</a></h2>
-    <p>45 个类型定义全部位于 <code>erika.h</code>。主要结构体字段见下方各表；完整字段和枚举定义以同版本头文件为准。</p>
+    <p>49 个类型定义全部位于 <code>erika.h</code>。主要结构体字段见下方各表；完整字段和枚举定义以同版本头文件为准。</p>
     <h3>句柄</h3>
     <ul class="body">
       <li><code>ErikaHandle</code> — pull 模型句柄。</li>
@@ -602,7 +603,7 @@
 
   <section id="open-and-export">
     <h2>打开选项与 GIF 导出类型<a class="anchor" href="#open-and-export">#</a></h2>
-    <p>以下定义来自 0.3.0 的 <code>erika.h</code>。HTTP 窗口和 GIF 导出的完整字段如下：</p>
+    <p>以下定义来自 0.3.1 的 <code>erika.h</code>。HTTP 窗口和 GIF 导出的完整字段如下：</p>
     <h3>ErikaOpenOptions</h3>
     <div class="code">
 <pre>typedef struct ErikaOpenOptions {
@@ -610,9 +611,11 @@
   uintptr_t header_count;
   uint64_t http_read_ahead_bytes;
   uint64_t http_back_buffer_bytes;
-  uint64_t reserved[2];
+  uint64_t start_position_micros;
+  uint64_t reserved[1];
 } ErikaOpenOptions;</pre>
     </div>
+    <p><code>start_position_micros</code> 为起始时间（微秒）；0 从头打开。该字段占用原首个保留位，清零的旧结构保持从头打开。</p>
     <h3>ErikaVideoAlphaMode</h3>
     <div class="code">
 <pre>typedef enum ErikaVideoAlphaMode {
@@ -659,8 +662,36 @@
     <p>回退缓存内的后退 seek 可直接复用已下载数据。高码率视频需要更大的预算：80 Mbit/s 的视频保留约 10 秒需约 100 MB。缓存按字节限制，不代表固定的播放秒数。</p>
   </section>
 
+  <section id="external-texture-types">
+    <h2>原生纹理类型 · 0.3.1<a class="anchor" href="#external-texture-types">#</a></h2>
+    <div class="code"><pre>typedef struct ErikaTextureFrame ErikaTextureFrame;
+typedef enum ErikaExternalTextureKind {
+  ErikaExternalTextureKind_Metal = 1,
+  ErikaExternalTextureKind_VulkanOpaqueFd = 2,
+} ErikaExternalTextureKind;
+typedef enum ErikaExternalTextureFormat {
+  ErikaExternalTextureFormat_Rgba8Unorm = 1,
+} ErikaExternalTextureFormat;
+typedef struct ErikaExternalTextureInfo {
+  ErikaExternalTextureKind kind;
+  ErikaExternalTextureFormat format;
+  uint32_t width;
+  uint32_t height;
+  uint64_t native_handle;
+  uint64_t device_id;
+  uint64_t allocation_size;
+  uint32_t memory_type_index;
+  uint32_t vulkan_format;
+  uint32_t vulkan_usage;
+  uint32_t vulkan_tiling;
+  uint8_t device_uuid[16];
+  uint8_t driver_uuid[16];
+} ErikaExternalTextureInfo;</pre></div>
+    <p>纹理帧可比 presenter 活得更久；消费者 GPU 工作及导入别名结束后再 release。get_info 的句柄为借用：Metal 可独立 retain 并覆盖消费期间；Vulkan OPAQUE_FD（0 也有效）导入前须 dup，匹配设备和驱动 UUID，并按相同属性导入专用分配；读取前从 EXTERNAL 获取队列所有权，旧布局 GENERAL。纹理只读、UNORM 存储中的像素为 sRGB 编码 RGBA。 <a href="https://github.com/AimesSoft/liberika/blob/v0.3.1/docs/external_textures.zh.md">liberika 纹理指南</a>.</p>
+  </section>
+
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.0</b></span>
+    <span>liberika <b>v0.3.1</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

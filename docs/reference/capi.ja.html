@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>C ABI の概要 — liberika 開発者向けドキュメント</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
   <div class="language-switch" role="group" aria-label="言語"><a href="capi.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="capi.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="capi.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="capi-json.ja.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -61,12 +61,12 @@
   <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>C ABI 概要</p>
   <h1>C ABI 概要</h1>
   <p class="kicker">C ABI Overview</p>
-  <p class="lead">C ABI のグローバル規則と型定義。関数リストはエントリ ファミリごとにページ分割されています。<a href="capi-handle.ja.html">ErikaHandle</a>(23)、<a href="capi-presenter.ja.html">ErikaPresenterHandle</a>(72)、一般および独立した入り口 (13)。に <code>crates/erika_capi/include/erika.h</code> 唯一の権限として。</p>
+  <p class="lead">C ABI のグローバル規則と型定義。関数リストはエントリ ファミリごとにページ分割されています。<a href="capi-handle.ja.html">ErikaHandle</a>(23)、<a href="capi-presenter.ja.html">ErikaPresenterHandle</a>(78)、一般および独立した入り口 (15)。に <code>crates/erika_capi/include/erika.h</code> 唯一の権限として。</p>
 
   <ul class="meta-strip">
-    <li>エクスポート機能 <b>108</b></li>
-    <li>種類 <b>45</b></li>
-    <li>イベント <b>12</b> 親切</li>
+    <li>エクスポート機能 <b>116</b></li>
+    <li>種類 <b>49</b></li>
+    <li>イベント <b>13</b> 親切</li>
   </ul>
 
   <section id="entry">
@@ -126,7 +126,7 @@
 
   <section id="events">
     <h2>ErikaEventKind<span class="jp">イベント</span><a class="anchor" href="#events">#</a></h2>
-    <p>列挙値は 13 個です。12 種類のイベントと、イベントなしを示す <code>None</code> があります。</p>
+    <p>列挙値は 14 個です。13 種類のイベントとイベントなしを示す <code>None</code> があります。13 はホスト用で、エンジンは送信しません。</p>
     <p>イベント履歴 <code>poll_event</code> テイクアウト。キューには制限がありません。ポーリングを行わないホストはイベントを蓄積するだけで、ステータスを監視せず、パケットを失いません。<code>ErikaEvent</code> のフィールドの 1 列のみが有効であり、次のように表されます。 <code>kind</code> 決断。<code>VideoDecoderChanged</code> と <code>AudioOutputChanged</code> ペイロード フィールドはありませんが、構造化メッセージがスレッドのローカル エラー スロットに書き込まれます。これは次から取得できます。 <code>erika_last_error_message</code> 読んでください。</p>
     <div class="tw">
       <table>
@@ -145,6 +145,7 @@
           <tr><td class="m">10</td><td class="k">TrackSelectionChanged</td><td>選択された変更を追跡します。</td><td class="m">—</td></tr>
           <tr><td class="m">11</td><td class="k">VideoDecoderChanged</td><td>ビデオ デコード バックエンドの切り替え。</td><td class="m">—</td></tr>
           <tr><td class="m">12</td><td class="k">AudioOutputChanged</td><td>音声出力の状態が変化します。</td><td class="m">—</td></tr>
+          <tr><td class="m">14</td><td class="k">Ended</td><td>自然再生終了時に Stopped の後で送信します。明示的な stop では送信しません。</td><td class="m">—</td></tr>
         </tbody>
       </table>
     </div>
@@ -152,7 +153,7 @@
 
   <section id="types">
     <h2>タイプ一覧<span class="jp">タイプ</span><a class="anchor" href="#types">#</a></h2>
-    <p>45 個の型定義はすべて次の場所にあります。 <code>erika.h</code>。主な構造フィールドを以下の表に示します。完全なフィールドと列挙の定義は、同じバージョンのヘッダー ファイルの影響を受けます。</p>
+    <p>49 個の型定義はすべて次の場所にあります。 <code>erika.h</code>。主な構造フィールドを以下の表に示します。完全なフィールドと列挙の定義は、同じバージョンのヘッダー ファイルの影響を受けます。</p>
     <h3>ハンドル</h3>
     <ul class="body">
       <li><code>ErikaHandle</code> — pull モデルのハンドル。</li>
@@ -603,7 +604,7 @@
 
   <section id="open-and-export">
     <h2>GIF エクスポート タイプでオプションを開く<a class="anchor" href="#open-and-export">#</a></h2>
-    <p>以下の定義は 0.3.0 からのものです。 <code>erika.h</code>。 HTTP ウィンドウと GIF エクスポートの完全なフィールドは次のとおりです。</p>
+    <p>以下の定義は 0.3.1 からのものです。 <code>erika.h</code>。 HTTP ウィンドウと GIF エクスポートの完全なフィールドは次のとおりです。</p>
     <h3>ErikaOpenOptions</h3>
     <div class="code">
 <pre>typedef struct ErikaOpenOptions {
@@ -611,9 +612,11 @@
   uintptr_t header_count;
   uint64_t http_read_ahead_bytes;
   uint64_t http_back_buffer_bytes;
-  uint64_t reserved[2];
+  uint64_t start_position_micros;
+  uint64_t reserved[1];
 } ErikaOpenOptions;</pre>
     </div>
+    <p><code>start_position_micros</code> は開始位置（マイクロ秒）で、0 は先頭から開きます。従来の最初の reserved 枠を使うため、ゼロ初期化した旧構造体は先頭から開きます。</p>
     <h3>ErikaVideoAlphaMode</h3>
     <div class="code">
 <pre>typedef enum ErikaVideoAlphaMode {
@@ -660,8 +663,36 @@
     <p>巻き戻しキャッシュ内の後方 seek は、ダウンロードされたデータを直接再利用できます。高ビットレートのビデオには、より大きな予算が必要です。80 Mbit/s のビデオを約 10 秒保持するには、約 100 MB が必要になります。キャッシュはバイト数によって制限されており、固定の再生秒数を表しません。</p>
   </section>
 
+  <section id="external-texture-types">
+    <h2>ネイティブテクスチャ型 · 0.3.1<a class="anchor" href="#external-texture-types">#</a></h2>
+    <div class="code"><pre>typedef struct ErikaTextureFrame ErikaTextureFrame;
+typedef enum ErikaExternalTextureKind {
+  ErikaExternalTextureKind_Metal = 1,
+  ErikaExternalTextureKind_VulkanOpaqueFd = 2,
+} ErikaExternalTextureKind;
+typedef enum ErikaExternalTextureFormat {
+  ErikaExternalTextureFormat_Rgba8Unorm = 1,
+} ErikaExternalTextureFormat;
+typedef struct ErikaExternalTextureInfo {
+  ErikaExternalTextureKind kind;
+  ErikaExternalTextureFormat format;
+  uint32_t width;
+  uint32_t height;
+  uint64_t native_handle;
+  uint64_t device_id;
+  uint64_t allocation_size;
+  uint32_t memory_type_index;
+  uint32_t vulkan_format;
+  uint32_t vulkan_usage;
+  uint32_t vulkan_tiling;
+  uint8_t device_uuid[16];
+  uint8_t driver_uuid[16];
+} ErikaExternalTextureInfo;</pre></div>
+    <p>テクスチャフレームは presenter より長く保持できます。使用側 GPU の処理とインポートした別名が終了してから release してください。get_info のハンドルは借用です。Metal は GPU 利用中の独立 retain が可能です。Vulkan OPAQUE_FD はインポート前に dup し（0 も有効）、デバイス・ドライバー UUID と属性を一致させ、専用アロケーションをインポートします。読み込み前に旧レイアウト GENERAL で EXTERNAL からキュー所有権を取得します。読み取り専用、UNORM 格納の sRGB 符号化 RGBA です。 <a href="https://github.com/AimesSoft/liberika/blob/v0.3.1/docs/external_textures.ja.md">liberika テクスチャガイド</a>.</p>
+  </section>
+
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.0</b></span>
+    <span>liberika <b>v0.3.1</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

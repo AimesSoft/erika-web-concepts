@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Flutter integration — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
   <div class="language-switch" role="group" aria-label="Language"><a href="flutter.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="flutter.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="flutter.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -73,7 +73,7 @@
     <div class="code">
       <p class="lbl">pubspec.yaml</p>
 <pre>dependencies:
-  erika_flutter: ^0.3.0</pre>
+  erika_flutter: ^0.3.1</pre>
     </div>
     <p>Run <code>flutter pub get</code>. Apple, Windows, Android, and OpenHarmony builds automatically download the matching prebuilt kernel. On Linux, you first build the native library and set <code>ERIKA_LIBRARY_DIR</code>; the steps are in <a href="linux.en.html">Linux integration</a>. To build from local source, set the environment variable <code>ERIKA_FORCE_SOURCE_BUILD=1</code> and point <code>ERIKA_REPO_ROOT</code> at the repository. One exception: when you use the macOS plugin inside the liberika repository, it detects <code>crates/erika_capi</code> and automatically builds from source. (For in-repository setups without a Rust toolchain, set <code>ERIKA_FORCE_PREBUILT=1</code> to force the prebuilt package.)</p>
   </section>
@@ -191,6 +191,8 @@ ErikaTextureVideoView(
     </div>
   </section>
 
+  <p class="note">Since 0.3.1, <code>open(startPosition:)</code> requests the initial position, <code>ErikaEventKind.ended</code> signals natural completion, and <code>setSubtitleDelay</code> and <code>subtitleText()</code> control delay and read the current subtitle. The <code>open</code> return value indicates whether the native runtime accepted the starting position; older runtimes may return false.</p>
+
   <section id="events">
     <h2>Listening for events<span class="jp">イベント購読</span><a class="anchor" href="#events">#</a></h2>
     <div class="code">
@@ -250,7 +252,7 @@ await player.play();</pre>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.0</b></span>
+    <span>liberika <b>v0.3.1</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

@@ -41,12 +41,12 @@ CSS。交互增强统一走 `docs/docs.js`（代码块复制按钮等）。
 
 ## 4. 内容基线
 
-- 当前安装、接口及功能说明按 liberika v0.3.0 核对，更新日志保留旧版历史。
-- C ABI 共 108 个导出函数、45 个类型；72 个 Presenter 函数、23 个
-  Handle 函数，另有 13 个通用/独立入口。
-- Flutter、SwiftPM 与 OHPM 的 0.3.0 均已公开可用。
-- JSON bridge 共 47 个方法，支持 listMethods 发现、日志、章节和帧导出。
-- Web 通过 liberika-web-0.3.0.zip 分发，包含运行时和演示页，尚未发布到 npm；
+- 当前安装、接口及功能说明按 liberika v0.3.1 核对，更新日志保留旧版历史。
+- C ABI 共 116 个导出函数、49 个类型；78 个 Presenter 函数、23 个
+  Handle 函数，另有 15 个通用/独立入口。
+- 截至 2026-10-31，Flutter 0.3.1 已公开，SwiftPM 和 OHPM 最新公开版仍为 0.3.0。
+- JSON bridge 共 51 个方法，支持 listMethods 发现、日志、章节和帧导出。
+- Web 通过 liberika-web-0.3.1.zip 分发，包含运行时和演示页，尚未发布到 npm；
   需要 WebCodecs、OffscreenCanvas、WebGL2、Web Audio 和 HTTPS/localhost。
 - 字幕/弹幕超采样默认开启；原生软件视频解码默认多线程。
 - Linux 为实验性源码构建目标，没有预编译发布包。接入指南包含

@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Web / WASM アクセス — liberika 開発者ドキュメント</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
   <div class="language-switch" role="group" aria-label="言語"><a href="web.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="web.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="web.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -61,12 +61,12 @@
   <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Web / WASM アクセス</p>
   <h1>Web / WASM アクセス</h1>
   <p class="kicker">Browser Playback</p>
-  <p class="lead">オリジナルの MKV をブラウザに提供し、ASS の特殊効果、フォントの添付ファイル、弾幕を保持します。 liberika 0.3.0 は、FFmpeg WASM を使用してカプセル化を解除し、WebCodecs をデコードし、libass を使用して字幕を描画し、その後、WebGL2 を使用して Canvas の一部をホストに合成します。</p>
-  <ul class="meta-strip"><li>バージョン <b>0.3.0</b></li><li>配布する <b>GitHub Release ZIP</b></li><li>環境 <b>HTTPS / localhost</b></li><li>出力 <b>SDR</b></li></ul>
+  <p class="lead">オリジナルの MKV をブラウザに提供し、ASS の特殊効果、フォントの添付ファイル、弾幕を保持します。 liberika 0.3.1 は、FFmpeg WASM を使用してカプセル化を解除し、WebCodecs をデコードし、libass を使用して字幕を描画し、その後、WebGL2 を使用して Canvas の一部をホストに合成します。</p>
+  <ul class="meta-strip"><li>バージョン <b>0.3.1</b></li><li>配布する <b>GitHub Release ZIP</b></li><li>環境 <b>HTTPS / localhost</b></li><li>出力 <b>SDR</b></li></ul>
 
   <section id="download">
     <h2>ダウンロードしてプレビューする<a class="anchor" href="#download">#</a></h2>
-    <p>ダウンロード <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/liberika-web-0.3.0.zip">liberika-web-0.3.0.zip</a>、同じReleaseを押します <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/SHA256SUMS">SHA256SUMS</a> 検証、完全な解凍、HTTPS またはローカル HTTP サービス経由のアクセス <code>index.html</code>。デモ ページでは、メディア サーバーを必要とせずに、ローカル ビデオ、字幕、および弾幕を選択できます。</p>
+    <p>ダウンロード <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.1/liberika-web-0.3.1.zip">liberika-web-0.3.1.zip</a>、同じReleaseを押します <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.1/SHA256SUMS">SHA256SUMS</a> 検証、完全な解凍、HTTPS またはローカル HTTP サービス経由のアクセス <code>index.html</code>。デモ ページでは、メディア サーバーを必要とせずに、ローカル ビデオ、字幕、および弾幕を選択できます。</p>
     <div class="code"><p class="lbl">解凍したディレクトリで実行</p><pre>python3 -m http.server 18765 --bind 127.0.0.1
 # 浏览器打开 http://127.0.0.1:18765</pre></div>
     <p>パッケージには、JavaScript、2 つの WASM、Worker、ライセンス、ビルド リスト、デモ ページが含まれています。ランタイムはまだ npm にリリースされていません。デプロイ時に完全なディレクトリと相対パスを保持し、JavaScript モジュールと <code>application/wasm</code> MIME; SharedArrayBuffer やクロスソース絶縁は必要ありません。</p>
@@ -125,7 +125,7 @@ await player.configureSubtitles({ scale: 1 });</pre></div>
       <tr><td>スクリーンショット</td><td><code>capture(width?)</code> ビデオ、字幕、弾幕を含む PNG Blob を返します。</td></tr>
       <tr><td>閉じる/解放する</td><td><code>close()</code> 現在のメディアをクリアした後、open を再実行できます。<code>destroy()</code> Worker、デコーダー、フレーム、GPU、およびオーディオ リソースを解放します。</td></tr>
     </tbody></table></div>
-    <p>完全なタイプについては、を参照してください。 <a href="https://github.com/AimesSoft/liberika/blob/v0.3.0/packages/erika_web/index.d.ts">index.d.ts</a>。<code>loaded</code>、<code>stats</code>、<code>timeupdate</code>、<code>error</code>、<code>log</code> は CustomEvent、データは detail にあります。 play / pause / ended は通常の Event です。</p>
+    <p>完全なタイプについては、を参照してください。 <a href="https://github.com/AimesSoft/liberika/blob/v0.3.1/packages/erika_web/index.d.ts">index.d.ts</a>。<code>loaded</code>、<code>stats</code>、<code>timeupdate</code>、<code>error</code>、<code>log</code> は CustomEvent、データは detail にあります。 play / pause / ended は通常の Event です。</p>
   </section>
 
   <section id="compatibility">
@@ -138,7 +138,7 @@ await player.configureSubtitles({ scale: 1 });</pre></div>
       <li>現在の出力は SDR で、デスクトップ HDR/EDR/Dolby Vision、ArtCNN、DRM、長さ不明のライブ ブロードキャスト、ビットマップ字幕、および埋め込まれた非 ASS 字幕変換を除きます。 SRT/VTT はプレーン テキストとして変換され、複雑な VTT レイアウトは保持されません。</li>
       <li>内蔵 ASS はシーク先の 5 秒前から先読みし、既に見たイベントを保持します。より前に始まる長いイベントへ初めてシークした場合、一時的に表示されないことがあります。完全な外部 ASS スクリプトにはこの制限はありません。</li>
     </ul>
-    <p>ソース コード検証レコードは、Chrome および Safari の指定されたバージョンとマテリアルをカバーします。 Firefox はまだ検証されていません。ビルドとテストの詳細な手順については、次を参照してください。<a href="https://github.com/AimesSoft/liberika/blob/v0.3.0/docs/web.zh.md">ソースコード Web ガイド</a>。</p>
+    <p>ソース コード検証レコードは、Chrome および Safari の指定されたバージョンとマテリアルをカバーします。 Firefox はまだ検証されていません。ビルドとテストの詳細な手順については、次を参照してください。<a href="https://github.com/AimesSoft/liberika/blob/v0.3.1/docs/web.zh.md">ソースコード Web ガイド</a>。</p>
   </section>
 
   <section id="build">
@@ -150,7 +150,7 @@ python3 scripts/serve_web.py
     <p>完全なデプロイ可能なディレクトリは次のとおりです。 <code>target/web</code>、中間ファイルは <code>target/web-build</code>。サーバーは、新旧の JS/WASM の混在を避けるために、ランタイムをバージョン ディレクトリに配置する必要があります。</p>
   </section>
 
-  <footer class="doc-foot"><span>liberika <b>v0.3.0</b></span><span>Section <b>Guide</b></span><span>License <b>MPL-2.0</b></span></footer>
+  <footer class="doc-foot"><span>liberika <b>v0.3.1</b></span><span>Section <b>Guide</b></span><span>License <b>MPL-2.0</b></span></footer>
   <nav class="pager"><a href="linux.ja.html"><span class="dir">Prev</span>Linux アクセス</a><a class="nx" href="../kernel/architecture.ja.html"><span class="dir">Next</span>アーキテクチャの概要</a></nav>
 </main>
 </div>

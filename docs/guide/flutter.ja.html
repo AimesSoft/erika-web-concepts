@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Flutter 埋め込み — liberika 開発者ドキュメント</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
   <div class="language-switch" role="group" aria-label="言語"><a href="flutter.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="flutter.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="flutter.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -74,7 +74,7 @@
     <div class="code">
       <p class="lbl">pubspec.yaml</p>
 <pre>dependencies:
-  erika_flutter: ^0.3.0</pre>
+  erika_flutter: ^0.3.1</pre>
     </div>
     <p>走る <code>flutter pub get</code> それだけです。 Apple、Windows、Android、および OpenHarmony ビルドは、一致するプリコンパイルされたカーネルを自動的にダウンロードします。 Linux は、最初にローカル動的ライブラリを構築して設定する必要があります <code>ERIKA_LIBRARY_DIR</code>の手順は次のとおりです。 <a href="linux.ja.html">Linux アクセス</a>。ローカル ソース コードからビルドする必要がある場合は、環境変数を設定します <code>ERIKA_FORCE_SOURCE_BUILD=1</code> そして指定します <code>ERIKA_REPO_ROOT</code> それだけです。例外: liberika リポジトリで macOS プラグインを使用するときに検出されました <code>crates/erika_capi</code> ソースコードのコンパイルが自動的に変更されます(Rustツールチェーンを必要としないウェアハウス内のシーンを設定可能) <code>ERIKA_FORCE_PREBUILT=1</code> プリコンパイルされたパッケージの使用を強制します)。</p>
   </section>
@@ -192,6 +192,8 @@ ErikaTextureVideoView(
     </div>
   </section>
 
+  <p class="note">0.3.1 以降、<code>open(startPosition:)</code> で開始位置を指定し、<code>ErikaEventKind.ended</code> で自然終了を受け取れます。<code>setSubtitleDelay</code> と <code>subtitleText()</code> で字幕遅延と表示中のテキストを扱えます。 <code>open</code> の戻り値はネイティブランタイムが開始位置を受け付けたかを示します。古いランタイムでは false が返る場合があります。</p>
+
   <section id="events">
     <h2>イベントリスニング<span class="jp">イベント購入確認</span><a class="anchor" href="#events">#</a></h2>
     <div class="code">
@@ -251,7 +253,7 @@ await player.play();</pre>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.0</b></span>
+    <span>liberika <b>v0.3.1</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

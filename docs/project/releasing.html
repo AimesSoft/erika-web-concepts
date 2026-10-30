@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>发布与产物 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <div class="language-switch" role="group" aria-label="语言"><a href="releasing.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="releasing.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="releasing.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -72,10 +72,12 @@
     <h2>触发<span class="jp">トリガー</span><a class="anchor" href="#trigger">#</a></h2>
     <p>推入 <code>v*</code> 标签触发正式发布，构建完成后发布到 GitHub Releases。workflow_dispatch 手动运行只构建不发布，用于发布前检查。发布前先在本机执行 <a href="building.html">构建流程</a> 验证。</p>
     <div class="code">
-<pre>git tag v0.3.0
-git push origin v0.3.0</pre>
+<pre>git tag v0.3.2
+git push origin v0.3.2</pre>
     </div>
   </section>
+
+  <p class="note">正式发布由 tag 触发的 Release 工作流构建；无需在打 tag 前先手动运行该工作流。</p>
 
   <section id="prepare">
     <h2>标签前准备<a class="anchor" href="#prepare">#</a></h2>
@@ -105,7 +107,7 @@ git push origin v0.3.0</pre>
 
   <section id="web">
     <h2>Web / WASM 归档<a class="anchor" href="#web">#</a></h2>
-    <p><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/liberika-web-0.3.0.zip">liberika-web-0.3.0.zip</a> 由 <code>cargo run -p xtask -- web build</code> 生成，包含 JavaScript、两个 WASM、Worker、许可证、<code>build-manifest.json</code> 和 <code>index.html</code> 演示页。与原生 ZIP 一起写入 <code>SHA256SUMS</code>。</p>
+    <p><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.1/liberika-web-0.3.1.zip">liberika-web-0.3.1.zip</a> 由 <code>cargo run -p xtask -- web build</code> 生成，包含 JavaScript、两个 WASM、Worker、许可证、<code>build-manifest.json</code> 和 <code>index.html</code> 演示页。与原生 ZIP 一起写入 <code>SHA256SUMS</code>。</p>
     <p>完整解压后通过 HTTPS 或 localhost 访问；独立静态部署即可选择本地 MKV 播放。Web 包尚未发布到 npm，接入及兼容范围见 <a href="../guide/web.html">Web 指南</a>。</p>
   </section>
 
@@ -140,7 +142,7 @@ git push origin v0.3.0</pre>
     <p>Flutter 插件构建时默认下载预编译运行时（<code>erika_flutter</code> 的 pub.dev 版本自带校验与缓存）；需要从源码构建时显式导出：</p>
     <div class="code">
 <pre><span class="k">export</span> ERIKA_FORCE_SOURCE_BUILD=1    <span class="c"># 改为源码构建（需 ERIKA_REPO_ROOT 指向仓库检出）</span>
-<span class="k">export</span> ERIKA_PREBUILT_TAG=v0.3.0       <span class="c"># 自定义预编译版本标签，默认匹配当前版本</span></pre>
+<span class="k">export</span> ERIKA_PREBUILT_TAG=v0.3.1       <span class="c"># 自定义预编译版本标签，默认匹配当前版本</span></pre>
     </div>
     <p>显式覆盖 <code>ERIKA_PREBUILT_TAG</code> 时，必须同时设置与该归档匹配的 <code>ERIKA_PREBUILT_SHA256</code>；从同一 Release 的 <code>SHA256SUMS</code> 读取对应平台摘要。源码构建与自定义预编译版本是两种独立配置方式。</p>
     <p>构建脚本按平台从 <code>github.com/AimesSoft/liberika/releases/download/&lt;tag&gt;/</code> 下载对应 bundle 并解包，并按发布级 <code>SHA256SUMS</code> 校验摘要。</p>
@@ -156,7 +158,7 @@ git push origin v0.3.0</pre>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.0</b></span>
+    <span>liberika <b>v0.3.1</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

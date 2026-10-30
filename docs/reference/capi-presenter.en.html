@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ErikaPresenterHandle reference — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
   <div class="language-switch" role="group" aria-label="Language"><a href="capi-presenter.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="capi-presenter.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="capi-presenter.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,17 +53,17 @@
       <li><a href="capi-json.en.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>ErikaPresenterHandle</p>
   <h1>ErikaPresenterHandle reference</h1>
   <p class="kicker">ErikaPresenterHandle Reference</p>
-  <p class="lead">All 72 functions of the push-model entry point: lifecycle, playback and runtime parameters, subtitles, danmaku, output diagnostics, surface and presentation, render loop, JSON bridge, and screenshots. Built only for macOS / iOS / tvOS / Windows / Android / OpenHarmony / Linux; on other targets <code>create</code> returns NULL.</p>
+  <p class="lead">All 78 functions of the push-model entry point: lifecycle, playback and runtime parameters, subtitles, danmaku, output diagnostics, surface and presentation, render loop, JSON bridge, and screenshots. Built only for macOS / iOS / tvOS / Windows / Android / OpenHarmony / Linux; on other targets <code>create</code> returns NULL.</p>
 
   <ul class="meta-strip">
-    <li>Functions <b>72</b></li>
+    <li>Functions <b>78</b></li>
     <li>Platforms <b>7</b></li>
   </ul>
 
@@ -111,7 +111,7 @@
 
     <div class="api" id="erika_presenter_open_with_options">
       <p class="sig"><b>ErikaStatus erika_presenter_open_with_options</b>( ErikaPresenterHandle *handle, const char *uri, const ErikaOpenOptions *options)</p>
-      <p class="desc">Opens media with <code>ErikaOpenOptions</code>, which can carry HTTP request headers, the read-ahead window, and the back-buffer budget in a single call. The options are borrowed only for the duration of the call; set <code>reserved</code> to zero.</p>
+      <p class="desc">Opens media with <code>ErikaOpenOptions</code>, which can carry HTTP request headers, the read-ahead window, and the back-buffer budget in a single call. The options are borrowed only for the duration of the call; set <code>reserved</code> to zero. <code>start_position_micros</code> is the starting time in microseconds; 0 opens at the beginning. It occupies the first former reserved slot, so zero-initialized older structs still open at the beginning.</p>
     </div>
 
 
@@ -483,8 +483,21 @@
     <p>On success, returns a caller-owned JSON string that carries a <code>schema</code>; release it with <code>erika_string_free</code>. Returns NULL on failure. For compatibility with older native libraries, resolve the symbol as optional; a missing symbol means the feature is unsupported. The corresponding JSON bridge method is <code>getDiagnosticsSnapshot</code>.</p>
   </section>
 
+  <section id="native-frame-export">
+    <h2>Playback and native texture APIs<a class="anchor" href="#native-frame-export">#</a></h2>
+    <div class="api" id="erika_presenter_set_open_start_position"><p class="sig"><b>ErikaStatus erika_presenter_set_open_start_position</b>(ErikaPresenterHandle *handle, uint64_t position_micros)</p><p class="desc">Sets the start for the next open whose options do not specify a nonzero position; in microseconds. 0 clears it, and the next open consumes it.</p></div>
+    <div class="api" id="erika_presenter_set_subtitle_delay"><p class="sig"><b>ErikaStatus erika_presenter_set_subtitle_delay</b>(ErikaPresenterHandle *handle, int64_t delay_micros)</p><p class="desc">Positive values show subtitles later, negative earlier; applies to embedded and external tracks, clamped to ±10 minutes. 0 restores the original timestamps.</p></div>
+    <div class="api" id="erika_presenter_set_danmaku_random_colors"><p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_random_colors</b>(ErikaPresenterHandle *handle, bool enabled)</p><p class="desc">Enables or disables random danmaku colors.</p></div>
+    <div class="api" id="erika_presenter_capture_frame_rgba_with_danmaku"><p class="sig"><b>ErikaStatus erika_presenter_capture_frame_rgba_with_danmaku</b>(ErikaPresenterHandle *handle, uint32_t width, uint32_t height, uint8_t *out_rgba, uintptr_t out_capacity)</p><p class="desc">Outputs SDR RGBA8 with video, subtitles and enabled danmaku, without the debug HUD. No surface or prior render tick is required; the caller buffer must hold at least width × height × 4 bytes.</p></div>
+    <div class="api" id="erika_presenter_create_for_texture_export"><p class="sig"><b>ErikaPresenterHandle *erika_presenter_create_for_texture_export</b>(ErikaPresenterConfig config)</p><p class="desc">Selects WgpuFallback for native texture export; returns NULL and sets last_error on failure.</p></div>
+    <div class="api" id="erika_presenter_export_frame_texture"><p class="sig"><b>ErikaStatus erika_presenter_export_frame_texture</b>(ErikaPresenterHandle *handle, uint32_t width, uint32_t height, double content_scale, ErikaTextureFrame **out_frame)</p><p class="desc">Exports an immutable SDR native texture from WgpuFallback, with video, subtitles and enabled danmaku but no HUD. Supports Linux Vulkan OPAQUE_FD and Apple Metal, without a surface, Flutter registrar, CPU readback or GPU texture copy. It waits for producer GPU completion and pumps audio. NoEvent means no video yet; out_frame is NULL on any non-Ok result.</p></div>
+    <div class="api" id="erika_texture_frame_get_info"><p class="sig"><b>ErikaStatus erika_texture_frame_get_info</b>(const ErikaTextureFrame *frame, ErikaExternalTextureInfo *out_info)</p><p class="desc">A texture frame can outlive its presenter. Release only after consumer GPU work and imported aliases retire. get_info returns borrowed handles: a Metal consumer may independently retain the texture through all GPU use; duplicate the Vulkan OPAQUE_FD before import (0 is valid), match device and driver UUIDs, and import the dedicated allocation with identical properties. Acquire queue ownership from EXTERNAL with old layout GENERAL before reading. Read-only pixels are sRGB-encoded RGBA in UNORM storage.</p></div>
+    <div class="api" id="erika_texture_frame_release"><p class="sig"><b>void erika_texture_frame_release</b>(ErikaTextureFrame *frame)</p><p class="desc">Release after consumer GPU work and aliases have retired.</p></div>
+    <p><a href="capi.en.html#external-texture-types">ErikaExternalTextureInfo</a> · <a href="https://github.com/AimesSoft/liberika/blob/v0.3.1/docs/external_textures.md">Texture guide</a></p>
+  </section>
+
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.0</b></span>
+    <span>liberika <b>v0.3.1</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

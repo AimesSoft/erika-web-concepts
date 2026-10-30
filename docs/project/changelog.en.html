@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Changelog — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
   <div class="language-switch" role="group" aria-label="Language"><a href="changelog.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="changelog.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="changelog.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -63,9 +63,15 @@
   <p class="lead">Changes that are visible to the host, listed by version. Entries that were later reverted are omitted; the repository’s root <code>CHANGELOG.md</code> is authoritative for the full history. Breaking changes in 0.1.3 and earlier are summarized at the end of this page.</p>
 
   <ul class="meta-strip">
-    <li>Current <b>0.3.0</b></li>
-    <li>Released <b>2026-10-25</b></li>
+    <li>Current <b>0.3.1</b></li>
+    <li>Released <b>2026-10-31</b></li>
   </ul>
+
+  <section id="v031">
+    <h2>0.3.1 · 2026-10-31<a class="anchor" href="#v031">#</a></h2>
+    <ul class="body"><li>Added opening at a requested position (including the first frame and Ready position), a natural-ended event, subtitle delay and current subtitle text.</li><li>Added a separate danmaku-inclusive capture and native frame texture export. The original capture still excludes danmaku. Fixed OpenHarmony text subtitle rendering and Android screenshot danmaku selection.</li></ul>
+    <p>Core and Flutter 0.3.1 are available. As of 2026-10-31, the latest public Swift SDK and OHPM package remain at 0.3.0. <a href="https://github.com/AimesSoft/liberika/releases/tag/v0.3.1">Release notes</a>.</p>
+  </section>
 
   <section id="v030">
     <h2>0.3.0 · 2026-10-25<a class="anchor" href="#v030">#</a></h2>
@@ -250,7 +256,7 @@
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.0</b></span>
+    <span>liberika <b>v0.3.1</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

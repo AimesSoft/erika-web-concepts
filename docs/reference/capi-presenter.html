@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ErikaPresenterHandle 参考 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <div class="language-switch" role="group" aria-label="语言"><a href="capi-presenter.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="capi-presenter.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="capi-presenter.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,17 +53,17 @@
       <li><a href="capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>ErikaPresenterHandle</p>
   <h1>ErikaPresenterHandle 参考</h1>
   <p class="kicker">ErikaPresenterHandle Reference</p>
-  <p class="lead">push 模型入口的全部 72 个函数：生命周期、播放与运行参数、字幕、弹幕、输出诊断、表面与呈现、渲染循环、JSON bridge、截图。仅编译于 macOS / iOS / tvOS / Windows / Android / OpenHarmony / Linux，其他目标 <code>create</code> 返回 NULL。</p>
+  <p class="lead">push 模型入口的全部 78 个函数：生命周期、播放与运行参数、字幕、弹幕、输出诊断、表面与呈现、渲染循环、JSON bridge、截图。仅编译于 macOS / iOS / tvOS / Windows / Android / OpenHarmony / Linux，其他目标 <code>create</code> 返回 NULL。</p>
 
   <ul class="meta-strip">
-    <li>函数 <b>72</b> 个</li>
+    <li>函数 <b>78</b> 个</li>
     <li>平台 <b>7</b> 个</li>
   </ul>
 
@@ -111,7 +111,7 @@
 
     <div class="api" id="erika_presenter_open_with_options">
       <p class="sig"><b>ErikaStatus erika_presenter_open_with_options</b>( ErikaPresenterHandle *handle, const char *uri, const ErikaOpenOptions *options)</p>
-      <p class="desc">使用 <code>ErikaOpenOptions</code> 打开媒体，可同时传入 HTTP 请求头、预读窗口与回退缓存预算。选项只在调用期间借用，<code>reserved</code> 置零。</p>
+      <p class="desc">使用 <code>ErikaOpenOptions</code> 打开媒体，可同时传入 HTTP 请求头、预读窗口与回退缓存预算。选项只在调用期间借用，<code>reserved</code> 置零。 <code>start_position_micros</code> 为起始时间（微秒）；0 从头打开。该字段占用原首个保留位，清零的旧结构保持从头打开。</p>
     </div>
 
 
@@ -483,8 +483,21 @@
     <p>成功时返回带 <code>schema</code> 的调用方所有 JSON 字符串，用 <code>erika_string_free</code> 释放；失败时为 NULL。兼容旧原生库时按可选符号解析，缺失即视为不支持。JSON bridge 的对应方法为 <code>getDiagnosticsSnapshot</code>。</p>
   </section>
 
+  <section id="native-frame-export">
+    <h2>播放与原生纹理接口<a class="anchor" href="#native-frame-export">#</a></h2>
+    <div class="api" id="erika_presenter_set_open_start_position"><p class="sig"><b>ErikaStatus erika_presenter_set_open_start_position</b>(ErikaPresenterHandle *handle, uint64_t position_micros)</p><p class="desc">为下一次未指定非零起始位置的 open 设置起点；单位微秒，0 清除，使用后取走。</p></div>
+    <div class="api" id="erika_presenter_set_subtitle_delay"><p class="sig"><b>ErikaStatus erika_presenter_set_subtitle_delay</b>(ErikaPresenterHandle *handle, int64_t delay_micros)</p><p class="desc">正值使字幕延后、负值使其提前；内嵌和外挂字幕均适用，范围限制在 ±10 分钟，0 恢复原时间戳。</p></div>
+    <div class="api" id="erika_presenter_set_danmaku_random_colors"><p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_random_colors</b>(ErikaPresenterHandle *handle, bool enabled)</p><p class="desc">设置弹幕随机颜色是否启用。</p></div>
+    <div class="api" id="erika_presenter_capture_frame_rgba_with_danmaku"><p class="sig"><b>ErikaStatus erika_presenter_capture_frame_rgba_with_danmaku</b>(ErikaPresenterHandle *handle, uint32_t width, uint32_t height, uint8_t *out_rgba, uintptr_t out_capacity)</p><p class="desc">输出 SDR RGBA8，包含视频、字幕和已启用的弹幕，不含 debug HUD；不需要 surface 或预先 render tick，缓冲至少 width × height × 4 字节。</p></div>
+    <div class="api" id="erika_presenter_create_for_texture_export"><p class="sig"><b>ErikaPresenterHandle *erika_presenter_create_for_texture_export</b>(ErikaPresenterConfig config)</p><p class="desc">选择 WgpuFallback 用于原生纹理导出；失败时返回 NULL 并设置 last_error。</p></div>
+    <div class="api" id="erika_presenter_export_frame_texture"><p class="sig"><b>ErikaStatus erika_presenter_export_frame_texture</b>(ErikaPresenterHandle *handle, uint32_t width, uint32_t height, double content_scale, ErikaTextureFrame **out_frame)</p><p class="desc">从 WgpuFallback 导出不可变 SDR 原生纹理，包含视频、字幕与已启用弹幕，不含 HUD。支持 Linux Vulkan OPAQUE_FD 和 Apple Metal；无需 surface、Flutter 注册器、CPU 读回或 GPU 纹理复制。返回前等待生产端 GPU 完成，并驱动音频；NoEvent 表示尚无视频，非 Ok 时 out_frame 为 NULL。</p></div>
+    <div class="api" id="erika_texture_frame_get_info"><p class="sig"><b>ErikaStatus erika_texture_frame_get_info</b>(const ErikaTextureFrame *frame, ErikaExternalTextureInfo *out_info)</p><p class="desc">纹理帧可比 presenter 活得更久；消费者 GPU 工作及导入别名结束后再 release。get_info 的句柄为借用：Metal 可独立 retain 并覆盖消费期间；Vulkan OPAQUE_FD（0 也有效）导入前须 dup，匹配设备和驱动 UUID，并按相同属性导入专用分配；读取前从 EXTERNAL 获取队列所有权，旧布局 GENERAL。纹理只读、UNORM 存储中的像素为 sRGB 编码 RGBA。</p></div>
+    <div class="api" id="erika_texture_frame_release"><p class="sig"><b>void erika_texture_frame_release</b>(ErikaTextureFrame *frame)</p><p class="desc">消费者 GPU 工作和导入别名结束后释放。</p></div>
+    <p><a href="capi.html#external-texture-types">ErikaExternalTextureInfo</a> · <a href="https://github.com/AimesSoft/liberika/blob/v0.3.1/docs/external_textures.zh.md">Texture guide</a></p>
+  </section>
+
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.0</b></span>
+    <span>liberika <b>v0.3.1</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

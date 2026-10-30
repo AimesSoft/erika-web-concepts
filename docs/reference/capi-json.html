@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>JSON bridge — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <div class="language-switch" role="group" aria-label="语言"><a href="capi-json.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="capi-json.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="capi-json.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,17 +53,17 @@
       <li><a href="capi-json.html" aria-current="page">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>JSON bridge</p>
   <h1>JSON bridge</h1>
   <p class="kicker">JSON Bridge Reference</p>
-  <p class="lead">三个 JSON 变体函数与 47 个命名方法。供已用平台通道序列化结构化参数的宿主使用，例如 Dart FFI 宿主的 <code>MethodChannel</code> 一侧。方法覆盖 Presenter 操作、全局日志及帧导出，参数经 JSON 对象传入；用 listMethods 查询运行时支持的接口。</p>
+  <p class="lead">三个 JSON 变体函数与 51 个命名方法。供已用平台通道序列化结构化参数的宿主使用，例如 Dart FFI 宿主的 <code>MethodChannel</code> 一侧。方法覆盖 Presenter 操作、全局日志及帧导出，参数经 JSON 对象传入；用 listMethods 查询运行时支持的接口。</p>
 
   <ul class="meta-strip">
-    <li>方法 <b>47</b> 个</li>
+    <li>方法 <b>51</b> 个</li>
     <li>命名 <b>camelCase</b></li>
   </ul>
 
@@ -103,7 +103,7 @@
 
   <section id="events">
     <h2>事件返回形状<span class="jp">イベント</span><a class="anchor" href="#events">#</a></h2>
-    <p><code>poll_event_json</code> 的事件对象字段与 <code>ErikaEvent</code> 一一对应,kind 为整数(0–12,见<a href="capi.html#events">C ABI 总览</a>的事件表):</p>
+    <p><code>poll_event_json</code> 的事件对象字段与 <code>ErikaEvent</code> 一一对应,kind 为整数(0–12, 14,见<a href="capi.html#events">C ABI 总览</a>的事件表):</p>
     <div class="code">
 <pre>{ "kind": 1, "status": 0, "state": 2, "durationMicros": 0,
   "positionMicros": 0, "buffering": false,
@@ -122,13 +122,20 @@
       <table>
         <thead><tr><th>方法</th><th>参数</th><th>返回</th><th>对应 C 函数</th></tr></thead>
         <tbody>
-          <tr><td class="k">open</td><td class="m">uri，[httpHeaders]，[httpReadAheadBytes]，[httpBackBufferBytes]</td><td class="m">null</td><td class="m">erika_presenter_open_with_options</td></tr>
-          <tr><td class="k">play / pause / stop / close</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_play / pause / stop / close</td></tr>
+          <tr><td class="k">open</td><td class="m">uri，[httpHeaders]，[httpReadAheadBytes]，[httpBackBufferBytes], [startPositionMicros]</td><td class="m">null</td><td class="m">erika_presenter_open_with_options</td></tr>
+          <tr><td class="k">play</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_play</td></tr>
+          <tr><td class="k">pause</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_pause</td></tr>
+          <tr><td class="k">stop</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_stop</td></tr>
+          <tr><td class="k">close</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_close</td></tr>
           <tr><td class="k">seek</td><td class="m">positionMicros</td><td class="m">null</td><td class="m">erika_presenter_seek</td></tr>
           <tr><td class="k">setPlaybackRate</td><td class="m">rate</td><td class="m">null</td><td class="m">erika_presenter_set_playback_rate</td></tr>
           <tr><td class="k">setVolume</td><td class="m">volume</td><td class="m">null</td><td class="m">erika_presenter_set_volume</td></tr>
           <tr><td class="k">setUpscaler</td><td class="m">mode</td><td class="m">null</td><td class="m">erika_presenter_set_upscaler</td></tr>
           <tr><td class="k">setSubtitleScale</td><td class="m">scale</td><td class="m">null</td><td class="m">erika_presenter_set_subtitle_scale</td></tr>
+          <tr><td class="k">setOpenStartPosition</td><td class="m">positionMicros</td><td class="m">null</td><td class="m">erika_presenter_set_open_start_position</td></tr>
+          <tr><td class="k">setSubtitleDelay</td><td class="m">delayMicros</td><td class="m">null</td><td class="m">erika_presenter_set_subtitle_delay</td></tr>
+          <tr><td class="k">subtitleDelay</td><td class="m">—</td><td class="m">{delayMicros}</td><td class="m">JSON bridge</td></tr>
+          <tr><td class="k">subtitleText</td><td class="m">—</td><td class="m">{text, cues, mediaOpen}</td><td class="m">JSON bridge</td></tr>
         </tbody>
       </table>
     </div>
@@ -141,7 +148,8 @@
           <tr><td class="k">tracks</td><td class="m">—</td><td class="m">轨道数组</td><td class="m">erika_presenter_tracks</td></tr>
           <tr><td class="k">addExternalSubtitle</td><td class="m">uri</td><td class="m">trackId</td><td class="m">erika_presenter_add_external_subtitle</td></tr>
           <tr><td class="k">removeSubtitleTrack</td><td class="m">trackId（有符号）</td><td class="m">null</td><td class="m">erika_presenter_remove_subtitle_track</td></tr>
-          <tr><td class="k">selectAudioTrack / selectSubtitleTrack</td><td class="m">[trackId]，默认 -1</td><td class="m">null</td><td class="m">erika_presenter_select_audio_track / select_subtitle_track</td></tr>
+                    <tr><td class="k">selectAudioTrack</td><td class="m">[trackId]，默认 -1</td><td class="m">null</td><td class="m">erika_presenter_select_audio_track</td></tr>
+          <tr><td class="k">selectSubtitleTrack</td><td class="m">[trackId]，默认 -1</td><td class="m">null</td><td class="m">erika_presenter_select_subtitle_track</td></tr>
         </tbody>
       </table>
     </div>
@@ -195,6 +203,8 @@
     </div>
   </section>
 
+  <p><code>setOpenStartPosition</code> 是下一次 open 的起点；<code>setSubtitleDelay</code> 的正值延后、负值提前，范围 ±10 分钟。<code>subtitleDelay</code> 返回当前偏移；<code>subtitleText</code> 返回应用偏移后的文本、cues 和 mediaOpen，ASS 覆盖标签被移除，位图无文本。</p>
+
   <section id="discovery">
     <h2>接口发现、章节与诊断 · 0.3.0<a class="anchor" href="#discovery">#</a></h2>
     <p><code>listMethods</code> 返回 <code>{schema, methods}</code>。每项包含 name、scope、summary、arguments（name / type / required）、returns、blocking 和 writesFiles；以当前运行时返回的表为准。全局方法无需 handle，Presenter 方法需要有效 handle；表项说明同步阻塞与可能写文件的行为，不代表异步任务调度。</p>
@@ -242,7 +252,7 @@ char *ev = erika_presenter_poll_event_json(p);
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.0</b></span>
+    <span>liberika <b>v0.3.1</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

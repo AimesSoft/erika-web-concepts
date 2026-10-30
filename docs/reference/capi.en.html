@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>C ABI overview — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
   <div class="language-switch" role="group" aria-label="Language"><a href="capi.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="capi.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="capi.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,19 +53,19 @@
       <li><a href="capi-json.en.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>C ABI overview</p>
   <h1>C ABI overview</h1>
   <p class="kicker">C ABI Overview</p>
-  <p class="lead">Global conventions and type definitions for the C ABI. The function lists are split by entry family: <a href="capi-handle.en.html">ErikaHandle</a> (23), <a href="capi-presenter.en.html">ErikaPresenterHandle</a> (72), and general and standalone entry points (13). <code>crates/erika_capi/include/erika.h</code> is the sole authority.</p>
+  <p class="lead">Global conventions and type definitions for the C ABI. The function lists are split by entry family: <a href="capi-handle.en.html">ErikaHandle</a> (23), <a href="capi-presenter.en.html">ErikaPresenterHandle</a> (78), and general and standalone entry points (15). <code>crates/erika_capi/include/erika.h</code> is the sole authority.</p>
 
   <ul class="meta-strip">
-    <li>Exported functions <b>108</b></li>
-    <li>Types <b>45</b></li>
-    <li>Event kinds <b>12</b></li>
+    <li>Exported functions <b>116</b></li>
+    <li>Types <b>49</b></li>
+    <li>Event kinds <b>13</b></li>
   </ul>
 
   <section id="entry">
@@ -125,7 +125,7 @@
 
   <section id="events">
     <h2>ErikaEventKind<span class="jp">イベント</span><a class="anchor" href="#events">#</a></h2>
-    <p>The enum has 13 values: 12 event kinds and <code>None</code>, which represents no event.</p>
+    <p>The enum has 14 values: 13 event kinds and <code>None</code>. Value 13 is reserved for host use and is not emitted by the engine.</p>
     <p>Events are retrieved with <code>poll_event</code>. The queue is unbounded: a host that never polls only accumulates events and stops observing state; no events are dropped. Only one group of fields in <code>ErikaEvent</code> is valid, as determined by <code>kind</code>. <code>VideoDecoderChanged</code> and <code>AudioOutputChanged</code> have no payload fields, but they write a structured message to the thread-local error slot, which you can read with <code>erika_last_error_message</code>.</p>
     <div class="tw">
       <table>
@@ -144,6 +144,7 @@
           <tr><td class="m">10</td><td class="k">TrackSelectionChanged</td><td>Selected track changed.</td><td class="m">—</td></tr>
           <tr><td class="m">11</td><td class="k">VideoDecoderChanged</td><td>Video decoding backend switched.</td><td class="m">—</td></tr>
           <tr><td class="m">12</td><td class="k">AudioOutputChanged</td><td>Audio output state changed.</td><td class="m">—</td></tr>
+          <tr><td class="m">14</td><td class="k">Ended</td><td>Natural playback completion, after Stopped; an explicit stop does not emit it.</td><td class="m">—</td></tr>
         </tbody>
       </table>
     </div>
@@ -151,7 +152,7 @@
 
   <section id="types">
     <h2>Type inventory<span class="jp">型</span><a class="anchor" href="#types">#</a></h2>
-    <p>All 45 type definitions are in <code>erika.h</code>. The tables below list the fields of the main structs; for complete field and enumeration definitions, the header of the same version is authoritative.</p>
+    <p>All 49 type definitions are in <code>erika.h</code>. The tables below list the fields of the main structs; for complete field and enumeration definitions, the header of the same version is authoritative.</p>
     <h3>Handles</h3>
     <ul class="body">
       <li><code>ErikaHandle</code> — Pull-model handle.</li>
@@ -602,7 +603,7 @@
 
   <section id="open-and-export">
     <h2>Open options and GIF export types<a class="anchor" href="#open-and-export">#</a></h2>
-    <p>The following definitions come from <code>erika.h</code> in 0.3.0. They give the complete fields for the HTTP read-ahead window and GIF export:</p>
+    <p>The following definitions come from <code>erika.h</code> in 0.3.1. They give the complete fields for the HTTP read-ahead window and GIF export:</p>
     <h3>ErikaOpenOptions</h3>
     <div class="code">
 <pre>typedef struct ErikaOpenOptions {
@@ -610,9 +611,11 @@
   uintptr_t header_count;
   uint64_t http_read_ahead_bytes;
   uint64_t http_back_buffer_bytes;
-  uint64_t reserved[2];
+  uint64_t start_position_micros;
+  uint64_t reserved[1];
 } ErikaOpenOptions;</pre>
     </div>
+    <p><code>start_position_micros</code> is the starting time in microseconds; 0 opens at the beginning. It occupies the first former reserved slot, so zero-initialized older structs still open at the beginning.</p>
     <h3>ErikaVideoAlphaMode</h3>
     <div class="code">
 <pre>typedef enum ErikaVideoAlphaMode {
@@ -659,8 +662,36 @@
     <p>A backward seek that lands inside the back buffer reuses the data already downloaded. High-bitrate video needs a larger budget: keeping about 10 seconds of an 80 Mbit/s stream takes roughly 100 MB. The cache is limited by bytes, not by a fixed number of seconds of playback.</p>
   </section>
 
+  <section id="external-texture-types">
+    <h2>Native texture types · 0.3.1<a class="anchor" href="#external-texture-types">#</a></h2>
+    <div class="code"><pre>typedef struct ErikaTextureFrame ErikaTextureFrame;
+typedef enum ErikaExternalTextureKind {
+  ErikaExternalTextureKind_Metal = 1,
+  ErikaExternalTextureKind_VulkanOpaqueFd = 2,
+} ErikaExternalTextureKind;
+typedef enum ErikaExternalTextureFormat {
+  ErikaExternalTextureFormat_Rgba8Unorm = 1,
+} ErikaExternalTextureFormat;
+typedef struct ErikaExternalTextureInfo {
+  ErikaExternalTextureKind kind;
+  ErikaExternalTextureFormat format;
+  uint32_t width;
+  uint32_t height;
+  uint64_t native_handle;
+  uint64_t device_id;
+  uint64_t allocation_size;
+  uint32_t memory_type_index;
+  uint32_t vulkan_format;
+  uint32_t vulkan_usage;
+  uint32_t vulkan_tiling;
+  uint8_t device_uuid[16];
+  uint8_t driver_uuid[16];
+} ErikaExternalTextureInfo;</pre></div>
+    <p>A texture frame can outlive its presenter. Release only after consumer GPU work and imported aliases retire. get_info returns borrowed handles: a Metal consumer may independently retain the texture through all GPU use; duplicate the Vulkan OPAQUE_FD before import (0 is valid), match device and driver UUIDs, and import the dedicated allocation with identical properties. Acquire queue ownership from EXTERNAL with old layout GENERAL before reading. Read-only pixels are sRGB-encoded RGBA in UNORM storage. <a href="https://github.com/AimesSoft/liberika/blob/v0.3.1/docs/external_textures.md">liberika texture guide</a>.</p>
+  </section>
+
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.0</b></span>
+    <span>liberika <b>v0.3.1</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

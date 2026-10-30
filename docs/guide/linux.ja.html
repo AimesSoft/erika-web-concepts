@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Linux アクセス — liberika 開発者ドキュメント</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
   <div class="language-switch" role="group" aria-label="言語"><a href="linux.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="linux.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="linux.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -93,7 +93,7 @@ sudo apt install -y \
       <p class="lbl">shell</p>
 <pre>git clone https://github.com/AimesSoft/liberika.git
 cd liberika
-git checkout v0.3.0
+git checkout v0.3.1
 bash scripts/build_linux_libass.sh
 cargo build --locked --release -p linux_native_demo -p erika_capi
 cargo run --locked --release -p linux_native_demo -- /path/to/video.mkv</pre>
@@ -111,7 +111,7 @@ export ERIKA_LIBRARY_DIR=&quot;${CARGO_TARGET_DIR:-$PWD/target}/release&quot;
 # 在 Flutter 宿主目录中执行：
 flutter build linux --release</pre>
     </div>
-    <p>ホストが追加されました <code>erika_flutter: ^0.3.0</code>。<code>ErikaVideoView</code> と <code>ErikaTextureVideoView</code> SDR RGBA テクスチャを使用すると、Flutter トリミングと UI オーバーレイがサポートされます。このパスには、フレームごとの GPU リードバックが必要です。</p>
+    <p>ホストが追加されました <code>erika_flutter: ^0.3.1</code>。<code>ErikaVideoView</code> と <code>ErikaTextureVideoView</code> SDR RGBA テクスチャを使用すると、Flutter トリミングと UI オーバーレイがサポートされます。このパスには、フレームごとの GPU リードバックが必要です。</p>
     <p>Wayland オプション <code>ErikaWindowOverlayVideoView</code>、使用します <code>wl_subsurface</code> フレームごとの RGBA リードバックを減らすために、ネイティブ ビデオを透明な Flutter UI の下に置きます。ビデオ領域は透明のままにしておく必要があります。このネイティブ レイヤーは不透明な srcOver をサポートしており、ビデオ自体は Flutter トリミングやカラー フィルターを受け入れません。 X11 はテクスチャ ビューを使用します。</p>
   </section>
 
@@ -165,7 +165,7 @@ ERIKA_TEST_WAYLAND=1 bash scripts/check_linux.sh</pre>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.0</b></span>
+    <span>liberika <b>v0.3.1</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

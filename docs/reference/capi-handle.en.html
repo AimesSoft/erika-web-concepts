@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ErikaHandle reference — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
   <div class="language-switch" role="group" aria-label="Language"><a href="capi-handle.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="capi-handle.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="capi-handle.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="capi-json.en.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -116,7 +116,7 @@
 
     <div class="api" id="erika_open_with_options">
       <p class="sig"><b>ErikaStatus erika_open_with_options</b>( ErikaHandle *handle, const char *uri, const ErikaOpenOptions *options)</p>
-      <p class="desc">Opens media with <code>ErikaOpenOptions</code>, which can carry HTTP request headers, the read-ahead window, and the back-buffer budget in a single call. The options are borrowed only for the duration of the call; set <code>reserved</code> to zero.</p>
+      <p class="desc">Opens media with <code>ErikaOpenOptions</code>, which can carry HTTP request headers, the read-ahead window, and the back-buffer budget in a single call. The options are borrowed only for the duration of the call; set <code>reserved</code> to zero. <code>start_position_micros</code> is the starting time in microseconds; 0 opens at the beginning. It occupies the first former reserved slot, so zero-initialized older structs still open at the beginning.</p>
     </div>
 
 
@@ -330,7 +330,7 @@ typedef enum ErikaLogLevel {
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.0</b></span>
+    <span>liberika <b>v0.3.1</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
