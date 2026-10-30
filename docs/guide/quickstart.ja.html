@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>クイック スタート — liberika 開発者ドキュメント</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
   <div class="language-switch" role="group" aria-label="言語"><a href="quickstart.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="quickstart.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="quickstart.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -76,7 +76,7 @@
       <table>
         <thead><tr><th>製品アーカイブ</th><th>コンテンツが含まれています</th><th>サポートアーキテクチャ</th></tr></thead>
         <tbody>
-          <tr><td class="m">erika-swift-core-0.3.0.xcframework.zip</td><td>Apple XCFramework コア ランタイム (macOS / iOS / tvOS)</td><td>arm64 / x86_64</td></tr>
+          <tr><td class="m">erika-swift-core-0.3.1.xcframework.zip</td><td>Apple XCFramework コア ランタイム (macOS / iOS / tvOS)</td><td>arm64 / x86_64</td></tr>
           <tr><td class="m">erika-capi-macos-universal.zip</td><td>liberika_capi.dylib / .a</td><td>arm64 / x86_64</td></tr>
           <tr><td class="m">erika-capi-windows-x64.zip</td><td>erika_capi.dll / .lib</td><td>x86_64</td></tr>
           <tr><td class="m">erika-capi-android.zip</td><td>4 つの ABI 向け共有ライブラリ</td><td>arm64-v8a / armeabi-v7a / x86_64 / x86</td></tr>
@@ -86,12 +86,14 @@
     </div>
   </section>
 
+  <p class="note">SwiftPM と OHPM パッケージにはそれぞれの公開済みバージョンを使ってください。コア Release の Swift XCFramework は 0.3.1 ランタイムです。</p>
+
   <section id="flutter">
     <h2>Flutter アクセス<span class="jp">Flutter</span><a class="anchor" href="#flutter">#</a></h2>
     <div class="code">
       <p class="lbl">pubspec.yaml</p>
 <pre>dependencies:
-  erika_flutter: ^0.3.0</pre>
+  erika_flutter: ^0.3.1</pre>
     </div>
     <div class="code">
       <p class="lbl">lib/main.dart</p>
@@ -131,7 +133,7 @@
     <div class="code">
       <p class="lbl">Cargo.toml</p>
 <pre>[dependencies]
-erika = { git = <span class="s">"https://github.com/AimesSoft/liberika"</span>, tag = <span class="s">"v0.3.0"</span> }</pre>
+erika = { git = <span class="s">"https://github.com/AimesSoft/liberika"</span>, tag = <span class="s">"v0.3.1"</span> }</pre>
     </div>
     <div class="code">
       <p class="lbl">src/main.rs</p>
@@ -183,11 +185,11 @@ erika_presenter_render_tick(p, host_time, &amp;stats);</pre>
 
   <section id="web">
     <h2>Web / WASM<a class="anchor" href="#web">#</a></h2>
-    <p>ダウンロード <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/liberika-web-0.3.0.zip">liberika-web-0.3.0.zip</a>、完全な解凍後、HTTPS または localhost を通じてデモ ページにアクセスします。 JavaScriptを使用する <code>Player.create({ canvas })</code> ローカルの MKV、ASS フォント、弾幕、マルチトラック、チャプター、スクリーンショットにアクセスし、サポートします。対応コーデックはブラウザーの WebCodecs 実装によって決まり、現在の出力は SDR です。詳細については参照してください <a href="web.ja.html">Web / WASM ガイド</a>。</p>
+    <p>ダウンロード <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.1/liberika-web-0.3.1.zip">liberika-web-0.3.1.zip</a>、完全な解凍後、HTTPS または localhost を通じてデモ ページにアクセスします。 JavaScriptを使用する <code>Player.create({ canvas })</code> ローカルの MKV、ASS フォント、弾幕、マルチトラック、チャプター、スクリーンショットにアクセスし、サポートします。対応コーデックはブラウザーの WebCodecs 実装によって決まり、現在の出力は SDR です。詳細については参照してください <a href="web.ja.html">Web / WASM ガイド</a>。</p>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.0</b></span>
+    <span>liberika <b>v0.3.1</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>渲染管线 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <div class="language-switch" role="group" aria-label="语言"><a href="render.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="render.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="render.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -109,13 +109,15 @@
 
   <section id="compositing">
     <h2>合成与几何<span class="jp">合成</span><a class="anchor" href="#compositing">#</a></h2>
-    <p>字幕与弹幕在 <code>OverlayComposite</code> pass 中合成。合成发生在视频视口内：弹幕与字幕相对视频内容定位，跟随视频的 aspect-fit 几何。</p>
+    <p>字幕与弹幕在 <code>OverlayComposite</code> pass 中合成。字幕限定在视频视口内，跟随画面的 aspect-fit 几何；弹幕仍可使用黑边区域。</p>
     <p>视频内容以 <code>aspect_fit</code> 居中放置在输出表面内，letterbox 区域由清屏色填充（当前后端统一为黑色）。合成顺序为视频、字幕、弹幕。</p>
-    <p>HDR 内容的渲染链与截图链共用同一张 pass 图；截图渲染到与表面相同像素格式的离屏目标，读回时转为 RGBA8（HDR 值钳制到 SDR 范围）。截图只合成视频与字幕，不含弹幕与 debug HUD。</p>
+    <p>HDR 内容的渲染链与截图链共用同一张 pass 图；截图渲染到与表面相同像素格式的离屏目标，读回时转为 RGBA8（HDR 值钳制到 SDR 范围）。原有截图接口只合成视频与字幕，不含弹幕与 debug HUD。</p>
   </section>
 
+  <p class="note">原生默认截图合成视频和字幕，不含弹幕和 debug HUD。0.3.1 新增独立的含弹幕截图入口；原生帧纹理导出也包含字幕和已启用的弹幕。</p>
+
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.0</b></span>
+    <span>liberika <b>v0.3.1</b></span>
     <span>Section <b>Kernel</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

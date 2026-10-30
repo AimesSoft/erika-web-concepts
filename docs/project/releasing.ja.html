@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>リリースと製品 — liberika 開発者ドキュメント</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
   <div class="language-switch" role="group" aria-label="言語"><a href="releasing.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="releasing.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="releasing.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -73,10 +73,12 @@
     <h2>トリガー<span class="jp">トリガー</span><a class="anchor" href="#trigger">#</a></h2>
     <p>押し込む <code>v*</code> このタグは正式リリースをトリガーし、ビルドが完了した後、GitHub Releases にリリースされます。 workflow_dispatch 公開せずにビルドのみを手動で実行します。リリース前のチェックに使用されます。公開する前にローカルマシンで実行する <a href="building.ja.html">ビルドプロセス</a> 確認する。</p>
     <div class="code">
-<pre>git tag v0.3.0
-git push origin v0.3.0</pre>
+<pre>git tag v0.3.2
+git push origin v0.3.2</pre>
     </div>
   </section>
+
+  <p class="note">タグを push すると Release ワークフローが正式ビルドを実行します。タグを付ける前の手動実行は必須ではありません。</p>
 
   <section id="prepare">
     <h2>ラベルを貼る前の準備<a class="anchor" href="#prepare">#</a></h2>
@@ -106,7 +108,7 @@ git push origin v0.3.0</pre>
 
   <section id="web">
     <h2>Web / WASM アーカイブ<a class="anchor" href="#web">#</a></h2>
-    <p><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/liberika-web-0.3.0.zip">liberika-web-0.3.0.zip</a> によって <code>cargo run -p xtask -- web build</code> JavaScript、2 つの WASM、Worker、ライセンスを含む生成、<code>build-manifest.json</code> そして <code>index.html</code> デモページ。ネイティブ ZIP で書き込みます <code>SHA256SUMS</code>。</p>
+    <p><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.1/liberika-web-0.3.1.zip">liberika-web-0.3.1.zip</a> によって <code>cargo run -p xtask -- web build</code> JavaScript、2 つの WASM、Worker、ライセンスを含む生成、<code>build-manifest.json</code> そして <code>index.html</code> デモページ。ネイティブ ZIP で書き込みます <code>SHA256SUMS</code>。</p>
     <p>完全な解凍後、HTTPS または localhost を通じてアクセスします。独立した静的展開では、ローカルの MKV 再生を選択できます。 Web パッケージはまだ npm にリリースされていません。アクセスと互換性の範囲を参照してください。 <a href="../guide/web.ja.html">Webガイド</a>。</p>
   </section>
 
@@ -141,7 +143,7 @@ git push origin v0.3.0</pre>
     <p>プリコンパイルされたランタイムは、Flutter プラグインのビルド時にデフォルトでダウンロードされます (<code>erika_flutter</code> pub.dev バージョンには検証とキャッシュが付属しています)。ソース コードからビルドする場合は、明示的にエクスポートする必要があります。</p>
     <div class="code">
 <pre><span class="k">export</span> ERIKA_FORCE_SOURCE_BUILD=1    <span class="c"># 改为源码构建（需 ERIKA_REPO_ROOT 指向仓库检出）</span>
-<span class="k">export</span> ERIKA_PREBUILT_TAG=v0.3.0       <span class="c"># 自定义预编译版本标签，默认匹配当前版本</span></pre>
+<span class="k">export</span> ERIKA_PREBUILT_TAG=v0.3.1       <span class="c"># 自定义预编译版本标签，默认匹配当前版本</span></pre>
     </div>
     <p>明示的なオーバーライド <code>ERIKA_PREBUILT_TAG</code> も設定する必要があります。 <code>ERIKA_PREBUILT_SHA256</code>;同じReleaseから <code>SHA256SUMS</code> 対応するプラットフォームの概要を読んでください。ソース コードのビルドとカスタム プリコンパイル バージョンは、2 つの独立した構成方法です。</p>
     <p>プラットフォームごとにスクリプトを構築する <code>github.com/AimesSoft/liberika/releases/download/&lt;tag&gt;/</code> 対応するbundleをダウンロードして解凍し、リリースレベルを押します <code>SHA256SUMS</code> 検証のまとめ。</p>
@@ -157,7 +159,7 @@ git push origin v0.3.0</pre>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.0</b></span>
+    <span>liberika <b>v0.3.1</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

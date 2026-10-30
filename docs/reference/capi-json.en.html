@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>JSON bridge — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
   <div class="language-switch" role="group" aria-label="Language"><a href="capi-json.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="capi-json.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="capi-json.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,17 +53,17 @@
       <li><a href="capi-json.en.html" aria-current="page">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>JSON bridge</p>
   <h1>JSON bridge</h1>
   <p class="kicker">JSON Bridge Reference</p>
-  <p class="lead">Three JSON variant functions and 47 named methods, for hosts that already serialize structured parameters over a platform channel, such as the <code>MethodChannel</code> side of a Dart FFI host. The methods cover Presenter operations, global logging, and frame export. Parameters are passed as a JSON object; call listMethods to query the interfaces the runtime supports.</p>
+  <p class="lead">Three JSON variant functions and 51 named methods, for hosts that already serialize structured parameters over a platform channel, such as the <code>MethodChannel</code> side of a Dart FFI host. The methods cover Presenter operations, global logging, and frame export. Parameters are passed as a JSON object; call listMethods to query the interfaces the runtime supports.</p>
 
   <ul class="meta-strip">
-    <li>Methods <b>47</b></li>
+    <li>Methods <b>51</b></li>
     <li>Naming <b>camelCase</b></li>
   </ul>
 
@@ -103,7 +103,7 @@
 
   <section id="events">
     <h2>Event return shape<span class="jp">イベント</span><a class="anchor" href="#events">#</a></h2>
-    <p>The fields of the event object from <code>poll_event_json</code> correspond one-to-one to <code>ErikaEvent</code>. kind is an integer (0–12; see the event table in the <a href="capi.en.html#events">C ABI overview</a>):</p>
+    <p>The fields of the event object from <code>poll_event_json</code> correspond one-to-one to <code>ErikaEvent</code>. kind is an integer (0–12, 14; see the event table in the <a href="capi.en.html#events">C ABI overview</a>):</p>
     <div class="code">
 <pre>{ "kind": 1, "status": 0, "state": 2, "durationMicros": 0,
   "positionMicros": 0, "buffering": false,
@@ -122,13 +122,20 @@
       <table>
         <thead><tr><th>Method</th><th>Parameters</th><th>Returns</th><th>C function</th></tr></thead>
         <tbody>
-          <tr><td class="k">open</td><td class="m">uri, [httpHeaders], [httpReadAheadBytes], [httpBackBufferBytes]</td><td class="m">null</td><td class="m">erika_presenter_open_with_options</td></tr>
-          <tr><td class="k">play / pause / stop / close</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_play / pause / stop / close</td></tr>
+          <tr><td class="k">open</td><td class="m">uri, [httpHeaders], [httpReadAheadBytes], [httpBackBufferBytes], [startPositionMicros]</td><td class="m">null</td><td class="m">erika_presenter_open_with_options</td></tr>
+          <tr><td class="k">play</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_play</td></tr>
+          <tr><td class="k">pause</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_pause</td></tr>
+          <tr><td class="k">stop</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_stop</td></tr>
+          <tr><td class="k">close</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_close</td></tr>
           <tr><td class="k">seek</td><td class="m">positionMicros</td><td class="m">null</td><td class="m">erika_presenter_seek</td></tr>
           <tr><td class="k">setPlaybackRate</td><td class="m">rate</td><td class="m">null</td><td class="m">erika_presenter_set_playback_rate</td></tr>
           <tr><td class="k">setVolume</td><td class="m">volume</td><td class="m">null</td><td class="m">erika_presenter_set_volume</td></tr>
           <tr><td class="k">setUpscaler</td><td class="m">mode</td><td class="m">null</td><td class="m">erika_presenter_set_upscaler</td></tr>
           <tr><td class="k">setSubtitleScale</td><td class="m">scale</td><td class="m">null</td><td class="m">erika_presenter_set_subtitle_scale</td></tr>
+          <tr><td class="k">setOpenStartPosition</td><td class="m">positionMicros</td><td class="m">null</td><td class="m">erika_presenter_set_open_start_position</td></tr>
+          <tr><td class="k">setSubtitleDelay</td><td class="m">delayMicros</td><td class="m">null</td><td class="m">erika_presenter_set_subtitle_delay</td></tr>
+          <tr><td class="k">subtitleDelay</td><td class="m">—</td><td class="m">{delayMicros}</td><td class="m">JSON bridge</td></tr>
+          <tr><td class="k">subtitleText</td><td class="m">—</td><td class="m">{text, cues, mediaOpen}</td><td class="m">JSON bridge</td></tr>
         </tbody>
       </table>
     </div>
@@ -141,7 +148,8 @@
           <tr><td class="k">tracks</td><td class="m">—</td><td class="m">Track array</td><td class="m">erika_presenter_tracks</td></tr>
           <tr><td class="k">addExternalSubtitle</td><td class="m">uri</td><td class="m">trackId</td><td class="m">erika_presenter_add_external_subtitle</td></tr>
           <tr><td class="k">removeSubtitleTrack</td><td class="m">trackId (signed)</td><td class="m">null</td><td class="m">erika_presenter_remove_subtitle_track</td></tr>
-          <tr><td class="k">selectAudioTrack / selectSubtitleTrack</td><td class="m">[trackId], default -1</td><td class="m">null</td><td class="m">erika_presenter_select_audio_track / select_subtitle_track</td></tr>
+                    <tr><td class="k">selectAudioTrack</td><td class="m">[trackId], default -1</td><td class="m">null</td><td class="m">erika_presenter_select_audio_track</td></tr>
+          <tr><td class="k">selectSubtitleTrack</td><td class="m">[trackId], default -1</td><td class="m">null</td><td class="m">erika_presenter_select_subtitle_track</td></tr>
         </tbody>
       </table>
     </div>
@@ -195,6 +203,8 @@
     </div>
   </section>
 
+  <p><code>setOpenStartPosition</code> sets the start for the next open. Positive <code>setSubtitleDelay</code> values delay subtitles, negative values advance them, clamped to ±10 minutes. <code>subtitleDelay</code> returns the current offset; <code>subtitleText</code> returns delay-adjusted text, cues and mediaOpen. ASS override tags are removed; bitmap subtitles have no text.</p>
+
   <section id="discovery">
     <h2>Method discovery, chapters, and diagnostics · 0.3.0<a class="anchor" href="#discovery">#</a></h2>
     <p><code>listMethods</code> returns <code>{schema, methods}</code>. Each entry contains name, scope, summary, arguments (name / type / required), returns, blocking, and writesFiles; the table that the current runtime returns is authoritative. Global methods need no handle; Presenter methods need a valid handle. The entries describe synchronous blocking and possible file writes; they do not imply asynchronous task scheduling.</p>
@@ -242,7 +252,7 @@ char *ev = erika_presenter_poll_event_json(p);
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.0</b></span>
+    <span>liberika <b>v0.3.1</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

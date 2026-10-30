@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>JSON bridge — liberika 開発者向けドキュメント</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
   <div class="language-switch" role="group" aria-label="言語"><a href="capi-json.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="capi-json.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="capi-json.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="capi-json.ja.html" aria-current="page">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -61,10 +61,10 @@
   <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>JSON bridge</p>
   <h1>JSON bridge</h1>
   <p class="kicker">JSON Bridge Reference</p>
-  <p class="lead">47 の名前付きメソッドを持つ 3 つの JSON バリアント関数。 Dart FFI ホストなど、構造化パラメーターをシリアル化するためにプラットフォーム チャネルを使用したホストで使用します。 <code>MethodChannel</code> 片側。このメソッドは、Presenter 操作、グローバル ログ、フレーム エクスポートをカバーしており、パラメータは JSON オブジェクトを通じて渡されます。 listMethods を使用して、ランタイムでサポートされているインターフェイスをクエリします。</p>
+  <p class="lead">51 の名前付きメソッドを持つ 3 つの JSON バリアント関数。 Dart FFI ホストなど、構造化パラメーターをシリアル化するためにプラットフォーム チャネルを使用したホストで使用します。 <code>MethodChannel</code> 片側。このメソッドは、Presenter 操作、グローバル ログ、フレーム エクスポートをカバーしており、パラメータは JSON オブジェクトを通じて渡されます。 listMethods を使用して、ランタイムでサポートされているインターフェイスをクエリします。</p>
 
   <ul class="meta-strip">
-    <li>方法 <b>47</b> ある</li>
+    <li>方法 <b>51</b> ある</li>
     <li>名前 <b>camelCase</b></li>
   </ul>
 
@@ -104,7 +104,7 @@
 
   <section id="events">
     <h2>イベントの戻り形状<span class="jp">イベント</span><a class="anchor" href="#events">#</a></h2>
-    <p><code>poll_event_json</code> イベント オブジェクトのフィールドは次と同じです。 <code>ErikaEvent</code> 1 対 1 の対応。kind は整数 (0 ～ 12、参照)<a href="capi.ja.html#events">C ABI 概要</a>イベントテーブル):</p>
+    <p><code>poll_event_json</code> イベント オブジェクトのフィールドは次と同じです。 <code>ErikaEvent</code> 1 対 1 の対応。kind は整数 (0 ～ 12 と 14、参照)<a href="capi.ja.html#events">C ABI 概要</a>イベントテーブル):</p>
     <div class="code">
 <pre>{ "kind": 1, "status": 0, "state": 2, "durationMicros": 0,
   "positionMicros": 0, "buffering": false,
@@ -123,13 +123,20 @@
       <table>
         <thead><tr><th>方法</th><th>パラメータ</th><th>戻る</th><th>C機能に対応</th></tr></thead>
         <tbody>
-          <tr><td class="k">open</td><td class="m">uri，[httpHeaders]，[httpReadAheadBytes]，[httpBackBufferBytes]</td><td class="m">null</td><td class="m">erika_presenter_open_with_options</td></tr>
-          <tr><td class="k">play / pause / stop / close</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_play / pause / stop / close</td></tr>
+          <tr><td class="k">open</td><td class="m">uri，[httpHeaders]，[httpReadAheadBytes]，[httpBackBufferBytes], [startPositionMicros]</td><td class="m">null</td><td class="m">erika_presenter_open_with_options</td></tr>
+          <tr><td class="k">play</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_play</td></tr>
+          <tr><td class="k">pause</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_pause</td></tr>
+          <tr><td class="k">stop</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_stop</td></tr>
+          <tr><td class="k">close</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_close</td></tr>
           <tr><td class="k">seek</td><td class="m">positionMicros</td><td class="m">null</td><td class="m">erika_presenter_seek</td></tr>
           <tr><td class="k">setPlaybackRate</td><td class="m">rate</td><td class="m">null</td><td class="m">erika_presenter_set_playback_rate</td></tr>
           <tr><td class="k">setVolume</td><td class="m">volume</td><td class="m">null</td><td class="m">erika_presenter_set_volume</td></tr>
           <tr><td class="k">setUpscaler</td><td class="m">mode</td><td class="m">null</td><td class="m">erika_presenter_set_upscaler</td></tr>
           <tr><td class="k">setSubtitleScale</td><td class="m">scale</td><td class="m">null</td><td class="m">erika_presenter_set_subtitle_scale</td></tr>
+          <tr><td class="k">setOpenStartPosition</td><td class="m">positionMicros</td><td class="m">null</td><td class="m">erika_presenter_set_open_start_position</td></tr>
+          <tr><td class="k">setSubtitleDelay</td><td class="m">delayMicros</td><td class="m">null</td><td class="m">erika_presenter_set_subtitle_delay</td></tr>
+          <tr><td class="k">subtitleDelay</td><td class="m">—</td><td class="m">{delayMicros}</td><td class="m">JSON bridge</td></tr>
+          <tr><td class="k">subtitleText</td><td class="m">—</td><td class="m">{text, cues, mediaOpen}</td><td class="m">JSON bridge</td></tr>
         </tbody>
       </table>
     </div>
@@ -142,7 +149,8 @@
           <tr><td class="k">tracks</td><td class="m">—</td><td class="m">軌道アレイ</td><td class="m">erika_presenter_tracks</td></tr>
           <tr><td class="k">addExternalSubtitle</td><td class="m">uri</td><td class="m">trackId</td><td class="m">erika_presenter_add_external_subtitle</td></tr>
           <tr><td class="k">removeSubtitleTrack</td><td class="m">trackId (署名)</td><td class="m">null</td><td class="m">erika_presenter_remove_subtitle_track</td></tr>
-          <tr><td class="k">selectAudioTrack / selectSubtitleTrack</td><td class="m">[trackId]、デフォルトは -1</td><td class="m">null</td><td class="m">erika_presenter_select_audio_track / select_subtitle_track</td></tr>
+                    <tr><td class="k">selectAudioTrack</td><td class="m">[trackId]、デフォルトは -1</td><td class="m">null</td><td class="m">erika_presenter_select_audio_track</td></tr>
+          <tr><td class="k">selectSubtitleTrack</td><td class="m">[trackId]、デフォルトは -1</td><td class="m">null</td><td class="m">erika_presenter_select_subtitle_track</td></tr>
         </tbody>
       </table>
     </div>
@@ -196,6 +204,8 @@
     </div>
   </section>
 
+  <p><code>setOpenStartPosition</code> は次の open の開始位置を設定します。<code>setSubtitleDelay</code> は正で字幕を遅らせ、負で早め、±10 分に制限します。<code>subtitleDelay</code> は現在の偏移を、<code>subtitleText</code> は偏移適用後の text・cues・mediaOpen を返します。ASS オーバーライドタグは除去し、ビットマップ字幕にはテキストがありません。</p>
+
   <section id="discovery">
     <h2>インターフェイスの検出、章、診断 · 0.3.0<a class="anchor" href="#discovery">#</a></h2>
     <p><code>listMethods</code> 戻る <code>{schema, methods}</code>。各アイテムには、name、scope、summary、arguments (name / type / required)、returns、blocking、writesFiles が含まれます。現在の実行中に返されるテーブル。グローバル メソッドには handle は必要ありません。また、Presenter メソッドは有効な handle である必要があります。表のエントリは、同期ブロッキングの動作と可能なファイル書き込みを説明するものであり、非同期タスクのスケジューリングを表すものではありません。</p>
@@ -243,7 +253,7 @@ char *ev = erika_presenter_poll_event_json(p);
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.0</b></span>
+    <span>liberika <b>v0.3.1</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

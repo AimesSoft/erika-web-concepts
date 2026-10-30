@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Rendering pipeline — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
   <div class="language-switch" role="group" aria-label="Language"><a href="render.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="render.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="render.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -109,13 +109,15 @@
 
   <section id="compositing">
     <h2>Compositing and geometry<span class="jp">合成</span><a class="anchor" href="#compositing">#</a></h2>
-    <p>Subtitles and danmaku are composited in the <code>OverlayComposite</code> pass. Compositing happens inside the video viewport: danmaku and subtitles are positioned relative to the video content and follow its aspect-fit geometry.</p>
+    <p>Subtitles and danmaku are composited in the <code>OverlayComposite</code> pass. Subtitles stay within the aspect-fit video viewport; danmaku can also use the letterbox area.</p>
     <p>Video content is placed centered in the output surface with <code>aspect_fit</code>, and the letterbox area is filled with the clear color (currently black on all backends). The compositing order is video, subtitles, then danmaku.</p>
-    <p>The HDR rendering chain and the screenshot chain share the same pass graph. A screenshot is rendered to an offscreen target with the same pixel format as the surface and converted to RGBA8 on readback (HDR values are clamped to the SDR range). Screenshots composite only video and subtitles; they exclude danmaku and the debug HUD.</p>
+    <p>The HDR rendering chain and the screenshot chain share the same pass graph. A screenshot is rendered to an offscreen target with the same pixel format as the surface and converted to RGBA8 on readback (HDR values are clamped to the SDR range). The original screenshot API composites only video and subtitles; they exclude danmaku and the debug HUD.</p>
   </section>
 
+  <p class="note">The original native capture composites video and subtitles, excluding danmaku and the debug HUD. Version 0.3.1 adds a separate capture with danmaku; native frame texture export includes subtitles and enabled danmaku.</p>
+
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.0</b></span>
+    <span>liberika <b>v0.3.1</b></span>
     <span>Section <b>Kernel</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>C ABI 嵌入 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <div class="language-switch" role="group" aria-label="语言"><a href="c.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="c.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="c.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -64,7 +64,7 @@
 
   <ul class="meta-strip">
     <li>头文件 <b>crates/erika_capi/include/erika.h</b></li>
-    <li>导出 <b>108</b> 个函数</li>
+    <li>导出 <b>116</b> 个函数</li>
     <li>入口 <b>2</b> 族</li>
   </ul>
 
@@ -95,6 +95,8 @@
       <li><b>线程安全。</b> 单个 handle 内部不包含同步锁，禁止在多个线程中并发调用同一句柄的方法。</li>
     </ul>
   </section>
+
+  <p class="note">0.3.1 新增 <code>ErikaOpenOptions.start_position_micros</code>、<code>erika_presenter_set_open_start_position</code>、自然结束事件 <code>ErikaEventKind_Ended</code>、<code>erika_presenter_set_subtitle_delay</code>、含弹幕截图和原生帧纹理导出。旧结构体清零后仍从头播放，主动停止不会产生结束事件。</p>
 
   <section id="presenter">
     <h2>Presenter 端到端示例<span class="jp">Presenter の流れ</span><a class="anchor" href="#presenter">#</a></h2>
@@ -236,7 +238,7 @@ ErikaStatus status = erika_presenter_open_with_options(
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.0</b></span>
+    <span>liberika <b>v0.3.1</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

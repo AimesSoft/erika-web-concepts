@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>快速开始 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
-<script defer src="../docs.js?v=20261030-i18n"></script>
+<link rel="stylesheet" href="../docs.css?v=20261031-031">
+<script defer src="../docs.js?v=20261031-031"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <div class="language-switch" role="group" aria-label="语言"><a href="quickstart.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="quickstart.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="quickstart.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -75,7 +75,7 @@
       <table>
         <thead><tr><th>产物归档</th><th>包含内容</th><th>支持架构</th></tr></thead>
         <tbody>
-          <tr><td class="m">erika-swift-core-0.3.0.xcframework.zip</td><td>Apple XCFramework 核心运行时（macOS / iOS / tvOS）</td><td>arm64 / x86_64</td></tr>
+          <tr><td class="m">erika-swift-core-0.3.1.xcframework.zip</td><td>Apple XCFramework 核心运行时（macOS / iOS / tvOS）</td><td>arm64 / x86_64</td></tr>
           <tr><td class="m">erika-capi-macos-universal.zip</td><td>liberika_capi.dylib / .a</td><td>arm64 / x86_64</td></tr>
           <tr><td class="m">erika-capi-windows-x64.zip</td><td>erika_capi.dll / .lib</td><td>x86_64</td></tr>
           <tr><td class="m">erika-capi-android.zip</td><td>4 个 ABI 的 so 库</td><td>arm64-v8a / armeabi-v7a / x86_64 / x86</td></tr>
@@ -85,12 +85,14 @@
     </div>
   </section>
 
+  <p class="note">SwiftPM 和 OHPM 包各自使用其已发布版本；核心 Release 中的 Swift XCFramework 归档是 0.3.1 运行时。</p>
+
   <section id="flutter">
     <h2>Flutter 接入<span class="jp">Flutter</span><a class="anchor" href="#flutter">#</a></h2>
     <div class="code">
       <p class="lbl">pubspec.yaml</p>
 <pre>dependencies:
-  erika_flutter: ^0.3.0</pre>
+  erika_flutter: ^0.3.1</pre>
     </div>
     <div class="code">
       <p class="lbl">lib/main.dart</p>
@@ -130,7 +132,7 @@
     <div class="code">
       <p class="lbl">Cargo.toml</p>
 <pre>[dependencies]
-erika = { git = <span class="s">"https://github.com/AimesSoft/liberika"</span>, tag = <span class="s">"v0.3.0"</span> }</pre>
+erika = { git = <span class="s">"https://github.com/AimesSoft/liberika"</span>, tag = <span class="s">"v0.3.1"</span> }</pre>
     </div>
     <div class="code">
       <p class="lbl">src/main.rs</p>
@@ -182,11 +184,11 @@ erika_presenter_render_tick(p, host_time, &amp;stats);</pre>
 
   <section id="web">
     <h2>Web / WASM<a class="anchor" href="#web">#</a></h2>
-    <p>下载 <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/liberika-web-0.3.0.zip">liberika-web-0.3.0.zip</a>，完整解压后通过 HTTPS 或 localhost 访问演示页。使用 JavaScript <code>Player.create({ canvas })</code> 接入，支持本地 MKV、ASS 字体、弹幕、多轨、章节与截图。编码能力由浏览器 WebCodecs 决定，当前输出为 SDR；详见 <a href="web.html">Web / WASM 指南</a>。</p>
+    <p>下载 <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.1/liberika-web-0.3.1.zip">liberika-web-0.3.1.zip</a>，完整解压后通过 HTTPS 或 localhost 访问演示页。使用 JavaScript <code>Player.create({ canvas })</code> 接入，支持本地 MKV、ASS 字体、弹幕、多轨、章节与截图。编码能力由浏览器 WebCodecs 决定，当前输出为 SDR；详见 <a href="web.html">Web / WASM 指南</a>。</p>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.0</b></span>
+    <span>liberika <b>v0.3.1</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
