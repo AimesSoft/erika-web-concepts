@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Clock and scheduling — liberika developer documentation</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
+<script defer src="../docs.js?v=20261030-i18n"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
+  <div class="language-switch" role="group" aria-label="Language"><a href="clock.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="clock.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="clock.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
+  <nav>
+    <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.en.html">Quick start</a></li>
+      <li><a href="../guide/flutter.en.html">Flutter integration</a></li>
+      <li><a href="../guide/swift.en.html">Swift integration</a></li>
+      <li><a href="../guide/openharmony.en.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.en.html">Rust integration</a></li>
+      <li><a href="../guide/c.en.html">C ABI integration</a></li>
+      <li><a href="../guide/linux.en.html">Linux integration</a></li>
+      <li><a href="../guide/web.en.html">Web / WASM integration</a></li>
+    </ul>
+    <h2><span class="no">2</span>Kernel design <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="architecture.en.html">Architecture overview</a></li>
+      <li><a href="decode.en.html">Hardware decoding</a></li>
+      <li><a href="zero-copy.en.html">Zero-copy import</a></li>
+      <li><a href="render.en.html">Rendering pipeline</a></li>
+      <li><a href="hdr.en.html">High dynamic range</a></li>
+      <li><a href="upscale.en.html">Neural upscaling</a></li>
+      <li><a href="subtitle-danmaku.en.html">Subtitles and danmaku</a></li>
+      <li><a href="clock.en.html" aria-current="page">Clock and scheduling</a></li>
+    </ul>
+    <h2><span class="no">3</span>Project <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.en.html">Building and dependencies</a></li>
+      <li><a href="../project/releasing.en.html">Releases and artifacts</a></li>
+      <li><a href="../project/contributing.en.html">Contributing</a></li>
+      <li><a href="../project/changelog.en.html">Changelog</a></li>
+    </ul>
+    <h2><span class="no">4</span>Reference <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.en.html">C ABI overview</a></li>
+      <li><a href="../reference/capi-handle.en.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.en.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>Clock and scheduling</p>
+  <h1>Clock and scheduling</h1>
+  <p class="kicker">Clock &amp; Scheduling</p>
+  <p class="lead">Audio output is the master clock. The presentation target of each video frame is quantized to vsync and aligned to the audio clock; there is no separate display clock between audio and video. When the buffer runs low, the kernel explicitly enters the buffering state, the clock freezes, and it re-anchors once data recovers.</p>
+
+  <ul class="meta-strip">
+    <li>Master clock <b>Audio</b></li>
+    <li>Ring buffer <b>192,000 frames</b></li>
+    <li>vsync <b>Quantized display target</b></li>
+  </ul>
+
+  <section id="clock">
+    <h2>Audio master clock<span class="jp">オーディオマスター</span><a class="anchor" href="#clock">#</a></h2>
+    <p>Every audio output backend pushes data into a shared f32 PCM ring buffer (capacity 192,000 frames; on overflow the oldest data is dropped). The playback clock is based on media time and derives the current time from the anchor point and the playback rate.</p>
+    <p>On every <code>render_tick</code>, the Presenter reads a snapshot of the audio clock and syncs it to the playback thread. Three parameters govern clock correction:</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Parameter</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="m">deadband</td><td class="m">5 ms</td><td>Jitter smaller than this value is not corrected.</td></tr>
+          <tr><td class="m">Maximum single correction</td><td class="m">5 ms</td><td>The upper limit of each correction, to avoid visible jumps.</td></tr>
+          <tr><td class="m">Snapshot threshold</td><td class="m">250 ms</td><td>A deviation above this value counts as the clock having drifted off track, and the clock is re-anchored directly.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The reference time is the media time plus the duration of queued audio (an audio lead of 120 ms), so video is presented ahead of the end of the audio queue. When the playback rate is not 1, audio clock synchronization is skipped and SoundTouch changes the audio speed (SEQUENCE 25 ms).</p>
+  </section>
+
+  <section id="vsync">
+    <h2>vsync-quantized scheduling<span class="jp">VSync スケジューリング</span><a class="anchor" href="#vsync">#</a></h2>
+    <p>The presentation target of each video frame is quantized to the vsync interval (16,666,667 ns by default, which is 60 Hz). For each frame, the scheduler makes one of three decisions:</p>
+    <ul class="body">
+      <li><b>Present</b> — The target time falls within this vsync cycle, so the frame is presented immediately.</li>
+      <li><b>Wait</b> — The frame is earlier than the presentation window, so it waits for the next cycle.</li>
+      <li><b>Drop</b> — The frame is later than the presentation window, so it is skipped to reduce accumulated latency.</li>
+    </ul>
+    <p>At most 5 consecutive frames can be dropped. Once it reaches that limit, the scheduler stops dropping and returns to Wait, so the screen is never left without output for long.</p>
+    <p>The clock is frozen while paused. A seek decodes and presents the keyframe at the requested position while the media clock stays put.</p>
+  </section>
+
+  <section id="buffering">
+    <h2>Buffering state<span class="jp">バッファリング</span><a class="anchor" href="#buffering">#</a></h2>
+    <p>When audio or video input runs short, playback enters an explicit buffering state: the playback clock freezes and stops advancing. Once data recovers, the clock is re-anchored at the recovered media time. The host observes the state change through the <code>BufferingChanged</code> event.</p>
+    <div class="note">
+      <p>The clock does not advance during buffering so that recovery does not cause a long run of dropped frames or a black screen.</p>
+    </div>
+  </section>
+
+  <section id="diagnostics">
+    <h2>Diagnostics<span class="jp">診断</span><a class="anchor" href="#diagnostics">#</a></h2>
+    <p>Environment variables control trace output for the clock and playback, which is written to <code>/tmp/erika_playback_trace.log</code>:</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Environment variable</th><th>Output</th></tr></thead>
+        <tbody>
+          <tr><td class="m">ERIKA_CLOCK_TRACE</td><td>Clock correction and anchor events.</td></tr>
+          <tr><td class="m">ERIKA_PLAYBACK_TRACE</td><td>Playback state machine events.</td></tr>
+          <tr><td class="m">ERIKA_DANMAKU_TRACE</td><td>Danmaku plan generation events.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>On Android, diagnostic output is emitted through logcat with the <code>Erika</code> tag. The debug HUD computes fps from frame count deltas, and you can control it with <code>set_debug_hud_enabled</code>.</p>
+  </section>
+
+  <section id="display-target">
+    <h2>iOS display target time<a class="anchor" href="#display-target">#</a></h2>
+    <p>Since 0.2.1, the iOS Flutter plugin uses <code>CADisplayLink.targetTimestamp</code> as the display target rather than the time the native queue actually runs. The refresh interval follows the display callback, so a 120 Hz screen is not scheduled at a fixed 60 Hz.</p>
+    <p>The display callback coalesces backlogged ticks through a mailbox. <code>erika_presenter_render_tick_with_timing</code> samples video, subtitles, and danmaku at the same target time. After a pause or seek, it does not advance or re-anchor the playback clock.</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Kernel</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="subtitle-danmaku.en.html"><span class="dir">Prev</span>Subtitles and danmaku</a>
+    <a class="nx" href="../reference/capi.en.html"><span class="dir">Next</span>C ABI overview</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

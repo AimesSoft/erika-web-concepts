@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Contributing — liberika developer documentation</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
+<script defer src="../docs.js?v=20261030-i18n"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
+  <div class="language-switch" role="group" aria-label="Language"><a href="contributing.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="contributing.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="contributing.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
+  <nav>
+    <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.en.html">Quick start</a></li>
+      <li><a href="../guide/flutter.en.html">Flutter integration</a></li>
+      <li><a href="../guide/swift.en.html">Swift integration</a></li>
+      <li><a href="../guide/openharmony.en.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.en.html">Rust integration</a></li>
+      <li><a href="../guide/c.en.html">C ABI integration</a></li>
+      <li><a href="../guide/linux.en.html">Linux integration</a></li>
+      <li><a href="../guide/web.en.html">Web / WASM integration</a></li>
+    </ul>
+    <h2><span class="no">2</span>Kernel design <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.en.html">Architecture overview</a></li>
+      <li><a href="../kernel/decode.en.html">Hardware decoding</a></li>
+      <li><a href="../kernel/zero-copy.en.html">Zero-copy import</a></li>
+      <li><a href="../kernel/render.en.html">Rendering pipeline</a></li>
+      <li><a href="../kernel/hdr.en.html">High dynamic range</a></li>
+      <li><a href="../kernel/upscale.en.html">Neural upscaling</a></li>
+      <li><a href="../kernel/subtitle-danmaku.en.html">Subtitles and danmaku</a></li>
+      <li><a href="../kernel/clock.en.html">Clock and scheduling</a></li>
+    </ul>
+    <h2><span class="no">3</span>Project <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="building.en.html">Building and dependencies</a></li>
+      <li><a href="releasing.en.html">Releases and artifacts</a></li>
+      <li><a href="contributing.en.html" aria-current="page">Contributing</a></li>
+      <li><a href="changelog.en.html">Changelog</a></li>
+    </ul>
+    <h2><span class="no">4</span>Reference <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.en.html">C ABI overview</a></li>
+      <li><a href="../reference/capi-handle.en.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.en.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>project<span class="sep">/</span>Contributing</p>
+  <h1>Contributing</h1>
+  <p class="kicker">Contributing</p>
+  <p class="lead">This page maps the codebase, lists every place you need to touch to change a platform, describes the constraints of the C ABI contract, and covers testing and commit conventions. Before you make changes, read the <a href="../kernel/architecture.en.html">Architecture overview</a> to understand the runtime model.</p>
+
+  <ul class="meta-strip">
+    <li>Crates <b>3</b></li>
+    <li>Traits <b>3</b></li>
+    <li>Language <b>Rust</b></li>
+  </ul>
+
+  <section id="layout">
+    <h2>Repository layout<span class="jp">レイアウト</span><a class="anchor" href="#layout">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Path</th><th>Responsibilities</th></tr></thead>
+        <tbody>
+          <tr><td class="m">crates/erika</td><td>The core engine: the playback, renderer, audio, subtitle, danmaku, presenter, and other modules.</td></tr>
+          <tr><td class="m">crates/erika_capi</td><td>The C ABI export layer; produces <code>erika.h</code>.</td></tr>
+          <tr><td class="m">crates/erika_ffmpeg_sys</td><td>FFmpeg bindings generated with bindgen.</td></tr>
+          <tr><td class="m">packages/erika_flutter</td><td>The Flutter plugin, covering seven platforms (Linux builds from source).</td></tr>
+          <tr><td class="m">packages/erika_ohos</td><td>The OpenHarmony native ArkTS / OHPM SDK.</td></tr>
+          <tr><td class="m">examples/</td><td>Verification and smoke-test programs.</td></tr>
+          <tr><td class="m">xtask/</td><td>Build orchestration for native dependencies.</td></tr>
+          <tr><td class="m">third_party/</td><td>Built native dependencies; this output is gitignored.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="model">
+    <h2>Runtime model<span class="jp">ランタイム</span><a class="anchor" href="#model">#</a></h2>
+    <p>Three facts determine where most changes land:</p>
+    <ul class="body">
+      <li><b>PresenterRuntime owns the entire stack.</b> The host calls <code>render_tick(time_seconds)</code> every frame. The runtime pulls the decoded frame, updates the overlay (subtitles + danmaku), renders, and presents. The danmaku plan is gated by generation + media_time so it stays in sync with the video.</li>
+      <li><b>Audio is the master clock.</b> Audio output runs on its own backend thread, and the playback scheduler aligns video presentation to the audio clock with vsync quantization.</li>
+      <li><b>Backends are pluggable.</b> The three traits <code>RendererBackend</code>, <code>AudioOutputBackend</code>, and <code>DecoderBackend</code> keep the Presenter platform-independent. Preferences are selected through <code>RendererBackendPreference</code> (PlatformNative / WgpuFallback) and <code>VideoDecodePreference</code>.</li>
+    </ul>
+  </section>
+
+  <section id="backend">
+    <h2>Adding a platform backend<span class="jp">新規バックエンド</span><a class="anchor" href="#backend">#</a></h2>
+    <p>A new platform usually means three pieces of work, each behind <code>#[cfg(target_os = ...)]</code>:</p>
+    <ol class="body">
+      <li><b>Decoding.</b> Add a variant to <code>DecoderBackend</code>, configure the hardware device (see the D3D11VA and VideoToolbox paths), and produce a <code>PlayerVideoFrame</code> that the renderer can import with zero copy. Fall back to software decoding when interop is unavailable.</li>
+      <li><b>Rendering.</b> Implement <code>RendererBackend</code> in <code>renderer/&lt;backend&gt;.rs</code>: attach / detach / resize, <code>upload_player_frame</code> (which owns the imported GPU representation), <code>render_current_frame</code> (which composites the overlay), and optionally capture, runtime_stats, and set_luma_upscaler. Use <code>renderer::pipeline</code> for color and tone-mapping decisions so behavior matches the other backends. The D3D11 backend is the most recent complete example.</li>
+      <li><b>Audio.</b> Implement <code>AudioOutputBackend</code>: configure / start / pause / stop / push / set_volume / state / stats, plus <code>clock_snapshot</code> for A/V synchronization. Reuse <code>BufferedAudioOutput</code> / <code>AudioRingBuffer</code>. WASAPI is the reference implementation.</li>
+    </ol>
+    <p>Then wire the backend into the Presenter's backend selection and add a <code>&lt;platform&gt;_native_demo</code> example for end-to-end verification.</p>
+  </section>
+
+  <section id="cabi">
+    <h2>The C ABI is a contract<span class="jp">C ABI 契約</span><a class="anchor" href="#cabi">#</a></h2>
+    <p><code>erika_capi</code> is the stable integration surface for every non-Rust host. When you change it:</p>
+    <ul class="body">
+      <li><b>Keep panics inside.</b> Every export wraps its body in <code>catch_unwind</code>, and a panic maps to <code>ErikaStatus_Panic</code>. An unwind must never cross the boundary.</li>
+      <li><b>Respect ownership.</b> A string you hand out belongs to the caller, who frees it with the matching <code>*_free</code> function.</li>
+      <li><b>Sync <code>erika.h</code>.</b> Update the header by hand to match, and add comments for new functions.</li>
+      <li><b>Sync the Swift mirror structs.</b> The Apple plugin hand-writes Swift mirrors of the C structs (such as <code>ErikaPresenterStats</code>). If you change a struct in <code>erika.h</code>, you must update the two Swift mirror files in <code>packages/erika_flutter</code> at the same time. A mismatch corrupts the stack and can show up as a misleading autorelease-pool crash.</li>
+      <li><b>Document JSON methods.</b> The Presenter's JSON bridge methods map one-to-one to the C surface. When you add one, update the <a href="../reference/capi-json.en.html">method list</a> as well.</li>
+    </ul>
+  </section>
+
+  <section id="testing">
+    <h2>Testing and verification<span class="jp">テスト</span><a class="anchor" href="#testing">#</a></h2>
+    <div class="code">
+<pre>cargo test --workspace
+cargo clippy --workspace
+cargo fmt --all</pre>
+    </div>
+    <ul class="body">
+      <li>Gate platform-specific code with <code>#[cfg]</code>. When you change one branch, make sure every branch (macOS / iOS / Windows / Android / fallback) still compiles. Leave targets you cannot test locally to CI.</li>
+      <li>The neural upscaling weights are verified against the onnxruntime reference in <code>tests/artcnn_upscaler.rs</code> (Metal) and <code>tests/wgpu_artcnn.rs</code> (tiled wgpu). Re-verify the corresponding path before you modify a kernel.</li>
+      <li>Android SDR playback and the explicit output fallback are verified. Until the active path on an API 35 HDR device passes <code>Rgba16Float + SCRGB_LINEAR</code> and the recovery checks, do not mark extended-linear scRGB as verified on real devices.</li>
+      <li>The native demos double as smoke tests: <code>cargo run -p macos_native_demo -- --smoke-seconds 3 "$SAMPLE"</code> (Windows has an equivalent command). It prints the pipeline counters, which you use to confirm that hardware decoding and zero-copy interop still work.</li>
+    </ul>
+  </section>
+
+  <section id="conventions">
+    <h2>Conventions<span class="jp">規約</span><a class="anchor" href="#conventions">#</a></h2>
+    <ul class="body">
+      <li>Edition 2024, Rust 1.92+. Run <code>cargo fmt</code> and keep clippy clean.</li>
+      <li>Do not <code>unwrap</code> or <code>panic</code> in hot paths or across FFI. Return <code>Result</code> and map it to <code>ErikaStatus</code> at the boundary.</li>
+      <li>Match the surrounding code: naming, comment density, and the existing <code>cfg</code> structure. Keep platform glue in the platform module so it does not leak into the engine.</li>
+      <li>Keep the docs in sync. Reflect user-visible changes in this documentation set. The base language is English, with translations following.</li>
+      <li>Keep PRs focused. State which platforms you built and tested on, and which you left to CI.</li>
+    </ul>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Project</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="releasing.en.html"><span class="dir">Prev</span>Releases and artifacts</a>
+    <a class="nx" href="changelog.en.html"><span class="dir">Next</span>Changelog</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

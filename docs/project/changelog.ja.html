@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>変更ログ — liberika 開発者ドキュメント</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
+<script defer src="../docs.js?v=20261030-i18n"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
+  <div class="language-switch" role="group" aria-label="言語"><a href="changelog.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="changelog.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="changelog.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
+  <nav>
+    <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.ja.html">クイックスタート</a></li>
+      <li><a href="../guide/flutter.ja.html">Flutter の組み込み</a></li>
+      <li><a href="../guide/swift.ja.html">Swift の導入</a></li>
+      <li><a href="../guide/openharmony.ja.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.ja.html">Rust の組み込み</a></li>
+      <li><a href="../guide/c.ja.html">C ABI の組み込み</a></li>
+      <li><a href="../guide/linux.ja.html">Linux の導入</a></li>
+      <li><a href="../guide/web.ja.html">Web / WASM の導入</a></li>
+    </ul>
+    <h2><span class="no">2</span>カーネル設計 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.ja.html">アーキテクチャ概要</a></li>
+      <li><a href="../kernel/decode.ja.html">ハードウェアデコード</a></li>
+      <li><a href="../kernel/zero-copy.ja.html">ゼロコピー取り込み</a></li>
+      <li><a href="../kernel/render.ja.html">レンダリングパイプライン</a></li>
+      <li><a href="../kernel/hdr.ja.html">ハイダイナミックレンジ</a></li>
+      <li><a href="../kernel/upscale.ja.html">ニューラル超解像</a></li>
+      <li><a href="../kernel/subtitle-danmaku.ja.html">字幕と弾幕</a></li>
+      <li><a href="../kernel/clock.ja.html">クロックとスケジューリング</a></li>
+    </ul>
+    <h2><span class="no">3</span>プロジェクト <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="building.ja.html">ビルドと依存関係</a></li>
+      <li><a href="releasing.ja.html">リリースと成果物</a></li>
+      <li><a href="contributing.ja.html">貢献ガイド</a></li>
+      <li><a href="changelog.ja.html" aria-current="page">変更履歴</a></li>
+    </ul>
+    <h2><span class="no">4</span>参考資料 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.ja.html">C ABI 概要</a></li>
+      <li><a href="../reference/capi-handle.ja.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.ja.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">機械翻訳です。正確な内容は中国語版をご参照ください。</p>
+  <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>project<span class="sep">/</span>変更ログ</p>
+  <h1>変更ログ</h1>
+  <p class="kicker">Changelog</p>
+  <p class="lead">ホストに表示される変更をバージョンごとにリストします。ロールバックされたアイテムはここにはリストされません。完全な履歴はリポジトリのルートから始まります <code>CHANGELOG.md</code> が勝つだろう。 0.1.3 以前 breaking change 記事の最後にある概要を参照してください。</p>
+
+  <ul class="meta-strip">
+    <li>現在の <b>0.3.0</b></li>
+    <li>公開する <b>2026-10-25</b></li>
+  </ul>
+
+  <section id="v030">
+    <h2>0.3.0 · 2026-10-25<a class="anchor" href="#v030">#</a></h2>
+    <p class="note"><b>デフォルトの動作の変更:</b>ネイティブと Web の字幕と弾幕スーパーサンプリングはデフォルトで有効になっており、それぞれオフにすることができます。ソフトウェア ビデオ デコードでは、デフォルトでフレーム/スライスのマルチスレッドが有効になり、スレッドの数は FFmpeg によって選択されます。設定 <code>ERIKA_VIDEO_DECODE_THREADS=1</code> シングルスレッドを復元します。</p>
+    <h3>Web、エクスポートと診断</h3>
+    <ul class="body">
+      <li>独立したものを追加 <a href="../guide/web.ja.html">Web / WASM バックエンド</a>: FFmpeg カプセル化解除、WebCodecs デコード、libass ASS/SSA 字幕とフォント添付ファイル、Rust 弾幕、Web Audio クロック、WebGL2 合成。ローカル ファイル、HTTP Range、マルチトラック、チャプター、PNG スクリーンショットをサポートし、エンコード機能はブラウザーに依存します。</li>
+      <li>Release新規 <code>liberika-web-0.3.0.zip</code>、完全なランタイム、ライセンス、デモ ページが一緒に配布され、要約も含まれています。 <code>SHA256SUMS</code>。</li>
+      <li>独立した RGBA / PNG フレーム エクスポートと連続フレーム キャプチャ セッションを追加しました。デコードステータスを再利用し、HDR を SDR にマッピングします。</li>
+      <li>感度を下げたログ ループ、デコードおよびハードウェア フォールバック診断、オーディオ/プレゼンテーション タイミング スナップショットを追加しました。<code>listMethods</code> JSON インターフェイスを見つけることができます。 <code>blocking</code> / <code>writesFiles</code> 財産。</li>
+      <li>Presenter JSON 新しい <code>chapters</code> 既存の C 構造を拡張せずにクエリを実行します。</li>
+    </ul>
+    <h3>修理と互換性</h3>
+    <ul class="body">
+      <li>一時停止ジャンプ、seek にわたる長い字幕、および一時停止トラックのカット後の字幕更新を修正しました (#171)。</li>
+      <li>iOS / tvOS 古いランタイムとの互換性を確保し、静的リンクによる新しいシンボルの喪失を避けるために、シンボルの可用性ごとにオプションのインターフェイスを保存します (#170)。</li>
+      <li>通常の HTTP 末尾読み取り失敗は EOF として処理され、Range チェックサム リソース変更エラーは保持されます (#169)。</li>
+      <li>Danmaku システム フォント フォールバックは、ゼロ コピー カバレッジ チェックと制限付き LRU を使用し、メモリ スパイクを修正し、表示可能な文字を保持します (#173)。</li>
+      <li><code>erika_play</code> trace は起動失敗の理由を記録します。 Windows、Android、Hongmeng へのアクセスが向上します。</li>
+      <li>プロジェクトの名前が liberika に変更されました。 Rust crate <code>erika</code>、C ABI <code>erika_*</code>、Flutter/OHPM パッケージ名は引き続き互換性があります。</li>
+    </ul>
+    <p><a href="https://github.com/AimesSoft/liberika/releases/tag/v0.3.0">GitHub Release</a>、<a href="https://pub.dev/packages/erika_flutter/versions/0.3.0">Flutter 0.3.0</a>、<a href="https://github.com/AimesSoft/liberika-swift/releases/tag/v0.3.0">Swift SDK 0.3.0</a> そして <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM erika 0.3.0</a> 全て公開されております。完全な記録については、を参照してください。<a href="https://github.com/AimesSoft/liberika/blob/v0.3.0/CHANGELOG.md">ソースコード CHANGELOG</a>。</p>
+  </section>
+
+  <section id="v021">
+    <h2>0.2.1 · 2026-10-02<a class="anchor" href="#v021">#</a></h2>
+    <ul class="body">
+      <li>HTTP接続、TLS、応答読み取りおよびバックグラウンド先読みはキャンセルできます。 stop / close / 再オープンすると、ネットワーク スレッドとキャッシュがリサイクルされ、終了ラグとリソースの残留が減少します。</li>
+      <li>Flutter、Swift、OpenHarmony SDKは通過可能 <code>httpBackBufferBytes</code> ロールバック キャッシュを調整します。デフォルトは 16 MiB です。</li>
+      <li>WMV / WMA、dav1d 8-bit / 10-bit AV1 ソフトウェア ロールバック、および Windows ソフトウェア フレーム アップロードを完了しました。</li>
+      <li>iOS は、表示ターゲットの瞬間に応じてビデオ、字幕、弾幕をスケジュールし、レンダリング コールバックのバックログをマージします。</li>
+      <li>実験的な Linux サポートを追加しました: X11 / Wayland、PulseAudio、NVDEC / VA-API、Flutter テクスチャおよび Wayland ネイティブ ビデオ レイヤー。</li>
+      <li>P010 アップロードでは、10-bit の精度が維持され、HDR の色変換が向上します。</li>
+    </ul>
+  </section>
+
+  <section id="v020">
+    <h2>0.2.0 · 2026-09-23<a class="anchor" href="#v020">#</a></h2>
+    <ul class="body">
+      <li>HTTP 永続接続、バックグラウンド先読み、seek ウィンドウおよびブレークポイントのリカバリ。リクエストヘッダーとキャッシュバリデータはリクエストとともに保持されます。</li>
+      <li>Dolby Vision RPU reshaping およびカラー変換をサポートし、Profile 5 / 8 および Profile 7 ベースレイヤーマッピングをカバーします。</li>
+      <li>デフォルトの BT.2390 / IPT tone mapping、さらに演算子を追加し、ターゲットの黒点とコントラスト、キャッシュされた知覚色域 LUT。</li>
+      <li>HDR10 ソフトウェア フレームはシーンの輝度統計を使用してマッピングを調整し、Apple EDR 出力はモニター headroom に従います。</li>
+    </ul>
+  </section>
+
+  <section id="v018">
+    <h2>0.1.8 · 2026-09-07<span class="jp">バージョン</span><a class="anchor" href="#v018">#</a></h2>
+    <p>HTTP 開始オプションと先読みウィンドウ構成、統一された SDK パブリッシング入口、および Windows Flutter SDR テクスチャを追加しました。 Presenter 構成ではビデオ alpha モードが追加され、ネイティブ ホストはそれに応じてヘッダー ファイルとランタイムを更新する必要があります。</p>
+    <h3>クロスプラットフォームネイティブ GPU 合成による透明なビデオ (#124)</h3>
+    <ul class="body">
+      <li>packed-alpha ビデオ プレゼンテーションを追加しました (<code>ErikaVideoAlphaMode.packedAlphaRight</code>): 左半分のカラーと右半分の alpha を持つマテリアルは、alpha で事前乗算された GPU で再構築され、エンコード幅の半分でレンダリングされます。このモードを要求しないプレイヤーは変更されずに動作します。</li>
+      <li>macOS は、IOSurface + Metal の Flutter Texture パスを追加します (<code>ErikaTextureVideoView</code>)、Flutter 不透明度、トリミング、変換、およびカラー フィルターを取得するためのフレームごとの CPU リードバックはありません。バックグラウンドを意識したミキシングが必要な場合はネイティブに切り替える <code>CAMetalLayer</code>(サポート <code>overlayBlendMode</code> レイヤーの不透明度を使用)。</li>
+      <li>Windows 透明ビデオは DirectComposition 合成に変更されます。 Composition Swap alpha で事前乗算された Chain は、Flutter HWND に直接バインドされ、元の独立した不透明ポップアップ ウィンドウを置き換えます。サポートされている <code>srcOver</code> / <code>overlay</code> ブレンディングと不透明度を備えた overlay は、同じ HWND 内で実際のゲームの背景をサンプリングできます。不透明なビデオは、元の HWND 再生パスを維持します。</li>
+      <li>ネイティブ再生速度制限が 4 倍速から 16 倍速に向上し、ショート アニメーションや特殊効果素材の高速再生がサポートされます。</li>
+      <li>C ABI 新しい <code>erika_presenter_create_with_output_mode_and_alpha</code>、<code>erika_presenter_attach_flutter_texture</code> / <code>erika_presenter_set_flutter_texture_buffer</code> と <code>erika_presenter_windows_composition_swapchain_iunknown</code>(AddRef/Release 独自仕様)。</li>
+    </ul>
+    <h3>弾幕の継続性とJSON契約(#121)</h3>
+    <ul class="body">
+      <li>放棄された弾幕が途中で再出現したり、目に見える弾幕が強制的に軌道を変更したりすることを防ぐために、連続する計画スライディング ウィンドウ間の軌道の割り当てと許可の決定を安定した状態に保ちます。</li>
+      <li>ホストによって渡された弾幕サービス ID をカーネルの内部レイアウト ID から分離し、オプションの JSON ID を正確に解析することをサポートします。 <code>u64</code> または 10 進数の文字列を使用して、浮動小数点の倍精度丸めによって発生する ID の切り捨てを回避します。</li>
+      <li>インライン弾幕 JSON 契約を正式に標準化して文書化し、標準配列と <code>comments</code> / <code>danmaku</code> / <code>items</code> ルートオブジェクト。</li>
+    </ul>
+  </section>
+
+  <section id="v017">
+    <h2>0.1.7<span class="jp">バージョン</span><a class="anchor" href="#v017">#</a></h2>
+    <h3>Flutter パッケージのリリース</h3>
+    <ul class="body">
+      <li><code>erika_flutter</code> pub.dev への最初のリリース。パッケージにはライセンス、changelog、metadata、サンプル、および独立したテストが含まれています。</li>
+      <li>ネイティブ bundle の検証およびロックされたバージョンが、Android、Apple、Windows、および OpenHarmony のデフォルトのビルド方法になります。ソースからビルドする場合は明示的な設定が必要です <code>ERIKA_FORCE_SOURCE_BUILD=1</code>。</li>
+      <li>ABI による Android 分割ランタイム アーカイブ: アプリのビルドは必要なアーキテクチャのみをダウンロードし、native-embedder 静的ライブラリは同梱されなくなりました。</li>
+      <li>各リリースでは、すべてのネイティブ アーカイブをカバーする新しいファイルが追加されます <code>SHA256SUMS</code> チェックリスト。</li>
+      <li>6 つのプラットフォームのそれぞれの GitHub Actions 消費ビルドは独立しており、package ビルドは monorepo に依存しなくなります。</li>
+    </ul>
+    <h3>OpenHarmony ネイティブパッケージがリリースされました</h3>
+    <ul class="body">
+      <li>OpenHarmony ArkTS / OHPM パッケージを追加しました <code>erika</code>、arm64、API 18 歳以上用。</li>
+      <li>提供する <code>XComponent</code> surface ライフサイクル、再生コントロール、<code>renderTick()</code> フレーム スケジュール、イベントとスクリーンショット API、および補足の独立したアクセス ガイド。</li>
+    </ul>
+  </section>
+
+  <section id="v016">
+    <h2>0.1.6<span class="jp">バージョン</span><a class="anchor" href="#v016">#</a></h2>
+    <h3>レンダリングと再生</h3>
+    <ul class="body">
+      <li>Rust、C、Flutter、Metal、wgpu インターフェイスを介して、劣化したアニメーション ソース用の ArtCNN C4F16 DS ノイズ リダクション/鮮明化輝度超解像度を追加しました。</li>
+      <li>Android および macOS の presenter レンダリングは、アプリケーション UI / main スレッドから移動されました。 Android AHardwareBuffer 変換帯域幅が減少しました。 D3D11 はデバイス間でフレームを多重化しなくなりました。</li>
+      <li>Apple プラットフォームは、ソースのコンテンツに応じて SDR / EDR 出力を選択します。リソースのステータスは、Android、Windows、OpenHarmony の統合を通じて公開されます。</li>
+    </ul>
+    <h3>統合と行動</h3>
+    <ul class="body">
+      <li>弾幕 scroll overwrite はデフォルトでオフになっており、高密度再生中に安定した弾幕が上書きされないようにします。</li>
+      <li>Windows システム メディア コントロール ビルドを復元しました。 OpenHarmony Flutter プラグインの ArkTS 宣言が明示的に変更されました。</li>
+    </ul>
+  </section>
+
+  <section id="v015">
+    <h2>0.1.5<span class="jp">バージョン</span><a class="anchor" href="#v015">#</a></h2>
+    <h3>システムメディアコントロールとバックグラウンドオーディオ</h3>
+    <ul class="body">
+      <li>Now Playing メタデータ、再生ステータス、タイムライン、play / pause / seek および前後の曲ナビゲーション。iOS、tvOS、macOS、Android、Windows、OpenHarmony の 6 つのプラットフォームをカバーします。</li>
+      <li>iOS および Android のオプションのバックグラウンド オーディオ再生。ビデオのデコードはバックグラウンドで一時停止され、ライフサイクル コールバックは制限された barrier によってキューに入れられるため、アプリケーション スレッドが無期限にブロックされることはありません。</li>
+      <li>運ばれていない <code>ErikaMediaMetadata</code> メディアを開くときに古いメタデータを消去します。 pause / play タイミングが確定します。 Android メディア コールバックは、Flutter engine によって分離されます。</li>
+      <li>Android カバー画像キャッシュ。ネイティブの再生ステータスが変更されていない場合、メディア通知は再構築されません。</li>
+    </ul>
+    <h3>プラットフォームのサポートと製品リリース</h3>
+    <ul class="body">
+      <li>tvOS プラグインおよび native target: 実デバイスおよび arm64 / x86_64 エミュレーター (Metal レンダリング、Apple オーディオ、VideoToolbox、字幕、弾幕、スクリーンショット、HTTP ソースを含む)。</li>
+      <li>新しい <code>erika-capi-tvos.zip</code>(実機 + ユニバーサルシミュレーター xcframework)、release workflow が自動的に追加されます。</li>
+      <li>OpenHarmony オプションのプリコンパイル済み消費: CMake タグ付きダウンロード可能ビルド <code>liberika_capi.so</code> 着る <code>liberika_flutter.so</code> 次に、ソース コード ビルドのロールバックに失敗します。</li>
+      <li>CI と macOS / iOS / tvOS のリリースは macOS 26 runner に統一されます。 macOS x64 および arm64 はクロス構築され、共通のパッケージに合成されます。長さゼロの HTTP リソースが切り捨てられたものとして誤って解釈されることがなくなりました。</li>
+    </ul>
+    <h3>字幕メモリーフォント</h3>
+    <ul class="body">
+      <li>メモリ サブタイトル フォント レジストリは、Rust、C、API、Dart を各ネイティブ Flutter 埋め込みに接続します。ホストは、ディスクに書き込むことなく、フォント faces を確認し、順序付けられたフォールバック セットを選択し、フォント データを置き換え、レジストリをクリアできます。</li>
+      <li>libass は順序付けられたロールバックを保持します。 TTC / OTC データは face 全体で共有されます。同じパス内のフォントが置き換えられると、レンダラー キャッシュが無効になり、アクティブな字幕トラックは新しいデータをすぐに使用します。</li>
+      <li>レジストリと選択されたセットの代数的分離。 libass codec private data を再生するためにレンダラーを再構築します。 OpenHarmony および tvOS を使用して、フル メモリ フォント C API サーフェスを完成させます。</li>
+    </ul>
+    <h3>プレイ再開</h3>
+    <ul class="body">
+      <li>オーディオおよびビデオ入力が不足している場合は、明示的なバッファ変換を開始します。再生クロックは、stall 中にフリーズし、データが復元された後にメディア時間に再固定され、クロックのオーバーランや長期的なフレーム ドロップや黒い画面の発生を回避します。</li>
+    </ul>
+  </section>
+
+  <section id="v014">
+    <h2>0.1.4<span class="jp">バージョン</span><a class="anchor" href="#v014">#</a></h2>
+    <h3>互換性に関するヒント</h3>
+    <ul class="body">
+      <li><b>弾幕 <code>outline_width</code> マルチプライヤーの代わりにギアに変更します。</b>0 オフ、1 細かい、2 ノーマル、3 粗い、3 を超えると粗いクランプになります。通常および粗いスケールは、1.0 および 2.0 の古い連続乗算器の幅を正確に再現するため、以前に送信されました。 <code>outline_width: 1.0</code> ホストは今度は送信する必要があります <code>2.0</code> 同じストロークを保つために。移行されていないストロークは細くなります。デフォルトのフォント サイズでは、ラスタライズ半径が 2 px から 1 px に半分になります。</li>
+      <li>弾幕のフォントサイズはemごとのピクセル数で説明されています。<code>ab_glyph</code> の <code>PxScale</code> ascenderからdescenderまでの高さです。古いコードは em サイズを直接渡しており、レンダリングはリクエストよりも小さくなります。テキストはリクエストと一致するようになり、アップグレード後は弾幕が大きくなりました。 PingFang SC の比率は 1.4 で、同じ構成では 40% 大きくなります。古い外観を希望するホストは、フォント サイズを小さくする必要があります。</li>
+      <li>弾幕のスクロール期間は、ビューポートの論理幅に応じて変化します (640 pt では ×0.9、1920 pt 以上では ×1.3)。同じ設定でも、大きなウィンドウではスクロールが遅くなります。</li>
+      <li>弾幕のスクリーンショットには弾幕が含まれなくなりました。<code>capture_*</code> ビデオと字幕のみが合成され、debug HUD はスクリーンショットには含まれません。</li>
+    </ul>
+    <h3>プラットフォームのサポートと製品リリース</h3>
+    <ul class="body">
+      <li>OpenHarmony 再生バックエンドおよび Flutter プラグイン: AVCodec H.264 / HEVC ハード デコード、OHNativeBuffer / Vulkan ゼロコピー レンダリング、WGPU 合成、字幕、弾幕、オーディオ、診断、および RGBA スクリーンショット。公開する <code>erika-capi-openharmony-arm64.zip</code>。</li>
+      <li>Windows ARM64 ネイティブ依存関係と <code>erika_capi</code> 構築する、追加する <code>erika-capi-windows-arm64.zip</code>。</li>
+      <li>macOS arm64 / x86_64 / universal オプションのビルドと対応するアーカイブ。</li>
+      <li>Apple Silicon、Android では、NDK に付属する一般的な機能を使用するようにソース コードの構造が変更されます。 <code>glslc</code>。 x86_64 製品は、FFmpeg 最適化アセンブリを再度有効にし、ソース コードの構築には NASM が必要です。</li>
+    </ul>
+    <h3>再生、レンダリング、ウィンドウの統合</h3>
+    <ul class="body">
+      <li>共有再生クロックは直接公開され、フレーム スナップショットのアトミック サンプリング時間、状態、世代が含まれます。弾幕、字幕、レンダリングは同じタイムベースを共有します。</li>
+      <li>一時停止された seek はプレビュー フレームをデコードしてレンダリングしますが、メディア クロックはフリーズしたままになります。 seek preroll、EOF、および seek の一時停止と再開の起動競合状態によって、クロック ロールバック、worker のアイドリング、または長い黒いフレームが生成されなくなりました。</li>
+      <li>オーディオとビデオの demux 要件が分離され、オーディオ バックプレッシャーによってビデオ パケットのスキャンがブロックされなくなりました。字幕を切り替えたり追加しても、オーディオとビデオの demux の選択はリセットされません。</li>
+      <li>macOS は次のように再構築されてレンダリングされます。 <code>CVDisplayLink</code>、フレームの結合が遅い、画面変更後に display link をリセットします。重複する overlay アタッチメントと GPU リソースのウィンドウ移行時の作業が削減されます。</li>
+      <li>デスクトップ overlay API は複数をサポートします <code>FlutterView</code> そして二次ウィンドウ。プレーヤーは、ホスト ウィンドウ間を移行するときに、サーフェス、可視性、世代、および aspect-fit 状態を維持します。</li>
+      <li>Windows D3D11 overlay ライフサイクル、ノンブロッキング レンダリングおよびリカバリ seek 処理の改善。字幕はビデオ ビューポート内で合成され、弾幕はフル ウィンドウ ビューポートを維持します。</li>
+    </ul>
+    <h3>弾幕と字幕</h3>
+    <ul class="body">
+      <li>弾幕の衝突境界をラスター化されたストロークに合わせ、シャドウ/ストローク/テキストの順序を修正し、トラックの設定を安定させ、オーバーフロートラックへの高密度のオーバーラップを制限します。</li>
+      <li>非同期リフロー中、古い弾幕 plan は動き続けます。純粋な描画設定ではレイアウトが再利用され、表示設定はすぐに有効になります。</li>
+      <li>増分 glyph atlas がアップロードされ、再利用可能 Metal instance buffer となり、フレームごとの DFM 割り当てと候補走査オーバーヘッドが削減されます。</li>
+      <li>プラグイン テキスト字幕の文字セット検出とトランスコーディング。GBK、Big5、Shift_JIS、UTF-16、UTF-8 パススルー、低信頼性、またはバイナリ入力フォールバック保護をカバーします。</li>
+      <li>libass はすべてのプラットフォームに登録されています。 liberikaを内蔵しています。 Droid Sans Fallback;非システム フォント プロバイダーのターゲットはデフォルトでこのファミリーになり、解析不可能なカテゴリには分類されなくなりました。 <code>Arial</code>。</li>
+      <li>字幕のフォールバックと選択的なスタイルのオーバーライド: カスタム フォント ファミリとファイル、RGBA カラー、メトリクス、テキスト プロパティ、境界線、配置、マージン、ぼかし。入り口は、 <code>erika_presenter_set_subtitle_font</code>、<code>erika_presenter_set_subtitle_style</code> と <code>ErikaPlayer.setSubtitleStyle</code>。</li>
+    </ul>
+    <h3>ネットワークとメディアの診断</h3>
+    <ul class="body">
+      <li><code>erika_open_with_headers</code> と <code>erika_presenter_open_with_headers</code>。リクエスト ヘッダーは、probe、range の読み取り、リトライ、プリフェッチに適用されますが、字幕と弾幕 sidecar には渡されません。</li>
+      <li>ホストの受信 liberika 管理トランスポート ヘッダーと不正な HTTP フィールドを拒否します。 HTTP range 入力強化: 無視 <code>Range</code>、エラー オフセット、一時的な障害、部分応答、偽 EOF による繰り返しプリフェッチ、再試行制限。</li>
+      <li>bitrate を追跡し、合理的なフレーム レート メタデータは Rust、C、Dart を通過します。オプションのネイティブ debug HUD は、デコーダー、レンダラー、GPU、オーディオ、出力、および HDR、弾幕診断をカバーします。</li>
+    </ul>
+    <h3>オーディオ、カラー、コーデック</h3>
+    <ul class="body">
+      <li>クリッピングを防ぐために、サラウンドからステレオのダウンミックス マトリックス正規化を行います。</li>
+      <li>すべてのオーディオ バックエンドにコールバック ボリューム ランピングを追加しました。 WASAPI 監視可能な回復ステータスと制限付きバックオフによるデバイス損失回復。</li>
+      <li>Metal、WGPU、D3D11 は BT.2100 HLG デコードをサポートします。 D3D11 overlay は、HDR10 出力で PQ を正しくエンコードします。</li>
+      <li>FFmpeg は 8.1.2 にアップグレードされます。 Darwin AV1 ハードウェアデコードのインポートが改善されました。 seek は読み込み中に最後のフレームを保持し、黒く点滅しなくなりました。</li>
+    </ul>
+  </section>
+
+  <section id="earlier">
+    <h2>0.1.3以前<span class="jp">前に</span><a class="anchor" href="#earlier">#</a></h2>
+    <p>0.1.3 Android 完全再生パス (MediaCodec、AHardwareBuffer / wgpu、AAudio、PlatformView、字幕、弾幕、スクリーンショット、SDR / HDR) を導入します。そのうちの 2 つ、breaking change は今のところ有効です。</p>
+    <ul class="body">
+      <li><b>表面サイズのセマンティクス。</b> attach および resize <code>width</code> / <code>height</code> 物理ピクセルの正確な drawable サイズを表します。 <code>scale</code>。<code>scale</code> 弾幕などの論理 UI コンテンツにのみ影響します。</li>
+      <li><b>play 非同期。</b> <code>play</code> 実行をキューに入れることで、worker の再生を待つ必要がなくなりました。最終的な結果は、 <code>StateChanged</code> と <code>Error</code> イベントが優先されます。</li>
+    </ul>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Project</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="contributing.ja.html"><span class="dir">Prev</span>貢献ガイド</a>
+    <a class="nx" href="../guide/quickstart.ja.html"><span class="dir">Next</span>クイックスタート</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

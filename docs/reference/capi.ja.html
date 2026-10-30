@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>C ABI の概要 — liberika 開発者向けドキュメント</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
+<script defer src="../docs.js?v=20261030-i18n"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
+  <div class="language-switch" role="group" aria-label="言語"><a href="capi.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="capi.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="capi.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
+  <nav>
+    <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.ja.html">クイックスタート</a></li>
+      <li><a href="../guide/flutter.ja.html">Flutter の組み込み</a></li>
+      <li><a href="../guide/swift.ja.html">Swift の導入</a></li>
+      <li><a href="../guide/openharmony.ja.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.ja.html">Rust の組み込み</a></li>
+      <li><a href="../guide/c.ja.html">C ABI の組み込み</a></li>
+      <li><a href="../guide/linux.ja.html">Linux の導入</a></li>
+      <li><a href="../guide/web.ja.html">Web / WASM の導入</a></li>
+    </ul>
+    <h2><span class="no">2</span>カーネル設計 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.ja.html">アーキテクチャ概要</a></li>
+      <li><a href="../kernel/decode.ja.html">ハードウェアデコード</a></li>
+      <li><a href="../kernel/zero-copy.ja.html">ゼロコピー取り込み</a></li>
+      <li><a href="../kernel/render.ja.html">レンダリングパイプライン</a></li>
+      <li><a href="../kernel/hdr.ja.html">ハイダイナミックレンジ</a></li>
+      <li><a href="../kernel/upscale.ja.html">ニューラル超解像</a></li>
+      <li><a href="../kernel/subtitle-danmaku.ja.html">字幕と弾幕</a></li>
+      <li><a href="../kernel/clock.ja.html">クロックとスケジューリング</a></li>
+    </ul>
+    <h2><span class="no">3</span>プロジェクト <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.ja.html">ビルドと依存関係</a></li>
+      <li><a href="../project/releasing.ja.html">リリースと成果物</a></li>
+      <li><a href="../project/contributing.ja.html">貢献ガイド</a></li>
+      <li><a href="../project/changelog.ja.html">変更履歴</a></li>
+    </ul>
+    <h2><span class="no">4</span>参考資料 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="capi.ja.html" aria-current="page">C ABI 概要</a></li>
+      <li><a href="capi-handle.ja.html">ErikaHandle</a></li>
+      <li><a href="capi-presenter.ja.html">ErikaPresenterHandle</a></li>
+      <li><a href="capi-json.ja.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">機械翻訳です。正確な内容は中国語版をご参照ください。</p>
+  <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>C ABI 概要</p>
+  <h1>C ABI 概要</h1>
+  <p class="kicker">C ABI Overview</p>
+  <p class="lead">C ABI のグローバル規則と型定義。関数リストはエントリ ファミリごとにページ分割されています。<a href="capi-handle.ja.html">ErikaHandle</a>(23)、<a href="capi-presenter.ja.html">ErikaPresenterHandle</a>(72)、一般および独立した入り口 (13)。に <code>crates/erika_capi/include/erika.h</code> 唯一の権限として。</p>
+
+  <ul class="meta-strip">
+    <li>エクスポート機能 <b>108</b></li>
+    <li>種類 <b>45</b></li>
+    <li>イベント <b>12</b> 親切</li>
+  </ul>
+
+  <section id="entry">
+    <h2>入場と同意<span class="jp">入場と規制</span><a class="anchor" href="#entry">#</a></h2>
+    <p>2 つの独立したエントランス ファミリは、一度に 2 つのうちの 1 つを統合します。</p>
+    <ul class="body">
+      <li><b>ErikaHandle</b> — pull モデル。ホストが描画し、状態を取得します。</li>
+      <li><b>ErikaPresenterHandle</b> — push モデル。エンジンがデコード、タイミング、音声、描画を管理し、ホストはサーフェスを提供して <code>render_tick</code> を呼びます。macOS / iOS / tvOS / Windows / Android / OpenHarmony / Linux で利用でき、それ以外の対象では <code>create</code> が NULL を返します。</li>
+    </ul>
+    <p>世界的な合意:</p>
+    <ul class="body">
+      <li>ステータスを返す関数は <code>ErikaStatus</code> を使います。<code>Ok</code>（0）と <code>NoEvent</code>（5）はエラーではありません。ポインタ、数値、または void を返す関数の失敗条件はヘッダーを確認してください。多くのステータス関数は panic を捕捉して <code>ErikaStatus_Panic</code> を返しますが、全入口で捕捉される保証はなく、panic-abort ビルドではプロセスが終了することがあります。</li>
+      <li>一部の失敗はスレッドローカルのエラーメッセージを設定しますが、すべての失敗で保証されるわけではなく、空または以前のメッセージの場合があります。失敗したスレッドで次の呼び出しの前に <code>erika_last_error_message()</code> から利用可能なメッセージを取得し、非 NULL の結果を <code>erika_string_free()</code> で解放してください。 例えば、<code>erika_add_external_subtitle</code> の <code>out_track_id</code> が NULL の場合は NullPointer を直接返し、スロットは更新されません。</li>
+      <li>liberika が返す <code>char*</code> は呼び出し元が所有します。独立した文字列は <code>erika_string_free()</code> で、<code>ErikaTrackInfo</code> / <code>ErikaDanmakuTrackInfo</code> 内の文字列は対応する <code>*_info_free()</code> で解放します。</li>
+      <li><code>const char*</code> パラメータは呼び出し中にのみ借用され、NUL で終わる UTF-8 である必要があります。</li>
+      <li>リスト クエリでは、カウントされた配列イディオムを使用します。<code>(buf, capacity, &amp;len)</code>。<code>len</code> 合計数に設定し、最大で書き込みます <code>capacity</code> バー; capacity が 0 で、buf が NULL の場合、数量のみが照会されます。</li>
+      <li>attach と resize の幅と高さは物理ピクセルです。 scale は、地表範囲をスケーリングしない、UI (弾幕など) / DPI 比の論理内容です。</li>
+      <li>handle は内部同期を提供しないため、複数のスレッドから同時に呼び出すことはできません。</li>
+    </ul>
+  </section>
+
+  <section id="status">
+    <h2>ErikaStatus<span class="jp">ステータス</span><a class="anchor" href="#status">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>値</th><th>名前</th><th>意味</th></tr></thead>
+        <tbody>
+          <tr><td class="m">0</td><td class="k">Ok</td><td>成功。</td></tr>
+          <tr><td class="m">1</td><td class="k">NullPointer</td><td>パラメータはヌルポインタです。</td></tr>
+          <tr><td class="m">2</td><td class="k">InvalidUtf8</td><td>文字列パラメータは有効な UTF-8 ではありません。</td></tr>
+          <tr><td class="m">3</td><td class="k">PlayerError</td><td>プレイヤーエラー。</td></tr>
+          <tr><td class="m">4</td><td class="k">Panic</td><td>内部 panic、キャプチャされました。</td></tr>
+          <tr><td class="m">5</td><td class="k">NoEvent</td><td>イベント キューが空です (エラーではありません)。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="state">
+    <h2>ErikaState<span class="jp">ステータス</span><a class="anchor" href="#state">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>値</th><th>名前</th><th>意味</th></tr></thead>
+        <tbody>
+          <tr><td class="m">0</td><td class="k">Idle</td><td>作成後の初期状態。</td></tr>
+          <tr><td class="m">1</td><td class="k">Opening</td><td>オープニング。</td></tr>
+          <tr><td class="m">2</td><td class="k">Ready</td><td>準備はできています、遊んでいません。</td></tr>
+          <tr><td class="m">3</td><td class="k">Playing</td><td>遊んでいます。</td></tr>
+          <tr><td class="m">4</td><td class="k">Paused</td><td>一時停止しました。</td></tr>
+          <tr><td class="m">5</td><td class="k">Stopped</td><td>止まった。</td></tr>
+          <tr><td class="m">6</td><td class="k">Closed</td><td>閉店しました。</td></tr>
+          <tr><td class="m">7</td><td class="k">Error</td><td>エラーステータス。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="events">
+    <h2>ErikaEventKind<span class="jp">イベント</span><a class="anchor" href="#events">#</a></h2>
+    <p>列挙値は 13 個です。12 種類のイベントと、イベントなしを示す <code>None</code> があります。</p>
+    <p>イベント履歴 <code>poll_event</code> テイクアウト。キューには制限がありません。ポーリングを行わないホストはイベントを蓄積するだけで、ステータスを監視せず、パケットを失いません。<code>ErikaEvent</code> のフィールドの 1 列のみが有効であり、次のように表されます。 <code>kind</code> 決断。<code>VideoDecoderChanged</code> と <code>AudioOutputChanged</code> ペイロード フィールドはありませんが、構造化メッセージがスレッドのローカル エラー スロットに書き込まれます。これは次から取得できます。 <code>erika_last_error_message</code> 読んでください。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>値</th><th>名前</th><th>意味</th><th>ペイロード</th></tr></thead>
+        <tbody>
+          <tr><td class="m">0</td><td class="k">None</td><td>イベントはありません。</td><td class="m">—</td></tr>
+          <tr><td class="m">1</td><td class="k">StateChanged</td><td>再生ステータスが変化します。</td><td class="m">state</td></tr>
+          <tr><td class="m">2</td><td class="k">DurationChanged</td><td>期間は決定または変更されます。</td><td class="m">duration_micros</td></tr>
+          <tr><td class="m">3</td><td class="k">PositionChanged</td><td>再生中に約 100ms ごとに再生位置が進みます。 seek / play / EOFの場合は別送となります。</td><td class="m">position_micros</td></tr>
+          <tr><td class="m">4</td><td class="k">TracksChanged</td><td>トラックリストの変更。</td><td class="m">tracks;その後トラックを再クエリする</td></tr>
+          <tr><td class="m">5</td><td class="k">BufferingChanged</td><td>バッファステータスの切り替え。</td><td class="m">buffering</td></tr>
+          <tr><td class="m">6</td><td class="k">VideoParamsChanged</td><td>ビデオパラメータが変更されます。</td><td class="m">video</td></tr>
+          <tr><td class="m">7</td><td class="k">SurfaceAttached</td><td>表面は貼り付けてあります。</td><td class="m">—</td></tr>
+          <tr><td class="m">8</td><td class="k">SurfaceDetached</td><td>表面が剥がれています。</td><td class="m">—</td></tr>
+          <tr><td class="m">9</td><td class="k">Error</td><td>間違い。</td><td class="m">status;同じスレッド <code>last_error_message</code> 詳細が利用可能</td></tr>
+          <tr><td class="m">10</td><td class="k">TrackSelectionChanged</td><td>選択された変更を追跡します。</td><td class="m">—</td></tr>
+          <tr><td class="m">11</td><td class="k">VideoDecoderChanged</td><td>ビデオ デコード バックエンドの切り替え。</td><td class="m">—</td></tr>
+          <tr><td class="m">12</td><td class="k">AudioOutputChanged</td><td>音声出力の状態が変化します。</td><td class="m">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="types">
+    <h2>タイプ一覧<span class="jp">タイプ</span><a class="anchor" href="#types">#</a></h2>
+    <p>45 個の型定義はすべて次の場所にあります。 <code>erika.h</code>。主な構造フィールドを以下の表に示します。完全なフィールドと列挙の定義は、同じバージョンのヘッダー ファイルの影響を受けます。</p>
+    <h3>ハンドル</h3>
+    <ul class="body">
+      <li><code>ErikaHandle</code> — pull モデルのハンドル。</li>
+      <li><code>ErikaPresenterHandle</code> — push モデルのハンドル。</li>
+      <li><code>ErikaFrameExportSession</code> — 独立したフレーム エクスポート セッション ハンドル。</li>
+    </ul>
+    <h3>構造</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>種類</th><th>目的</th></tr></thead>
+        <tbody>
+          <tr><td class="m">ErikaHttpHeader</td><td>開かれたときの HTTP リクエスト ヘッダー (name / value)。</td></tr>
+          <tr><td class="m">ErikaPresenterConfig</td><td>出力モード、EDR headroom、超解像度およびビデオ alpha モード。</td></tr>
+          <tr><td class="m">ErikaSubtitleStyle</td><td>字幕スタイルのオーバーライド (override_mask を含む)。</td></tr>
+          <tr><td class="m">ErikaSurfaceOutputCapabilities</td><td>サーフェス出力機能 (extended-linear、direct、composition、headroom)。</td></tr>
+          <tr><td class="m">ErikaUpscalerStatus</td><td>超解像ステータスとフレーム数。</td></tr>
+          <tr><td class="m">ErikaOutputStatus</td><td>出力エンコーディング、headroom、およびフォールバック ステータス。</td></tr>
+          <tr><td class="m">ErikaPresenterResourceStatus</td><td>レンダラーのメモリのスナップショット。</td></tr>
+          <tr><td class="m">ErikaSubtitleMemoryFontStatus</td><td>メモリーフォントの登録状況。</td></tr>
+          <tr><td class="m">ErikaSubtitleMemoryFontFace / Info</td><td>メモリフォント face とメタデータ。</td></tr>
+          <tr><td class="m">ErikaDanmakuConfig</td><td>弾幕のレイアウトと表示パラメータ。</td></tr>
+          <tr><td class="m">ErikaDanmakuTrackInfo</td><td>弾幕トラック情報。</td></tr>
+          <tr><td class="m">ErikaVideoParams</td><td>ビデオのサイズと原色/伝送。</td></tr>
+          <tr><td class="m">ErikaTrackCounts / Selection / Info</td><td>トラック数、現在の選択内容、トラック情報。</td></tr>
+          <tr><td class="m">ErikaEvent</td><td>イベントペイロード。</td></tr>
+          <tr><td class="m">ErikaPresenterStats</td><td>レンダリング統計、フィールドを以下の表に示します。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>0.3.0の新しいタイプ</h3>
+    <p><code>ErikaFrameExportFormat</code> RGBA(0) と PNG(1) を定義します。<code>ErikaFrameExportOptions</code>、<code>ErikaFrameExportResult</code>、<code>ErikaFrameExportSessionOptions</code>、<code>ErikaFrameExportRequest</code> 単一のエクスポート、結果、セッション開始、およびフレームごとのリクエストをそれぞれ説明します。<code>ErikaFrameExportSession</code> 不透明なセッション ハンドルです。<code>ErikaLogLevel</code> Trace(0)からError(4)まで。完全な免責事項と所有権については、を参照してください。<a href="capi-handle.ja.html#frame-export">フレームのエクスポートとログ</a>。</p>
+
+    <h3>構造体フィールド</h3>
+    <p>次の表は、一般的に使用される構造体のフィールド、タイプ、セマンティクスを示しています。フィールド名と <code>erika.h</code> 一貫した。</p>
+
+    <h4>ErikaSubtitleStyle</h4>
+    <p>字幕のフォールバック表示は、不透明な白文字（<code>0xFFFFFFFF</code>）と半透明の黒い縁取り（<code>0x0000007F</code>）が既定です。範囲外の数値はクランプし、<code>border_style</code> と <code>alignment</code> は範囲外なら既定値 1 / 2 を使います。コンテナ内 ASS トラックでは、<code>override_mask</code> が 0 のときフォントファミリーのフォールバックを除きこれらのフィールドは効きません。対応するビットを立てると ASS の dialogue で宣言されたスタイルを上書きします。SRT/WebVTT のプレーンテキスト字幕では、liberika が生成する ASS ヘッダーにスタイル全体を反映し、<code>override_mask</code> には依存しません。すべての寸法は ASS スクリプト単位で、<code>set_subtitle_scale</code> を掛けます。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>フィールド</th><th>種類</th><th>セマンティクス</th></tr></thead>
+        <tbody>
+          <tr><td class="m">font_family</td><td class="m">const char*</td><td>NULL または空の文字列はプラットフォームのデフォルトのままです。</td></tr>
+          <tr><td class="m">font_file_path</td><td class="m">const char*</td><td>フォントファイルのパス。</td></tr>
+          <tr><td class="m">primary_color_rgba</td><td class="m">uint32_t</td><td>テキストの色、0xRRGGBBAA。</td></tr>
+          <tr><td class="m">outline_color_rgba</td><td class="m">uint32_t</td><td>ストロークの色、0xRRGGBBAA。</td></tr>
+          <tr><td class="m">font_size</td><td class="m">double</td><td>8..400、デフォルトは 48。</td></tr>
+          <tr><td class="m">outline_width</td><td class="m">double</td><td>0..32、デフォルトは 2。</td></tr>
+          <tr><td class="m">bold / italic / underline / strike_out</td><td class="m">bool</td><td>グリフ属性。</td></tr>
+          <tr><td class="m">spacing</td><td class="m">double</td><td>-100..100。</td></tr>
+          <tr><td class="m">scale_x_percent / scale_y_percent</td><td class="m">double</td><td>1..1000、100 = スケーリングなし。</td></tr>
+          <tr><td class="m">border_style</td><td class="m">int32_t</td><td>1 = ストローク + シャドウ、3 = 不透明なカラー ブロック。</td></tr>
+          <tr><td class="m">shadow_depth</td><td class="m">double</td><td>0..32。</td></tr>
+          <tr><td class="m">blur</td><td class="m">double</td><td>0..100。</td></tr>
+          <tr><td class="m">alignment</td><td class="m">int32_t</td><td>1..9、テンキーのレイアウト、2 = 下部中央。</td></tr>
+          <tr><td class="m">margin_left / margin_right / margin_vertical</td><td class="m">int32_t</td><td>マージン、0..10000 に固定。</td></tr>
+          <tr><td class="m">override_mask</td><td class="m">uint32_t</td><td>ビット マスクをオーバーライドします。以下のビット テーブルを参照してください。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">上書きビットが有効な場合、寸法は解像度に依存せず、<code>font_size</code> 48 はスクリプトの <code>PlayResY</code> にかかわらず同じピクセルサイズになります。余白は例外です。コンテナ ASS の余白はスクリプトの <code>PlayResY</code> に応じてスケーリングし、プレーンテキスト字幕ではピクセルを使います（スクリプトはフレームサイズに合わせて liberika が生成）。マスクが 0 の場合はすべてフォールバックのみとなり、コンテナトラックには効かず、<code>erika_presenter_set_subtitle_style</code> はフォント選択にのみ関わります。</p>
+
+    <h4>ErikaDanmakuConfig</h4>
+    <p class="muted">スクロール時間の計算式: 画面通過ミリ秒 = <code>scroll_duration_seconds</code> × <code>clamp(逻辑宽 / 1280, 0.9, 1.3)</code> × 1000 / <code>scroll_speed_factor</code>;速度 = (ビューポートの幅 + テキストの幅) / 継続時間。<code>max_quantity</code> 画面密度と同時にスクロール ウィンドウ内でフィルタリングを行い、スクロールの弾幕にのみ作用します。<code>max_lines_per_mode</code> 「各カテゴリ」とは、左スクロール、右スクロール、上スクロール、下スクロールの４方向のそれぞれの上限を意味する。<code>set_danmaku_config</code> C の表示フィールドを置き換えます。<code>block_words</code> カスタム フォントを含むフィールドは、現在の設定から継承されます。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>フィールド</th><th>種類</th><th>デフォルト</th><th>セマンティクス</th></tr></thead>
+        <tbody>
+          <tr><td class="m">enabled</td><td class="m">bool</td><td>true</td><td>弾幕マスタースイッチ。</td></tr>
+          <tr><td class="m">font_size</td><td class="m">float</td><td>30</td><td>NipaPlay/Flutter 論理フォント サイズ。surface scale に従ってフォント ピクセルを変換します。</td></tr>
+          <tr><td class="m">opacity</td><td class="m">float</td><td>1.0</td><td>不透明度。</td></tr>
+          <tr><td class="m">display_area</td><td class="m">float</td><td>1.0</td><td>ビューポートの高さに対する弾幕エリアの比率。0.1..1.0 にクランプされます。</td></tr>
+          <tr><td class="m">scroll_duration_seconds</td><td class="m">float</td><td>10.0</td><td>画面全体の連続スクロールの継続時間のベンチマーク。1..60 秒に固定されています。</td></tr>
+          <tr><td class="m">scroll_speed_factor</td><td class="m">float</td><td>1.0</td><td>回転速度係数は 0.2..4.0 に固定され、大きいほど速くなります。</td></tr>
+          <tr><td class="m">track_gap_ratio</td><td class="m">float</td><td>0.15</td><td>トラック間隔 = 弾幕の高さ × この比率、0..2 にクランプされます。</td></tr>
+          <tr><td class="m">outline_width</td><td class="m">float</td><td>1.0</td><td>ストローク幅。</td></tr>
+          <tr><td class="m">shadow_offset_x / shadow_offset_y</td><td class="m">float</td><td>1.0 / 1.0</td><td>影のオフセット。</td></tr>
+          <tr><td class="m">merge_duplicates</td><td class="m">bool</td><td>false</td><td>重複した弾幕を結合します。</td></tr>
+          <tr><td class="m">allow_stacking</td><td class="m">bool</td><td>false</td><td>同じトラックのスタッキングが可能です。</td></tr>
+          <tr><td class="m">allow_scroll_overwrite</td><td class="m">bool</td><td>false</td><td>スクロール弾幕オーバーレイを許可します。</td></tr>
+          <tr><td class="m">max_quantity</td><td class="m">uint32_t</td><td>0</td><td>ローリング弾幕密度の上限。0 = 制限なし。</td></tr>
+          <tr><td class="m">max_lines_per_mode</td><td class="m">uint32_t</td><td>0</td><td>弾幕の種類ごとの最大ライン数。0 = 制限なし。</td></tr>
+          <tr><td class="m">block_top / block_bottom / block_scroll</td><td class="m">bool</td><td>false</td><td>上/下/スクロール弾幕をブロックします。</td></tr>
+          <tr><td class="m">shadow_style</td><td class="m">int32_t</td><td>3</td><td>0 None / 1 Soft / 2 Medium / 3 Strong、不明な値の場合は 3 にフォールバックします。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaPresenterConfig</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>フィールド</th><th>種類</th><th>セマンティクス</th></tr></thead>
+        <tbody>
+          <tr><td class="m">output_mode</td><td class="m">int32_t</td><td><code>ErikaPresenterOutputMode</code>。</td></tr>
+          <tr><td class="m">edr_headroom</td><td class="m">float</td><td>EDR headroom、0 = 自動。</td></tr>
+          <tr><td class="m">luma_upscaler</td><td class="m">int32_t</td><td><code>ErikaLumaUpscalerMode</code>。</td></tr>
+          <tr><td class="m">video_alpha_mode</td><td class="m">int32_t</td><td><code>ErikaVideoAlphaMode</code>：0 = Opaque，1 = PackedAlphaRight。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaSurfaceOutputCapabilities</h4>
+    <p>attach のホストから提供される表示/表面検出結果。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>フィールド</th><th>種類</th><th>セマンティクス</th></tr></thead>
+        <tbody>
+          <tr><td class="m">extended_linear</td><td class="m">bool</td><td>Surface は extended-linear をサポートします。</td></tr>
+          <tr><td class="m">direct_composition</td><td class="m">bool</td><td>直接合成がサポートされています。</td></tr>
+          <tr><td class="m">desired_headroom</td><td class="m">float</td><td>headroom、0 = システム自動。</td></tr>
+          <tr><td class="m">fallback_reason</td><td class="m">int32_t</td><td><code>ErikaOutputFallbackReason</code>。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaUpscalerStatus</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>フィールド</th><th>種類</th><th>セマンティクス</th></tr></thead>
+        <tbody>
+          <tr><td class="m">requested_mode</td><td class="m">int32_t</td><td>要求されたモード、<code>ErikaLumaUpscalerMode</code>。</td></tr>
+          <tr><td class="m">active_backend</td><td class="m">int32_t</td><td>実際のバックエンド、<code>ErikaUpscalerBackendStatus</code>。</td></tr>
+          <tr><td class="m">fallback_count</td><td class="m">uint64_t</td><td>フォールバック回数。</td></tr>
+          <tr><td class="m">upscaled_frames</td><td class="m">uint64_t</td><td>アップスケール済みフレーム数。</td></tr>
+          <tr><td class="m">last_encode_micros</td><td class="m">uint64_t</td><td>前回のエンコード所要時間（マイクロ秒）。</td></tr>
+          <tr><td class="m">last_gpu_micros</td><td class="m">uint64_t</td><td>前回の GPU 処理の所要時間（マイクロ秒）。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaOutputStatus</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>フィールド</th><th>種類</th><th>セマンティクス</th></tr></thead>
+        <tbody>
+          <tr><td class="m">requested_mode</td><td class="m">int32_t</td><td><code>ErikaPresenterOutputMode</code>。</td></tr>
+          <tr><td class="m">active_encoding</td><td class="m">int32_t</td><td><code>ErikaActiveOutputEncoding</code>。</td></tr>
+          <tr><td class="m">surface_format</td><td class="m">int32_t</td><td><code>ErikaOutputSurfaceFormat</code>。</td></tr>
+          <tr><td class="m">native_data_space</td><td class="m">int32_t</td><td>ネイティブ data-space ハンドル。</td></tr>
+          <tr><td class="m">requested_headroom</td><td class="m">float</td><td>headroom をリクエストしました。</td></tr>
+          <tr><td class="m">active_headroom</td><td class="m">float</td><td>実際に有効なheadroom。</td></tr>
+          <tr><td class="m">active_headroom_known</td><td class="m">bool</td><td>headroom が判明しているか。</td></tr>
+          <tr><td class="m">extended_linear_active</td><td class="m">bool</td><td>extended-linear が有効か。</td></tr>
+          <tr><td class="m">fallback_reason</td><td class="m">int32_t</td><td><code>ErikaOutputFallbackReason</code>。</td></tr>
+          <tr><td class="m">fallback_count</td><td class="m">uint64_t</td><td>フォールバック回数。</td></tr>
+          <tr><td class="m">data_space_failures</td><td class="m">uint64_t</td><td>data-space 失敗の数。</td></tr>
+          <tr><td class="m">headroom_updates</td><td class="m">uint64_t</td><td>headroom の更新回数。</td></tr>
+          <tr><td class="m">extended_linear_frames</td><td class="m">uint64_t</td><td>extended-linear フレーム数。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaPresenterResourceStatus</h4>
+    <p>レンダラーのメモリのスナップショット。<code>device_current_allocated_bytes</code> Metal デバイス レベルのプロセス カウンターです。他の presenter の割り当てが含まれる場合があります。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>フィールド</th><th>種類</th><th>セマンティクス</th></tr></thead>
+        <tbody>
+          <tr><td class="m">device_current_allocated_bytes</td><td class="m">uint64_t</td><td>デバイスは現在バイトを割り当てています。</td></tr>
+          <tr><td class="m">device_recommended_working_set_bytes</td><td class="m">uint64_t</td><td>機器推奨ワーキングセット。</td></tr>
+          <tr><td class="m">drawable_estimated_bytes</td><td class="m">uint64_t</td><td>drawable 推定バイト数。</td></tr>
+          <tr><td class="m">video_frame_bytes</td><td class="m">uint64_t</td><td>ビデオフレームバイト。</td></tr>
+          <tr><td class="m">overlay_atlas_bytes</td><td class="m">uint64_t</td><td>字幕 atlas バイト。</td></tr>
+          <tr><td class="m">danmaku_atlas_bytes</td><td class="m">uint64_t</td><td>atlasバイトを連発。</td></tr>
+          <tr><td class="m">danmaku_vertex_buffer_bytes</td><td class="m">uint64_t</td><td>弾幕の頂点バッファーのバイト。</td></tr>
+          <tr><td class="m">upscaler_bytes</td><td class="m">uint64_t</td><td>ハイパースケーラーのバイト。</td></tr>
+          <tr><td class="m">renderer_tracked_bytes</td><td class="m">uint64_t</td><td>レンダラーは合計バイト数を追跡​​します。</td></tr>
+          <tr><td class="m">presenter_cpu_danmaku_atlas_bytes</td><td class="m">uint64_t</td><td>presenter側CPU弾幕atlasバイト。</td></tr>
+          <tr><td class="m">drawable_count</td><td class="m">uint32_t</td><td>drawable数量。</td></tr>
+          <tr><td class="m">output_mode_switches</td><td class="m">uint64_t</td><td>出力モードの切り替え回数。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaSubtitleMemoryFont*</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>種類</th><th>フィールド</th><th>種類</th><th>セマンティクス</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="5" class="m">Status</td><td class="m">registered_count</td><td class="m">uintptr_t</td><td>登録されているフォントの数。</td></tr>
+          <tr><td class="m">registered_bytes</td><td class="m">uintptr_t</td><td>登録された合計バイト数。</td></tr>
+          <tr><td class="m">selected_count</td><td class="m">uintptr_t</td><td>選択したフォントの数。</td></tr>
+          <tr><td class="m">generation</td><td class="m">uint64_t</td><td>登録の生成、変更とは、レジストリが更新されたことを意味します。</td></tr>
+          <tr><td class="m">selected_ids</td><td class="m">uint64_t*</td><td>選択されたフォント id 配列。</td></tr>
+          <tr><td rowspan="6" class="m">Face</td><td class="m">index</td><td class="m">uint32_t</td><td>フォント コレクション内のインデックス。</td></tr>
+          <tr><td class="m">families_json</td><td class="m">char*</td><td>family リスト JSON。</td></tr>
+          <tr><td class="m">post_script_name</td><td class="m">char*</td><td>PostScript という名前。</td></tr>
+          <tr><td class="m">weight</td><td class="m">uint16_t</td><td>フォントの太さ。</td></tr>
+          <tr><td class="m">italic</td><td class="m">bool</td><td>イタリック体になっていますか？</td></tr>
+          <tr><td class="m">monospaced</td><td class="m">bool</td><td>幅が等しいかどうか。</td></tr>
+          <tr><td rowspan="4" class="m">Info</td><td class="m">id</td><td class="m">uint64_t</td><td>フォントはid。</td></tr>
+          <tr><td class="m">byte_len</td><td class="m">uintptr_t</td><td>フォントデータのバイト数。</td></tr>
+          <tr><td class="m">faces</td><td class="m">Face*</td><td>face配列。</td></tr>
+          <tr><td class="m">face_count</td><td class="m">uintptr_t</td><td>face数量。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaDanmakuTrackInfo</h4>
+    <p>呼び出し元に戻った後、文字列は呼び出し元によって所有されます。使用する <code>erika_danmaku_track_info_free</code> リリース。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>フィールド</th><th>種類</th><th>セマンティクス</th></tr></thead>
+        <tbody>
+          <tr><td class="m">id</td><td class="m">uint64_t</td><td>idを追跡します。</td></tr>
+          <tr><td class="m">enabled</td><td class="m">bool</td><td>トラックが有効かどうか。</td></tr>
+          <tr><td class="m">offset_micros</td><td class="m">int64_t</td><td>軌道時間オフセット、マイクロ秒。</td></tr>
+          <tr><td class="m">item_count</td><td class="m">uintptr_t</td><td>弾幕の数。</td></tr>
+          <tr><td class="m">name</td><td class="m">char*</td><td>トラック名。</td></tr>
+          <tr><td class="m">source</td><td class="m">char*</td><td>ソースの説明。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaVideoParams</h4>
+    <p>ビデオのサイズと色のメタデータ、経由 <code>VideoParamsChanged</code> 事件の報告。<code>primaries</code> と <code>transfer</code> これは、FFmpeg の元の定数値ではなく、FFmpeg 列挙から変換されたプロジェクト独自の列挙番号です。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>フィールド</th><th>種類</th><th>セマンティクス</th></tr></thead>
+        <tbody>
+          <tr><td class="m">width / height</td><td class="m">uint32_t</td><td>ビデオのピクセル サイズ。</td></tr>
+          <tr><td class="m">primaries</td><td class="m">uint32_t</td><td>0 Unknown / 1 Bt709 / 2 DisplayP3 / 3 Bt2020。</td></tr>
+          <tr><td class="m">transfer</td><td class="m">uint32_t</td><td>0 Unknown / 1 Srgb / 2 Bt1886 / 3 Pq / 4 Hlg。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">マッピング: BT.709 伝達関数は Bt1886 に分類されます。不明な値は常に 0 です。値はビデオ トラックから取得されます。 <code>AVCodecParameters</code> レベルカラー情報。</p>
+
+    <h4>ErikaTrackCounts / ErikaTrackSelection</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>種類</th><th>フィールド</th><th>種類</th><th>セマンティクス</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="3" class="m">Counts</td><td class="m">video / audio / subtitle</td><td class="m">uint32_t</td><td>各タイプのトラックの数。</td></tr>
+          <tr><td></td><td></td><td></td></tr>
+          <tr><td></td><td></td><td></td></tr>
+          <tr><td rowspan="3" class="m">Selection</td><td class="m">video / audio / subtitle</td><td class="m">int64_t</td><td>各タイプの選択されたトラックは id、-1 = なし。</td></tr>
+          <tr><td></td><td></td><td></td></tr>
+          <tr><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaTrackInfo</h4>
+    <p>6 つの文字列フィールドは呼び出し元によって所有され、次を使用します。 <code>erika_track_info_free</code> リリース。<code>bit_rate</code>(bit/s) はすべてのトラック タイプに設定されます。フレーム レート フィールドはビデオ トラックでのみ使用できます (<code>frame_rate_numerator / frame_rate_denominator</code>、0 = 不明)。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>フィールド</th><th>種類</th><th>セマンティクス</th></tr></thead>
+        <tbody>
+          <tr><td class="m">id</td><td class="m">int64_t</td><td>idを追跡します。</td></tr>
+          <tr><td class="m">kind</td><td class="m">ErikaTrackKind</td><td>ビデオ/オーディオ/字幕。</td></tr>
+          <tr><td class="m">source</td><td class="m">ErikaTrackSource</td><td>埋め込み/プラグイン。</td></tr>
+          <tr><td class="m">selected</td><td class="m">bool</td><td>チェックが入っているかどうか。</td></tr>
+          <tr><td class="m">can_remove</td><td class="m">bool</td><td>取り外し可能かどうか（外部トラックの場合は true）。</td></tr>
+          <tr><td class="m">title</td><td class="m">char*</td><td>タイトル。</td></tr>
+          <tr><td class="m">language</td><td class="m">char*</td><td>言語コード。</td></tr>
+          <tr><td class="m">codec</td><td class="m">char*</td><td>コーデック名。</td></tr>
+          <tr><td class="m">width / height</td><td class="m">uint32_t</td><td>ビデオ トラックのピクセル サイズ。</td></tr>
+          <tr><td class="m">sample_rate / channels</td><td class="m">uint32_t</td><td>オーディオトラックのサンプルレート/チャンネル数。</td></tr>
+          <tr><td class="m">pixel_format</td><td class="m">char*</td><td>ビデオのピクセル形式。</td></tr>
+          <tr><td class="m">sample_format</td><td class="m">char*</td><td>オーディオのサンプリング形式。</td></tr>
+          <tr><td class="m">profile</td><td class="m">char*</td><td>コードprofile。</td></tr>
+          <tr><td class="m">level</td><td class="m">int32_t</td><td>コードlevel。</td></tr>
+          <tr><td class="m">bit_rate</td><td class="m">uint64_t</td><td>ビットレート、bit/s。</td></tr>
+          <tr><td class="m">frame_rate_numerator / frame_rate_denominator</td><td class="m">uint32_t</td><td>フレーム レートの割合、0/0 = 不明。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaEvent</h4>
+    <p>押す <code>kind</code> 有効なフィールドの共用体構造を決定します。を参照してください。<a href="#events">イベントテーブル</a>。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>フィールド</th><th>種類</th><th>セマンティクス</th></tr></thead>
+        <tbody>
+          <tr><td class="m">kind</td><td class="m">ErikaEventKind</td><td>イベント タイプによって、他のフィールドの有効性が決まります。</td></tr>
+          <tr><td class="m">status</td><td class="m">ErikaStatus</td><td><code>Error</code> イベントによって伝えられるエラー コード。</td></tr>
+          <tr><td class="m">state</td><td class="m">ErikaState</td><td><code>StateChanged</code> 新しいステータスが引き継がれました。</td></tr>
+          <tr><td class="m">duration_micros</td><td class="m">int64_t</td><td><code>DurationChanged</code> キャリーの継続時間。</td></tr>
+          <tr><td class="m">position_micros</td><td class="m">uint64_t</td><td><code>PositionChanged</code> 持ち運び位置。</td></tr>
+          <tr><td class="m">buffering</td><td class="m">bool</td><td><code>BufferingChanged</code> キャリーバッファステータス。</td></tr>
+          <tr><td class="m">video</td><td class="m">ErikaVideoParams</td><td><code>VideoParamsChanged</code> パラメータが運ばれます。</td></tr>
+          <tr><td class="m">tracks</td><td class="m">ErikaTrackCounts</td><td><code>TracksChanged</code> キャリーカウント。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaPresenterStats</h4>
+    <p>レンダリングパイプラインカウンター。デコード/レンダリング/オーディオ/オーバーレイのカウント、ソフトウェア／ハードウェアデコードとゼロコピー、および HDR とオーディオ リカバリの内訳。<code>audio_recovery_state</code> 値: 0 安定 / 1 切断 / 2 回復中 / 3 失敗。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>フィールド</th><th>種類</th><th>セマンティクス</th></tr></thead>
+        <tbody>
+          <tr><td class="m">decoded_video_frames</td><td class="m">uint64_t</td><td>デコードされたビデオ フレーム。</td></tr>
+          <tr><td class="m">rendered_video_frames</td><td class="m">uint64_t</td><td>レンダリングされたビデオフレーム。</td></tr>
+          <tr><td class="m">rendered_test_frames</td><td class="m">uint64_t</td><td>テストフレーム。</td></tr>
+          <tr><td class="m">pushed_audio_frames</td><td class="m">uint64_t</td><td>オーディオフレームがプッシュされました。</td></tr>
+          <tr><td class="m">overlay_frames</td><td class="m">uint64_t</td><td>字幕オーバーレイフレーム。</td></tr>
+          <tr><td class="m">danmaku_frames / danmaku_items</td><td class="m">uint64_t</td><td>弾幕レンダリングのフレーム/バーの数。</td></tr>
+          <tr><td class="m">import_failures / render_failures / audio_failures</td><td class="m">uint64_t</td><td>インポート/レンダリング/オーディオの失敗の数。</td></tr>
+          <tr><td class="m">software_video_frames / hardware_video_frames</td><td class="m">uint64_t</td><td>ソフトウェア／ハードウェアデコード。</td></tr>
+          <tr><td class="m">zero_copy_video_frames</td><td class="m">uint64_t</td><td>ゼロコピーフレーム数。</td></tr>
+          <tr><td class="m">cpu_video_frame_fallbacks</td><td class="m">uint64_t</td><td>CPU にフォールバックするフレームの数。</td></tr>
+          <tr><td class="m">last_render_micros / last_render_current_micros</td><td class="m">uint64_t</td><td>最後の完全な tick / レンダラ呼び出しにかかった時間はマイクロ秒単位です。</td></tr>
+          <tr><td class="m">audio_clock_read_frames / audio_clock_queued_frames / audio_clock_underflow_frames</td><td class="m">uint64_t</td><td>オーディオ クロックの読み取りフレーム/キュー/アンダーラン。</td></tr>
+          <tr><td class="m">audio_recovery_state</td><td class="m">int32_t</td><td>0 安定 / 1 切断 / 2 回復 / 3 失敗。</td></tr>
+          <tr><td class="m">audio_last_error_code</td><td class="m">int32_t</td><td>最後のオーディオエラーコード。</td></tr>
+          <tr><td class="m">audio_recovery_attempts / audio_recovery_count / audio_recovery_failures</td><td class="m">uint64_t</td><td>オーディオ回復の試行/成功/失敗。</td></tr>
+          <tr><td class="m">direct_zero_copy_video_frames / shared_handle_video_frames</td><td class="m">uint64_t</td><td>ダイレクトゼロコピー/共有ハンドルフレーム。</td></tr>
+          <tr><td class="m">hdr_source_frames / hdr10_output_frames / sdr_tonemap_frames</td><td class="m">uint64_t</td><td>HDR ソース / HDR10 出力 / SDR トーン マップされたフレーム。</td></tr>
+          <tr><td class="m">hdr10_metadata_updates / hdr10_metadata_failures / hdr10_output_failures</td><td class="m">uint64_t</td><td>HDR10 メタデータの更新/失敗/出力に失敗しました。</td></tr>
+          <tr><td class="m">hdr10_output_active</td><td class="m">bool</td><td>HDR10 出力が有効かどうか。</td></tr>
+          <tr><td class="m">video_frame_backpressure_drops</td><td class="m">uint64_t</td><td>バックプレッシャーによってドロップされたフレームの数。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">プラットフォームの違い: wgpu バックエンド <code>last_gpu_micros</code> と <code>direct_zero_copy_video_frames</code> 常に 0 (Metal のみが GPU 時間を報告し、直接接続数は D3D11 の増分のみを報告します)。<code>shared_handle_video_frames</code> wgpu(Android / OpenHarmony) でのみ増加します。<code>hdr10_output_frames</code> D3D11 でのみ増加します。<code>decoded_video_frames</code> これは、レンダラーによってアップロードされたデコードされたフレームです。<code>rendered_video_frames</code> はサーフェスに正常に描画されたフレームであり、この 2 つの違いはレンダリングされなかった部分です。</p>
+    <h3>字幕スタイルオーバーライドマスク</h3>
+    <p><code>override_mask</code> はい <code>ERIKA_SUBTITLE_OVERRIDE_*</code> ビット OR、libass のミラー <code>ASS_OVERRIDE_BIT_*</code> 値。このビットを設定すると、対応するフィールドは fallback ではなくなりますが、ASS ダイアログ イベント リクエスト スタイルを置き換えます。 0 を指定すると、すべてのフィールドが fallback のままになります。不明なビットは破棄されます。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>マクロ</th><th>ビット</th><th>対象分野</th></tr></thead>
+        <tbody>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_FONT_SIZE_FIELDS</td><td class="m">1u&lt;&lt;2</td><td>font_size、spacing、scale_x_percent、scale_y_percent</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_FONT_NAME</td><td class="m">1u&lt;&lt;3</td><td>font_family</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_COLORS</td><td class="m">1u&lt;&lt;4</td><td>primary_color_rgba、outline_color_rgba</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_ATTRIBUTES</td><td class="m">1u&lt;&lt;5</td><td>bold、italic、underline、strike_out</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_BORDER</td><td class="m">1u&lt;&lt;6</td><td>border_style、outline_width、shadow_depth</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_ALIGNMENT</td><td class="m">1u&lt;&lt;7</td><td>alignment</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_MARGINS</td><td class="m">1u&lt;&lt;8</td><td>margin_left、margin_right、margin_vertical</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_BLUR</td><td class="m">1u&lt;&lt;11</td><td>blur</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_ALL</td><td class="m">すべてのビット</td><td>上記のすべて</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>列挙</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>種類</th><th>目的</th></tr></thead>
+        <tbody>
+          <tr><td class="m">ErikaStatus / ErikaState / ErikaEventKind</td><td>上記のセクションを参照してください。</td></tr>
+          <tr><td class="m">ErikaTrackKind</td><td>ビデオ/オーディオ/字幕。</td></tr>
+          <tr><td class="m">ErikaTrackSource</td><td>埋め込み/プラグイン。</td></tr>
+          <tr><td class="m">ErikaWgpuSurfaceKind</td><td>wgpu サーフェス タイプ、9 メンバー。</td></tr>
+          <tr><td class="m">ErikaFlutterTextureKind</td><td>Flutter テクスチャ タイプ、6 メンバー。</td></tr>
+          <tr><td class="m">ErikaPresenterOutputMode</td><td>SDR / Apple EDR / extended-linear / Auto。</td></tr>
+          <tr><td class="m">ErikaActiveOutputEncoding</td><td>SDR sRGB / Apple EDR / Android scRGB / HDR10 PQ / Linux scRGB。</td></tr>
+          <tr><td class="m">ErikaOutputFallbackReason</td><td>HDR フォールバックの理由、メンバーは 9 人です。</td></tr>
+          <tr><td class="m">ErikaOutputSurfaceFormat</td><td>8-bit UNORM / 10-bit UNORM / 16-bit float。</td></tr>
+          <tr><td class="m">ErikaLumaUpscalerMode</td><td>Off / ArtCNN F16 / ArtCNN F32 / ArtCNN F16 DS。</td></tr>
+          <tr><td class="m">ErikaUpscalerBackendStatus</td><td>スーパースコアバックエンドステータス、5種類。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaTrackKind / ErikaTrackSource</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>値</th><th>TrackKind</th><th>値</th><th>TrackSource</th></tr></thead>
+        <tbody>
+          <tr><td class="m">0</td><td>Video</td><td class="m">0</td><td>Embedded (コンテナ内)</td></tr>
+          <tr><td class="m">1</td><td>Audio</td><td class="m">1</td><td>External(プラグイン)</td></tr>
+          <tr><td class="m">2</td><td>Subtitle</td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaWgpuSurfaceKind</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>値</th><th>名前</th><th>プラットフォーム</th></tr></thead>
+        <tbody>
+          <tr><td class="m">0</td><td class="m">Unknown</td><td>不明。</td></tr>
+          <tr><td class="m">1</td><td class="m">MacOsNsView</td><td>macOS NSView。</td></tr>
+          <tr><td class="m">2</td><td class="m">MacOsCaMetalLayer</td><td>macOS CAMetalLayer。</td></tr>
+          <tr><td class="m">3</td><td class="m">IosUiView</td><td>iOS UIView。</td></tr>
+          <tr><td class="m">4</td><td class="m">WindowsHwnd</td><td>Windows HWND。</td></tr>
+          <tr><td class="m">5</td><td class="m">XlibWindow</td><td>X11(Xlib)ウィンドウ。</td></tr>
+          <tr><td class="m">6</td><td class="m">WaylandSurface</td><td>Wayland面。</td></tr>
+          <tr><td class="m">7</td><td class="m">AndroidNativeWindow</td><td>Android ANativeWindow。</td></tr>
+          <tr><td class="m">8</td><td class="m">OhosNativeWindow</td><td>OpenHarmony ネイティブ ウィンドウ。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaFlutterTextureKind</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>値</th><th>名前</th><th>プラットフォーム</th></tr></thead>
+        <tbody>
+          <tr><td class="m">0</td><td class="m">Unknown</td><td>不明。</td></tr>
+          <tr><td class="m">1</td><td class="m">MacOsTextureRegistrar</td><td>macOS Flutter テクスチャ レジスタ。</td></tr>
+          <tr><td class="m">2</td><td class="m">IosTextureRegistrar</td><td>iOS Flutter テクスチャ レジスタ。</td></tr>
+          <tr><td class="m">3</td><td class="m">AndroidSurfaceTexture</td><td>Android SurfaceTexture。</td></tr>
+          <tr><td class="m">4</td><td class="m">WindowsTextureRegistrar</td><td>Windows Flutter テクスチャ レジスタ。</td></tr>
+          <tr><td class="m">5</td><td class="m">LinuxTextureRegistrar</td><td>Linux Flutter テクスチャ レジスタ。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaPresenterOutputMode / ErikaActiveOutputEncoding</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>値</th><th>PresenterOutputMode</th><th>値</th><th>ActiveOutputEncoding</th></tr></thead>
+        <tbody>
+          <tr><td class="m">0</td><td>Sdr</td><td class="m">0</td><td>SdrSrgb</td></tr>
+          <tr><td class="m">1</td><td>AppleEdr</td><td class="m">1</td><td>AppleEdr</td></tr>
+          <tr><td class="m">2</td><td>ExtendedLinear</td><td class="m">2</td><td>AndroidExtendedLinearScRgb</td></tr>
+          <tr><td class="m">3</td><td>Auto</td><td class="m">3</td><td>Hdr10Pq</td></tr>
+          <tr><td>—</td><td>—</td><td class="m">4</td><td>LinuxExtendedLinearScRgb</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaOutputFallbackReason</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>値</th><th>名前</th><th>意味</th></tr></thead>
+        <tbody>
+          <tr><td class="m">0</td><td class="m">None</td><td>フォールバックはありません。</td></tr>
+          <tr><td class="m">1</td><td class="m">DisplayHdrUnsupported</td><td>モニターはHDRをサポートしていません。</td></tr>
+          <tr><td class="m">2</td><td class="m">HybridCompositionRequired</td><td>混合合成が必要です。</td></tr>
+          <tr><td class="m">3</td><td class="m">WgpuBackendNotVulkan</td><td>wgpu バックエンドは Vulkan ではありません。</td></tr>
+          <tr><td class="m">4</td><td class="m">Rgba16FloatSurfaceFormatUnavailable</td><td>RGBA16F サーフェス フォーマットは使用できません。</td></tr>
+          <tr><td class="m">5</td><td class="m">NativeWindowDataSpaceApiUnavailable</td><td>ネイティブ ウィンドウ data-space API は使用できません。</td></tr>
+          <tr><td class="m">6</td><td class="m">ScrgbDataSpaceVerificationFailed</td><td>scRGB data-space 認証に失敗しました。</td></tr>
+          <tr><td class="m">7</td><td class="m">SurfaceConfigureFailed</td><td>サーフェスの構成に失敗しました。</td></tr>
+          <tr><td class="m">8</td><td class="m">LegacyAppleEdrUnsupported</td><td>旧形式の Apple EDR はサポートされていません。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>ErikaOutputSurfaceFormat / ErikaLumaUpscalerMode / ErikaUpscalerBackendStatus</h4>
+    <div class="tw">
+      <table>
+        <thead><tr><th>値</th><th>OutputSurfaceFormat</th><th>値</th><th>LumaUpscalerMode</th><th>値</th><th>UpscalerBackendStatus</th></tr></thead>
+        <tbody>
+          <tr><td class="m">0</td><td>EightBitUnorm</td><td class="m">0</td><td>Off</td><td class="m">0</td><td>Off</td></tr>
+          <tr><td class="m">1</td><td>TenBitUnorm</td><td class="m">1</td><td>ArtCnnC4F16</td><td class="m">1</td><td>Inactive (バックエンドは ArtCNN を実行せず、ネイティブの輝度サンプリングを保持します)</td></tr>
+          <tr><td class="m">2</td><td>SixteenBitFloat</td><td class="m">2</td><td>ArtCnnC4F32</td><td class="m">2</td><td>Building</td></tr>
+          <tr><td></td><td></td><td class="m">3</td><td>ArtCnnC4F16Ds</td><td class="m">3</td><td>Scalar</td></tr>
+          <tr><td></td><td></td><td></td><td></td><td class="m">4</td><td>SimdgroupMatrix</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="open-and-export">
+    <h2>GIF エクスポート タイプでオプションを開く<a class="anchor" href="#open-and-export">#</a></h2>
+    <p>以下の定義は 0.3.0 からのものです。 <code>erika.h</code>。 HTTP ウィンドウと GIF エクスポートの完全なフィールドは次のとおりです。</p>
+    <h3>ErikaOpenOptions</h3>
+    <div class="code">
+<pre>typedef struct ErikaOpenOptions {
+  const ErikaHttpHeader *headers;
+  uintptr_t header_count;
+  uint64_t http_read_ahead_bytes;
+  uint64_t http_back_buffer_bytes;
+  uint64_t reserved[2];
+} ErikaOpenOptions;</pre>
+    </div>
+    <h3>ErikaVideoAlphaMode</h3>
+    <div class="code">
+<pre>typedef enum ErikaVideoAlphaMode {
+  ErikaVideoAlphaMode_Opaque = 0,
+  ErikaVideoAlphaMode_PackedAlphaRight = 1,
+} ErikaVideoAlphaMode;</pre>
+    </div>
+    <h3>ErikaGifExportQuality</h3>
+    <div class="code">
+<pre>typedef enum ErikaGifExportQuality {
+  ErikaGifExportQuality_Normal = 0,
+  ErikaGifExportQuality_High = 1,
+} ErikaGifExportQuality;</pre>
+    </div>
+    <h3>ErikaGifExportOptions</h3>
+    <div class="code">
+<pre>typedef struct ErikaGifExportOptions {
+  const char *input_uri;
+  const char *output_path;
+  uint64_t start_millis;
+  uint64_t end_millis;
+  uint32_t frames_per_second;
+  uint32_t output_width;
+  uint32_t output_height;
+  int32_t quality;
+  int32_t loop_count;
+  bool overwrite;
+  const ErikaHttpHeader *headers;
+  uintptr_t header_count;
+  uint64_t http_read_ahead_bytes;
+  uint64_t reserved[3];
+} ErikaGifExportOptions;</pre>
+    </div>
+    <h3>ErikaGifExportResult</h3>
+    <div class="code">
+<pre>typedef struct ErikaGifExportResult {
+  uint32_t width;
+  uint32_t height;
+  uint64_t frame_count;
+  uint64_t file_size;
+} ErikaGifExportResult;</pre>
+    </div>
+    <p><code>http_read_ahead_bytes</code> 前方に読み取るバイト数を決定します。デフォルトは 2 MiB です。<code>http_back_buffer_bytes</code> 保持する再生データの量を決定します。デフォルトは 16 MiB です。両方を省略するか、0 を渡してデフォルト値を使用します。先読みのデフォルト値は次のように指定することもできます。 <code>ERIKA_HTTP_READAHEAD_BYTES</code> 設定。</p>
+    <p>巻き戻しキャッシュ内の後方 seek は、ダウンロードされたデータを直接再利用できます。高ビットレートのビデオには、より大きな予算が必要です。80 Mbit/s のビデオを約 10 秒保持するには、約 100 MB が必要になります。キャッシュはバイト数によって制限されており、固定の再生秒数を表しません。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Reference</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="../kernel/clock.ja.html"><span class="dir">Prev</span>クロックとスケジューリング</a>
+    <a class="nx" href="capi-handle.ja.html"><span class="dir">Next</span>ErikaHandleリファレンス</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

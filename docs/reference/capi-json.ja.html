@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JSON bridge — liberika 開発者向けドキュメント</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
+<script defer src="../docs.js?v=20261030-i18n"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
+  <div class="language-switch" role="group" aria-label="言語"><a href="capi-json.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="capi-json.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="capi-json.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
+  <nav>
+    <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.ja.html">クイックスタート</a></li>
+      <li><a href="../guide/flutter.ja.html">Flutter の組み込み</a></li>
+      <li><a href="../guide/swift.ja.html">Swift の導入</a></li>
+      <li><a href="../guide/openharmony.ja.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.ja.html">Rust の組み込み</a></li>
+      <li><a href="../guide/c.ja.html">C ABI の組み込み</a></li>
+      <li><a href="../guide/linux.ja.html">Linux の導入</a></li>
+      <li><a href="../guide/web.ja.html">Web / WASM の導入</a></li>
+    </ul>
+    <h2><span class="no">2</span>カーネル設計 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.ja.html">アーキテクチャ概要</a></li>
+      <li><a href="../kernel/decode.ja.html">ハードウェアデコード</a></li>
+      <li><a href="../kernel/zero-copy.ja.html">ゼロコピー取り込み</a></li>
+      <li><a href="../kernel/render.ja.html">レンダリングパイプライン</a></li>
+      <li><a href="../kernel/hdr.ja.html">ハイダイナミックレンジ</a></li>
+      <li><a href="../kernel/upscale.ja.html">ニューラル超解像</a></li>
+      <li><a href="../kernel/subtitle-danmaku.ja.html">字幕と弾幕</a></li>
+      <li><a href="../kernel/clock.ja.html">クロックとスケジューリング</a></li>
+    </ul>
+    <h2><span class="no">3</span>プロジェクト <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.ja.html">ビルドと依存関係</a></li>
+      <li><a href="../project/releasing.ja.html">リリースと成果物</a></li>
+      <li><a href="../project/contributing.ja.html">貢献ガイド</a></li>
+      <li><a href="../project/changelog.ja.html">変更履歴</a></li>
+    </ul>
+    <h2><span class="no">4</span>参考資料 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="capi.ja.html">C ABI 概要</a></li>
+      <li><a href="capi-handle.ja.html">ErikaHandle</a></li>
+      <li><a href="capi-presenter.ja.html">ErikaPresenterHandle</a></li>
+      <li><a href="capi-json.ja.html" aria-current="page">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">機械翻訳です。正確な内容は中国語版をご参照ください。</p>
+  <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>JSON bridge</p>
+  <h1>JSON bridge</h1>
+  <p class="kicker">JSON Bridge Reference</p>
+  <p class="lead">47 の名前付きメソッドを持つ 3 つの JSON バリアント関数。 Dart FFI ホストなど、構造化パラメーターをシリアル化するためにプラットフォーム チャネルを使用したホストで使用します。 <code>MethodChannel</code> 片側。このメソッドは、Presenter 操作、グローバル ログ、フレーム エクスポートをカバーしており、パラメータは JSON オブジェクトを通じて渡されます。 listMethods を使用して、ランタイムでサポートされているインターフェイスをクエリします。</p>
+
+  <ul class="meta-strip">
+    <li>方法 <b>47</b> ある</li>
+    <li>名前 <b>camelCase</b></li>
+  </ul>
+
+  <section id="entries">
+    <h2>エントリー機能<span class="jp">入口レベルの数</span><a class="anchor" href="#entries">#</a></h2>
+
+    <div class="api" id="erika_presenter_invoke_json">
+      <p class="sig"><b>char *erika_presenter_invoke_json</b>(ErikaPresenterHandle *handle, const char *method, const char *arguments_json)</p>
+      <p class="desc">指定されたメソッドを呼び出します。返された JSON 文字列は呼び出し元が所有しており、 <code>erika_string_free</code> リリース。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_render_tick_json">
+      <p class="sig"><b>char *erika_presenter_render_tick_json</b>(ErikaPresenterHandle *handle, double time_seconds)</p>
+      <p class="desc"><code>render_tick</code> JSON バリアントは、統計 JSON を返します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_poll_event_json">
+      <p class="sig"><b>char *erika_presenter_poll_event_json</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc"><code>poll_event</code> JSON のバリアント。イベントキューが空の場合は、NULLを返します。</p>
+    </div>
+
+    <p class="note">返される文字列のリリース ルールは、C と一致します。<code>invoke_json</code> / <code>render_tick_json</code> の結果 <code>erika_string_free</code>；<code>poll_event_json</code> 無料の NULL をリリースする必要はありません。不明なメソッド名がエラー応答を返します。</p>
+  </section>
+
+  <section id="envelope">
+    <h2>応答エンベロープ<span class="jp">レスポンス</span><a class="anchor" href="#envelope">#</a></h2>
+    <p>成功した応答:</p>
+    <div class="code">
+<pre>{ "ok": true, "status": 0, "value": <span class="c">/* 方法返回值，无值时为 null */</span> }</pre>
+    </div>
+    <p>失敗時の応答:</p>
+    <div class="code">
+<pre>{ "ok": false, "status": 3, "error": "human readable message" }</pre>
+    </div>
+    <p><code>ok</code> を確認してください。ブリッジ自身が引数やメソッドのエラーを生成する場合があります。C API の失敗時はスレッドローカルのメッセージを読み、空ならステータスの説明を生成します。捕捉された panic はエラー応答になりますが、捕捉範囲外や panic-abort ビルドではプロセスが終了することがあります。C API の非 Ok ステータスは <code>status: 3</code> に変換されます。</p>
+  </section>
+
+  <section id="events">
+    <h2>イベントの戻り形状<span class="jp">イベント</span><a class="anchor" href="#events">#</a></h2>
+    <p><code>poll_event_json</code> イベント オブジェクトのフィールドは次と同じです。 <code>ErikaEvent</code> 1 対 1 の対応。kind は整数 (0 ～ 12、参照)<a href="capi.ja.html#events">C ABI 概要</a>イベントテーブル):</p>
+    <div class="code">
+<pre>{ "kind": 1, "status": 0, "state": 2, "durationMicros": 0,
+  "positionMicros": 0, "buffering": false,
+  "video": { "width": 0, "height": 0, "primaries": 0, "transfer": 0 },
+  "tracks": { "video": 0, "audio": 0, "subtitle": 0 } }</pre>
+    </div>
+    <p>3 つの kind には追加フィールドが付属しています。<code>Error</code>(9)添付書類 <code>error</code> 文字列;<code>VideoDecoderChanged</code>(11)添付書類 <code>decoder</code> と <code>message</code>;<code>AudioOutputChanged</code>(12)添付書類 <code>audio</code> と <code>message</code>。キューが空の場合は、NULL を返します。</p>
+  </section>
+
+  <section id="methods">
+    <h2>メソッドリスト<span class="jp">メソッド</span><a class="anchor" href="#methods">#</a></h2>
+    <p>パラメータ名は常に camelCase です。オプションのパラメータは角かっこで囲まれています。省略した場合は、C関数のデフォルト値が使用されます。パラメータと戻り値のみがリストされており、セマンティクスは同じ名前のものと同じです。 <a href="capi-presenter.ja.html">C関数</a>一貫した。</p>
+
+    <h3>再生コントロール</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>方法</th><th>パラメータ</th><th>戻る</th><th>C機能に対応</th></tr></thead>
+        <tbody>
+          <tr><td class="k">open</td><td class="m">uri，[httpHeaders]，[httpReadAheadBytes]，[httpBackBufferBytes]</td><td class="m">null</td><td class="m">erika_presenter_open_with_options</td></tr>
+          <tr><td class="k">play / pause / stop / close</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_play / pause / stop / close</td></tr>
+          <tr><td class="k">seek</td><td class="m">positionMicros</td><td class="m">null</td><td class="m">erika_presenter_seek</td></tr>
+          <tr><td class="k">setPlaybackRate</td><td class="m">rate</td><td class="m">null</td><td class="m">erika_presenter_set_playback_rate</td></tr>
+          <tr><td class="k">setVolume</td><td class="m">volume</td><td class="m">null</td><td class="m">erika_presenter_set_volume</td></tr>
+          <tr><td class="k">setUpscaler</td><td class="m">mode</td><td class="m">null</td><td class="m">erika_presenter_set_upscaler</td></tr>
+          <tr><td class="k">setSubtitleScale</td><td class="m">scale</td><td class="m">null</td><td class="m">erika_presenter_set_subtitle_scale</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>軌道</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>方法</th><th>パラメータ</th><th>戻る</th><th>C機能に対応</th></tr></thead>
+        <tbody>
+          <tr><td class="k">tracks</td><td class="m">—</td><td class="m">軌道アレイ</td><td class="m">erika_presenter_tracks</td></tr>
+          <tr><td class="k">addExternalSubtitle</td><td class="m">uri</td><td class="m">trackId</td><td class="m">erika_presenter_add_external_subtitle</td></tr>
+          <tr><td class="k">removeSubtitleTrack</td><td class="m">trackId (署名)</td><td class="m">null</td><td class="m">erika_presenter_remove_subtitle_track</td></tr>
+          <tr><td class="k">selectAudioTrack / selectSubtitleTrack</td><td class="m">[trackId]、デフォルトは -1</td><td class="m">null</td><td class="m">erika_presenter_select_audio_track / select_subtitle_track</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>メモリーフォント</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>方法</th><th>パラメータ</th><th>戻る</th><th>C機能に対応</th></tr></thead>
+        <tbody>
+          <tr><td class="k">selectSubtitleMemoryFonts</td><td class="m">fontIds</td><td class="m">null</td><td class="m">erika_presenter_select_subtitle_memory_fonts</td></tr>
+          <tr><td class="k">clearSubtitleMemoryFonts</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_clear_subtitle_memory_fonts</td></tr>
+          <tr><td class="k">getSubtitleMemoryFontStatus</td><td class="m">—</td><td class="m">registeredCount、registeredBytes、selectedCount、generation、selectedIds</td><td class="m">erika_presenter_get_subtitle_memory_font_status</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>弾幕</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>方法</th><th>パラメータ</th><th>戻る</th><th>C機能に対応</th></tr></thead>
+        <tbody>
+          <tr><td class="k">loadDanmakuFile</td><td class="m">uri</td><td class="m">null</td><td class="m">erika_presenter_load_danmaku_file</td></tr>
+          <tr><td class="k">loadDanmakuJson</td><td class="m">json</td><td class="m">null</td><td class="m">erika_presenter_load_danmaku_json</td></tr>
+          <tr><td class="k">addDanmakuTrackFile</td><td class="m">uri，[name]，[offsetMicros]</td><td class="m">trackId</td><td class="m">erika_presenter_add_danmaku_track_file</td></tr>
+          <tr><td class="k">addDanmakuTrackJson</td><td class="m">json，[name]，[offsetMicros]</td><td class="m">trackId</td><td class="m">erika_presenter_add_danmaku_track_json</td></tr>
+          <tr><td class="k">removeDanmakuTrack</td><td class="m">trackId (署名なし)</td><td class="m">null</td><td class="m">erika_presenter_remove_danmaku_track</td></tr>
+          <tr><td class="k">setDanmakuTrackEnabled</td><td class="m">trackId、[enabled]、デフォルト true</td><td class="m">null</td><td class="m">erika_presenter_set_danmaku_track_enabled</td></tr>
+          <tr><td class="k">setDanmakuTrackOffset</td><td class="m">trackId，[offsetMicros]</td><td class="m">null</td><td class="m">erika_presenter_set_danmaku_track_offset</td></tr>
+          <tr><td class="k">setDanmakuGlobalOffset</td><td class="m">[offsetMicros]</td><td class="m">null</td><td class="m">erika_presenter_set_danmaku_global_offset</td></tr>
+          <tr><td class="k">danmakuTracks</td><td class="m">—</td><td class="m">弾幕トラック配列 (id、enabled、offsetMicros、itemCount、name、source)</td><td class="m">erika_presenter_danmaku_tracks</td></tr>
+          <tr><td class="k">clearDanmaku</td><td class="m">—</td><td class="m">null</td><td class="m">erika_presenter_clear_danmaku</td></tr>
+          <tr><td class="k">setDanmakuEnabled</td><td class="m">[enabled]、デフォルトは true</td><td class="m">null</td><td class="m">erika_presenter_set_danmaku_enabled</td></tr>
+          <tr><td class="k">setDanmakuConfig</td><td class="m">部分的にカバーされているフィールド</td><td class="m">null</td><td class="m">erika_presenter_get_danmaku_config + set_danmaku_config (読み取り-変更-書き込み)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>注:<code>loadDanmakuJson</code> と <code>addDanmakuTrackJson</code> の <code>json</code> パラメータは統一されたものに従います<a href="../kernel/subtitle-danmaku.ja.html#json-schema">弾幕 JSON 契約仕様</a>、以下を含む標準の item 配列を直接渡すことができます。 <code>comments</code> / <code>danmaku</code> / <code>items</code> 配列のルート オブジェクト、または JSON Lines 文字列。</p>
+    <p><code>setDanmakuConfig</code> 読み取り-変更-書き込み: 受信キーのみが上書きされ、提供されていないフィールドは現在の値を保持します。ブールキー:<code>enabled</code>、<code>mergeDuplicates</code>、<code>allowStacking</code>、<code>allowScrollOverwrite</code>、<code>blockTop</code>、<code>blockBottom</code>、<code>blockScroll</code>;数字キー:<code>fontSize</code>、<code>opacity</code>、<code>displayArea</code>、<code>scrollDurationSeconds</code>、<code>scrollSpeedFactor</code>、<code>trackGapRatio</code>、<code>outlineWidth</code>、<code>shadowOffsetX</code>、<code>shadowOffsetY</code>、<code>maxQuantity</code>、<code>maxLinesPerMode</code>、<code>shadowStyle</code>。次の 2 つの条件キーもあります。<code>customFontFamily</code> または <code>customFontFilePath</code> いるときは行く <code>erika_presenter_set_danmaku_font</code>,<code>blockWordsJson</code> いるときは行く <code>erika_presenter_set_danmaku_block_words_json</code>。</p>
+
+    <h3>ステータスクエリ</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>方法</th><th>パラメータ</th><th>戻る</th><th>C機能に対応</th></tr></thead>
+        <tbody>
+          <tr><td class="k">getUpscalerStatus</td><td class="m">—</td><td class="m">スーパースコアステータス</td><td class="m">erika_presenter_get_upscaler_status</td></tr>
+          <tr><td class="k">getOutputStatus</td><td class="m">—</td><td class="m">出力ステータス</td><td class="m">erika_presenter_get_output_status</td></tr>
+          <tr><td class="k">getPresenterStats</td><td class="m">—</td><td class="m">レンダリング統計</td><td class="m">erika_presenter_get_stats</td></tr>
+          <tr><td class="k">getResourceStatus</td><td class="m">—</td><td class="m">リソースのステータス</td><td class="m">erika_presenter_get_resource_status</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="discovery">
+    <h2>インターフェイスの検出、章、診断 · 0.3.0<a class="anchor" href="#discovery">#</a></h2>
+    <p><code>listMethods</code> 戻る <code>{schema, methods}</code>。各アイテムには、name、scope、summary、arguments (name / type / required)、returns、blocking、writesFiles が含まれます。現在の実行中に返されるテーブル。グローバル メソッドには handle は必要ありません。また、Presenter メソッドは有効な handle である必要があります。表のエントリは、同期ブロッキングの動作と可能なファイル書き込みを説明するものであり、非同期タスクのスケジューリングを表すものではありません。</p>
+    <div class="code"><p class="lbl">C</p><pre>char *methods = erika_presenter_invoke_json(NULL, "listMethods", "{}");
+// 解析后释放
+erika_string_free(methods);</pre></div>
+    <div class="tw"><table><thead><tr><th>方法</th><th>パラメータ/戻り値</th><th>範囲</th></tr></thead><tbody>
+      <tr><td class="m">listMethods</td><td>パラメータはありません。完全なインターフェイス テーブルを返します。</td><td>global</td></tr>
+      <tr><td class="m">invokeJson</td><td>method、[arguments];呼び出されたメソッドの完全な応答エンベロープを返します。</td><td>presenter</td></tr>
+      <tr><td class="m">setDebugHudEnabled</td><td>enabled;nullを返します。</td><td>presenter</td></tr>
+      <tr><td class="m">setOutputHeadroom</td><td>headroom、known; nullを返します。</td><td>presenter</td></tr>
+      <tr><td class="m">trackSelection</td><td>パラメータはありません。 {video、audio、subtitle} を返します。null は選択されていません。</td><td>presenter</td></tr>
+      <tr><td class="m">setSubtitleFont</td><td>[fontFamily]、[fontFilePath]; nullを返します。</td><td>presenter</td></tr>
+      <tr><td class="m">setSubtitleStyle</td><td>ErikaSubtitleStyle に対応する camelCase フィールド。 nullを返します。</td><td>presenter</td></tr>
+      <tr><td class="m">getDanmakuConfig</td><td>パラメータはありません。現在のレイアウト構成を返します。</td><td>presenter</td></tr>
+      <tr><td class="m">chapters</td><td>パラメータはありません。 {chapters:[{index,title,startMs,endMs}], mediaOpen}を返します。</td><td>presenter</td></tr>
+      <tr><td class="m">getDiagnosticsSnapshot</td><td>パラメータはありません。実際のデコード パス、出力、オーディオ、バッファリング、時間統計を含む schema 1 つの診断ドキュメントを返します。</td><td>presenter</td></tr>
+      <tr><td class="m">getLogs</td><td>[limit]、[minLevel] (trace/debug/info/warn/error)、[sinceSeq];感度解除ログ文書と nextSeq を返します。</td><td>global</td></tr>
+      <tr><td class="m">exportFrame</td><td>uri、positionMillis;オプションのwidth、height、format (png / rgba)、outputPath、overwrite、httpHeaders、httpReadAheadBytes。パスが指定されていない場合は、dataBase64 を返します。</td><td>global</td></tr>
+      <tr><td class="m">exportFrames</td><td>uri、positionsMillis、outputDir;他のオプションは単一フレームのエクスポートと同じです。ソース サイズ、期間、seek/ デコード数、およびフレームごとの結果を返します。</td><td>global</td></tr>
+    </tbody></table></div>
+    <p>ミリ秒単位の章の位置。endMs は null にすることができます。に渡されました <code>seek</code> startMs をマイクロ秒に変換します。単一フレームおよびバッチ エクスポートは、ファイルを書き込むことができる同期ブロッキング操作であり、UI 作業スレッドで実行する必要があります。多重化デコーダをバッチでエクスポートします。単一フレームの失敗は対応するエントリに記録され、残りは継続されます。</p>
+    <p>エクスポートには、timestampMicros、ソース ディメンション、および toneMapped が含まれます。 HDR は SDR にマップされます。メモリとスレッドのルールの詳細については、次を参照してください。<a href="capi-handle.ja.html#frame-export">フレームエクスポート C エントリ</a>。ログの limit=0 はすべての予約済みエントリを読み取り、sinceSeq は最後の nextSeq を使用します。ログ リングは最大 2000 エントリ / 512 KiB を保持できます。</p>
+  </section>
+
+  <section id="example">
+    <h2>例<span class="jp">例</span><a class="anchor" href="#example">#</a></h2>
+    <div class="code">
+<pre><span class="c">// seek 到 30 秒</span>
+char *out = erika_presenter_invoke_json(p,
+    <span class="s">"seek"</span>, <span class="s">"{ \"positionMicros\": 30000000 }"</span>);
+<span class="c">// {"ok":true,"status":0,"value":null}</span>
+erika_string_free(out);
+
+<span class="c">// 打开并附带请求头:httpHeaders 是"名称:值"对象,不是数组</span>
+out = erika_presenter_invoke_json(p, <span class="s">"open"</span>,
+    <span class="s">"{ \"uri\": \"https://example.com/v.mp4\", "</span>
+    <span class="s">"\"httpHeaders\": { \"Referer\": \"https://example.com\" } }"</span>);
+erika_string_free(out);
+
+<span class="c">// 事件轮询：队列为空时返回 NULL</span>
+char *ev = erika_presenter_poll_event_json(p);
+<span class="k">if</span> (ev) { erika_string_free(ev); }</pre>
+    </div>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Reference</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="capi-presenter.ja.html"><span class="dir">Prev</span>ErikaPresenterHandleリファレンス</a>
+    <a class="nx" href="../project/building.ja.html"><span class="dir">Next</span>ビルドと依存関係</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

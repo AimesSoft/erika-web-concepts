@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>C ABI 总览 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css">
-<script defer src="../docs.js"></script>
+<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
+<script defer src="../docs.js?v=20261030-i18n"></script>
 </head>
 <body>
 <div class="layout">
@@ -14,6 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <div class="language-switch" role="group" aria-label="语言"><a href="capi.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="capi.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="capi.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
     <ul>
@@ -76,8 +77,8 @@
     </ul>
     <p>全局约定：</p>
     <ul class="body">
-      <li>每个可能失败的调用返回 <code>ErikaStatus</code>。<code>Ok</code>（0）与 <code>NoEvent</code>（5）是仅有的非错误结果。panic 被捕获并映射为 <code>ErikaStatus_Panic</code>。</li>
-      <li>非 Ok/NoEvent 结果的人读消息存放在线程局部槽位。在同一线程经 <code>erika_last_error_message()</code> 读取，用 <code>erika_string_free()</code> 释放。</li>
+      <li>返回状态的接口使用 <code>ErikaStatus</code>：<code>Ok</code>（0）与 <code>NoEvent</code>（5）是非错误结果。其他接口也可能返回指针、数值或无返回值；按头文件检查各自的失败约定。许多状态接口捕获 panic 并返回 <code>ErikaStatus_Panic</code>，但并非所有入口都有捕获包装，且 abort 模式下进程可能终止。</li>
+      <li>部分失败会设置线程局部错误消息，但并非每次失败都保证有消息；槽位也可能为空或保留旧消息。在失败调用的同一线程、后续调用之前使用 <code>erika_last_error_message()</code> 读取可用消息，并用 <code>erika_string_free()</code> 释放非空返回值。 例如，<code>erika_add_external_subtitle</code> 的 <code>out_track_id</code> 为 NULL 时直接返回 NullPointer，不会写入该槽位。</li>
       <li>liberika 返回的 <code>char*</code> 归调用方所有。独立字符串用 <code>erika_string_free()</code>；<code>ErikaTrackInfo</code> / <code>ErikaDanmakuTrackInfo</code> 内的字符串用配套的 <code>*_info_free()</code>。</li>
       <li><code>const char*</code> 参数仅调用期间借用，必须是 NUL 结尾的 UTF-8。</li>
       <li>列表查询使用计数数组惯用法：<code>(buf, capacity, &amp;len)</code>。<code>len</code> 置为总数，最多写入 <code>capacity</code> 条；capacity 为 0 且 buf 为 NULL 时只查询数量。</li>
@@ -124,6 +125,7 @@
 
   <section id="events">
     <h2>ErikaEventKind<span class="jp">イベント</span><a class="anchor" href="#events">#</a></h2>
+    <p>枚举有 13 个值：12 种事件，以及表示无事件的 <code>None</code>。</p>
     <p>事件经 <code>poll_event</code> 取出。队列无界:不轮询的宿主只是堆积事件、不再观察状态,不会丢包。<code>ErikaEvent</code> 中的字段只有一列有效,由 <code>kind</code> 决定。<code>VideoDecoderChanged</code> 与 <code>AudioOutputChanged</code> 没有载荷字段,但会把结构化消息写入线程局部错误槽,可从 <code>erika_last_error_message</code> 读取。</p>
     <div class="tw">
       <table>

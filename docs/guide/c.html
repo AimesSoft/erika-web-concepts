@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>C ABI 嵌入 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css">
-<script defer src="../docs.js"></script>
+<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
+<script defer src="../docs.js?v=20261030-i18n"></script>
 </head>
 <body>
 <div class="layout">
@@ -14,6 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <div class="language-switch" role="group" aria-label="语言"><a href="c.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="c.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="c.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
     <ul>
@@ -86,8 +87,8 @@
   <section id="conventions">
     <h2>公共约定<span class="jp">共通規約</span><a class="anchor" href="#conventions">#</a></h2>
     <ul class="body">
-      <li><b>返回值。</b> 每个可能失败的调用返回 <code>ErikaStatus</code>。<code>ErikaStatus_Ok</code>（0）表示成功；<code>ErikaStatus_NoEvent</code>（5）表示事件队列暂空。非零且非 5 的状态码均表示错误。</li>
-      <li><b>错误消息。</b> 发生错误时，内核会将详细的可读错误信息保存在<b>线程局部变量</b>中。必须在调用失败的同一线程中立即调用 <code>erika_last_error_message()</code> 读取，并使用 <code>erika_string_free()</code> 释放返回的指针。</li>
+      <li><b>返回值。</b> 返回状态的接口使用 <code>ErikaStatus</code>：<code>ErikaStatus_Ok</code>（0）表示成功，<code>ErikaStatus_NoEvent</code>（5）表示事件队列暂空；其他状态表示错误。指针、数值或无返回值的接口按头文件检查各自约定。</li>
+      <li><b>错误消息。</b> 部分失败会设置线程局部错误，但并非所有失败都提供消息；该槽位可能为空或保留旧值。在失败调用的同一线程、后续调用之前，用 <code>erika_last_error_message()</code> 读取可用信息，并用 <code>erika_string_free()</code> 释放非空返回值。 例如，<code>erika_add_external_subtitle</code> 的 <code>out_track_id</code> 为 NULL 时直接返回 NullPointer，不会写入该槽位。</li>
       <li><b>所有权。</b> liberika 返回的 <code>char*</code> 堆内存归调用方所有。独立字符串使用 <code>erika_string_free()</code>；结构体（如 <code>ErikaTrackInfo</code>）内部包含的字符串使用配套的 <code>erika_track_info_free()</code>。</li>
       <li><b>参数借用。</b> <code>const char*</code> 参数仅在函数调用期间被借用，必须是以 NUL 结尾的 UTF-8 字符串。</li>
       <li><b>计数数组。</b> 列表查询采用 <code>(buf, capacity, &amp;len)</code> 模式：<code>len</code> 总是返回流中的实际总数量，而写入 <code>buf</code> 的数量最多为 <code>capacity</code>。遍历时应以 <code>min(len, capacity)</code> 为界，避免越界访问。</li>
@@ -107,8 +108,7 @@
 <span class="c">/* 辅助函数：读取并打印线程局部错误信息 */</span>
 <span class="k">static void</span> print_last_error(<span class="k">const char</span> *action, ErikaStatus status) {
     <span class="k">char</span> *msg = erika_last_error_message();
-    fprintf(stderr, <span class="s">"[liberika Error] %s failed (status=%d): %s
-"</span>,
+    fprintf(stderr, <span class="s">"[liberika Error] %s failed (status=%d): %s\n"</span>,
             action, status, msg ? msg : <span class="s">"unknown"</span>);
     <span class="k">if</span> (msg) {
         erika_string_free(msg);
@@ -119,8 +119,7 @@
     <span class="c">/* 1. 创建 Presenter 句柄 */</span>
     ErikaPresenterHandle *p = erika_presenter_create();
     <span class="k">if</span> (!p) {
-        fprintf(stderr, <span class="s">"创建 liberika Presenter 失败
-"</span>);
+        fprintf(stderr, <span class="s">"创建 liberika Presenter 失败\n"</span>);
         <span class="k">return</span>;
     }
 
@@ -157,14 +156,11 @@
     ErikaEvent ev;
     <span class="k">while</span> (erika_presenter_poll_event(p, &amp;ev) == ErikaStatus_Ok) {
         <span class="k">if</span> (ev.kind == ErikaEventKind_StateChanged) {
-            printf(<span class="s">"状态迁移: %d
-"</span>, ev.state);
+            printf(<span class="s">"状态迁移: %d\n"</span>, ev.state);
         } <span class="k">else if</span> (ev.kind == ErikaEventKind_DurationChanged) {
-            printf(<span class="s">"媒体总时长: %lld us
-"</span>, (<span class="k">long long</span>)ev.duration_micros);
+            printf(<span class="s">"媒体总时长: %lld us\n"</span>, (<span class="k">long long</span>)ev.duration_micros);
         } <span class="k">else if</span> (ev.kind == ErikaEventKind_PositionChanged) {
-            printf(<span class="s">"当前进度: %llu us
-"</span>, (<span class="k">unsigned long long</span>)ev.position_micros);
+            printf(<span class="s">"当前进度: %llu us\n"</span>, (<span class="k">unsigned long long</span>)ev.position_micros);
         } <span class="k">else if</span> (ev.kind == ErikaEventKind_Error) {
             print_last_error(<span class="s">"event_error"</span>, ev.status);
         }

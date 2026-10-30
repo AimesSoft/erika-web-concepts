@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ErikaPresenterHandle リファレンス — liberika 開発者ドキュメント</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
+<script defer src="../docs.js?v=20261030-i18n"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
+  <div class="language-switch" role="group" aria-label="言語"><a href="capi-presenter.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="capi-presenter.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="capi-presenter.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
+  <nav>
+    <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.ja.html">クイックスタート</a></li>
+      <li><a href="../guide/flutter.ja.html">Flutter の組み込み</a></li>
+      <li><a href="../guide/swift.ja.html">Swift の導入</a></li>
+      <li><a href="../guide/openharmony.ja.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.ja.html">Rust の組み込み</a></li>
+      <li><a href="../guide/c.ja.html">C ABI の組み込み</a></li>
+      <li><a href="../guide/linux.ja.html">Linux の導入</a></li>
+      <li><a href="../guide/web.ja.html">Web / WASM の導入</a></li>
+    </ul>
+    <h2><span class="no">2</span>カーネル設計 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.ja.html">アーキテクチャ概要</a></li>
+      <li><a href="../kernel/decode.ja.html">ハードウェアデコード</a></li>
+      <li><a href="../kernel/zero-copy.ja.html">ゼロコピー取り込み</a></li>
+      <li><a href="../kernel/render.ja.html">レンダリングパイプライン</a></li>
+      <li><a href="../kernel/hdr.ja.html">ハイダイナミックレンジ</a></li>
+      <li><a href="../kernel/upscale.ja.html">ニューラル超解像</a></li>
+      <li><a href="../kernel/subtitle-danmaku.ja.html">字幕と弾幕</a></li>
+      <li><a href="../kernel/clock.ja.html">クロックとスケジューリング</a></li>
+    </ul>
+    <h2><span class="no">3</span>プロジェクト <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.ja.html">ビルドと依存関係</a></li>
+      <li><a href="../project/releasing.ja.html">リリースと成果物</a></li>
+      <li><a href="../project/contributing.ja.html">貢献ガイド</a></li>
+      <li><a href="../project/changelog.ja.html">変更履歴</a></li>
+    </ul>
+    <h2><span class="no">4</span>参考資料 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="capi.ja.html">C ABI 概要</a></li>
+      <li><a href="capi-handle.ja.html">ErikaHandle</a></li>
+      <li><a href="capi-presenter.ja.html" aria-current="page">ErikaPresenterHandle</a></li>
+      <li><a href="capi-json.ja.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">機械翻訳です。正確な内容は中国語版をご参照ください。</p>
+  <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>ErikaPresenterHandle</p>
+  <h1>ErikaPresenterHandleリファレンス</h1>
+  <p class="kicker">ErikaPresenterHandle Reference</p>
+  <p class="lead">push モデル入口の 72 個の機能すべて: ライフ サイクル、再生および実行パラメーター、字幕、弾幕、出力診断、サーフェスとプレゼンテーション、レンダリング ループ、JSON bridge、スクリーンショット。 macOS/iOS/tvOS/Windows/Android/OpenHarmony/Linux、その他のターゲットでのみコンパイルします <code>create</code> NULLを返します。</p>
+
+  <ul class="meta-strip">
+    <li>機能 <b>72</b> ある</li>
+    <li>プラットフォーム <b>7</b> ある</li>
+  </ul>
+
+  <section id="lifecycle">
+    <h2>ライフサイクルと構成<span class="jp">ライフサイクル</span><a class="anchor" href="#lifecycle">#</a></h2>
+
+    <div class="api" id="erika_presenter_create">
+      <p class="sig"><b>ErikaPresenterHandle *erika_presenter_create</b>(void)</p>
+      <p class="desc">presenterを作成します。 NULL が返された場合は作成失敗を示します。使用してください。 <code>erika_last_error_message</code> 理由を読んでください。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_create_with_config">
+      <p class="sig"><b>ErikaPresenterHandle *erika_presenter_create_with_config</b>(ErikaPresenterConfig config)</p>
+      <p class="desc">構成を使用して presenter を作成します。 config は出力モード、EDR headroom、超解像度モードを選択します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_create_with_output_mode">
+      <p class="sig"><b>ErikaPresenterHandle *erika_presenter_create_with_output_mode</b>(int32_t output_mode, float edr_headroom)</p>
+      <p class="desc">出力モードで headroom を使用して presenter を作成します。これは、対応するフィールドを構成するのと同じです。 <code>create_with_config</code>。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_create_with_output_mode_and_alpha">
+      <p class="sig"><b>ErikaPresenterHandle *erika_presenter_create_with_output_mode_and_alpha</b>(int32_t output_mode, float edr_headroom, int32_t video_alpha_mode)</p>
+      <p class="desc">で <code>create_with_output_mode</code> 追加に基づいて <code>ErikaVideoAlphaMode</code>：<code>Opaque</code>(デフォルトでは、画面は完全に不透明です) または <code>PackedAlphaRight</code>(左右に分割されたマテリアル: 左半分がカラー、右半分がグレースケール alpha、GPU が再構築され、alpha で事前乗算され、エンコード幅の半分でレンダリングされます)。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_destroy">
+      <p class="sig"><b>void erika_presenter_destroy</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">presenter を破壊し、すべてのリソースを解放します。</p>
+    </div>
+  </section>
+
+  <section id="playback">
+    <h2>再生および操作パラメータ<span class="jp">再生</span><a class="anchor" href="#playback">#</a></h2>
+
+    <div class="api" id="erika_presenter_open">
+      <p class="sig"><b>ErikaStatus erika_presenter_open</b>(ErikaPresenterHandle *handle, const char *uri)</p>
+      <p class="desc">メディアを開きます。<code>uri</code> ローカル パスまたは HTTP(S) URL です。この関数はストリーム情報の検出とトラック分析を同期して完了し、ステータスを Ready に設定します。戻った後、再生関数を呼び出して、非同期デコードとプレゼンテーションを開始します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_open_with_headers">
+      <p class="sig"><b>ErikaStatus erika_presenter_open_with_headers</b>(ErikaPresenterHandle *handle, const char *uri, const ErikaHttpHeader *headers, uintptr_t header_count)</p>
+      <p class="desc">カスタム HTTP リクエスト ヘッダーを持つメディアを開きます。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_open_with_options">
+      <p class="sig"><b>ErikaStatus erika_presenter_open_with_options</b>( ErikaPresenterHandle *handle, const char *uri, const ErikaOpenOptions *options)</p>
+      <p class="desc">使用する <code>ErikaOpenOptions</code> メディアを開くときに、HTTP リクエスト ヘッダー、先読みウィンドウ、およびフォールバック キャッシュ バジェットを同時に渡すことができます。オプションは通話中にのみ借りられますが、<code>reserved</code> ゼロに設定します。</p>
+    </div>
+
+
+    <div class="api" id="erika_presenter_play">
+      <p class="sig"><b>ErikaStatus erika_presenter_play</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">プレイを開始します。 play は作業のみを提供します。最終結果は次のとおりです。 <code>StateChanged</code> または <code>Error</code> イベントが優先されます。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_pause">
+      <p class="sig"><b>ErikaStatus erika_presenter_pause</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">再生を一時停止します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_stop">
+      <p class="sig"><b>ErikaStatus erika_presenter_stop</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">遊ぶのをやめてください。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_close">
+      <p class="sig"><b>ErikaStatus erika_presenter_close</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">メディア リソースを閉じて解放します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_seek">
+      <p class="sig"><b>ErikaStatus erika_presenter_seek</b>(ErikaPresenterHandle *handle, uint64_t position_micros)</p>
+      <p class="desc">マイクロ秒単位で指定された場所にジャンプします。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_playback_rate">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_playback_rate</b>(ErikaPresenterHandle *handle, double rate)</p>
+      <p class="desc">再生速度を設定します。 1.0 は通常の速度で、0.25 ～ 16 倍に固定されます。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_volume">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_volume</b>(ErikaPresenterHandle *handle, double volume)</p>
+      <p class="desc">音量を0.0～1.0の範囲で設定します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_upscaler">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_upscaler</b>(ErikaPresenterHandle *handle, int32_t mode)</p>
+      <p class="desc">超解像モードを設定して撮影する <code>ErikaLumaUpscalerMode</code>。 Metal および compute 対応の wgpu/Vulkan レンダラーは ArtCNN を実行します。他のバックエンドはネイティブの輝度サンプルを保持し、Inactive を明示的に報告します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_subtitle_scale">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_subtitle_scale</b>(ErikaPresenterHandle *handle, double scale)</p>
+      <p class="desc">字幕の拡大縮小率を設定します。</p>
+    </div>
+  </section>
+
+  <section id="subtitle">
+    <h2>字幕のフォントとスタイル<span class="jp">字幕</span><a class="anchor" href="#subtitle">#</a></h2>
+
+    <div class="api" id="erika_presenter_set_subtitle_font">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_subtitle_font</b>(ErikaPresenterHandle *handle, const char *family, const char *file_path)</p>
+      <p class="desc">フォールバック字幕フォントを設定します。 NULL または空の文字列は、対応する半分をクリアします。コンテナー ASS スクリプトは、次の場合を除き、独自のフォントを保持します。 <code>set_subtitle_style</code> フォント名オーバーライドビットを渡します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_register_subtitle_memory_font">
+      <p class="sig"><b>ErikaStatus erika_presenter_register_subtitle_memory_font</b>(ErikaPresenterHandle *handle, const uint8_t *data, uintptr_t data_len, uint64_t *out_font_id)</p>
+      <p class="desc">メモリフォントデータを登録し、フォントidを出力します。データはディスクには書き込まれず、レンダラーは選択されたフォントの世代に従ってキャッシュを再構築します。選択されたセット内のフォントは、置換直後にアクティブ化された字幕トラックで有効になります。登録されただけで選択されていないフォントは、レンダラーの再構築をトリガーしません。 (カスタム フォント ファイル パスの同名置換は mtime/size として検出され、すぐにリロードされます。)</p>
+    </div>
+
+    <div class="api" id="erika_presenter_select_subtitle_memory_fonts">
+      <p class="sig"><b>ErikaStatus erika_presenter_select_subtitle_memory_fonts</b>(ErikaPresenterHandle *handle, const uint64_t *font_ids, uintptr_t font_count)</p>
+      <p class="desc">順序付けされたフォールバック フォント コレクションを選択します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_clear_subtitle_memory_fonts">
+      <p class="sig"><b>ErikaStatus erika_presenter_clear_subtitle_memory_fonts</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">メモリフォントレジストリをクリアします。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_subtitle_memory_font_status">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_subtitle_memory_font_status</b>(ErikaPresenterHandle *handle, ErikaSubtitleMemoryFontStatus *out_status)</p>
+      <p class="desc">レジストリのステータス (数値、バイト、選択されたフォント id) を読み取ります。結果が使用されます <code>erika_subtitle_memory_font_status_free</code> リリース。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_subtitle_memory_font_info">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_subtitle_memory_font_info</b>(ErikaPresenterHandle *handle, uint64_t font_id, ErikaSubtitleMemoryFontInfo *out_info)</p>
+      <p class="desc">指定されたフォントの faces とメタデータを読み取ります。結果が使用されます <code>erika_subtitle_memory_font_info_free</code> リリース。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_subtitle_style">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_subtitle_style</b>(ErikaPresenterHandle *handle, ErikaSubtitleStyle style)</p>
+      <p class="desc">字幕スタイルのオーバーライドを適用します。カバレッジの粒度は次のように与えられます。 <code>style.override_mask</code> ビットフラグ制御、各フィールドの値とクランプ範囲を以下に示します。<a href="capi.ja.html#types">C ABI 概要</a>タイプセクション。</p>
+    </div>
+  </section>
+
+  <section id="output">
+    <h2>出力と診断<span class="jp">出力と診断</span><a class="anchor" href="#output">#</a></h2>
+
+    <div class="api" id="erika_presenter_set_output_headroom">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_output_headroom</b>(ErikaPresenterHandle *handle, float headroom, bool known)</p>
+      <p class="desc">出力ネゴシエーションに参加するには、期待値 headroom と有効性フラグを指定します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_upscaler_status">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_upscaler_status</b>(ErikaPresenterHandle *handle, ErikaUpscalerStatus *out_status)</p>
+      <p class="desc">超解像度ステータスの読み取り: リクエスト モード、アクティブなバックエンド、ロールバック時間、およびフレーム数。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_output_status">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_output_status</b>(ErikaPresenterHandle *handle, ErikaOutputStatus *out_status)</p>
+      <p class="desc">出力ステータスの読み取り: アクティブなエンコーディング、サーフェス フォーマット、headroom、およびフォールバック理由。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_resource_status">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_resource_status</b>(ErikaPresenterHandle *handle, ErikaPresenterResourceStatus *out_status)</p>
+      <p class="desc">レンダラーのメモリ スナップショットを読み取ります。レベル device のカウントはプロセス全体に適用され、他の presenter の割り当てが含まれる場合があります。</p>
+    </div>
+  </section>
+
+  <section id="tracks">
+    <h2>軌道<span class="jp">トラック</span><a class="anchor" href="#tracks">#</a></h2>
+
+    <div class="api" id="erika_presenter_add_external_subtitle">
+      <p class="sig"><b>ErikaStatus erika_presenter_add_external_subtitle</b>(ErikaPresenterHandle *handle, const char *uri, int64_t *out_track_id)</p>
+      <p class="desc">外部字幕トラックを追加し、トラック id を出力します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_remove_subtitle_track">
+      <p class="sig"><b>ErikaStatus erika_presenter_remove_subtitle_track</b>(ErikaPresenterHandle *handle, int64_t track_id)</p>
+      <p class="desc">字幕トラックを削除します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_select_audio_track">
+      <p class="sig"><b>ErikaStatus erika_presenter_select_audio_track</b>(ErikaPresenterHandle *handle, int64_t track_id)</p>
+      <p class="desc">オーディオトラックを選択します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_select_subtitle_track">
+      <p class="sig"><b>ErikaStatus erika_presenter_select_subtitle_track</b>(ErikaPresenterHandle *handle, int64_t track_id)</p>
+      <p class="desc">字幕トラックを選択します。 id -1 は字幕を無効にします。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_track_selection">
+      <p class="sig"><b>ErikaStatus erika_presenter_track_selection</b>(ErikaPresenterHandle *handle, ErikaTrackSelection *out_selection)</p>
+      <p class="desc">現在選択されているビデオ、オーディオ、字幕トラックを読み取ります。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_tracks">
+      <p class="sig"><b>ErikaStatus erika_presenter_tracks</b>(ErikaPresenterHandle *handle, ErikaTrackInfo *out_tracks, uintptr_t capacity, uintptr_t *out_len)</p>
+      <p class="desc">カウント配列イディオムによってトラック リストを読み取ります。設定された各レコードは、 <code>erika_track_info_free</code> リリース。</p>
+    </div>
+  </section>
+
+  <section id="danmaku">
+    <h2>弾幕<span class="jp">カーテン</span><a class="anchor" href="#danmaku">#</a></h2>
+    <p><code>load_*</code> このシリーズでは、すべての弾幕が匿名のトラックに置き換えられます。<code>add_*_track</code> シリーズは、名前付きマルチトラック リストを構築します。入力は、Bilibili XML (ファイル、パスまたは URL) または JSON (インライン文字列) です。<code>offset_micros</code> 単一トラックのタイムラインをオフセットします。グローバル オフセットはすべてのトラックに適用されます。</p>
+
+    <div class="api" id="erika_presenter_load_danmaku_file">
+      <p class="sig"><b>ErikaStatus erika_presenter_load_danmaku_file</b>(ErikaPresenterHandle *handle, const char *uri)</p>
+      <p class="desc">ファイルまたは URL から Bilibili XML 弾幕をロードし、匿名トラックに置き換えます。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_load_danmaku_json">
+      <p class="sig"><b>ErikaStatus erika_presenter_load_danmaku_json</b>(ErikaPresenterHandle *handle, const char *json)</p>
+      <p class="desc">インライン JSON から弾幕をロードし、匿名トラックに置き換えます。データ形式とフィールド仕様の詳細については、を参照してください。<a href="../kernel/subtitle-danmaku.ja.html#json-schema">弾幕 JSON 契約仕様</a>。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_add_danmaku_track_file">
+      <p class="sig"><b>ErikaStatus erika_presenter_add_danmaku_track_file</b>(ErikaPresenterHandle *handle, const char *uri, const char *name, int64_t offset_micros, uint64_t *out_track_id)</p>
+      <p class="desc">名前付きの箇条書きトラック (XML ファイル) を追加します。これはタイムラインによってオフセットでき、出力トラックは id です。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_add_danmaku_track_json">
+      <p class="sig"><b>ErikaStatus erika_presenter_add_danmaku_track_json</b>(ErikaPresenterHandle *handle, const char *json, const char *name, int64_t offset_micros, uint64_t *out_track_id)</p>
+      <p class="desc">名前付きの箇条書きトラック (インライン JSON) を追加します。これはタイムラインによってオフセットでき、出力トラックは id です。データ形式とフィールド仕様の詳細については、を参照してください。<a href="../kernel/subtitle-danmaku.ja.html#json-schema">弾幕 JSON 契約仕様</a>。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_remove_danmaku_track">
+      <p class="sig"><b>ErikaStatus erika_presenter_remove_danmaku_track</b>(ErikaPresenterHandle *handle, uint64_t track_id)</p>
+      <p class="desc">弾幕トラックを削除します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_track_enabled">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_track_enabled</b>(ErikaPresenterHandle *handle, uint64_t track_id, bool enabled)</p>
+      <p class="desc">単一の弾幕トラックを開始および停止します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_track_offset">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_track_offset</b>(ErikaPresenterHandle *handle, uint64_t track_id, int64_t offset_micros)</p>
+      <p class="desc">単一の弾丸トラックのタイムライン オフセットを設定します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_global_offset">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_global_offset</b>(ErikaPresenterHandle *handle, int64_t offset_micros)</p>
+      <p class="desc">グローバル弾幕タイムライン オフセットを設定します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_danmaku_tracks">
+      <p class="sig"><b>ErikaStatus erika_presenter_danmaku_tracks</b>(ErikaPresenterHandle *handle, ErikaDanmakuTrackInfo *out_tracks, uintptr_t capacity, uintptr_t *out_len)</p>
+      <p class="desc">count 配列イディオムを使用して箇条書きトラック リストを読み取ります。設定された各レコードは、 <code>erika_danmaku_track_info_free</code> リリース。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_clear_danmaku">
+      <p class="sig"><b>ErikaStatus erika_presenter_clear_danmaku</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">すべての弾幕トラックをクリアします。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_enabled">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_enabled</b>(ErikaPresenterHandle *handle, bool enabled)</p>
+      <p class="desc">弾幕表示をグローバルに開始および停止します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_config">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_config</b>(ErikaPresenterHandle *handle, ErikaDanmakuConfig config)</p>
+      <p class="desc">弾幕のレイアウトと表示設定を適用します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_config_ptr">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_config_ptr</b>(ErikaPresenterHandle *handle, const ErikaDanmakuConfig *config)</p>
+      <p class="desc">弾幕構成をポインターの形式で適用します。これは、値ベースのバージョンと同等です。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_danmaku_config">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_danmaku_config</b>(ErikaPresenterHandle *handle, ErikaDanmakuConfig *out_config)</p>
+      <p class="desc">現在有効な弾幕構成を読み取ります。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_font">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_font</b>(ErikaPresenterHandle *handle, const char *family, const char *file_path)</p>
+      <p class="desc">弾幕フォントファミリーとフォントファイルを設定します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_danmaku_block_words_json">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_danmaku_block_words_json</b>(ErikaPresenterHandle *handle, const char *json)</p>
+      <p class="desc">弾幕ブロックワードのリストをJSON配列形式で設定します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_debug_hud_enabled">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_debug_hud_enabled</b>(ErikaPresenterHandle *handle, bool enabled)</p>
+      <p class="desc">HUD オーバーレイのデバッグを開始および停止します。</p>
+    </div>
+  </section>
+
+  <section id="surface">
+    <h2>表面とプレゼンテーション<span class="jp">サーフェス</span><a class="anchor" href="#surface">#</a></h2>
+    <p>レンダリング バックエンド (ネイティブ Metal、ネイティブ D3D11、または wgpu) は、アタッチメントの呼び出しに関係なく、presenter 構成によって決定されます。 drawable サイズまたは scale の変更が呼び出されます。 <code>resize_surface</code>。</p>
+
+    <div class="api" id="erika_presenter_attach_metal_layer">
+      <p class="sig"><b>ErikaStatus erika_presenter_attach_metal_layer</b>(ErikaPresenterHandle *handle, uint64_t raw_layer, uint32_t width, uint32_t height, double scale)</p>
+      <p class="desc">Metal面(macOS/iOS)を取り付けます。<code>raw_layer</code> はい <code>CAMetalLayer*</code> uint64_tに変換します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_attach_wgpu_surface">
+      <p class="sig"><b>ErikaStatus erika_presenter_attach_wgpu_surface</b>(ErikaPresenterHandle *handle, ErikaWgpuSurfaceKind kind, uint64_t raw_window, uint64_t raw_display, uint32_t width, uint32_t height, double scale)</p>
+      <p class="desc">wgpu面を貼り付けます。<code>raw_window</code> / <code>raw_display</code> kindに対応したプラットフォームハンドルです。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_attach_wgpu_surface_with_output_capabilities">
+      <p class="sig"><b>ErikaStatus erika_presenter_attach_wgpu_surface_with_output_capabilities</b>(ErikaPresenterHandle *handle, ErikaWgpuSurfaceKind kind, uint64_t raw_window, uint64_t raw_display, uint32_t width, uint32_t height, double scale, ErikaSurfaceOutputCapabilities output_capabilities)</p>
+      <p class="desc">出力能力の宣言は、HDR ネゴシエーションで使用するために wgpu サーフェスに添付されます。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_attach_windows_hwnd">
+      <p class="sig"><b>ErikaStatus erika_presenter_attach_windows_hwnd</b>(ErikaPresenterHandle *handle, uint64_t hwnd, uint64_t hinstance, uint32_t width, uint32_t height, double scale)</p>
+      <p class="desc">Windows面を貼り付けます。カプセル化 <code>attach_wgpu_surface</code> WindowsHwnd のバリアント: hwnd は HWND、hinstance は HINSTANCE です。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_attach_flutter_texture">
+      <p class="sig"><b>ErikaStatus erika_presenter_attach_flutter_texture</b>(ErikaPresenterHandle *handle, ErikaFlutterTextureKind kind, int64_t texture_id, uint32_t width, uint32_t height, double scale)</p>
+      <p class="desc">texture registrar によるバインディング <code>texture_id</code> 識別された Flutter テクスチャ サーフェス (現在は Apple) <code>MacOsTextureRegistrar</code>/<code>IosTextureRegistrar</code>）。 pixel buffer 所有権は常にホスト側にあります。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_set_flutter_texture_buffer">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_flutter_texture_buffer</b>(ErikaPresenterHandle *handle, uint64_t raw_texture, uint32_t width, uint32_t height)</p>
+      <p class="desc">毎回 <code>render_tick</code> 以前は、次のフレームのレンダリングにホスト GPU テクスチャが選択されていました。 Apple 上 <code>raw_texture</code> uint64_tに強制されました <code>id&lt;MTLTexture&gt;</code>、BGRA8Unorm であり、宣言されたものと同じ寸法を持つ必要があります。テクスチャは現在のフレーム内でのみ借用され、render_tick が返された後にホストはそれを再利用または解放できます。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_windows_composition_swapchain_iunknown">
+      <p class="sig"><b>ErikaStatus erika_presenter_windows_composition_swapchain_iunknown</b>(ErikaPresenterHandle *handle, void **out_swapchain)</p>
+      <p class="desc">Windowsのみ。に <code>direct_composition</code> アビリティがアタッチされ、透明 alpha モードまたは overlay ミックスで再生されると、liberika によって作成された事前乗算された alpha DirectComposition swap chain を返します。返された IUnknown は AddRef になりました。呼び出し元は COM 参照を所有しており、Release でなければなりません。デコーダまたは出力デバイスは、再構築後に swap chain を再取得する必要があります (ポインタは変化しておらず、再構築がないことを示しています)。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_resize_surface">
+      <p class="sig"><b>ErikaStatus erika_presenter_resize_surface</b>(ErikaPresenterHandle *handle, uint32_t width, uint32_t height, double scale)</p>
+      <p class="desc">面サイズまたはscaleを調整します。 drawable サイズが変更された後に呼び出されます。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_detach_surface">
+      <p class="sig"><b>ErikaStatus erika_presenter_detach_surface</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">現在のサーフェスを切り離します。</p>
+    </div>
+  </section>
+
+  <section id="loop">
+    <h2>レンダリングループとイベント<span class="jp">レンダーループ</span><a class="anchor" href="#loop">#</a></h2>
+
+    <div class="api" id="erika_presenter_render_tick">
+      <p class="sig"><b>ErikaStatus erika_presenter_render_tick</b>(ErikaPresenterHandle *handle, double time_seconds, ErikaPresenterStats *out_stats)</p>
+      <p class="desc">表示フレームごとに 1 回呼び出されます。<code>time_seconds</code> vsync 量子化スケジューリングに使用される、ホスト ディスプレイ クロック (レンダリング タイムスタンプ) の時間です。<code>out_stats</code> NULL の可能性があります。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_audio_only_tick">
+      <p class="sig"><b>ErikaStatus erika_presenter_audio_only_tick</b>(ErikaPresenterHandle *handle, ErikaPresenterStats *out_stats)</p>
+      <p class="desc">オーディオ専用のtick。バックグラウンドオーディオ再生のためにビデオデコードを一時停止します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_get_stats">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_stats</b>(ErikaPresenterHandle *handle, ErikaPresenterStats *out_stats)</p>
+      <p class="desc">累積統計を読み取ります。 <code>render_tick</code> 統計には一貫性があり、いつでも照会できます。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_poll_event">
+      <p class="sig"><b>ErikaStatus erika_presenter_poll_event</b>(ErikaPresenterHandle *handle, ErikaEvent *out_event)</p>
+      <p class="desc">ノンブロッキングポーリングイベントキュー。キューが空の場合に戻ります <code>NoEvent</code>。イベントタイプ、<code>ErikaEvent</code> 各イベントのペイロード フィールドについては、を参照してください。<a href="capi.ja.html#events">C ABI 概要</a>イベントテーブル。</p>
+    </div>
+  </section>
+
+  <section id="json">
+    <h2>JSON bridge<span class="jp">JSON ブリッジ</span><a class="anchor" href="#json">#</a></h2>
+    <p>プラットフォーム チャネルを使用して構造化パラメータをシリアル化したホストが使用します。メソッド式<a href="capi-json.ja.html">JSON bridge</a>。</p>
+
+    <div class="api" id="erika_presenter_invoke_json">
+      <p class="sig"><b>char *erika_presenter_invoke_json</b>(ErikaPresenterHandle *handle, const char *method, const char *arguments_json)</p>
+      <p class="desc">指定されたメソッドを呼び出します。返された JSON 文字列は呼び出し元が所有しており、 <code>erika_string_free</code> リリース。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_render_tick_json">
+      <p class="sig"><b>char *erika_presenter_render_tick_json</b>(ErikaPresenterHandle *handle, double time_seconds)</p>
+      <p class="desc">render_tick の JSON バリアント。統計 JSON を返します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_poll_event_json">
+      <p class="sig"><b>char *erika_presenter_poll_event_json</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">JSON poll_event のバリアント。アイドル状態の場合は NULL を返します。</p>
+    </div>
+  </section>
+
+  <section id="capture">
+    <h2>スクリーンショット<span class="jp">スクリーンショット</span><a class="anchor" href="#capture">#</a></h2>
+
+    <div class="api" id="erika_presenter_capture_frame_rgba">
+      <p class="sig"><b>ErikaStatus erika_presenter_capture_frame_rgba</b>(ErikaPresenterHandle *handle, uint32_t width, uint32_t height, uint8_t *out_rgba, uintptr_t out_capacity)</p>
+      <p class="desc">現在の複合フレーム (ビデオ + 字幕、弾幕と debug HUD を除く) を、呼び出し元によって割り当てられた RGBA8 バッファーにオフスクリーンでレンダリングします。<code>out_capacity</code> 必須 ≥ width × height × 4。使用可能なフレームがない場合は失敗します。</p>
+    </div>
+  </section>
+
+  <section id="display-timing">
+    <h2>目標タイムを表示<a class="anchor" href="#display-timing">#</a></h2>
+    <div class="api" id="erika_presenter_render_tick_with_timing">
+      <p class="sig"><b>ErikaStatus erika_presenter_render_tick_with_timing</b>( ErikaPresenterHandle *handle, double time_seconds, const double *presentation_delay_seconds, ErikaPresenterStats *out_stats)</p>
+      <p class="desc"><code>presentation_delay_seconds</code> エントリーを呼び出してから目標タイムが表示されるまでの秒数です。負の数も指定でき、範囲は ±0.25 秒です。 NULLキープを通過 <code>render_tick</code> サンプリング動作。字幕、連打、およびビデオは同じターゲット時間スナップショットを使用し、再生クロックは変更しません。</p>
+    </div>
+
+  </section>
+
+  <section id="flutter-frame">
+    <h2>Flutterフレーム引き継ぎ<a class="anchor" href="#flutter-frame">#</a></h2>
+    <div class="api" id="erika_presenter_windows_flutter_texture_iunknown">
+      <p class="sig"><b>ErikaStatus erika_presenter_windows_flutter_texture_iunknown</b>( ErikaPresenterHandle *handle, void **out_texture)</p>
+      <p class="desc">Windows は、完成した不変の SDR Flutter GPU テクスチャを返します。返された COM 参照は AddRef に置き換えられ、呼び出し元は後で Release として使用します。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_copy_flutter_frame_rgba">
+      <p class="sig"><b>ErikaStatus erika_presenter_copy_flutter_frame_rgba</b>( ErikaPresenterHandle *handle, uint8_t *out_rgba, uintptr_t capacity, uint32_t *out_width, uint32_t *out_height)</p>
+      <p class="desc">現在の Flutter テクスチャ フレームのコンパクトな RGBA データをコピーします。 Linux ピクセル バッファ テクスチャに使用されます。容量、幅、高さは出力パラメータとして処理され、バッファは呼び出し元によって提供されます。</p>
+    </div>
+
+  </section>
+
+  <section id="diagnostics">
+    <h2>診断スナップショット<a class="anchor" href="#diagnostics">#</a></h2>
+    <div class="api" id="erika_presenter_get_diagnostics_json">
+      <p class="sig"><b>ErikaStatus erika_presenter_get_diagnostics_json</b>(ErikaPresenterHandle *handle, char **out_json)</p>
+      <p class="desc">デコーダと実際のハードウェアデコード パス、レンダリング数と消費時間、出力 /HDR、オーディオ、バッファ深度、タイミングのスケジュールを一度に読み取ります。読み取りカウントのみ。デコード、レンダリング、または再生スレッドの待機はありません。不明な値は null です。同じ handle を同時に呼び出さないというルールに従ってください。</p>
+    </div>
+    <p>成功して戻る <code>schema</code> 呼び出し元にはすべての JSON 文字列があり、次を使用します。 <code>erika_string_free</code> リリースされました。失敗時はNULL。古いネイティブ ライブラリと互換性がある場合、それらはオプションのシンボルとして解決されます。これらが欠落している場合は、サポートされていないとみなされます。 JSON bridge の対応メソッドは次のとおりです。 <code>getDiagnosticsSnapshot</code>。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Reference</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="capi-handle.ja.html"><span class="dir">Prev</span>ErikaHandleリファレンス</a>
+    <a class="nx" href="capi-json.ja.html"><span class="dir">Next</span>JSON bridge</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

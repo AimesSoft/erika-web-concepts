@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ErikaHandle reference — liberika developer documentation</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
+<script defer src="../docs.js?v=20261030-i18n"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
+  <div class="language-switch" role="group" aria-label="Language"><a href="capi-handle.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="capi-handle.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="capi-handle.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
+  <nav>
+    <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.en.html">Quick start</a></li>
+      <li><a href="../guide/flutter.en.html">Flutter integration</a></li>
+      <li><a href="../guide/swift.en.html">Swift integration</a></li>
+      <li><a href="../guide/openharmony.en.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.en.html">Rust integration</a></li>
+      <li><a href="../guide/c.en.html">C ABI integration</a></li>
+      <li><a href="../guide/linux.en.html">Linux integration</a></li>
+      <li><a href="../guide/web.en.html">Web / WASM integration</a></li>
+    </ul>
+    <h2><span class="no">2</span>Kernel design <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.en.html">Architecture overview</a></li>
+      <li><a href="../kernel/decode.en.html">Hardware decoding</a></li>
+      <li><a href="../kernel/zero-copy.en.html">Zero-copy import</a></li>
+      <li><a href="../kernel/render.en.html">Rendering pipeline</a></li>
+      <li><a href="../kernel/hdr.en.html">High dynamic range</a></li>
+      <li><a href="../kernel/upscale.en.html">Neural upscaling</a></li>
+      <li><a href="../kernel/subtitle-danmaku.en.html">Subtitles and danmaku</a></li>
+      <li><a href="../kernel/clock.en.html">Clock and scheduling</a></li>
+    </ul>
+    <h2><span class="no">3</span>Project <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.en.html">Building and dependencies</a></li>
+      <li><a href="../project/releasing.en.html">Releases and artifacts</a></li>
+      <li><a href="../project/contributing.en.html">Contributing</a></li>
+      <li><a href="../project/changelog.en.html">Changelog</a></li>
+    </ul>
+    <h2><span class="no">4</span>Reference <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="capi.en.html">C ABI overview</a></li>
+      <li><a href="capi-handle.en.html" aria-current="page">ErikaHandle</a></li>
+      <li><a href="capi-presenter.en.html">ErikaPresenterHandle</a></li>
+      <li><a href="capi-json.en.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>ErikaHandle</p>
+  <h1>ErikaHandle reference</h1>
+  <p class="kicker">ErikaHandle Reference</p>
+  <p class="lead">All functions of the pull-model entry point: lifecycle, playback control, tracks and subtitles, state and events, surface attachment, and the general helper functions shared by both entry points. Signatures and comments in <code>erika.h</code> are authoritative.</p>
+
+  <ul class="meta-strip">
+    <li>Handle functions <b>23</b></li>
+    <li>Helpers and exports <b>7</b></li>
+  </ul>
+
+  <section id="lifecycle">
+    <h2>Lifecycle and errors<span class="jp">ライフサイクル</span><a class="anchor" href="#lifecycle">#</a></h2>
+
+    <div class="api" id="erika_create">
+      <p class="sig"><b>ErikaHandle *erika_create</b>(void)</p>
+      <p class="desc">Creates a player handle. Cannot fail.</p>
+    </div>
+
+    <div class="api" id="erika_destroy">
+      <p class="sig"><b>void erika_destroy</b>(ErikaHandle *handle)</p>
+      <p class="desc">Destroys the handle and releases all internal resources.</p>
+    </div>
+
+    <div class="api" id="erika_last_error_message">
+      <p class="sig"><b>char *erika_last_error_message</b>(void)</p>
+      <p class="desc">Reads a human-readable message for the most recent error on this thread. The returned string is owned by the caller; release it with <code>erika_string_free</code>. You must read it on the same thread where the error occurred.</p>
+    </div>
+
+    <div class="api" id="erika_string_free">
+      <p class="sig"><b>void erika_string_free</b>(char *value)</p>
+      <p class="desc">Frees a standalone string returned by liberika.</p>
+    </div>
+
+    <div class="api" id="erika_subtitle_memory_font_status_free">
+      <p class="sig"><b>void erika_subtitle_memory_font_status_free</b>(ErikaSubtitleMemoryFontStatus *status)</p>
+      <p class="desc">Frees the array and string fields inside <code>ErikaSubtitleMemoryFontStatus</code>.</p>
+    </div>
+
+    <div class="api" id="erika_subtitle_memory_font_info_free">
+      <p class="sig"><b>void erika_subtitle_memory_font_info_free</b>(ErikaSubtitleMemoryFontInfo *info)</p>
+      <p class="desc">Frees the array and string fields inside <code>ErikaSubtitleMemoryFontInfo</code>.</p>
+    </div>
+  </section>
+
+  <section id="playback">
+    <h2>Playback control<span class="jp">再生制御</span><a class="anchor" href="#playback">#</a></h2>
+
+    <div class="api" id="erika_open">
+      <p class="sig"><b>ErikaStatus erika_open</b>(ErikaHandle *handle, const char *uri)</p>
+      <p class="desc">Opens media. <code>uri</code> is a local path or an HTTP(S) URL. The call synchronously probes stream information, parses tracks, and sets the state to Ready. After it returns, call the play function to start asynchronous decoding and presentation.</p>
+    </div>
+
+    <div class="api" id="erika_open_with_headers">
+      <p class="sig"><b>ErikaStatus erika_open_with_headers</b>(ErikaHandle *handle, const char *uri, const ErikaHttpHeader *headers, uintptr_t header_count)</p>
+      <p class="desc">Opens media with custom HTTP request headers.</p>
+    </div>
+
+    <div class="api" id="erika_open_with_options">
+      <p class="sig"><b>ErikaStatus erika_open_with_options</b>( ErikaHandle *handle, const char *uri, const ErikaOpenOptions *options)</p>
+      <p class="desc">Opens media with <code>ErikaOpenOptions</code>, which can carry HTTP request headers, the read-ahead window, and the back-buffer budget in a single call. The options are borrowed only for the duration of the call; set <code>reserved</code> to zero.</p>
+    </div>
+
+
+    <div class="api" id="erika_play">
+      <p class="sig"><b>ErikaStatus erika_play</b>(ErikaHandle *handle)</p>
+      <p class="desc">Starts playback. play only enqueues the work; the final outcome is reported by a <code>StateChanged</code> or <code>Error</code> event.</p>
+    </div>
+
+    <div class="api" id="erika_pause">
+      <p class="sig"><b>ErikaStatus erika_pause</b>(ErikaHandle *handle)</p>
+      <p class="desc">Pauses playback.</p>
+    </div>
+
+    <div class="api" id="erika_stop">
+      <p class="sig"><b>ErikaStatus erika_stop</b>(ErikaHandle *handle)</p>
+      <p class="desc">Stops playback.</p>
+    </div>
+
+    <div class="api" id="erika_close">
+      <p class="sig"><b>ErikaStatus erika_close</b>(ErikaHandle *handle)</p>
+      <p class="desc">Closes the media and releases its resources, moving to the Closed state. Destroy the handle afterward; create a new handle for the next playback.</p>
+    </div>
+
+    <div class="api" id="erika_seek">
+      <p class="sig"><b>ErikaStatus erika_seek</b>(ErikaHandle *handle, uint64_t position_micros)</p>
+      <p class="desc">Seeks to the given position, in microseconds.</p>
+    </div>
+  </section>
+
+  <section id="tracks">
+    <h2>Tracks and subtitles<span class="jp">トラック</span><a class="anchor" href="#tracks">#</a></h2>
+
+    <div class="api" id="erika_add_external_subtitle">
+      <p class="sig"><b>ErikaStatus erika_add_external_subtitle</b>(ErikaHandle *handle, const char *uri, int64_t *out_track_id)</p>
+      <p class="desc">Adds an external subtitle track and outputs the track id.</p>
+    </div>
+
+    <div class="api" id="erika_remove_subtitle_track">
+      <p class="sig"><b>ErikaStatus erika_remove_subtitle_track</b>(ErikaHandle *handle, int64_t track_id)</p>
+      <p class="desc">Removes a subtitle track.</p>
+    </div>
+
+    <div class="api" id="erika_select_audio_track">
+      <p class="sig"><b>ErikaStatus erika_select_audio_track</b>(ErikaHandle *handle, int64_t track_id)</p>
+      <p class="desc">Selects an audio track.</p>
+    </div>
+
+    <div class="api" id="erika_select_subtitle_track">
+      <p class="sig"><b>ErikaStatus erika_select_subtitle_track</b>(ErikaHandle *handle, int64_t track_id)</p>
+      <p class="desc">Selects a subtitle track. An id of -1 disables subtitles.</p>
+    </div>
+
+    <div class="api" id="erika_track_selection">
+      <p class="sig"><b>ErikaStatus erika_track_selection</b>(ErikaHandle *handle, ErikaTrackSelection *out_selection)</p>
+      <p class="desc">Reads the currently selected video, audio, and subtitle tracks.</p>
+    </div>
+
+    <div class="api" id="erika_tracks">
+      <p class="sig"><b>ErikaStatus erika_tracks</b>(ErikaHandle *handle, ErikaTrackInfo *out_tracks, uintptr_t capacity, uintptr_t *out_len)</p>
+      <p class="desc">Reads the track list using the counted-array idiom. Release each populated record with <code>erika_track_info_free</code>.</p>
+    </div>
+
+    <div class="api" id="erika_track_info_free">
+      <p class="sig"><b>void erika_track_info_free</b>(ErikaTrackInfo *track)</p>
+      <p class="desc">Frees the string fields inside <code>ErikaTrackInfo</code>.</p>
+    </div>
+
+    <div class="api" id="erika_danmaku_track_info_free">
+      <p class="sig"><b>void erika_danmaku_track_info_free</b>(ErikaDanmakuTrackInfo *track)</p>
+      <p class="desc">Frees the string fields inside <code>ErikaDanmakuTrackInfo</code>.</p>
+    </div>
+  </section>
+
+  <section id="state">
+    <h2>State and events<span class="jp">状態とイベント</span><a class="anchor" href="#state">#</a></h2>
+
+    <div class="api" id="erika_state">
+      <p class="sig"><b>ErikaStatus erika_state</b>(ErikaHandle *handle, ErikaState *out_state)</p>
+      <p class="desc">Reads the current playback state.</p>
+    </div>
+
+    <div class="api" id="erika_poll_event">
+      <p class="sig"><b>ErikaStatus erika_poll_event</b>(ErikaHandle *handle, ErikaEvent *out_event)</p>
+      <p class="desc">Polls the event queue without blocking. Returns <code>NoEvent</code> when the queue is empty. For the event kinds and the payload fields of each <code>ErikaEvent</code>, see the event table in the <a href="capi.en.html#events">C ABI overview</a>. After an <code>Error</code> event, you can get details from <code>erika_last_error_message</code>.</p>
+    </div>
+  </section>
+
+  <section id="surface">
+    <h2>Surface attachment<span class="jp">サーフェス</span><a class="anchor" href="#surface">#</a></h2>
+
+    <div class="api" id="erika_attach_metal_layer">
+      <p class="sig"><b>ErikaStatus erika_attach_metal_layer</b>(ErikaHandle *handle, uint64_t raw_layer, uint32_t width, uint32_t height, double scale)</p>
+      <p class="desc">Attaches a Metal surface. <code>raw_layer</code> is a <code>CAMetalLayer*</code> cast to uint64_t.</p>
+    </div>
+
+    <div class="api" id="erika_attach_wgpu_surface">
+      <p class="sig"><b>ErikaStatus erika_attach_wgpu_surface</b>(ErikaHandle *handle, ErikaWgpuSurfaceKind kind, uint64_t raw_window, uint64_t raw_display, uint32_t width, uint32_t height, double scale)</p>
+      <p class="desc">Attaches a wgpu surface. <code>raw_window</code> and <code>raw_display</code> are the platform handles for the given kind.</p>
+    </div>
+
+    <div class="api" id="erika_attach_wgpu_surface_with_output_capabilities">
+      <p class="sig"><b>ErikaStatus erika_attach_wgpu_surface_with_output_capabilities</b>(ErikaHandle *handle, ErikaWgpuSurfaceKind kind, uint64_t raw_window, uint64_t raw_display, uint32_t width, uint32_t height, double scale, ErikaSurfaceOutputCapabilities output_capabilities)</p>
+      <p class="desc">Attaches a wgpu surface together with an output capabilities declaration, for HDR negotiation.</p>
+    </div>
+
+    <div class="api" id="erika_attach_flutter_texture">
+      <p class="sig"><b>ErikaStatus erika_attach_flutter_texture</b>(ErikaHandle *handle, ErikaFlutterTextureKind kind, int64_t texture_id, uint32_t width, uint32_t height, double scale)</p>
+      <p class="desc">Attaches a Flutter texture surface.</p>
+    </div>
+
+    <div class="api" id="erika_detach_surface">
+      <p class="sig"><b>ErikaStatus erika_detach_surface</b>(ErikaHandle *handle)</p>
+      <p class="desc">Detaches the current surface.</p>
+    </div>
+  </section>
+
+  <section id="gif-export">
+    <h2>Standalone GIF export<a class="anchor" href="#gif-export">#</a></h2>
+    <div class="api" id="erika_export_gif">
+      <p class="sig"><b>ErikaStatus erika_export_gif</b>( const ErikaGifExportOptions *options, ErikaGifExportResult *out_result)</p>
+      <p class="desc">A standalone, synchronous export entry point that needs no player or surface. Times are in milliseconds; UI hosts should run it on a worker thread. On success it fills in the dimensions, frame count, and file size.</p>
+    </div>
+
+    <div class="code">
+      <p class="lbl">C</p>
+<pre>ErikaGifExportOptions options = {
+    .input_uri = &quot;/path/input.mp4&quot;,
+    .output_path = &quot;/path/output.gif&quot;,
+    .start_millis = 5000,
+    .end_millis = 10000,
+    .frames_per_second = 10,
+    .output_width = 640,
+    .output_height = 360,
+    .quality = ErikaGifExportQuality_High,
+    .loop_count = 0,
+};
+ErikaGifExportResult result = {0};
+ErikaStatus status = erika_export_gif(&amp;options, &amp;result);</pre>
+    </div>
+  </section>
+
+  <section id="frame-export">
+    <h2>Standalone frame export and logging · 0.3.0<a class="anchor" href="#frame-export">#</a></h2>
+    <p>Frame export is synchronous; UI hosts should run it on a worker thread. The input position_millis is in milliseconds; the result’s timestamp_micros and duration_micros are in microseconds. HDR (PQ / HLG / Dolby Vision) is tone-mapped along the SDR display path, and the result sets <code>ERIKA_FRAME_EXPORT_TONE_MAPPED</code> (1) in reserved_flags.</p>
+    <div class="api" id="erika_export_frame"><p class="sig">ErikaStatus erika_export_frame( const ErikaFrameExportOptions *options, ErikaFrameExportResult *out_result)</p><p class="desc">Standalone, synchronous export of the image at a media timestamp, returned as RGBA or PNG. It preserves the display aspect ratio, scales down to fit within the optional size limits, and never scales up. It has its own demuxer and a multithreaded software decoder, so it needs no player or surface.</p></div>
+    <div class="api" id="erika_frame_export_result_free"><p class="sig">void erika_frame_export_result_free(ErikaFrameExportResult *result)</p><p class="desc">Frees the data in the result and resets the result. Do not substitute erika_string_free or the host’s free.</p></div>
+    <div class="api" id="erika_frame_export_session_open"><p class="sig">ErikaStatus erika_frame_export_session_open( const ErikaFrameExportSessionOptions *options, ErikaFrameExportSession **out_session)</p><p class="desc">Opens a media file once for continuous frame capture and returns a session on success. Zero out reserved and reserved_flags when you initialize the structs.</p></div>
+    <div class="api" id="erika_frame_export_session_frame"><p class="sig">ErikaStatus erika_frame_export_session_frame( ErikaFrameExportSession *session, const ErikaFrameExportRequest *request, ErikaFrameExportResult *out_result)</p><p class="desc">Exports the image at the given time from the session. For increasing requests with no intervening keyframe, it keeps decoding; otherwise it seeks again. The result is identical to a single export, and you free each one with result_free.</p></div>
+    <div class="api" id="erika_frame_export_session_close"><p class="sig">void erika_frame_export_session_close(ErikaFrameExportSession *session)</p><p class="desc">Closes and releases the session; accepts NULL. Calls on one session must be serialized: they must not run concurrently with close, and the session must not be used after it is closed.</p></div>
+    <div class="api" id="erika_log_read_json"><p class="sig">ErikaStatus erika_log_read_json( uint32_t limit, int32_t min_level, uint64_t since_seq, char **out_json)</p><p class="desc">Reads the process-wide redacted log ring, which holds at most 2000 entries / 512 KiB. limit=0 reads all retained entries, min_level=-1 applies no level filter, and since_seq takes the previous nextSeq for incremental reads. Callable from any thread with no handle. Free a successful string with erika_string_free; on failure, out_json is NULL.</p></div>
+    <p class="note">Standalone frame export decodes only the media image; it does not include the current Presenter’s subtitles or danmaku. Native <code>erika_presenter_capture_frame_rgba</code> includes video and subtitles but not danmaku, while Web <code>capture()</code> includes all three.</p>
+    <h3>Related types</h3>
+    <div class="code"><p class="lbl">erika.h</p><pre>typedef enum ErikaFrameExportFormat {
+  ErikaFrameExportFormat_Rgba = 0, /* rows of width * 4 bytes, alpha 255 */
+  ErikaFrameExportFormat_Png = 1, /* PNG file bytes, 8-bit RGB */
+} ErikaFrameExportFormat;
+
+typedef struct ErikaFrameExportOptions {
+  const char *input_uri;
+  const ErikaHttpHeader *headers;
+  uintptr_t header_count;
+  uint64_t position_millis;
+  uint64_t http_read_ahead_bytes;
+  uint32_t max_width;
+  uint32_t max_height;
+  int32_t format;
+  uint32_t reserved_flags;
+  uint64_t reserved[4];
+} ErikaFrameExportOptions;
+
+typedef struct ErikaFrameExportResult {
+  uint8_t *data;
+  uintptr_t data_len;
+  uint64_t timestamp_micros;
+  uint64_t duration_micros;
+  uint32_t width;
+  uint32_t height;
+  uint32_t source_width;
+  uint32_t source_height;
+  int32_t format;
+  uint32_t reserved_flags;
+  uint64_t reserved[2];
+} ErikaFrameExportResult;
+
+typedef struct ErikaFrameExportSessionOptions {
+  const char *input_uri;
+  const ErikaHttpHeader *headers;
+  uintptr_t header_count;
+  uint64_t http_read_ahead_bytes;
+  uint32_t reserved_flags;
+  uint64_t reserved[4];
+} ErikaFrameExportSessionOptions;
+
+typedef struct ErikaFrameExportRequest {
+  uint64_t position_millis;
+  uint32_t max_width;
+  uint32_t max_height;
+  int32_t format; /* ErikaFrameExportFormat */
+  uint32_t reserved_flags;
+  uint64_t reserved[4];
+} ErikaFrameExportRequest;
+
+typedef enum ErikaLogLevel {
+  ErikaLogLevel_Trace = 0,
+  ErikaLogLevel_Debug = 1,
+  ErikaLogLevel_Info = 2,
+  ErikaLogLevel_Warn = 3,
+  ErikaLogLevel_Error = 4,
+} ErikaLogLevel;</pre></div>
+    <p>Logs redact URL query parameters, credential-type fields, request headers, and the user’s home directory. Hosts that must work with older runtimes should resolve the diagnostics symbols as optional. The JSON bridge provides <code>getLogs</code>, <code>exportFrame</code>, and <code>exportFrames</code>; see <a href="capi-json.en.html#discovery">Method discovery</a>.</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Reference</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="capi.en.html"><span class="dir">Prev</span>C ABI overview</a>
+    <a class="nx" href="capi-presenter.en.html"><span class="dir">Next</span>ErikaPresenterHandle</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

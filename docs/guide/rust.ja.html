@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rust 埋め込み — liberika 開発者ドキュメント</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
+<script defer src="../docs.js?v=20261030-i18n"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
+  <div class="language-switch" role="group" aria-label="言語"><a href="rust.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="rust.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="rust.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
+  <nav>
+    <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="quickstart.ja.html">クイックスタート</a></li>
+      <li><a href="flutter.ja.html">Flutter の組み込み</a></li>
+      <li><a href="swift.ja.html">Swift の導入</a></li>
+      <li><a href="openharmony.ja.html">OpenHarmony / OHPM</a></li>
+      <li><a href="rust.ja.html" aria-current="page">Rust の組み込み</a></li>
+      <li><a href="c.ja.html">C ABI の組み込み</a></li>
+      <li><a href="linux.ja.html">Linux の導入</a></li>
+      <li><a href="web.ja.html">Web / WASM の導入</a></li>
+    </ul>
+    <h2><span class="no">2</span>カーネル設計 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.ja.html">アーキテクチャ概要</a></li>
+      <li><a href="../kernel/decode.ja.html">ハードウェアデコード</a></li>
+      <li><a href="../kernel/zero-copy.ja.html">ゼロコピー取り込み</a></li>
+      <li><a href="../kernel/render.ja.html">レンダリングパイプライン</a></li>
+      <li><a href="../kernel/hdr.ja.html">ハイダイナミックレンジ</a></li>
+      <li><a href="../kernel/upscale.ja.html">ニューラル超解像</a></li>
+      <li><a href="../kernel/subtitle-danmaku.ja.html">字幕と弾幕</a></li>
+      <li><a href="../kernel/clock.ja.html">クロックとスケジューリング</a></li>
+    </ul>
+    <h2><span class="no">3</span>プロジェクト <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.ja.html">ビルドと依存関係</a></li>
+      <li><a href="../project/releasing.ja.html">リリースと成果物</a></li>
+      <li><a href="../project/contributing.ja.html">貢献ガイド</a></li>
+      <li><a href="../project/changelog.ja.html">変更履歴</a></li>
+    </ul>
+    <h2><span class="no">4</span>参考資料 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.ja.html">C ABI 概要</a></li>
+      <li><a href="../reference/capi-handle.ja.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.ja.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">機械翻訳です。正確な内容は中国語版をご参照ください。</p>
+  <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Rust埋め込み</p>
+  <h1>Rust埋め込み</h1>
+  <p class="kicker">Rust Embedding</p>
+  <p class="lead">Rust はホストによって直接使用されます <code>erika</code> crateの <code>Player</code> または <code>PresenterRuntime</code>。ホストはイベント チャネルを通じてステータスの変化を感知し、デコードされたビデオ フレーム、オーディオ サンプル、および字幕をオンデマンドでサブスクライブします。</p>
+
+  <ul class="meta-strip">
+    <li>入口 <b>Player / PresenterRuntime</b></li>
+    <li>PlayerEvent <b>12 種類</b></li>
+    <li>フレームのサブスクリプション <b>3チャンネル</b></li>
+  </ul>
+
+  <section id="setup">
+    <h2>依存関係とビルド<span class="jp">セットアップ</span><a class="anchor" href="#setup">#</a></h2>
+    <div class="code">
+      <p class="lbl">Cargo.toml</p>
+<pre>[dependencies]
+erika = { git = <span class="s">"https://github.com/AimesSoft/liberika"</span>, tag = <span class="s">"v0.3.0"</span> }</pre>
+    </div>
+    <p>Apple、Windows、Android、および OpenHarmony の最初のソース コードを構築する前に、プリセット LGPL ネイティブ依存関係 (FFmpeg、libass、dav1d など) を xtask を通じてコンパイルする必要があります。</p>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>cargo run -p xtask -- deps build --all --profile lgpl
+cargo build -p erika</pre>
+    </div>
+  </section>
+
+  <section id="lifecycle">
+    <h2>遊びのライフサイクル<span class="jp">ライフサイクル</span><a class="anchor" href="#lifecycle">#</a></h2>
+    <div class="code">
+      <p class="lbl">src/main.rs</p>
+<pre><span class="k">use</span> std::time::Duration;
+<span class="k">use</span> erika::{MediaRequest, Player, PlayerConfig, PlayerState};
+
+<span class="k">fn</span> main() -&gt; Result&lt;(), Box&lt;<span class="k">dyn</span> std::error::Error&gt;&gt; {
+    <span class="k">let</span> player = Player::new(PlayerConfig::default());
+
+    <span class="c">/* 1. 同步打开媒体：完成探测与轨道解析，返回时状态已为 Ready */</span>
+    player.open(MediaRequest::new(<span class="s">"/path/to/video.mp4"</span>))?;
+
+    <span class="c">/* 2. 启动后台解码与时钟驱动 */</span>
+    player.play()?;
+
+    <span class="c">/* 3. 播放控制：seek 向工作线程投递命令并立即返回 */</span>
+    player.pause()?;
+    player.seek(Duration::from_millis(1500))?;
+    player.set_playback_rate(1.25)?;
+    player.stop()?;
+
+    <span class="c">/* 4. 关闭播放器：安全终止后台工作线程 */</span>
+    player.close()?;
+    Ok(())
+}</pre>
+    </div>
+    <p>メソッドのセマンティクスの重要なポイント:</p>
+    <ul class="body">
+      <li><b><code>open</code> 検出は同期的に完了します。</b> <code>Player::open()</code> メディアのカプセル化解除、ストリーム情報の検出、トラックの抽出を同時に実行し、リターンします。 <code>Ok(())</code> 以前に公開されました <code>DurationChanged</code>、<code>TracksChanged</code> 最初のイベントを待ち、状態を次のように設定します。 <code>Ready</code>。</li>
+      <li><b><code>play</code> 非同期再生ループを開始します。</b> <code>play()</code> バックグラウンド ワーカー スレッドを起動してデコードを開始し、オーディオとビデオのクロックを同期すると、再生状態は次のようになります。 <code>Playing</code>。</li>
+      <li><b><code>seek</code> ノンブロッキング配信です:</b> <code>seek()</code> ジャンプ目標時間をコマンドキューに渡したらすぐに戻り、バックグラウンドスレッドは一時停止または再生状態でキーフレームの配置を完了します。</li>
+      <li><b><code>close</code> 安全なリサイクルの保証:</b> <code>close()</code> バックグラウンドのデコード スレッドが安全に終了するまで待ってから戻ると、安全に破棄できます。 <code>Player</code> 例。</li>
+    </ul>
+    <p><code>MediaRequest</code> HTTP(S) URL およびカスタム リクエスト ヘッダーをサポートします。</p>
+    <div class="code">
+      <p class="lbl">Headers によるオンライン メディア リクエスト</p>
+<pre><span class="k">let</span> request = MediaRequest::new(<span class="s">"https://example.com/stream.m3u8"</span>)
+    .with_http_headers(<span class="k">vec</span>![
+        (<span class="s">"User-Agent"</span>.into(), <span class="s">"CustomPlayer/1.0"</span>.into()),
+        (<span class="s">"Referer"</span>.into(), <span class="s">"https://example.com"</span>.into()),
+    ]);
+player.open(request)?;</pre>
+    </div>
+  </section>
+
+  <section id="events">
+    <h2>イベントのサブスクリプション<span class="jp">イベント</span><a class="anchor" href="#events">#</a></h2>
+    <p>で <code>open()</code> 前に呼び出された <code>player.subscribe()</code>を開くと、最初のイベントとその後の状態変化を受け取ることができます。</p>
+    <div class="code">
+      <p class="lbl">イベント消費ループ</p>
+<pre><span class="k">use</span> erika::{PlayerEvent, PlayerState};
+
+<span class="k">let</span> events = player.subscribe();
+
+<span class="k">while let</span> Ok(event) = events.recv() {
+    <span class="k">match</span> event {
+        PlayerEvent::StateChanged(PlayerState::Closed) =&gt; {
+            println!(<span class="s">"播放器已完全关闭"</span>);
+            <span class="k">break</span>;
+        }
+        PlayerEvent::StateChanged(state) =&gt; {
+            println!(<span class="s">"状态迁移: {:?}"</span>, state);
+        }
+        PlayerEvent::DurationChanged(duration) =&gt; {
+            println!(<span class="s">"总时长: {:?}"</span>, duration);
+        }
+        PlayerEvent::PositionChanged(pos) =&gt; {
+            println!(<span class="s">"当前进度: {:?}"</span>, pos);
+        }
+        PlayerEvent::BufferingChanged(is_buffering) =&gt; {
+            println!(<span class="s">"缓冲状态: {}"</span>, is_buffering);
+        }
+        PlayerEvent::TracksChanged(tracks) =&gt; {
+            println!(<span class="s">"可用轨道数: {}"</span>, tracks.len());
+        }
+        PlayerEvent::Error(err) =&gt; {
+            eprintln!(<span class="s">"播放器错误: {:?}"</span>, err);
+        }
+        _ =&gt; {}
+    }
+}</pre>
+    </div>
+  </section>
+
+  <section id="frames">
+    <h2>Presenter ホスティングによるフレーム サブスクリプション<span class="jp">フレーム購入確認</span><a class="anchor" href="#frames">#</a></h2>
+    <p>自己構築されたレンダリング パイプラインの Rust ホストは、デコードされたデータ フレームを直接サブスクライブできます。</p>
+    <div class="code">
+      <p class="lbl">オーディオ、ビデオ、字幕フレームを購読する</p>
+<pre><span class="k">let</span> video_rx = player.subscribe_video_frames();
+<span class="k">let</span> audio_rx = player.subscribe_audio_frames();
+<span class="k">let</span> subtitle_rx = player.subscribe_subtitle_frames();
+
+<span class="c">/* 在宿主渲染循环中非阻塞拉取 */</span>
+<span class="k">if let</span> Ok(video_frame) = video_rx.try_recv() {
+    <span class="c">/* video_frame: 像素格式、尺寸、PTS、纹理句柄或 CPU 内存块 */</span>
+}
+<span class="k">if let</span> Ok(audio_frame) = audio_rx.try_recv() {
+    <span class="c">/* audio_frame: PCM 采样数据与声道参数 */</span>
+}</pre>
+    </div>
+    <p>フレーム サブスクリプション チャネルにはバック プレッシャー制御メカニズムがあります。キューがいっぱいになると、スムーズな再生を確保するために、現在送信される新しいフレームは破棄されます。カーネルは、GPU レンダリング (Metal / D3D11 / wgpu) およびオーディオ クロック ホストのセット全体をホストする必要があります。直接使用することをお勧めします。 <code>PresenterRuntime</code>：</p>
+    <div class="code">
+      <p class="lbl">PresenterRuntime がホストするプレゼンテーション</p>
+<pre><span class="k">use</span> erika::presenter::{PresenterConfig, PresenterRuntime};
+
+<span class="k">let mut</span> presenter = PresenterRuntime::new(PresenterConfig::default())?;
+presenter.open(MediaRequest::new(<span class="s">"/path/to/video.mp4"</span>))?;
+presenter.play()?;
+
+<span class="c">/* 在显示时钟驱动回调中调用 */</span>
+<span class="k">let</span> stats = presenter.render_tick(host_time_seconds)?;</pre>
+    </div>
+  </section>
+
+  <section id="config">
+    <h2>設定項目<span class="jp">設定</span><a class="anchor" href="#config">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>フィールド</th><th>デフォルト値</th><th>意味</th></tr></thead>
+        <tbody>
+          <tr><td class="m">name</td><td class="m">"Erika"</td><td>プレーヤー インスタンス名。マルチインスタンス ログの識別に使用されます。</td></tr>
+          <tr><td class="m">event_channel_capacity</td><td class="m">1024</td><td>内部再生制御コマンドキューの容量。フィールド名と異なり、購読イベントキューの容量は制限しません。</td></tr>
+          <tr><td class="m">playback</td><td class="m">PlaybackSessionConfig</td><td>デコーダおよび再生セッションの基礎となる構成 (ハードウェア アクセラレーション設定、バッファ深度など)。</td></tr>
+          <tr><td class="m">renderer</td><td class="m">Auto</td><td>レンダリングのバックエンド設定。</td></tr>
+          <tr><td class="m">video_frame_queue_capacity</td><td class="m">3</td><td>ビデオ出力フレームキューのバッファ深さ。</td></tr>
+          <tr><td class="m">audio_frame_queue_capacity</td><td class="m">192</td><td>オーディオ出力フレームキューの深さ。</td></tr>
+          <tr><td class="m">subtitle_frame_queue_capacity</td><td class="m">16</td><td>字幕イベントフレームキューの深さ。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="http-cache">
+    <h2>HTTP キャッシュ<a class="anchor" href="#http-cache">#</a></h2>
+    <p><code>httpReadAheadBytes</code> 前方に読み取るバイト数を決定します。デフォルトは 2 MiB です。<code>httpBackBufferBytes</code> 保持する再生データの量を決定します。デフォルトは 16 MiB です。両方を省略するか、0 を渡してデフォルト値を使用します。先読みのデフォルト値は次のように指定することもできます。 <code>ERIKA_HTTP_READAHEAD_BYTES</code> 設定。</p>
+    <p>ロールバック キャッシュ内のフォールバック seek は、ダウンロードされたデータを直接再利用できます。高ビットレートのビデオには、より大きな予算が必要です。80 Mbit/s のビデオを約 10 秒保持するには、約 100 MB が必要になります。キャッシュはバイト数によって制限されており、固定の再生秒数を表しません。</p>
+    <div class="code">
+      <p class="lbl">Rust</p>
+<pre>let request = MediaRequest::new(&quot;https://example.com/video.mp4&quot;)
+    .with_http_read_ahead_bytes(8 * 1024 * 1024)
+    .with_http_back_buffer_bytes(128 * 1024 * 1024);
+player.open(request)?;</pre>
+    </div>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Guide</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="openharmony.ja.html"><span class="dir">Prev</span>OpenHarmony / OHPM</a>
+    <a class="nx" href="c.ja.html"><span class="dir">Next</span>C ABI 埋め込み</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

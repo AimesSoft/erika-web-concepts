@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>クロックとスケジューリング — liberika 開発者ドキュメント</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
+<script defer src="../docs.js?v=20261030-i18n"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
+  <div class="language-switch" role="group" aria-label="言語"><a href="clock.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="clock.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="clock.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
+  <nav>
+    <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.ja.html">クイックスタート</a></li>
+      <li><a href="../guide/flutter.ja.html">Flutter の組み込み</a></li>
+      <li><a href="../guide/swift.ja.html">Swift の導入</a></li>
+      <li><a href="../guide/openharmony.ja.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.ja.html">Rust の組み込み</a></li>
+      <li><a href="../guide/c.ja.html">C ABI の組み込み</a></li>
+      <li><a href="../guide/linux.ja.html">Linux の導入</a></li>
+      <li><a href="../guide/web.ja.html">Web / WASM の導入</a></li>
+    </ul>
+    <h2><span class="no">2</span>カーネル設計 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="architecture.ja.html">アーキテクチャ概要</a></li>
+      <li><a href="decode.ja.html">ハードウェアデコード</a></li>
+      <li><a href="zero-copy.ja.html">ゼロコピー取り込み</a></li>
+      <li><a href="render.ja.html">レンダリングパイプライン</a></li>
+      <li><a href="hdr.ja.html">ハイダイナミックレンジ</a></li>
+      <li><a href="upscale.ja.html">ニューラル超解像</a></li>
+      <li><a href="subtitle-danmaku.ja.html">字幕と弾幕</a></li>
+      <li><a href="clock.ja.html" aria-current="page">クロックとスケジューリング</a></li>
+    </ul>
+    <h2><span class="no">3</span>プロジェクト <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.ja.html">ビルドと依存関係</a></li>
+      <li><a href="../project/releasing.ja.html">リリースと成果物</a></li>
+      <li><a href="../project/contributing.ja.html">貢献ガイド</a></li>
+      <li><a href="../project/changelog.ja.html">変更履歴</a></li>
+    </ul>
+    <h2><span class="no">4</span>参考資料 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.ja.html">C ABI 概要</a></li>
+      <li><a href="../reference/capi-handle.ja.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.ja.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">機械翻訳です。正確な内容は中国語版をご参照ください。</p>
+  <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>クロックとスケジューリング</p>
+  <h1>クロックとスケジューリング</h1>
+  <p class="kicker">Clock &amp; Scheduling</p>
+  <p class="lead">オーディオ出力はマスタークロックです。ビデオ フレームのレンダリング ターゲットは vsync 量子化され、オーディオ クロックに合わせられます。オーディオとビデオの間に独立した表示クロックはありません。バッファーが低く、クロックがフリーズし、データ回復後に再固定される場合は、明示的に buffering を入力します。</p>
+
+  <ul class="meta-strip">
+    <li>マスタークロック <b>オーディオ</b></li>
+    <li>ring buffer <b>192,000フレーム</b></li>
+    <li>vsync <b>目標の定量化を表示</b></li>
+  </ul>
+
+  <section id="clock">
+    <h2>オーディオマスタークロック<span class="jp">オーディオマスター</span><a class="anchor" href="#clock">#</a></h2>
+    <p>すべてのオーディオ出力バックエンドは、統合された f32 PCM ring buffer (容量 192,000 フレーム、オーバーフロー時に最も古い) にデータをプッシュします。再生クロックはメディア時間に基づいており、アンカーモーメントと倍速を組み合わせて現在時間を導出します。</p>
+    <p>毎回Presenter <code>render_tick</code> オーディオ クロックのスナップショットを読み取り、再生スレッドと同期します。クロック補正は、次の 3 つのパラメータによって制御されます。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>パラメータ</th><th>デフォルト</th><th>意味</th></tr></thead>
+        <tbody>
+          <tr><td class="m">deadband</td><td class="m">5 ms</td><td>この値より小さい偏差を持つジッターは補正されません。</td></tr>
+          <tr><td class="m">最大単一補正</td><td class="m">5 ms</td><td>ジャンプを避けるための各補正の上限。</td></tr>
+          <tr><td class="m">スナップショットのしきい値</td><td class="m">250 ms</td><td>この値を超える逸脱は脱線とみなされ、直接再固定されます。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>基準時間は、メディア時間にキューに入れられたオーディオ期間 (オーディオ lead 120 ms) を加えたものであるため、ビデオはオーディオ キューの最後に事前に表示されます。乗数が 1 以外の場合、オーディオクロックの同期はスキップされ、SoundTouch (SEQUENCE 25 ms) によってオーディオ速度が変更されます。</p>
+  </section>
+
+  <section id="vsync">
+    <h2>vsync 定量的なスケジューリング<span class="jp">VSync スケジューリング</span><a class="anchor" href="#vsync">#</a></h2>
+    <p>ビデオ フレームのレンダリング ターゲットは、vsync 間隔で量子化されます (デフォルトは 16,666,667 ns、つまり 60 Hz)。スケジューラはフレームごとに次の 3 つの決定のうち 1 つを行います。</p>
+    <ul class="body">
+      <li><b>Present</b> — 目標タイムはこの vsync サイクル内にあり、すぐに表示されます。</li>
+      <li><b>Wait</b> — フレームはレンダリング ウィンドウより前にあり、次のサイクルを待っています。</li>
+      <li><b>Drop</b> — 累積レイテンシーを減らすために、レンダリング ウィンドウより後のフレームはスキップされます。</li>
+    </ul>
+    <p>連続コマ落ちの上限は5コマです。上限に達した後は、フレームの損失を停止し、Wait に戻り、長時間画像が出力されないようにします。</p>
+    <p>一時停止中にクロックがフリーズしている間、seek はメディア クロックが進まないようにしながら、要求された位置でキーフレームをデコードしてレンダリングします。</p>
+  </section>
+
+  <section id="buffering">
+    <h2>バッファステータス<span class="jp">バッファリング</span><a class="anchor" href="#buffering">#</a></h2>
+    <p>オーディオまたはビデオ入力が不十分な場合、再生は明示的な buffering に入ります。つまり、再生クロックがフリーズし、進まなくなります。データが復元されると、復元されたメディア時間に従ってクロックが再固定されます。ホスト子午線 <code>BufferingChanged</code> イベントを認識した状態の変化。</p>
+    <div class="note">
+      <p>回復後の長時間のフレームドロップや黒い画面を避けるために、バッファリング中にクロックは進められません。</p>
+    </div>
+  </section>
+
+  <section id="diagnostics">
+    <h2>診断施設<span class="jp">診断</span><a class="anchor" href="#diagnostics">#</a></h2>
+    <p>クロックと再生のトラック出力は、環境変数によって制御されます。 <code>/tmp/erika_playback_trace.log</code>：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>環境変数</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr><td class="m">ERIKA_CLOCK_TRACE</td><td>時計の修正とアンカー イベント。</td></tr>
+          <tr><td class="m">ERIKA_PLAYBACK_TRACE</td><td>ステート マシン イベントを再生します。</td></tr>
+          <tr><td class="m">ERIKA_DANMAKU_TRACE</td><td>弾幕planはイベントを発生させます。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>logcat を介した Android の診断出力 <code>Erika</code> tag が発行されます。 HUD のデバッグでは、フレーム カウントの差を使用して fps を計算します。 <code>set_debug_hud_enabled</code> コントロール。</p>
+  </section>
+
+  <section id="display-target">
+    <h2>iOSは目標タイムを表示します<a class="anchor" href="#display-target">#</a></h2>
+    <p>0.2.1 iOS Flutter プラグインの使用 <code>CADisplayLink.targetTimestamp</code> 表示対象はネイティブキューの実実行時間ではありません。更新間隔は表示コールバックに従い、120 Hz 画面が固定の 60 Hz でスケジュールされるのを回避します。</p>
+    <p>表示コールバックはバックログ tick から mailbox をマージします。<code>erika_presenter_render_tick_with_timing</code> ビデオ、字幕、弾幕を目標時間に同時にサンプリングします。一時停止または seek 後に再生クロックを進めたり、再固定したりしないでください。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Kernel</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="subtitle-danmaku.ja.html"><span class="dir">Prev</span>字幕と弾幕</a>
+    <a class="nx" href="../reference/capi.ja.html"><span class="dir">Next</span>C ABI 概要</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

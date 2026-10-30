@@ -7,6 +7,12 @@ const escapeHTML = (value = '') =>
     (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character],
   );
 
+const languages = [
+  { value: 'zh', lang: 'zh-CN', mark: '中', name: '中文' },
+  { value: 'en', lang: 'en', mark: 'EN', name: 'English' },
+  { value: 'ja', lang: 'ja', mark: '日', name: '日本語' },
+];
+
 const sectionHeading = ({ eyebrow, title, lead }) => `
   <header class="section-heading reveal">
     <p class="section-eyebrow">${escapeHTML(eyebrow)}</p>
@@ -18,22 +24,25 @@ const sectionHeading = ({ eyebrow, title, lead }) => `
   </header>`;
 
 function renderHeader(content) {
-  const { brand, navigation } = content;
+  const { brand, navigation, ui } = content;
   return `
     <header class="site-header" data-header>
       <div class="shell header-inner">
-        <a class="brand" href="#top" aria-label="liberika 首页">
+        <a class="brand" href="#top" aria-label="${escapeHTML(ui.home)}">
           <img class="brand-mark" src="assets/images/favicon.svg" alt="" width="64" height="64">
           <span class="brand-name">${escapeHTML(brand.name)}</span>
           <span class="brand-kana">${escapeHTML(brand.kana)}</span>
         </a>
-        <button class="nav-toggle" type="button" aria-label="打开菜单" aria-expanded="false" data-nav-toggle>
-          ${icon('menu')}
-        </button>
-        <nav class="site-nav" aria-label="主导航" data-nav>
+        <nav class="site-nav" aria-label="${escapeHTML(ui.navigation)}" data-nav>
           ${navigation.map(({ label, href }) => `<a href="${href}">${escapeHTML(label)}</a>`).join('')}
           <a class="nav-repo" href="${brand.repoUrl}" target="_blank" rel="noreferrer">${icon('github')} GitHub</a>
         </nav>
+        <div class="language-switch" role="group" aria-label="${escapeHTML(ui.language)}">
+          ${languages.map(({ value, lang, mark, name }) => `<button type="button" lang="${lang}" title="${name}" aria-label="${name}" aria-pressed="${app.language === value}" data-language="${value}">${mark}</button>`).join('')}
+        </div>
+        <button class="nav-toggle" type="button" aria-label="${escapeHTML(ui.openMenu)}" aria-expanded="false" data-nav-toggle>
+          ${icon('menu')}
+        </button>
       </div>
     </header>`;
 }
@@ -69,6 +78,7 @@ function renderHero({ brand, hero }) {
 }
 
 function renderFeatures(features) {
+  const ui = app.ui;
   return `
     <section class="section shell" id="features">
       ${sectionHeading(features)}
@@ -78,18 +88,19 @@ function renderFeatures(features) {
             <div class="feature-top"><span>${escapeHTML(item.number)}</span>${icon(item.icon)}</div>
             <h3>${escapeHTML(item.title)}</h3>
             <p>${escapeHTML(item.text)}</p>
-            <ul aria-label="相关技术">${item.tags.map((tag) => `<li>${escapeHTML(tag)}</li>`).join('')}</ul>
+            <ul aria-label="${escapeHTML(ui.technologies)}">${item.tags.map((tag) => `<li>${escapeHTML(tag)}</li>`).join('')}</ul>
           </article>`).join('')}
       </div>
     </section>`;
 }
 
 function renderQuickStart(quickStart) {
+  const ui = app.ui;
   return `
     <section class="section shell" id="start">
       ${sectionHeading(quickStart)}
       <div class="code-case reveal" data-tabs>
-        <div class="code-tabs" role="tablist" aria-label="接入方式">
+        <div class="code-tabs" role="tablist" aria-label="${escapeHTML(ui.integration)}">
           ${quickStart.tabs.map((tab, index) => `
             <button type="button" role="tab" id="tab-${tab.id}" aria-controls="panel-${tab.id}" aria-selected="${index === 0}" tabindex="${index === 0 ? 0 : -1}" data-tab="${tab.id}">${escapeHTML(tab.label)}</button>`).join('')}
         </div>
@@ -98,7 +109,7 @@ function renderQuickStart(quickStart) {
             <div class="code-toolbar">
               <span><i></i><i></i><i></i></span>
               <b>${escapeHTML(tab.language)}</b>
-              <button type="button" data-copy aria-label="复制 ${escapeHTML(tab.label)} 代码">${icon('copy')}<span>复制</span></button>
+              <button type="button" data-copy aria-label="${escapeHTML(ui.copyCode)}: ${escapeHTML(tab.label)}">${icon('copy')}<span>${escapeHTML(ui.copy)}</span></button>
             </div>
             <pre><code>${escapeHTML(tab.code)}</code></pre>
             <div class="code-note">
@@ -111,6 +122,7 @@ function renderQuickStart(quickStart) {
 }
 
 function renderPlatforms(platforms) {
+  const ui = app.ui;
   return `
     <section class="section shell" id="platforms">
       ${sectionHeading(platforms)}
@@ -124,7 +136,7 @@ function renderPlatforms(platforms) {
             <span>${escapeHTML(item.minimum)}</span>
             <code>${escapeHTML(item.render)}</code>
             <code>${escapeHTML(item.decode)}</code>
-            <span class="status ${item.status}"><i></i>${escapeHTML(item.statusLabel || (item.status === 'ready' ? '可用' : '规划中'))}</span>
+            <span class="status ${item.status}"><i></i>${escapeHTML(item.statusLabel || (item.status === 'ready' ? ui.ready : ui.planned))}</span>
           </article>`).join('')}
       </div>
     </section>`;

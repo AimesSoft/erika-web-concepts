@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quick start — liberika developer documentation</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
+<script defer src="../docs.js?v=20261030-i18n"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
+  <div class="language-switch" role="group" aria-label="Language"><a href="quickstart.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="quickstart.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="quickstart.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
+  <nav>
+    <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="quickstart.en.html" aria-current="page">Quick start</a></li>
+      <li><a href="flutter.en.html">Flutter integration</a></li>
+      <li><a href="swift.en.html">Swift integration</a></li>
+      <li><a href="openharmony.en.html">OpenHarmony / OHPM</a></li>
+      <li><a href="rust.en.html">Rust integration</a></li>
+      <li><a href="c.en.html">C ABI integration</a></li>
+      <li><a href="linux.en.html">Linux integration</a></li>
+      <li><a href="web.en.html">Web / WASM integration</a></li>
+    </ul>
+    <h2><span class="no">2</span>Kernel design <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.en.html">Architecture overview</a></li>
+      <li><a href="../kernel/decode.en.html">Hardware decoding</a></li>
+      <li><a href="../kernel/zero-copy.en.html">Zero-copy import</a></li>
+      <li><a href="../kernel/render.en.html">Rendering pipeline</a></li>
+      <li><a href="../kernel/hdr.en.html">High dynamic range</a></li>
+      <li><a href="../kernel/upscale.en.html">Neural upscaling</a></li>
+      <li><a href="../kernel/subtitle-danmaku.en.html">Subtitles and danmaku</a></li>
+      <li><a href="../kernel/clock.en.html">Clock and scheduling</a></li>
+    </ul>
+    <h2><span class="no">3</span>Project <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.en.html">Building and dependencies</a></li>
+      <li><a href="../project/releasing.en.html">Releases and artifacts</a></li>
+      <li><a href="../project/contributing.en.html">Contributing</a></li>
+      <li><a href="../project/changelog.en.html">Changelog</a></li>
+    </ul>
+    <h2><span class="no">4</span>Reference <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.en.html">C ABI overview</a></li>
+      <li><a href="../reference/capi-handle.en.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.en.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Quick start</p>
+  <h1>Quick start</h1>
+  <p class="kicker">Quickstart</p>
+  <p class="lead">liberika supports several integration paths: the Flutter plugin <code>erika_flutter</code>, the SwiftPM package <code>liberika-swift</code>, the OpenHarmony ArkTS native package <code>erika</code>, the native Rust crate, the standard C ABI dynamic and static libraries, and a standalone Web / WASM browser backend.</p>
+
+  <ul class="meta-strip">
+    <li>Prebuilt <b>6 major platforms</b></li>
+    <li>Source <b>Rust 1.92+</b></li>
+    <li>Native dependencies <b>statically linked</b></li>
+  </ul>
+
+  <section id="prebuilt">
+    <h2>Prebuilt artifacts<span class="jp">プリビルト</span><a class="anchor" href="#prebuilt">#</a></h2>
+    <p>GitHub Releases (<code>github.com/AimesSoft/liberika/releases</code>) provides self-contained prebuilt archives for all major platforms:</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Archive</th><th>Contents</th><th>Architectures</th></tr></thead>
+        <tbody>
+          <tr><td class="m">erika-swift-core-0.3.0.xcframework.zip</td><td>Apple XCFramework core runtime (macOS / iOS / tvOS)</td><td>arm64 / x86_64</td></tr>
+          <tr><td class="m">erika-capi-macos-universal.zip</td><td>liberika_capi.dylib / .a</td><td>arm64 / x86_64</td></tr>
+          <tr><td class="m">erika-capi-windows-x64.zip</td><td>erika_capi.dll / .lib</td><td>x86_64</td></tr>
+          <tr><td class="m">erika-capi-android.zip</td><td>Shared libraries for four ABIs</td><td>arm64-v8a / armeabi-v7a / x86_64 / x86</td></tr>
+          <tr><td class="m">erika-capi-openharmony-arm64.zip</td><td>liberika_capi.so + C ABI header</td><td>arm64</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="flutter">
+    <h2>Flutter integration<span class="jp">Flutter</span><a class="anchor" href="#flutter">#</a></h2>
+    <div class="code">
+      <p class="lbl">pubspec.yaml</p>
+<pre>dependencies:
+  erika_flutter: ^0.3.0</pre>
+    </div>
+    <div class="code">
+      <p class="lbl">lib/main.dart</p>
+<pre><span class="k">final</span> player = ErikaPlayer();
+<span class="k">await</span> player.open(<span class="s">'/path/to/video.mp4'</span>);
+<span class="k">await</span> player.play();</pre>
+    </div>
+    <p>The plugin covers macOS, iOS, tvOS, Windows, Android, and OpenHarmony, and now adds experimental Linux support. For usage, see <a href="flutter.en.html">Flutter integration</a>. For Linux dependencies and build steps, see <a href="linux.en.html">Linux integration</a>.</p>
+  </section>
+
+  <section id="swift">
+    <h2>Swift / Apple native integration<span class="jp">Swift</span><a class="anchor" href="#swift">#</a></h2>
+    <p>Add the SwiftPM dependency <code>https://github.com/AimesSoft/liberika-swift</code> to your Xcode project to get started quickly with Metal rendering and system hardware decoding:</p>
+    <div class="code">
+      <p class="lbl">Swift example</p>
+<pre><span class="k">import</span> Erika
+
+<span class="k">let</span> player = <span class="k">try</span> ErikaPlayer()
+<span class="k">try</span> player.open(<span class="s">"https://example.com/video.mp4"</span>)
+<span class="k">try</span> player.play()</pre>
+    </div>
+    <p>For the native view <code>ErikaPlayerView</code> and lifecycle management, see <a href="swift.en.html">Swift integration</a>.</p>
+  </section>
+
+  <section id="ohpm">
+    <h2>OpenHarmony / ArkTS<span class="jp">OpenHarmony</span><a class="anchor" href="#ohpm">#</a></h2>
+    <p>Install the native ArkTS package through OHPM and drive playback from an <code>XComponent</code> surface:</p>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>ohpm install erika</pre>
+    </div>
+    <p>For the ArkTS page lifecycle and frame scheduling, see <a href="openharmony.en.html">OpenHarmony / OHPM integration</a>.</p>
+  </section>
+
+  <section id="rust">
+    <h2>Rust integration<span class="jp">Rust</span><a class="anchor" href="#rust">#</a></h2>
+    <div class="code">
+      <p class="lbl">Cargo.toml</p>
+<pre>[dependencies]
+erika = { git = <span class="s">"https://github.com/AimesSoft/liberika"</span>, tag = <span class="s">"v0.3.0"</span> }</pre>
+    </div>
+    <div class="code">
+      <p class="lbl">src/main.rs</p>
+<pre><span class="k">use</span> erika::{Player, PlayerConfig, MediaRequest};
+
+<span class="k">let</span> player = Player::new(PlayerConfig::default());
+player.open(MediaRequest::new(<span class="s">"/path/to/video.mp4"</span>))?;
+player.play()?;</pre>
+    </div>
+    <p>For the full API and channel subscriptions, see <a href="rust.en.html">Rust integration</a>.</p>
+  </section>
+
+  <section id="c">
+    <h2>C / C++ ABI integration<span class="jp">C ABI</span><a class="anchor" href="#c">#</a></h2>
+    <p>Integrate through <code>erika.h</code> and the prebuilt <code>liberika_capi</code>. We recommend <code>ErikaPresenterHandle</code>, where the kernel manages rendering and audio:</p>
+    <div class="code">
+      <p class="lbl">main.c</p>
+<pre><span class="k">#include</span> <span class="s">"erika.h"</span>
+
+ErikaPresenterHandle *p = erika_presenter_create();
+erika_presenter_attach_metal_layer(p, (uint64_t)layer, w, h, scale);
+erika_presenter_open(p, <span class="s">"https://example.com/video.mp4"</span>);
+erika_presenter_play(p);
+
+<span class="c">/* Drive once per frame from the display clock callback */</span>
+ErikaPresenterStats stats;
+erika_presenter_render_tick(p, host_time, &amp;stats);</pre>
+    </div>
+    <p>For the full specification and a comparison with the headless <code>ErikaHandle</code>, see <a href="c.en.html">C ABI integration</a>.</p>
+  </section>
+
+  <section id="platforms">
+    <h2>Platform matrix<span class="jp">対応環境</span><a class="anchor" href="#platforms">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Platform</th><th>Minimum version</th><th>Hardware decoding</th><th>Rendering</th><th>Audio output</th><th>Support status</th></tr></thead>
+        <tbody>
+          <tr><td class="p">macOS</td><td class="m">macOS 11</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">CoreAudio</td><td class="st ok">Officially supported</td></tr>
+          <tr><td class="p">iOS</td><td class="m">iOS 13</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">AudioQueue</td><td class="st ok">Officially supported</td></tr>
+          <tr><td class="p">tvOS</td><td class="m">tvOS 13</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">AudioQueue</td><td class="st ok">Officially supported</td></tr>
+          <tr><td class="p">Windows</td><td class="m">Windows 10</td><td class="m">D3D11VA</td><td class="m">Direct3D 11</td><td class="m">WASAPI</td><td class="st ok">Officially supported</td></tr>
+          <tr><td class="p">Android</td><td class="m">Android 8.0</td><td class="m">MediaCodec</td><td class="m">wgpu (Vulkan / GLES)</td><td class="m">AAudio</td><td class="st ok">Officially supported</td></tr>
+          <tr><td class="p">OpenHarmony</td><td class="m">API 18</td><td class="m">AVCodec</td><td class="m">wgpu (Vulkan)</td><td class="m">OHAudio</td><td class="st ok">Officially supported</td></tr>
+          <tr><td class="p">Linux</td><td class="m">FFmpeg 8.x</td><td class="m">NVDEC / VA-API</td><td class="m">wgpu (Vulkan / EGL)</td><td class="m">PulseAudio / pipewire-pulse</td><td class="st wait">Experimental · build from source</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="web">
+    <h2>Web / WASM<a class="anchor" href="#web">#</a></h2>
+    <p>Download <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/liberika-web-0.3.0.zip">liberika-web-0.3.0.zip</a>, extract it completely, and open the demo page over HTTPS or localhost. Integrate from JavaScript with <code>Player.create({ canvas })</code>. It supports local MKV files, ASS fonts, danmaku, multiple tracks, chapters, and screenshots. Codec support depends on the browser's WebCodecs implementation, and output is currently SDR. For details, see <a href="web.en.html">Web / WASM integration</a>.</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Guide</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="../index.en.html"><span class="dir">Prev</span>Developer documentation</a>
+    <a class="nx" href="flutter.en.html"><span class="dir">Next</span>Flutter integration</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

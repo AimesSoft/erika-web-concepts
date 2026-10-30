@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ハイダイナミックレンジ — liberika 開発者向けドキュメント</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
+<script defer src="../docs.js?v=20261030-i18n"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
+  <div class="language-switch" role="group" aria-label="言語"><a href="hdr.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="hdr.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="hdr.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
+  <nav>
+    <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.ja.html">クイックスタート</a></li>
+      <li><a href="../guide/flutter.ja.html">Flutter の組み込み</a></li>
+      <li><a href="../guide/swift.ja.html">Swift の導入</a></li>
+      <li><a href="../guide/openharmony.ja.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.ja.html">Rust の組み込み</a></li>
+      <li><a href="../guide/c.ja.html">C ABI の組み込み</a></li>
+      <li><a href="../guide/linux.ja.html">Linux の導入</a></li>
+      <li><a href="../guide/web.ja.html">Web / WASM の導入</a></li>
+    </ul>
+    <h2><span class="no">2</span>カーネル設計 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="architecture.ja.html">アーキテクチャ概要</a></li>
+      <li><a href="decode.ja.html">ハードウェアデコード</a></li>
+      <li><a href="zero-copy.ja.html">ゼロコピー取り込み</a></li>
+      <li><a href="render.ja.html">レンダリングパイプライン</a></li>
+      <li><a href="hdr.ja.html" aria-current="page">ハイダイナミックレンジ</a></li>
+      <li><a href="upscale.ja.html">ニューラル超解像</a></li>
+      <li><a href="subtitle-danmaku.ja.html">字幕と弾幕</a></li>
+      <li><a href="clock.ja.html">クロックとスケジューリング</a></li>
+    </ul>
+    <h2><span class="no">3</span>プロジェクト <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.ja.html">ビルドと依存関係</a></li>
+      <li><a href="../project/releasing.ja.html">リリースと成果物</a></li>
+      <li><a href="../project/contributing.ja.html">貢献ガイド</a></li>
+      <li><a href="../project/changelog.ja.html">変更履歴</a></li>
+    </ul>
+    <h2><span class="no">4</span>参考資料 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.ja.html">C ABI 概要</a></li>
+      <li><a href="../reference/capi-handle.ja.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.ja.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">機械翻訳です。正確な内容は中国語版をご参照ください。</p>
+  <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>ハイダイナミックレンジ</p>
+  <h1>ハイダイナミックレンジ</h1>
+  <p class="kicker">HDR / EDR Output</p>
+  <p class="lead">プラットフォームによってネゴシエートされた liberika 出力エンコード: Apple EDR、Windows HDR10 PQ、Android、および Linux extended-linear scRGB。ネゴシエーションが失敗した場合は、SDR にフォールバックします。フォールバックの理由とカウント時間 <code>ErikaOutputStatus</code> 黙って降格させるのではなく、報告してください。</p>
+
+  <ul class="meta-strip">
+    <li>出力モード <b>4</b> 親切</li>
+    <li>アクティブコーディング <b>5</b> 親切</li>
+    <li>フォールバックの理由 <b>8</b> 種（それ以外の場合） <code>None</code> ロールバックがないことを示します)</li>
+  </ul>
+
+  <section id="modes">
+    <h2>出力モード<span class="jp">努力してください</span><a class="anchor" href="#modes">#</a></h2>
+    <p>ホストが presenter を作成したとき <code>ErikaPresenterConfig.output_mode</code> ステートメントリクエスト:</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>モード</th><th>値</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Sdr</td><td class="m">0</td><td>SDR出力を修正しました。</td></tr>
+          <tr><td class="k">AppleEdr</td><td class="m">1</td><td>Apple EDR、headroom によって拡張されました。</td></tr>
+          <tr><td class="k">ExtendedLinear</td><td class="m">2</td><td>extended-linear 出力 (Android / Linux scRGB パス)。</td></tr>
+          <tr><td class="k">Auto</td><td class="m">3</td><td>コンテンツと表面の機能に基づいた自動選択。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>実際の効果的なエンコーディングは次の場所に記録されます。 <code>ErikaOutputStatus.active_encoding</code>：<code>SdrSrgb</code>、<code>AppleEdr</code>、<code>AndroidExtendedLinearScRgb</code>、<code>Hdr10Pq</code>、<code>LinuxExtendedLinearScRgb</code>。リクエスト モードとアクティブなエンコーディングは異なる場合がありますが、その違いはフォールバックです。</p>
+  </section>
+
+  <section id="headroom">
+    <h2>Headroom 交渉<span class="jp">ヘッドルーム</span><a class="anchor" href="#headroom">#</a></h2>
+    <p>EDR パスと scRGB パスは、ディスプレイのピーク輝度に基づいてダイナミック レンジをネゴシエートします。ホスト用 <code>set_output_headroom</code> レンダラーがサーフェスの実際の機能に基づいて使用可能な値に収束できるかどうかを示すフラグを、必要な headroom に提供します。</p>
+    <p>ネゴシエーション中のステータス フィールド:</p>
+    <ul class="body">
+      <li><code>requested_headroom</code> — ホスト要求値。</li>
+      <li><code>active_headroom</code> / <code>active_headroom_known</code> — 現在の実効値と有効性。</li>
+      <li><code>headroom_updates</code> — 実効値の変更の数。</li>
+      <li><code>extended_linear_frames</code> — extended-linear エンコードで出力されるフレームの数。</li>
+    </ul>
+  </section>
+
+  <section id="fallback">
+    <h2>ロールバック<span class="jp">フォールバック</span><a class="anchor" href="#fallback">#</a></h2>
+    <p>フォールバック理由の列挙 <code>ErikaOutputFallbackReason</code> 含まれています <code>None</code>(ロールバックが発生しなかったことを示します) 合計 9 つの値があり、そのうち 8 つは実際のロールバックの理由です。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>理由</th><th>値</th><th>意味</th></tr></thead>
+        <tbody>
+          <tr><td class="m">None</td><td class="m">0</td><td>フォールバックはありません。</td></tr>
+          <tr><td class="m">DisplayHdrUnsupported</td><td class="m">1</td><td>モニターはHDRをサポートしていません。</td></tr>
+          <tr><td class="m">HybridCompositionRequired</td><td class="m">2</td><td>混合合成が必要です。</td></tr>
+          <tr><td class="m">WgpuBackendNotVulkan</td><td class="m">3</td><td>wgpu バックエンドは Vulkan ではありません。</td></tr>
+          <tr><td class="m">Rgba16FloatSurfaceFormatUnavailable</td><td class="m">4</td><td>RGBA16F はサーフェスではサポートされていません。</td></tr>
+          <tr><td class="m">NativeWindowDataSpaceApiUnavailable</td><td class="m">5</td><td>native window に data space API がありません。</td></tr>
+          <tr><td class="m">ScrgbDataSpaceVerificationFailed</td><td class="m">6</td><td>scRGB data space 検証に失敗しました。</td></tr>
+          <tr><td class="m">SurfaceConfigureFailed</td><td class="m">7</td><td>サーフェスの構成に失敗しました。</td></tr>
+          <tr><td class="m">LegacyAppleEdrUnsupported</td><td class="m">8</td><td>従来の Apple EDR パスは使用できません。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><code>fallback_count</code> ロールバックの累積数、<code>data_space_failures</code> ネゴシエーション失敗数 data space が個別に累積されます。ホストはこれら 2 つの項目を使用して、ターゲット デバイスの HDR サポートが安定しているかどうかを判断できます。</p>
+    <p>Android scRGB には、Vulkan、RGBA16F サーフェスと正しい native window data space が必要です。 Linux scRGB には、FP16 extended-linear WSI が必要です。通常のSDR面はtone mapping出力を使用します。</p>
+  </section>
+
+  <section id="stats">
+    <h2>HDR 統計<span class="jp">統計</span><a class="anchor" href="#stats">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>フィールド</th><th>意味</th></tr></thead>
+        <tbody>
+          <tr><td class="m">hdr_source_frames</td><td>HDR ソース コンテンツ内のフレーム数。</td></tr>
+          <tr><td class="m">hdr10_output_frames</td><td>HDR10 PQ として出力されるフレーム数。</td></tr>
+          <tr><td class="m">sdr_tonemap_frames</td><td>HDR ソースから tone map ～ SDR を経由して出力されるフレームの数。</td></tr>
+          <tr><td class="m">hdr10_metadata_updates</td><td>HDR10 メタデータの更新数。</td></tr>
+          <tr><td class="m">hdr10_metadata_failures</td><td>メタデータ生成の失敗の数。</td></tr>
+          <tr><td class="m">hdr10_output_failures</td><td>HDR10 は失敗数を出力します。</td></tr>
+          <tr><td class="m">hdr10_output_active</td><td>現在の出力がHDR10かどうか。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>tone mapping および HDR コンテンツの出力変換は、レンダリング パイプライン内で完了します。を参照してください。<a href="render.ja.html">レンダリングパイプライン</a>。</p>
+  </section>
+
+  <section id="tonemap">
+    <h2>Tone Mapping および Dolby Vision<a class="anchor" href="#tonemap">#</a></h2>
+    <p>0.2.0 以降、デフォルトで BT.2390 EETF が使用され、ピーク圧縮は IPT 色空間で完了します。 spline、BT.2446a、ST 2094、Mobius、Reinhard、clip などの演算子はオプションです。黒点とターゲットのコントラストもマッピングに参加します。</p>
+    <p>Dolby Vision RPU は、piecewise / MMR reshaping および非線形行列変換をサポートし、Profile 5 / 8 は BT.2020 / PQ として処理されます。 Profile 7 はベース レイヤとそのマッピングを使用しますが、エンハンスメント レイヤの残差はまだ合成に参加していません。 Dolby Vision 信号をディスプレイに透過的に送信するのではなく、ここでレンダリング変換が実行されます。</p>
+    <p>HDR10 ソフトウェア フレームは、フレームごとの輝度統計を使用してピークに設定でき、知覚色域マッピング LUT は CPU によってバックグラウンドで構築され、フレーム全体でキャッシュされます。 Apple EDR 出力はモニター headroom で更新されます。 P010 アップロードでは 10-bit の精度が維持されます。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Kernel</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="render.ja.html"><span class="dir">Prev</span>レンダリングパイプライン</a>
+    <a class="nx" href="upscale.ja.html"><span class="dir">Next</span>ニューラル超解像</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

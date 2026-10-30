@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>アーキテクチャの概要 — liberika 開発者ドキュメント</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
+<script defer src="../docs.js?v=20261030-i18n"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
+  <div class="language-switch" role="group" aria-label="言語"><a href="architecture.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="architecture.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="architecture.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
+  <nav>
+    <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.ja.html">クイックスタート</a></li>
+      <li><a href="../guide/flutter.ja.html">Flutter の組み込み</a></li>
+      <li><a href="../guide/swift.ja.html">Swift の導入</a></li>
+      <li><a href="../guide/openharmony.ja.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.ja.html">Rust の組み込み</a></li>
+      <li><a href="../guide/c.ja.html">C ABI の組み込み</a></li>
+      <li><a href="../guide/linux.ja.html">Linux の導入</a></li>
+      <li><a href="../guide/web.ja.html">Web / WASM の導入</a></li>
+    </ul>
+    <h2><span class="no">2</span>カーネル設計 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="architecture.ja.html" aria-current="page">アーキテクチャ概要</a></li>
+      <li><a href="decode.ja.html">ハードウェアデコード</a></li>
+      <li><a href="zero-copy.ja.html">ゼロコピー取り込み</a></li>
+      <li><a href="render.ja.html">レンダリングパイプライン</a></li>
+      <li><a href="hdr.ja.html">ハイダイナミックレンジ</a></li>
+      <li><a href="upscale.ja.html">ニューラル超解像</a></li>
+      <li><a href="subtitle-danmaku.ja.html">字幕と弾幕</a></li>
+      <li><a href="clock.ja.html">クロックとスケジューリング</a></li>
+    </ul>
+    <h2><span class="no">3</span>プロジェクト <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.ja.html">ビルドと依存関係</a></li>
+      <li><a href="../project/releasing.ja.html">リリースと成果物</a></li>
+      <li><a href="../project/contributing.ja.html">貢献ガイド</a></li>
+      <li><a href="../project/changelog.ja.html">変更履歴</a></li>
+    </ul>
+    <h2><span class="no">4</span>参考資料 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.ja.html">C ABI 概要</a></li>
+      <li><a href="../reference/capi-handle.ja.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.ja.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">機械翻訳です。正確な内容は中国語版をご参照ください。</p>
+  <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>アーキテクチャの概要</p>
+  <h1>アーキテクチャの概要</h1>
+  <p class="kicker">Architecture</p>
+  <p class="lead">liberika は Rust によって実装されます。 demux から GPU レンダリングへのデコード、オーディオ、字幕、弾幕はすべてカーネル内で完了します。ホストはレンダリング サーフェスを提供し、再生コマンドを送信しますが、レンダリング パイプラインには参加しません。</p>
+
+  <ul class="meta-strip">
+    <li>コア crate <b>crates/erika</b></li>
+    <li>C ABI 層 <b>crates/erika_capi</b></li>
+    <li>めねじ <b>5</b></li>
+    <li>バックエンド trait <b>3</b></li>
+  </ul>
+
+  <section id="repo">
+    <h2>倉庫の階層化<span class="jp">構成する</span><a class="anchor" href="#repo">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>パス</th><th>責任</th></tr></thead>
+        <tbody>
+          <tr><td class="k">crates/erika</td><td>コア再生ライブラリ。 Player、Presenter、レンダリング バックエンド、オーディオ、字幕、弾幕。</td></tr>
+          <tr><td class="k">crates/erika_capi</td><td>C ABI エクスポートレイヤー。すべてをエクスポートする <code>include/erika.h</code> が勝つだろう。</td></tr>
+          <tr><td class="k">crates/erika_ffmpeg_sys</td><td>FFmpeg bindgen バインディング。</td></tr>
+          <tr><td class="k">packages/erika_flutter</td><td>Flutter プラグイン、macOS / iOS / tvOS / Windows / Android / HarmonyOS をカバーします。</td></tr>
+          <tr><td class="k">packages/erika_ohos</td><td>スタンドアロン OpenHarmony ArkTS / OHPM ネイティブ SDK、提供 <code>ErikaPlayer</code> XComponent surface bridgeと。</td></tr>
+          <tr><td class="k">examples/</td><td>検証、スモーク、デモプログラム。<code>macos_native_demo</code>、<code>windows_native_demo</code> はエンドツーエンドの例です。</td></tr>
+          <tr><td class="k">xtask/</td><td>ネイティブの依存関係ビルド オーケストレーション。<code>deps plan / fetch / status / build</code>。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="modules">
+    <h2>モジュール分割<span class="jp">モジュール</span><a class="anchor" href="#modules">#</a></h2>
+    <p><code>crates/erika/src/</code> 以下のモジュールは役割に応じて分割されており、プラットフォーム関連のコードは次のように分割されています。 <code>#[cfg(target_os = …)]</code> ゲートされた、集中した <code>apple.rs</code>、<code>windows.rs</code>、<code>android.rs</code>、<code>ohos.rs</code> およびそのサブディレクトリ。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>モジュール</th><th>責任</th></tr></thead>
+        <tbody>
+          <tr><td class="k">core</td><td><code>Player</code>、<code>PlayerConfig</code>、イベントの種類、<code>RendererBackend</code> trait。</td></tr>
+          <tr><td class="k">playback</td><td>再生ステートマシン、オーディオマスタークロック、フレームスケジューラ、<code>VideoDecodePreference</code>。</td></tr>
+          <tr><td class="k">presenter</td><td><code>PresenterRuntime</code>。文字列 player、renderer、audio、overlay、作成者 <code>render_tick</code> ドライブ。</td></tr>
+          <tr><td class="k">ffmpeg</td><td>demux、decode、resample、seek。<code>DecoderBackend</code> 5 つのバックエンドの選択と構成。</td></tr>
+          <tr><td class="k">audio</td><td><code>AudioOutputBackend</code> trait、f32 PCM ring buffer、オーディオクロック。</td></tr>
+          <tr><td class="k">renderer</td><td><code>metal</code>（Apple）、<code>d3d11</code>（Windows）、<code>wgpu</code>(Android、HarmonyOS) バックエンド;<code>pipeline</code> tone map を使用して、バックエンドに依存しない色の決定を行います。</td></tr>
+          <tr><td class="k">subtitle</td><td>SRT / WebVTT / ASS 解析および libass レンダリング、埋め込みおよび外部字幕トラック。</td></tr>
+          <tr><td class="k">danmaku</td><td>Bilibili XML / JSON 解析、DFM+ 衝突回避レイアウト、glyph atlas レンダリング。</td></tr>
+          <tr><td class="k">overlay</td><td>合成タイムライン、字幕、弾幕再生ウィンドウの管理。</td></tr>
+          <tr><td class="k">source</td><td><code>MediaSource</code> trait、file、HTTP range の 2 つの実装があります。</td></tr>
+          <tr><td class="k">trace / debug_hud</td><td>診断設備。 HUD オーバーレイを備えた環境変数スイッチ。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="flow">
+    <h2>データフロー<span class="jp">データフロー</span><a class="anchor" href="#flow">#</a></h2>
+    <p>再生チェーンはメディア ソースから始まり、レンダリング サーフェスで終了します。</p>
+    <div class="code">
+      <p class="lbl">playback data flow</p>
+<pre>MediaSource (file / HTTP range)
+  → demux (ffmpeg)
+  → decode (DecoderBackend: hardware / software)
+  → frame queue (video / audio / subtitle)
+  → PresenterRuntime::render_tick(host_time)
+  → RenderFrameContext { media_time, overlay, danmaku, output_size }
+  → RendererBackend::render_current_frame
+  → surface (Metal / D3D11 / wgpu)</pre>
+    </div>
+    <p>ステータスとイベントは独立しています crossbeam channel。プレーヤーのステータスの変更、継続時間、トラック、バッファリング、エラー、その他の情報がイベント チャネルとホストに公開されます。 <code>poll_event</code> または、Rust 側のイベント サブスクリプションの消費。</p>
+    <div class="note">
+      <p><b>タイムベース。</b> オーディオ出力はマスタークロックです。ビデオ レンダリングは、vsync によってオーディオ クロックを調整するために量子化されます。詳細については、を参照してください。<a href="clock.ja.html">クロックとスケジューリング</a>。</p>
+    </div>
+  </section>
+
+  <section id="threads">
+    <h2>ねじ切りモデル<span class="jp">スレッド</span><a class="anchor" href="#threads">#</a></h2>
+    <p>カーネルは内部で 5 つの常駐スレッドを維持し、一部のプラットフォーム オーディオ出力はシステム コールバック コンテキスト (CoreAudio コールバック、WASAPI render スレッド) で実行されます。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>スレッド名</th><th>責任</th></tr></thead>
+        <tbody>
+          <tr><td class="k">erika-playback</td><td>コマンドループ。消費 <code>PlaybackCommand</code>、インラインビデオデコード、管理ステートマシン。</td></tr>
+          <tr><td class="k">erika-demux</td><td>demux コンシューマ スレッドは、bounded パケット キュー (容量 512) を playback スレッドに配信します。</td></tr>
+          <tr><td class="k">erika-danmaku</td><td>弾幕planが発生する。 Mutex + Condvar はモデルをリクエストし、結果は unbounded channel 経由で返されます。</td></tr>
+          <tr><td class="k">erika-upscaler-build</td><td>ArtCNN ウェイトロードとバックエンド構築 (Metal パス)。</td></tr>
+          <tr><td class="k">erika-wasapi-render</td><td>Windows WASAPI オーディオ出力スレッド。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>ホスト スレッドとカーネルの間の境界は、C ABI レイヤーによって制限されます。handle は内部同期を提供せず、複数のスレッドから同時に呼び出すことはできません。</p>
+  </section>
+
+  <section id="entry">
+    <h2>3つの入り口<span class="jp">エントリポイント</span><a class="anchor" href="#entry">#</a></h2>
+    <p>liberika は、ホスト言語とレンダリングの所有権によって区別される 3 つの使用グループを公開します。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>入口</th><th>ホスト</th><th>所有権をレンダリングする</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Player</td><td>Rust</td><td>ホストがフレームデータをプルする</td><td>Rust API を完了します。イベントのサブスクリプション + ビデオ/オーディオ/字幕フレームのサブスクリプション。</td></tr>
+          <tr><td class="k">ErikaHandle</td><td>C / Swift / Dart FFI</td><td>ホストがフレームデータをプルする</td><td>pullモデル。ホストはレンダリング ループ自体を管理します。</td></tr>
+          <tr><td class="k">ErikaPresenterHandle</td><td>C / Swift / Dart FFI</td><td>カーネルホスティング</td><td>pushモデル。ホストはサーフェスを提供し、フレームごとにそれを呼び出します <code>render_tick</code>。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>3 セットの入口は同じ内部実装を共有します。 C ABI レイヤーのエクスポートされた各関数は、 <code>catch_unwind</code> パッケージ、panic のマップ先 <code>ErikaStatus_Panic</code>、FFI境界を超えません。</p>
+  </section>
+
+  <section id="abstractions">
+    <h2>バックエンドの抽象化<span class="jp">抽象化</span><a class="anchor" href="#abstractions">#</a></h2>
+    <p>プラットフォームの違いは 3 つの trait の後に収束し、presenter とレンダー ループはプラットフォームに依存しません。</p>
+    <ul class="body">
+      <li><code>RendererBackend</code>(core.rs) - 表面の取り付けとサイズ設定、<code>render_current_frame</code>、<code>upload_player_frame</code>、スクリーンショット。 Metal、D3D11、wgpu の 3 つの実装があります。</li>
+      <li><code>AudioOutputBackend</code>(audio.rs) - 設定、再生制御、<code>push(PcmAudioFrame)</code>、時計のスナップショット。 CoreAudio / AudioQueue / WASAPI / AAudio / OHAudio の実装。</li>
+      <li><code>DecoderBackend</code>(ffmpeg.rs) - ソフトウェア、VideoToolbox、D3D11VA、MediaCodec、AVCodec の 5 つのデコード バックエンド。</li>
+    </ul>
+    <p>選択ルール:<code>RendererBackendPreference</code>(プラットフォーム ネイティブまたは wgpu フォールバック) レンダリング バックエンドを決定します。<code>VideoDecodePreference</code> デコード バックエンドはデフォルトでプラットフォームによって選択されます。</p>
+  </section>
+
+  <section id="platforms">
+    <h2>プラットフォームの対象範囲<span class="jp">環境</span><a class="anchor" href="#platforms">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>プラットフォーム</th><th>最低の</th><th>デコード</th><th>レンダリング</th><th>オーディオ</th><th>ステータス</th></tr></thead>
+        <tbody>
+          <tr><td class="p">macOS</td><td class="m">14</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">CoreAudio</td><td class="st ok">利用可能</td></tr>
+          <tr><td class="p">iOS</td><td class="m">16</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">AudioQueue</td><td class="st ok">利用可能</td></tr>
+          <tr><td class="p">tvOS</td><td class="m">13</td><td class="m">VideoToolbox</td><td class="m">Metal</td><td class="m">AudioQueue</td><td class="st ok">利用可能</td></tr>
+          <tr><td class="p">Windows</td><td class="m">10</td><td class="m">D3D11VA</td><td class="m">Direct3D 11</td><td class="m">WASAPI</td><td class="st ok">利用可能</td></tr>
+          <tr><td class="p">Android</td><td class="m">8</td><td class="m">MediaCodec / ソフトウェアデコード</td><td class="m">wgpu · Vulkan+GLES</td><td class="m">AAudio</td><td class="st ok">利用可能</td></tr>
+          <tr><td class="p">HarmonyOS</td><td class="m">API 18</td><td class="m">AVCodec / ソフトウェアデコード</td><td class="m">wgpu · Vulkan</td><td class="m">OHAudio</td><td class="st ok">利用可能</td></tr>
+          <tr><td class="p">Linux</td><td class="m">FFmpeg 8.x</td><td class="m">NVDEC / VA-API</td><td class="m">wgpu (Vulkan / EGL)</td><td class="m">PulseAudio</td><td class="st wait">実験的</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>プラットフォーム表の上のバージョンは機能ベースラインです。ビルド時の実際のデプロイメント ターゲットは macOS 11.0 / iOS 13.0 です。「」を参照してください。<a href="../project/building.ja.html">ビルドと依存関係</a>。</p>
+  </section>
+
+  <section id="web">
+    <h2>ブラウザ バックエンド · 0.3.0<a class="anchor" href="#web">#</a></h2>
+    <p>Web は独立した JavaScript Player インターフェイスです。 FFmpeg WASM は Worker で読み取りとカプセル化解除を行い、圧縮されたパッケージは WebCodecs、libass、および Rust に渡されます。 DFM エンジンは字幕と弾幕を処理し、次に WebGL2合成; Web Audio は出力および再生クロックを提供します。ネイティブ Presenter C ABI は使用されず、デスクトップ HDR または ArtCNN も含まれません。導入とサポートの範囲については、「」を参照してください。<a href="../guide/web.ja.html">Web / WASM アクセス</a>。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Kernel</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="../guide/linux.ja.html"><span class="dir">Prev</span>Linux アクセス</a>
+    <a class="nx" href="decode.ja.html"><span class="dir">Next</span>ハードウェアデコード</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

@@ -177,28 +177,6 @@ aside::before {
   letter-spacing: 0.08em;
 }
 
-.langs {
-  display: flex;
-  width: fit-content;
-  gap: 4px;
-  margin: 0 0 22px;
-  padding: 3px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-}
-
-.langs a {
-  padding: 3px 10px;
-  border-radius: 999px;
-  color: var(--ink-faint);
-  font-size: 10px;
-}
-
-.langs a[aria-current="true"] {
-  color: var(--white);
-  background: var(--ink);
-}
-
 aside nav h2 {
   display: flex;
   align-items: center;
@@ -977,8 +955,7 @@ footer.doc-foot b {
 
   aside::before,
   .brand-sub,
-  .side-foot,
-  .langs {
+  .side-foot {
     display: none;
   }
 
@@ -1132,4 +1109,78 @@ footer.doc-foot b {
   *::after {
     transition-duration: 0.001ms !important;
   }
+}
+
+/* Language seals: the current page language is pressed like a stamp. */
+.language-switch {
+  display: flex;
+  gap: 2px;
+  margin: -12px 0 0 33px;
+}
+
+.language-switch a {
+  position: relative;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--ink-soft);
+  font-family: var(--serif);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  transition: color 150ms ease, transform 150ms ease;
+}
+
+.language-switch a[lang="en"] {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+.language-switch a::before {
+  position: absolute;
+  inset: 3px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 50%;
+  content: "";
+  opacity: 0;
+  transform: scale(0.82);
+  transition: opacity 150ms ease, transform 200ms ease;
+}
+
+.language-switch a:hover {
+  color: var(--ink);
+}
+
+.language-switch a:hover::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.language-switch a:not([aria-current]):active {
+  transform: scale(0.9);
+}
+
+.language-switch a[aria-current] {
+  color: var(--pink);
+  cursor: default;
+  transform: rotate(-8deg);
+}
+
+.language-switch a[aria-current]::before {
+  border: 1.5px solid var(--pink);
+  opacity: 1;
+  transform: none;
+}
+
+.translation-note {
+  border-left: 3px solid #9b7662;
+  padding: .6rem .9rem;
+  font-size: .9rem;
+  background: #f8f3ef;
+}
+@media (max-width: 900px) {
+  html { scroll-padding-top: 145px; }
+  .language-switch { position: absolute; top: 12px; right: 14px; margin: 0; }
 }

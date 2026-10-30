@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>字幕と弾幕 — liberika 開発者ドキュメント</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
+<script defer src="../docs.js?v=20261030-i18n"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
+  <div class="language-switch" role="group" aria-label="言語"><a href="subtitle-danmaku.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="subtitle-danmaku.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="subtitle-danmaku.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
+  <nav>
+    <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.ja.html">クイックスタート</a></li>
+      <li><a href="../guide/flutter.ja.html">Flutter の組み込み</a></li>
+      <li><a href="../guide/swift.ja.html">Swift の導入</a></li>
+      <li><a href="../guide/openharmony.ja.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.ja.html">Rust の組み込み</a></li>
+      <li><a href="../guide/c.ja.html">C ABI の組み込み</a></li>
+      <li><a href="../guide/linux.ja.html">Linux の導入</a></li>
+      <li><a href="../guide/web.ja.html">Web / WASM の導入</a></li>
+    </ul>
+    <h2><span class="no">2</span>カーネル設計 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="architecture.ja.html">アーキテクチャ概要</a></li>
+      <li><a href="decode.ja.html">ハードウェアデコード</a></li>
+      <li><a href="zero-copy.ja.html">ゼロコピー取り込み</a></li>
+      <li><a href="render.ja.html">レンダリングパイプライン</a></li>
+      <li><a href="hdr.ja.html">ハイダイナミックレンジ</a></li>
+      <li><a href="upscale.ja.html">ニューラル超解像</a></li>
+      <li><a href="subtitle-danmaku.ja.html" aria-current="page">字幕と弾幕</a></li>
+      <li><a href="clock.ja.html">クロックとスケジューリング</a></li>
+    </ul>
+    <h2><span class="no">3</span>プロジェクト <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.ja.html">ビルドと依存関係</a></li>
+      <li><a href="../project/releasing.ja.html">リリースと成果物</a></li>
+      <li><a href="../project/contributing.ja.html">貢献ガイド</a></li>
+      <li><a href="../project/changelog.ja.html">変更履歴</a></li>
+    </ul>
+    <h2><span class="no">4</span>参考資料 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.ja.html">C ABI 概要</a></li>
+      <li><a href="../reference/capi-handle.ja.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.ja.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">機械翻訳です。正確な内容は中国語版をご参照ください。</p>
+  <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>字幕と弾幕</p>
+  <h1>字幕と弾幕</h1>
+  <p class="kicker">Subtitle &amp; Danmaku</p>
+  <p class="lead">字幕トラックは、libass によってレンダリングされた SRT / WebVTT / ASS をサポートします。弾幕は、DFM+ 衝突回避レイアウトを使用して、Bilibili XML および JSON の 2 つの入力をサポートし、glyph atlas によって GPU 上に描画されます。どちらも、レンダー パイプラインのコンポジション pass 内のビデオでフレーム化されています。</p>
+
+  <ul class="meta-strip">
+    <li>字幕のレンダリング <b>libass</b></li>
+    <li>弾幕レイアウト <b>DFM+</b></li>
+    <li>描く <b>glyph atlas</b></li>
+  </ul>
+
+  <section id="subtitle">
+    <h2>字幕<span class="jp">字幕</span><a class="anchor" href="#subtitle">#</a></h2>
+    <p>字幕トラックは、埋め込みとプラグインの 2 つのソースに分かれています (<code>ErikaTrackSource</code>）。外部字幕 <code>add_external_subtitle</code> 追加、トラック id を返します。字幕トラック id は -1 で字幕を無効にします。外部テキスト字幕には文字セット検出とトランスコーディングが付属しており、GBK、Big5、Shift_JIS、UTF-16、UTF-8 パススルーをカバーし、信頼性の低い入力やバイナリ入力は控えめにフォールバックします。</p>
+    <p>レンダリングの統合は libass によって行われ、埋め込み Droid Sans Fallback はすべてのプラットフォームでメモリ内フォントとして登録され、システム フォント プロバイダーのないターゲット プラットフォームはデフォルトでこのファミリーを使用します。</p>
+    <h3>スタイルの上書き</h3>
+    <p>ホストは字幕スタイル全体をオーバーライドできます。カバレッジの粒度はビットによって制御されます。<code>ErikaSubtitleStyle.override_mask</code> ビットフラグ:</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>ロゴ</th><th>ビット</th><th>オーバーライド</th></tr></thead>
+        <tbody>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_FONT_SIZE_FIELDS</td><td class="m">2</td><td>フォントサイズ</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_FONT_NAME</td><td class="m">3</td><td>フォントファミリーとフォントファイル</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_COLORS</td><td class="m">4</td><td>メインカラーとストロークカラー</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_ATTRIBUTES</td><td class="m">5</td><td>太字、斜体、下線、取り消し線</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_BORDER</td><td class="m">6</td><td>枠線のスタイルと幅</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_ALIGNMENT</td><td class="m">7</td><td>整列</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_MARGINS</td><td class="m">8</td><td>マージン</td></tr>
+          <tr><td class="m">ERIKA_SUBTITLE_OVERRIDE_BLUR</td><td class="m">11</td><td>ぼやけた</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><code>ERIKA_SUBTITLE_OVERRIDE_ALL</code> 上記の組み合わせです。コンテナー ASS スクリプトは、ホストがフォント名オーバーライド ビットによる置換を強制しない限り、独自のフォントを保持します。</p>
+    <h3>メモリーフォント</h3>
+    <p>0.1.5 ではメモリ フォント レジストリが導入されています。ホストは、(ディスクに書き込むことなく) フォント データを登録し、フォントの faces をクエリし、順序付けされたフォールバック セットを選択し、フォント データを置換し、レジストリをクリアできます。レンダラーは、選択されたフォントの世代に従ってキャッシュを再構築します。選択されたコレクション内のフォントは、置換直後にアクティブな字幕トラックで有効になります。登録されているが選択されていないフォントのみは、レンダラーの再構築をトリガーしません。</p>
+  </section>
+
+  <section id="danmaku">
+    <h2>弾幕<span class="jp">カーテン</span><a class="anchor" href="#danmaku">#</a></h2>
+    <p>弾幕入力は、Bilibili XML (ファイルまたは URL) および JSON (インライン文字列) です。 2 つの読み込みパス:</p>
+    <ul class="body">
+      <li><code>load_danmaku_file</code> / <code>load_danmaku_json</code> — すべての弾幕を匿名のトラックに置き換えます。</li>
+      <li><code>add_danmaku_track_file</code> / <code>add_danmaku_track_json</code> — 名前付きマルチトラック リストを作成します。各トラックは個別に開始、停止、オフセットできます。</li>
+    </ul>
+    <p>軌道レベル <code>offset_micros</code> 単一トラックのタイムラインをオフセットします。グローバル オフセットはすべてのトラックに適用されます。レイアウトイン <code>erika-danmaku</code> スレッド内で生成された plan は、ビデオとの同期を保つために、generation および media time でゲートされます。</p>
+    <h3>DFM+ レイアウト</h3>
+    <p>弾幕レイアウトは、DFM+ 衝突回避エンジンによって完成されます。上下の 3 つのスクロール モードには、それぞれトラックの割り当て、密度制限、およびカバレッジ戦略があります。 glyph atlas を描画すると、グリフは一度に atlas にラスタライズされ、インスタンス化された頂点を使用してフレームごとに描画されます。</p>
+    <p>レイアウトパラメータ <code>ErikaDanmakuConfig</code> コントロール:</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>フィールド</th><th>意味</th></tr></thead>
+        <tbody>
+          <tr><td class="m">font_size</td><td>弾幕の論理フォント サイズは、デフォルトの弾幕フォント NipaPlay と一致しており、サーフェス上で scale ピクセルから glyph ピクセルに変換されます。</td></tr>
+          <tr><td class="m">opacity / outline_width / shadow_*</td><td>透明度、ストローク幅、影のオフセット、スタイル。</td></tr>
+          <tr><td class="m">display_area</td><td>弾幕が占めることができる表示領域の割合。</td></tr>
+          <tr><td class="m">scroll_duration_seconds / scroll_speed_factor</td><td>スクロール時間と速度係数。</td></tr>
+          <tr><td class="m">merge_duplicates</td><td>弾幕合流を繰り返します。</td></tr>
+          <tr><td class="m">allow_stacking / allow_scroll_overwrite</td><td>スタッキングおよびローリング カバレッジ戦略を共同追跡します。</td></tr>
+          <tr><td class="m">max_quantity / max_lines_per_mode</td><td>シングルモードでの弾幕の総量と最大ライン数。</td></tr>
+          <tr><td class="m">block_top / block_bottom / block_scroll</td><td>モードごとにコメントをブロックします。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>シールド・シージン <code>set_danmaku_block_words_json</code> 提供される、JSON 配列形式で、弾幕テキストを 1 つずつ照合します。</p>
+
+    <h3 id="json-schema">弾幕 JSON 契約仕様</h3>
+    <p><code>load_danmaku_json</code> と <code>add_danmaku_track_json</code> インライン JSON を受け入れます。入力ルート ノードは、次の 2 種類の構造をサポートします。</p>
+    <ul class="body">
+      <li><b>Item配列:</b> <code>[ { ... }, { ... } ]</code></li>
+      <li><b>パッケージングオブジェクト:</b> 含まれています <code>comments</code>、<code>danmaku</code> または <code>items</code> オブジェクトの配列など <code>{ "comments": [ ... ] }</code>。列ごとに分割したJSON Lines(JSONL)にも対応します。</li>
+    </ul>
+
+    <p>各弾幕 item でサポートされているフィールドは次のとおりです (互換性のあるエイリアスは括弧内にあります)。</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>フィールド名</th><th>種類</th><th>デフォルト値</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td class="m">content<br><span class="en">(text, c)</span></td><td class="k">String</td><td class="m">—</td><td>弾幕テキスト。欠落しているエントリ、または空白文字のみが含まれているエントリは、自動的にスキップされます。</td></tr>
+          <tr><td class="m">time<br><span class="en">(t)</span></td><td class="k">Number / String</td><td class="m">0.0</td><td>弾幕表示時間 (秒)、浮動小数点秒をサポート (例: <code>12.45</code>）。</td></tr>
+          <tr><td class="m">type<br><span class="en">(mode, y)</span></td><td class="k">String / Number</td><td class="m">"scroll"</td><td>弾幕タイプ:<code>scroll</code> / <code>1</code>(スクロール)、<code>bottom</code> / <code>4</code>(底部固定)、<code>top</code> / <code>5</code>(上部固定)、<code>reverse</code> / <code>6</code>(逆スクロール)、<code>special</code> / <code>7</code>(高度な特殊。現在の解析後にレイアウトのレンダリングを開始しません)。数値フィールドも使用可能 <code>type_code</code> / <code>mode_code</code>。</td></tr>
+          <tr><td class="m">color<br><span class="en">(r)</span></td><td class="k">Number / String</td><td class="m">白</td><td>弾幕カラー: 10 進数の RGB 整数 (例: <code>16777215</code>)、完了 <code>#RRGGBB</code> 16 進数の文字列 (例: <code>"#FFFFFF"</code>) または CSS <code>rgb(r,g,b)</code>。注: 使用しないでください <code>#FFF</code> およびその他の 3 桁の略語 (これらは直接解析されて <code>0x000FFF</code>）。</td></tr>
+          <tr><td class="m">font_size<br><span class="en">(fontSize, size, s)</span></td><td class="k">Number / String</td><td class="m">25.0</td><td>ソース参照フォント サイズ (ポイント)。最終的にレンダリングされるフォント サイズも、グローバル構成とサーフェス scale に応じてスケーリングされます。</td></tr>
+          <tr><td class="m">opacity<br><span class="en">(alpha, a)</span></td><td class="k">Number / String</td><td class="m">1.0</td><td>カスタムの不透明度 (<code>0.0</code> ~ <code>1.0</code>）。</td></tr>
+          <tr><td class="m">is_me<br><span class="en">(isMe, self, mine)</span></td><td class="k">Boolean / Number</td><td class="m">false</td><td>現在のユーザーに対する自発的な弾幕であるかどうか (アンチスタック ポリシーによるフィルタリングを避けるためにレイアウトを優先します)。</td></tr>
+          <tr><td class="m">id</td><td class="k">u64 / String</td><td class="m">順次割り当て</td><td>ビジネスID。サポート <code>u64</code> 範囲内の符号なし整数または 10 進数文字列。<code>0</code> 提供されないものとして扱います。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>分析と行動規則:</p>
+    <ul class="body">
+      <li><b><code>id</code> 省略可能:</b> 省略された場合、0、不正な値、または範囲外の場合、liberika には入力全体の自然な位置に従って番号が割り当てられます。</li>
+      <li><b>正確な <code>u64</code> 分析:</b> サポート <code>0</code> 到着 <code>18446744073709551615</code>（<code>u64::MAX</code>)、範囲内の符号なし整数または 10 進数文字列は、JS/JSON 倍精度浮動小数点精度の切り捨てを防ぐために、解析中に浮動小数点変換を受けません。</li>
+      <li><b>ビジネス ID はレイアウト ID から切り離されています。</b> ビジネス ID では、複数のトラックをマージするときに重複またはクロスオリジンの競合が許可されます。発信者<b>スプライスしないでください track ID</b>、また<b>植字を一意にするために特別な ID を合成する必要はありません</b>。</li>
+      <li><b>クロススライディング ウィンドウの連続性は次のことを保証します。</b> 弾幕セッションは、マルチトラックのマージ後に内部レイアウト ID を現在のコンテンツ バージョンに個別に割り当てます。同じ連続セッション内で、連続タイム スライディング ウィンドウは、過去のアドミッションと軌道割り当ての決定、および外部コミットメントを厳密に継承します。<b>「スライディング ウィンドウが更新された後、弾幕は表示されず、途中で軌道が変更されません。」</b>(viewportのサイズ変更、タイムラインコンテンツの変更、レイアウト構成の調整を除く)。</li>
+      <li><b>フォールトトレランスメカニズム:</b> ルート ノードの形式が正しくない場合は、直接失敗が返されます。単一の item テキストが欠落しているか空白の場合、バッチ解析全体を中断することなくスキップされます。不正なオプションフィールドはデフォルト値に戻ります。未知の事業分野（ <code>cid</code>、<code>danmakuId</code>) は無視しても問題ありません。</li>
+    </ul>
+
+    <div class="code">
+      <p class="lbl">標準弾幕 JSON 例</p>
+<pre>[
+  { <span class="s">"time"</span>: 1.5, <span class="s">"content"</span>: <span class="s">"前方高能预警"</span>, <span class="s">"type"</span>: <span class="s">"scroll"</span>, <span class="s">"color"</span>: <span class="s">"#FF0000"</span> },
+  { <span class="s">"t"</span>: 2.0, <span class="s">"c"</span>: <span class="s">"名场面打卡"</span>, <span class="s">"mode"</span>: 5, <span class="s">"color"</span>: 16777215, <span class="s">"id"</span>: <span class="s">"9007199254740993"</span> },
+  { <span class="s">"time"</span>: 4.8, <span class="s">"content"</span>: <span class="s">"弹幕合影"</span>, <span class="s">"is_me"</span>: <span class="k">true</span>, <span class="s">"opacity"</span>: 0.9 }
+]</pre>
+    </div>
+  </section>
+
+  <section id="supersampling">
+    <h2>スーパーサンプリングのデフォルト · 0.3.0<a class="anchor" href="#supersampling">#</a></h2>
+    <p>ネイティブと Web の両方のバックエンド字幕と弾幕スーパーサンプリングがデフォルトでオンになっており、これによりフォントの明瞭さが向上し、ビデオ解像度を上げることなく論理表示サイズが維持されます。両方とも独立して構成されます。 Webは利用可能です <code>configureSubtitles({ supersampling: false })</code> そして <code>configureDanmaku({ supersampling: false })</code> それぞれ閉じます。</p>
+    <p>一時停止ジャンプ、長い字幕スパン seek、および一時停止トラックのカットでは、現在の字幕が再計算されます。システム フォント フォールバックは、ゼロコピー上書きチェックと有界 LRU キャッシュを介してメモリを制御し、有効なグリフを保持します。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Kernel</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="upscale.ja.html"><span class="dir">Prev</span>ニューラル超解像</a>
+    <a class="nx" href="clock.ja.html"><span class="dir">Next</span>クロックとスケジューリング</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

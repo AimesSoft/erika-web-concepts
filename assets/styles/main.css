@@ -1451,3 +1451,84 @@ noscript {
     animation-duration: 0.001ms !important;
   }
 }
+
+/* Language seals: the current language is pressed like the version sticker. */
+.language-switch {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+  margin-left: 18px;
+}
+
+.language-switch button {
+  position: relative;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--ink-soft);
+  background: transparent;
+  font-family: var(--serif);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  transition: color 160ms ease, transform 160ms ease;
+}
+
+.language-switch button[lang="en"] {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.language-switch button::before {
+  position: absolute;
+  inset: 3px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 50%;
+  content: "";
+  opacity: 0;
+  transform: scale(0.82);
+  transition: opacity 160ms ease, transform 200ms ease;
+}
+
+.language-switch button:hover {
+  color: var(--ink);
+}
+
+.language-switch button:hover::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.language-switch button:not([aria-pressed="true"]):active {
+  transform: scale(0.9);
+}
+
+.language-switch button[aria-pressed="true"] {
+  color: var(--pink);
+  cursor: default;
+  transform: rotate(-8deg);
+}
+
+.language-switch button[aria-pressed="true"]::before {
+  border: 1.5px solid var(--pink);
+  opacity: 1;
+  transform: none;
+}
+
+@media (min-width: 821px) and (max-width: 1040px) {
+  .site-nav { gap: 22px; }
+}
+@media (min-width: 821px) and (max-width: 960px) {
+  .brand-kana { display: none; }
+  .site-nav { gap: 18px; }
+  .language-switch { margin-left: 12px; }
+}
+@media (max-width: 820px) {
+  .language-switch { margin-left: auto; }
+  .nav-toggle { margin-left: 6px; }
+}

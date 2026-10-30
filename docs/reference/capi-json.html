@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>JSON bridge — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css">
-<script defer src="../docs.js"></script>
+<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
+<script defer src="../docs.js?v=20261030-i18n"></script>
 </head>
 <body>
 <div class="layout">
@@ -14,6 +14,7 @@
 <aside>
   <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
+  <div class="language-switch" role="group" aria-label="语言"><a href="capi-json.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="capi-json.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="capi-json.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
     <h2><span class="no">一</span>接入指南 <span class="en">Guide</span></h2>
     <ul>
@@ -97,7 +98,7 @@
     <div class="code">
 <pre>{ "ok": false, "status": 3, "error": "human readable message" }</pre>
     </div>
-    <p>只检查 <code>ok</code> 字段。错误消息与 C 面的线程局部错误一致；panic 被捕获并映射为相同形状的错误响应。注意:任何 C 层非 Ok 状态(包括 NullPointer)都统一映射为 <code>status: 3</code>。</p>
+    <p>检查 <code>ok</code> 字段。桥接层可能自行生成参数或方法错误；C 接口失败时会读取线程局部消息，若为空则生成状态描述。受捕获的 panic 会变为错误响应；捕获范围外的 panic 或 abort 模式可能终止进程。C 层非 Ok 状态统一映射为 <code>status: 3</code>。</p>
   </section>
 
   <section id="events">

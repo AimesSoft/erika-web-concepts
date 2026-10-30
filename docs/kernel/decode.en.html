@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hardware decoding — liberika developer documentation</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
+<script defer src="../docs.js?v=20261030-i18n"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
+  <div class="language-switch" role="group" aria-label="Language"><a href="decode.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="decode.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="decode.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
+  <nav>
+    <h2><span class="no">1</span>Integration guide <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.en.html">Quick start</a></li>
+      <li><a href="../guide/flutter.en.html">Flutter integration</a></li>
+      <li><a href="../guide/swift.en.html">Swift integration</a></li>
+      <li><a href="../guide/openharmony.en.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.en.html">Rust integration</a></li>
+      <li><a href="../guide/c.en.html">C ABI integration</a></li>
+      <li><a href="../guide/linux.en.html">Linux integration</a></li>
+      <li><a href="../guide/web.en.html">Web / WASM integration</a></li>
+    </ul>
+    <h2><span class="no">2</span>Kernel design <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="architecture.en.html">Architecture overview</a></li>
+      <li><a href="decode.en.html" aria-current="page">Hardware decoding</a></li>
+      <li><a href="zero-copy.en.html">Zero-copy import</a></li>
+      <li><a href="render.en.html">Rendering pipeline</a></li>
+      <li><a href="hdr.en.html">High dynamic range</a></li>
+      <li><a href="upscale.en.html">Neural upscaling</a></li>
+      <li><a href="subtitle-danmaku.en.html">Subtitles and danmaku</a></li>
+      <li><a href="clock.en.html">Clock and scheduling</a></li>
+    </ul>
+    <h2><span class="no">3</span>Project <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="../project/building.en.html">Building and dependencies</a></li>
+      <li><a href="../project/releasing.en.html">Releases and artifacts</a></li>
+      <li><a href="../project/contributing.en.html">Contributing</a></li>
+      <li><a href="../project/changelog.en.html">Changelog</a></li>
+    </ul>
+    <h2><span class="no">4</span>Reference <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.en.html">C ABI overview</a></li>
+      <li><a href="../reference/capi-handle.en.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.en.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>Hardware decoding</p>
+  <h1>Hardware decoding</h1>
+  <p class="kicker">Decoding</p>
+  <p class="lead">All decoding goes through FFmpeg's <code>avcodec</code> interface, and <code>DecoderBackend</code> selects a software or hardware backend. When the hardware path is unavailable, the kernel falls back to software decoding and reports the switch to the host through the <code>VideoDecoderChanged</code> event.</p>
+
+  <ul class="meta-strip">
+    <li>Backends <b>7</b></li>
+    <li>Hardware 6 / Software 1</li>
+    <li>Switch event <b>VideoDecoderChanged</b></li>
+  </ul>
+
+  <section id="backends">
+    <h2>Decoding backends<span class="jp">デコーダ</span><a class="anchor" href="#backends">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Backend</th><th>Platform</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Cuda / NVDEC</td><td class="m">Linux / NVIDIA</td><td>Uses a CUDA video decoding device.</td></tr>
+          <tr><td class="k">Vaapi</td><td class="m">Linux / Intel, AMD</td><td>Uses a VA-API render device.</td></tr>
+          <tr><td class="k">Software</td><td class="m">All</td><td>FFmpeg software decoding; the fallback target on every platform.</td></tr>
+          <tr><td class="k">VideoToolbox</td><td class="m">macOS / iOS / tvOS</td><td>Apple hardware decoding.</td></tr>
+          <tr><td class="k">D3d11va</td><td class="m">Windows</td><td>Direct3D 11 video acceleration.</td></tr>
+          <tr><td class="k">MediaCodec</td><td class="m">Android</td><td>Surface mode is the primary mode; falls back to ByteBuffer mode on failure.</td></tr>
+          <tr><td class="k">AvCodec</td><td class="m">HarmonyOS</td><td>AVCodec hardware decoding, covering H.264 / HEVC.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><code>VideoDecodePreference</code> determines the default backend for each platform: VideoToolbox on Apple platforms, D3D11VA on Windows, MediaCodec on Android, AVCodec on HarmonyOS, and on Linux CUDA / NVDEC first, then VA-API. All other platforms use software decoding.</p>
+  </section>
+
+  <section id="hardware">
+    <h2>Hardware path<span class="jp">ハードウェア経路</span><a class="anchor" href="#hardware">#</a></h2>
+    <p>Hardware backend selection happens in <code>open_raw</code>. It picks the codec for the backend, queries the hardware configuration with <code>avcodec_get_hw_config</code>, and then creates the device context with <code>av_hwdevice_ctx_create</code>. If device creation fails, decoding falls back along the fallback chain to software decoding.</p>
+    <p>MediaCodec is the most unusual of these paths. In surface mode, the decoder binds <code>AVMediaCodecDeviceContext.native_window</code> and sets three options: <code>ndk_codec=1</code>, <code>delay_flush=1</code>, and <code>erika_nonblocking=1</code>. If creating or binding the surface fails, the playback thread rebuilds the decoder in ByteBuffer mode and reopens the stream. To the host, the whole process appears as a single <code>VideoDecoderChanged</code> event.</p>
+    <div class="note">
+      <p><b>Fallback is explicit.</b> Every backend switch publishes a <code>VideoDecoderChanged</code> event. The host can use it to update a diagnostics UI or just write a log entry. The statistics fields <code>hardware_video_frames</code> and <code>software_video_frames</code> count the frames decoded on each path.</p>
+    </div>
+  </section>
+
+  <section id="queues">
+    <h2>Frame queues<span class="jp">フレームキュー</span><a class="anchor" href="#queues">#</a></h2>
+    <p>Decoded output goes into bounded queues, which decouple the playback thread from the rendering side. You can adjust the queue depths in <code>PlayerConfig</code>:</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Queue</th><th>Default capacity</th><th>Config field</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Video frames</td><td class="m">3</td><td class="m">video_frame_queue_capacity</td></tr>
+          <tr><td class="k">Audio frames</td><td class="m">192</td><td class="m">audio_frame_queue_capacity</td></tr>
+          <tr><td class="k">Subtitle frames</td><td class="m">16</td><td class="m">subtitle_frame_queue_capacity</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>When a queue is full, new frames are dropped; the statistics field <code>video_frame_backpressure_drops</code> counts the dropped video frames. The audio frame queue is drained by the audio clock, and its capacity is set by <code>PlayerConfig.audio_frame_queue_capacity</code> (<code>AudioSyncConfig</code> holds only synchronization parameters, not capacity).</p>
+  </section>
+
+  <section id="stats">
+    <h2>Related statistics<span class="jp">統計</span><a class="anchor" href="#stats">#</a></h2>
+    <p>Decoding-related fields in <code>ErikaPresenterStats</code>:</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Field</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="m">decoded_video_frames</td><td>Total number of decoded video frames.</td></tr>
+          <tr><td class="m">hardware_video_frames</td><td>Number of hardware-decoded frames.</td></tr>
+          <tr><td class="m">software_video_frames</td><td>Number of software-decoded frames.</td></tr>
+          <tr><td class="m">zero_copy_video_frames</td><td>Number of frames imported into the renderer with zero copy.</td></tr>
+          <tr><td class="m">cpu_video_frame_fallbacks</td><td>Number of frames that fell back to CPU upload after zero-copy import failed.</td></tr>
+          <tr><td class="m">import_failures</td><td>Number of times importing decoder output into the GPU failed.</td></tr>
+          <tr><td class="m">video_frame_backpressure_drops</td><td>Number of frames dropped because a queue was full.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>For the details of zero-copy import, see <a href="zero-copy.en.html">Zero-copy import</a>.</p>
+  </section>
+
+  <section id="software">
+    <h2>Software decoding fallback<a class="anchor" href="#software">#</a></h2>
+    <p>Version 0.2.1 completed software decoding for WMV / WMA and added 8-bit and 10-bit AV1 support through dav1d. When hardware decoding is unavailable or the device does not support the video format, software-decoded frames enter the same rendering pipeline. Windows also supports uploading software frames.</p>
+  </section>
+
+  <section id="software-threads">
+    <h2>Software decoding threads · 0.3.0<a class="anchor" href="#software-threads">#</a></h2>
+    <p>Software video decoding uses frame/slice multithreading by default, and FFmpeg chooses the thread count based on the codec and the runtime environment. Set <code>ERIKA_VIDEO_DECODE_THREADS=1</code> to restore single-threaded decoding. When you test the pure software path, also set <code>ERIKA_HWDEC=software</code>.</p>
+    <p>When a hardware decoding backend internally falls back to a software pixel format, diagnostics and <code>VideoDecoderChanged</code> report the actual decoding path, the fallback reason, and the counts. You cannot tell whether hardware decoding is actually in use from the requested backend alone.</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Kernel</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="architecture.en.html"><span class="dir">Prev</span>Architecture overview</a>
+    <a class="nx" href="zero-copy.en.html"><span class="dir">Next</span>Zero-copy import</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>

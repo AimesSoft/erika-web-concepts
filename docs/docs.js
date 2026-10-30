@@ -1,4 +1,17 @@
 (function enhanceErikaDocs() {
+  var pageLanguage = document.documentElement.lang === 'ja' ? 'ja' :
+    document.documentElement.lang === 'en' ? 'en' : 'zh';
+  try { localStorage.setItem('liberika-language', pageLanguage); } catch (error) { /* Storage is optional. */ }
+  document.querySelectorAll('.language-switch a').forEach(function keepSection(link) {
+    link.addEventListener('click', function () {
+      link.hash = window.location.hash;
+    });
+  });
+  var copyLabels = {
+    zh: ['复制', '复制代码', '已复制', '复制失败'],
+    en: ['Copy', 'Copy code', 'Copied', 'Copy failed'],
+    ja: ['コピー', 'コードをコピー', 'コピーしました', 'コピーに失敗しました']
+  }[pageLanguage];
   function copyText(text) {
     if (navigator.clipboard && window.isSecureContext) {
       return navigator.clipboard.writeText(text);
@@ -29,16 +42,16 @@
     var button = document.createElement('button');
     button.className = 'copy';
     button.type = 'button';
-    button.textContent = '复制';
-    button.setAttribute('aria-label', '复制代码');
+    button.textContent = copyLabels[0];
+    button.setAttribute('aria-label', copyLabels[1]);
     button.addEventListener('click', function handleCopy() {
       copyText(pre.innerText).then(function showSuccess() {
-        button.textContent = '已复制';
+        button.textContent = copyLabels[2];
         window.setTimeout(function resetLabel() {
-          button.textContent = '复制';
+          button.textContent = copyLabels[0];
         }, 1500);
       }).catch(function showFailure() {
-        button.textContent = '复制失败';
+        button.textContent = copyLabels[3];
       });
     });
     block.appendChild(button);

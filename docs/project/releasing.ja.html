@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>リリースと製品 — liberika 開発者ドキュメント</title>
+<link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../docs.css?v=20261030-i18n">
+<script defer src="../docs.js?v=20261030-i18n"></script>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.0</span></a></div>
+  <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
+  <div class="language-switch" role="group" aria-label="言語"><a href="releasing.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="releasing.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="releasing.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
+  <nav>
+    <h2><span class="no">1</span>導入ガイド <span class="en">Guide</span></h2>
+    <ul>
+      <li><a href="../guide/quickstart.ja.html">クイックスタート</a></li>
+      <li><a href="../guide/flutter.ja.html">Flutter の組み込み</a></li>
+      <li><a href="../guide/swift.ja.html">Swift の導入</a></li>
+      <li><a href="../guide/openharmony.ja.html">OpenHarmony / OHPM</a></li>
+      <li><a href="../guide/rust.ja.html">Rust の組み込み</a></li>
+      <li><a href="../guide/c.ja.html">C ABI の組み込み</a></li>
+      <li><a href="../guide/linux.ja.html">Linux の導入</a></li>
+      <li><a href="../guide/web.ja.html">Web / WASM の導入</a></li>
+    </ul>
+    <h2><span class="no">2</span>カーネル設計 <span class="en">Kernel</span></h2>
+    <ul>
+      <li><a href="../kernel/architecture.ja.html">アーキテクチャ概要</a></li>
+      <li><a href="../kernel/decode.ja.html">ハードウェアデコード</a></li>
+      <li><a href="../kernel/zero-copy.ja.html">ゼロコピー取り込み</a></li>
+      <li><a href="../kernel/render.ja.html">レンダリングパイプライン</a></li>
+      <li><a href="../kernel/hdr.ja.html">ハイダイナミックレンジ</a></li>
+      <li><a href="../kernel/upscale.ja.html">ニューラル超解像</a></li>
+      <li><a href="../kernel/subtitle-danmaku.ja.html">字幕と弾幕</a></li>
+      <li><a href="../kernel/clock.ja.html">クロックとスケジューリング</a></li>
+    </ul>
+    <h2><span class="no">3</span>プロジェクト <span class="en">Project</span></h2>
+    <ul>
+      <li><a href="building.ja.html">ビルドと依存関係</a></li>
+      <li><a href="releasing.ja.html" aria-current="page">リリースと成果物</a></li>
+      <li><a href="contributing.ja.html">貢献ガイド</a></li>
+      <li><a href="changelog.ja.html">変更履歴</a></li>
+    </ul>
+    <h2><span class="no">4</span>参考資料 <span class="en">Reference</span></h2>
+    <ul>
+      <li><a href="../reference/capi.ja.html">C ABI 概要</a></li>
+      <li><a href="../reference/capi-handle.ja.html">ErikaHandle</a></li>
+      <li><a href="../reference/capi-presenter.ja.html">ErikaPresenterHandle</a></li>
+      <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
+    </ul>
+  </nav>
+  <p class="side-foot">liberika v0.3.0<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+</aside>
+
+<main>
+  <p class="translation-note">機械翻訳です。正確な内容は中国語版をご参照ください。</p>
+  <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>project<span class="sep">/</span>リリースと製品</p>
+  <h1>リリースと製品</h1>
+  <p class="kicker">Releasing and Artifacts</p>
+  <p class="lead">release workflow ネイティブ ビルド <code>erika_capi</code> Web / WASM で製品をプリコンパイルし、GitHub Release にフックします。各 bundle にはライブラリ ファイルが含まれています。<code>erika.h</code>、MPL-2.0 ライセンスと依存関係の声明。デスクトップ Linux はまだリリースされていません。</p>
+
+  <ul class="meta-strip">
+    <li>プラットフォーム <b>6 ネイティブ + Web</b></li>
+    <li>ZIP アーカイブ <b>15</b> ある</li>
+    <li>profile <b>lgpl</b></li>
+  </ul>
+
+  <section id="trigger">
+    <h2>トリガー<span class="jp">トリガー</span><a class="anchor" href="#trigger">#</a></h2>
+    <p>押し込む <code>v*</code> このタグは正式リリースをトリガーし、ビルドが完了した後、GitHub Releases にリリースされます。 workflow_dispatch 公開せずにビルドのみを手動で実行します。リリース前のチェックに使用されます。公開する前にローカルマシンで実行する <a href="building.ja.html">ビルドプロセス</a> 確認する。</p>
+    <div class="code">
+<pre>git tag v0.3.0
+git push origin v0.3.0</pre>
+    </div>
+  </section>
+
+  <section id="prepare">
+    <h2>ラベルを貼る前の準備<a class="anchor" href="#prepare">#</a></h2>
+    <p>最初のルート <code>Cargo.toml</code> の <code>[workspace.package].version</code> 対象バージョンに変更して再度実行 <code>cargo update -w</code> そして一緒に提出してください <code>Cargo.lock</code>。 CIの <code>--locked</code> ビルドでは両方が一貫している必要があります。 vendored のバージョンのアップストリーム依存関係を保持します。</p>
+    <p>CHANGELOG と、ルート ディレクトリ Flutter および OHPM のインストール ドキュメントを更新し、メイン ブランチ CI が合格していることを確認し、releasing ドキュメントで必要なフォーマット、テスト、clippy および Dart のリリース チェックを完了します。 Release は入り口のタグのバージョンと Cargo workspace のバージョンをチェックします。矛盾がある場合はすぐに失敗します。</p>
+    <p>Flutter、OHPM、および Swift のバージョンとネイティブ サマリーは、後続のワークフローによって同期されます。 GitHub Release が完了したら、pub.dev、SwiftPM、OHPM の公開バージョンをそれぞれ確認する必要があります。 OHPM のアップロードが成功しても、レビューが完了したことを意味するものではありません。</p>
+  </section>
+
+  <section id="bundles">
+    <h2>製品<span class="jp">アーティファクト</span><a class="anchor" href="#bundles">#</a></h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>プラットフォーム</th><th>bundle 名前</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr><td class="k">macOS</td><td class="m">erika-capi-macos-arm64<br>erika-capi-macos-x64</td><td><code>liberika_capi.dylib</code> + <code>liberika_capi.a</code>、アーキテクチャに従ってボリュームに分かれています。</td></tr>
+          <tr><td class="k">macOS 一般</td><td class="m">erika-capi-macos-universal</td><td>lipo は、汎用 dylib を静的ライブラリとマージします。</td></tr>
+          <tr><td class="k">iOS</td><td class="m">erika-capi-ios</td><td><code>erika_capi.xcframework</code>、実機+シミュレーター。</td></tr>
+          <tr><td class="k">tvOS</td><td class="m">erika-capi-tvos</td><td><code>erika_capi.xcframework</code>。</td></tr>
+          <tr><td class="k">Windows</td><td class="m">erika-capi-windows-x64<br>erika-capi-windows-arm64</td><td>DLL とインポート ライブラリ。</td></tr>
+          <tr><td class="k">Android</td><td class="m">erika-capi-android</td><td>arm64 / armv7 / x86_64 / x86 4つのABIが1つに。</td></tr>
+          <tr><td class="k">OpenHarmony</td><td class="m">erika-capi-openharmony-arm64</td><td>Flutter プラグイン ランタイム アーカイブ。スタンドアロン ArkTS SDK は OHPM 経由でリリースされました。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>ネイティブの依存関係 (FFmpeg、dav1d、libass など) は、lgpl profile としてライブラリに静的にリンクされ、実行時のシステムのインストールには依存しません。</p>
+  </section>
+
+  <section id="web">
+    <h2>Web / WASM アーカイブ<a class="anchor" href="#web">#</a></h2>
+    <p><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.0/liberika-web-0.3.0.zip">liberika-web-0.3.0.zip</a> によって <code>cargo run -p xtask -- web build</code> JavaScript、2 つの WASM、Worker、ライセンスを含む生成、<code>build-manifest.json</code> そして <code>index.html</code> デモページ。ネイティブ ZIP で書き込みます <code>SHA256SUMS</code>。</p>
+    <p>完全な解凍後、HTTPS または localhost を通じてアクセスします。独立した静的展開では、ローカルの MKV 再生を選択できます。 Web パッケージはまだ npm にリリースされていません。アクセスと互換性の範囲を参照してください。 <a href="../guide/web.ja.html">Webガイド</a>。</p>
+  </section>
+
+  <section id="ohpm">
+    <h2>OpenHarmony OHPM パッケージ<span class="jp">OHPM パッケージ</span><a class="anchor" href="#ohpm">#</a></h2>
+    <p>OpenHarmony arm64 のネイティブ ArkTS パッケージ <code>erika</code> パス <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM</a> ディストリビューション、最小互換性は API 18 です。2026 年 10 月 30 日の時点で、0.3.0 がレビューされ、公開されています。</p>
+    <div class="code">
+      <p class="lbl">shell</p>
+<pre>ohpm install erika@0.3.0</pre>
+    </div>
+    <p>パッケージには、一致する N-API bridge が含まれています <code>liberika_capi.so</code>、インターフェースは <code>XComponent</code> surface ライフサイクルを参照 <a href="https://github.com/AimesSoft/liberika/blob/main/packages/erika_ohos/README.md">OpenHarmony package guide</a>。</p>
+  </section>
+
+  <section id="layout">
+    <h2>bundle構造<span class="jp">構成する</span><a class="anchor" href="#layout">#</a></h2>
+    <p>C ABI bundle によって <code>packaging/bundle.sh</code> 同じ構造で生成されます。</p>
+    <div class="code">
+<pre>&lt;bundle-name&gt;/
+  lib/                    <span class="c"># 库文件或 xcframework</span>
+  include/erika.h         <span class="c"># C ABI 头文件</span>
+  LICENSE                 <span class="c"># MPL-2.0</span>
+  THIRD_PARTY_NOTICES.md  <span class="c"># 依赖许可证声明与 LGPL relink 说明</span>
+  licenses/               <span class="c"># 各依赖的许可证原文</span>
+  MANIFEST.txt            <span class="c"># ref / commit / profile / 构建时间</span></pre>
+    </div>
+    <p>MANIFEST.txt レコード構築ソース: bundle 名、git ref、commit、profile、UTC 時間。製品ソースのトラブルシューティングを行うときに、最初にお読みください。</p>
+    <p class="note">THIRD_PARTY_NOTICES.md 説明 LGPL コンポーネントの relink 義務: ライブラリは静的リンクで配布されており、動的リンクを変更するホストはこれらのコンポーネントを置き換えることができる必要があります。</p>
+  </section>
+
+  <section id="consume">
+    <h2>プリコンパイル済みの消費<span class="jp">プレビルトの利用</span><a class="anchor" href="#consume">#</a></h2>
+    <p>プリコンパイルされたランタイムは、Flutter プラグインのビルド時にデフォルトでダウンロードされます (<code>erika_flutter</code> pub.dev バージョンには検証とキャッシュが付属しています)。ソース コードからビルドする場合は、明示的にエクスポートする必要があります。</p>
+    <div class="code">
+<pre><span class="k">export</span> ERIKA_FORCE_SOURCE_BUILD=1    <span class="c"># 改为源码构建（需 ERIKA_REPO_ROOT 指向仓库检出）</span>
+<span class="k">export</span> ERIKA_PREBUILT_TAG=v0.3.0       <span class="c"># 自定义预编译版本标签，默认匹配当前版本</span></pre>
+    </div>
+    <p>明示的なオーバーライド <code>ERIKA_PREBUILT_TAG</code> も設定する必要があります。 <code>ERIKA_PREBUILT_SHA256</code>;同じReleaseから <code>SHA256SUMS</code> 対応するプラットフォームの概要を読んでください。ソース コードのビルドとカスタム プリコンパイル バージョンは、2 つの独立した構成方法です。</p>
+    <p>プラットフォームごとにスクリプトを構築する <code>github.com/AimesSoft/liberika/releases/download/&lt;tag&gt;/</code> 対応するbundleをダウンロードして解凍し、リリースレベルを押します <code>SHA256SUMS</code> 検証のまとめ。</p>
+    <p>native ホストの消費方法: bundle を解凍し、<code>include/erika.h</code> 唯一のヘッダー ファイルとして、<code>lib/</code> ホスト内のライブラリをホストにリンクします。を参照してください。<a href="../guide/c.ja.html">C ABI 埋め込み</a>。</p>
+  </section>
+
+  <section id="pipeline">
+    <h2>ビルドとパッケージのリリースのプロセス<a class="anchor" href="#pipeline">#</a></h2>
+    <p>mainの現在のRelease workflowは、macOSの2つの構造、sliceの3つ、tvOSの3つ、slice、Androidの4つ、ABI、Windows、OpenHarmonyの構造を個別に構築し、完成後にそれらをマージします。 universal / XCFramework、または ABI としてパッケージ化されています。ネイティブ依存関係キャッシュはターゲットに従って保存され、CI と Release が再利用されます。</p>
+    <p>このリリースでは、合計 15 の ZIP が生成されました: 9 つの C ABI アーカイブ、ABI で分割された 4 つの Flutter Android ランタイム、1 つの Swift XCFramework、および 1 つの Web / WASM パッケージ。<code>SHA256SUMS</code> すべてのアーカイブの概要を記録します。</p>
+    <p>ネイティブ タグが正常に公開されると、<code>Release ecosystem packages</code> Flutter / OHPM バージョンとネイティブ製品概要を更新し、pub.dev および OHPM をリリースします。 Swift XCFrameworkの構築とSwiftPMのリリースは並行して進められます。 OHPM が正常にアップロードされた後も、プラットフォームのレビューを完了する必要があります。公開版はregistryに従うものとします。</p>
+    <p>メイン ブランチ CI は、変更パスに従ってネイティブ タスクを選択します。古いブランチのビルドはキャンセルできます。ドキュメントまたはエコロジカル パッケージ リリース スクリプトのみが変更された場合、メインの CI はネイティブ ビルドをスキップします。ネイティブ ソース コード、依存関係パッチ、および CI / Release ビルド スクリプトへの変更は引き続きトリガーされます。</p>
+  </section>
+
+  <footer class="doc-foot">
+    <span>liberika <b>v0.3.0</b></span>
+    <span>Section <b>Project</b></span>
+    <span>License <b>MPL-2.0</b></span>
+  </footer>
+
+  <nav class="pager">
+    <a href="building.ja.html"><span class="dir">Prev</span>ビルドと依存関係</a>
+    <a class="nx" href="contributing.ja.html"><span class="dir">Next</span>貢献ガイド</a>
+  </nav>
+</main>
+
+</div>
+</body>
+</html>
