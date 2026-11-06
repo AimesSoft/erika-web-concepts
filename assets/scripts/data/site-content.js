@@ -4,7 +4,7 @@ app.siteContent = {
     name: 'liberika',
     kana: '古戸ヱリカ',
     descriptor: 'Playback Kernel',
-    version: 'v0.3.1',
+    version: 'v0.3.4',
     repoUrl: 'https://github.com/AimesSoft/liberika',
   },
   navigation: [
@@ -33,7 +33,7 @@ app.siteContent = {
     eyebrow: 'Case file / 01',
     title: '真相只有一条播放管线',
     lead:
-      '0.3.1 带来从指定位置打开、播放结束事件、字幕偏移和台词查询，以及带弹幕截图与原生帧纹理导出。',
+      '0.3.4 扩展 ArtCNN、Anime4K 与平台超分，支持自定义模型，并让 Flutter 播放器在独立原生线程运行。',
     items: [
       {
         number: '01',
@@ -68,16 +68,16 @@ app.siteContent = {
         label: '预编译产物',
         language: 'SHELL',
         code: `# github.com/AimesSoft/liberika/releases
-erika-swift-core-0.3.1.xcframework.zip
+erika-swift-core-0.3.4.xcframework.zip
 erika-capi-macos-universal.zip
 erika-capi-windows-x64.zip
 erika-capi-android.zip
 erika-capi-openharmony-arm64.zip
-liberika-web-0.3.1.zip`,
+liberika-web-0.3.4.zip`,
         note: 'C ABI 归档包含 erika.h、许可证与 MANIFEST.txt；Swift 使用 XCFramework。',
         action: {
           label: '查看 GitHub Releases',
-          url: 'https://github.com/AimesSoft/liberika/releases/tag/v0.3.1',
+          url: 'https://github.com/AimesSoft/liberika/releases/tag/v0.3.4',
         },
       },
       {
@@ -92,7 +92,7 @@ await player.play();
 
 // 放入 Widget 树
 ErikaVideoView(player: player)`,
-        note: 'pub.dev 0.3.1 已发布：flutter pub add erika_flutter:^0.3.1。',
+        note: 'pub.dev 0.3.4 已发布：flutter pub add erika_flutter:^0.3.4。',
       },
       {
         id: 'swift',
@@ -103,7 +103,7 @@ ErikaVideoView(player: player)`,
 let player = try ErikaPlayer()
 try player.open("https://example.com/video.mp4")
 try player.play()`,
-        note: 'SwiftPM 0.3.0：在 Xcode 中添加 https://github.com/AimesSoft/liberika-swift',
+        note: 'SwiftPM 0.3.4：在 Xcode 中添加 https://github.com/AimesSoft/liberika-swift',
         action: {
           label: '查看 Swift 接入指南',
           url: 'docs/guide/swift.html',
@@ -118,7 +118,7 @@ try player.play()`,
 const player = new ErikaPlayer();
 player.open('https://example.com/video.mp4');
 player.play();`,
-        note: 'OHPM 0.3.0 已公开：ohpm install erika@0.3.0。原生表面与帧调度示例收录在接入指南。',
+        note: 'OHPM 0.3.4 已公开：ohpm install erika@0.3.4。原生表面与帧调度示例收录在接入指南。',
         action: {
           label: '查看 OpenHarmony 接入指南',
           url: 'docs/guide/openharmony.html',
@@ -136,7 +136,7 @@ playButton.onclick = () => player.play();
 
 // 卸载时释放播放器
 // await player.destroy();`,
-        note: '下载 liberika-web-0.3.1.zip，完整解压后通过 HTTPS 或 localhost 访问。附带演示页；尚未发布到 npm。',
+        note: '下载 liberika-web-0.3.4.zip，完整解压后通过 HTTPS 或 localhost 访问。附带演示页；尚未发布到 npm。',
         action: {
           label: '查看 Web 接入与下载',
           url: 'docs/guide/web.html',
@@ -151,7 +151,7 @@ playButton.onclick = () => player.play();
 let player = Player::new(PlayerConfig::default());
 player.open(MediaRequest::new("/path/to/video.mp4"))?;
 player.play()?;`,
-        note: 'Cargo.toml：erika = { git = "https://github.com/AimesSoft/liberika", tag = "v0.3.1" }',
+        note: 'Cargo.toml：erika = { git = "https://github.com/AimesSoft/liberika", tag = "v0.3.4" }',
       },
       {
         id: 'c-api',

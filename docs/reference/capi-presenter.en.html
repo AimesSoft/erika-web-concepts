@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ErikaPresenterHandle reference — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261031-031">
-<script defer src="../docs.js?v=20261031-031"></script>
+<link rel="stylesheet" href="../docs.css?v=20261106-034">
+<script defer src="../docs.js?v=20261106-034"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
   <div class="language-switch" role="group" aria-label="Language"><a href="capi-presenter.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="capi-presenter.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="capi-presenter.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,17 +53,17 @@
       <li><a href="capi-json.en.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>ErikaPresenterHandle</p>
   <h1>ErikaPresenterHandle reference</h1>
   <p class="kicker">ErikaPresenterHandle Reference</p>
-  <p class="lead">All 78 functions of the push-model entry point: lifecycle, playback and runtime parameters, subtitles, danmaku, output diagnostics, surface and presentation, render loop, JSON bridge, and screenshots. Built only for macOS / iOS / tvOS / Windows / Android / OpenHarmony / Linux; on other targets <code>create</code> returns NULL.</p>
+  <p class="lead">All 81 functions of the push-model entry point: lifecycle, playback and runtime parameters, subtitles, danmaku, output diagnostics, surface and presentation, render loop, JSON bridge, and screenshots. Built only for macOS / iOS / tvOS / Windows / Android / OpenHarmony / Linux; on other targets <code>create</code> returns NULL.</p>
 
   <ul class="meta-strip">
-    <li>Functions <b>78</b></li>
+    <li>Functions <b>81</b></li>
     <li>Platforms <b>7</b></li>
   </ul>
 
@@ -150,9 +150,24 @@
       <p class="desc">Sets the volume, in the range 0.0&ndash;1.0.</p>
     </div>
 
+    <div class="api" id="erika_presenter_set_muted">
+      <p class="sig"><b>ErikaStatus erika_presenter_set_muted</b>(ErikaPresenterHandle *handle, bool muted)</p>
+      <p class="desc">Mutes or unmutes without losing volume; changes made while muted apply on unmute.</p>
+    </div>
+
     <div class="api" id="erika_presenter_set_upscaler">
       <p class="sig"><b>ErikaStatus erika_presenter_set_upscaler</b>(ErikaPresenterHandle *handle, int32_t mode)</p>
-      <p class="desc">Sets the upscaling mode, taking an <code>ErikaLumaUpscalerMode</code>. Metal and compute-capable wgpu/Vulkan renderers run ArtCNN; other backends keep native luma sampling and report Inactive explicitly.</p>
+      <p class="desc">Selects an <code>ErikaLumaUpscalerMode</code>. Unsupported configurations retain native sampling and report Inactive; background compilation reports Building. See the <a href="../kernel/upscale.en.html">upscaling guide</a> for platform requirements.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_load_upscaler_model">
+      <p class="sig"><b>ErikaStatus erika_presenter_load_upscaler_model</b>(ErikaPresenterHandle *handle, const char *name, const uint8_t *data, uintptr_t data_len)</p>
+      <p class="desc">Loads an Erika .esr model or an FSRCNNX / Anime4K CNN mpv hook shader from memory. The host supplies the weights; select Custom mode after loading.</p>
+    </div>
+
+    <div class="api" id="erika_presenter_clear_upscaler_model">
+      <p class="sig"><b>ErikaStatus erika_presenter_clear_upscaler_model</b>(ErikaPresenterHandle *handle)</p>
+      <p class="desc">Unloads the current custom model.</p>
     </div>
 
     <div class="api" id="erika_presenter_set_subtitle_scale">
@@ -493,11 +508,11 @@
     <div class="api" id="erika_presenter_export_frame_texture"><p class="sig"><b>ErikaStatus erika_presenter_export_frame_texture</b>(ErikaPresenterHandle *handle, uint32_t width, uint32_t height, double content_scale, ErikaTextureFrame **out_frame)</p><p class="desc">Exports an immutable SDR native texture from WgpuFallback, with video, subtitles and enabled danmaku but no HUD. Supports Linux Vulkan OPAQUE_FD and Apple Metal, without a surface, Flutter registrar, CPU readback or GPU texture copy. It waits for producer GPU completion and pumps audio. NoEvent means no video yet; out_frame is NULL on any non-Ok result.</p></div>
     <div class="api" id="erika_texture_frame_get_info"><p class="sig"><b>ErikaStatus erika_texture_frame_get_info</b>(const ErikaTextureFrame *frame, ErikaExternalTextureInfo *out_info)</p><p class="desc">A texture frame can outlive its presenter. Release only after consumer GPU work and imported aliases retire. get_info returns borrowed handles: a Metal consumer may independently retain the texture through all GPU use; duplicate the Vulkan OPAQUE_FD before import (0 is valid), match device and driver UUIDs, and import the dedicated allocation with identical properties. Acquire queue ownership from EXTERNAL with old layout GENERAL before reading. Read-only pixels are sRGB-encoded RGBA in UNORM storage.</p></div>
     <div class="api" id="erika_texture_frame_release"><p class="sig"><b>void erika_texture_frame_release</b>(ErikaTextureFrame *frame)</p><p class="desc">Release after consumer GPU work and aliases have retired.</p></div>
-    <p><a href="capi.en.html#external-texture-types">ErikaExternalTextureInfo</a> · <a href="https://github.com/AimesSoft/liberika/blob/v0.3.1/docs/external_textures.md">Texture guide</a></p>
+    <p><a href="capi.en.html#external-texture-types">ErikaExternalTextureInfo</a> · <a href="https://github.com/AimesSoft/liberika/blob/v0.3.4/docs/external_textures.md">Texture guide</a></p>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.1</b></span>
+    <span>liberika <b>v0.3.4</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

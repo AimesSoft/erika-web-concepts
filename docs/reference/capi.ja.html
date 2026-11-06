@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>C ABI の概要 — liberika 開発者向けドキュメント</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261031-031">
-<script defer src="../docs.js?v=20261031-031"></script>
+<link rel="stylesheet" href="../docs.css?v=20261106-034">
+<script defer src="../docs.js?v=20261106-034"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
   <div class="language-switch" role="group" aria-label="言語"><a href="capi.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="capi.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="capi.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="capi-json.ja.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -61,10 +61,10 @@
   <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>C ABI 概要</p>
   <h1>C ABI 概要</h1>
   <p class="kicker">C ABI Overview</p>
-  <p class="lead">C ABI のグローバル規則と型定義。関数リストはエントリ ファミリごとにページ分割されています。<a href="capi-handle.ja.html">ErikaHandle</a>(23)、<a href="capi-presenter.ja.html">ErikaPresenterHandle</a>(78)、一般および独立した入り口 (15)。に <code>crates/erika_capi/include/erika.h</code> 唯一の権限として。</p>
+  <p class="lead">C ABI のグローバル規則と型定義。関数リストはエントリ ファミリごとにページ分割されています。<a href="capi-handle.ja.html">ErikaHandle</a>(23)、<a href="capi-presenter.ja.html">ErikaPresenterHandle</a>(81)、一般および独立した入り口 (15)。に <code>crates/erika_capi/include/erika.h</code> 唯一の権限として。</p>
 
   <ul class="meta-strip">
-    <li>エクスポート機能 <b>116</b></li>
+    <li>エクスポート機能 <b>119</b></li>
     <li>種類 <b>49</b></li>
     <li>イベント <b>13</b> 親切</li>
   </ul>
@@ -504,8 +504,8 @@
           <tr><td class="m">ErikaActiveOutputEncoding</td><td>SDR sRGB / Apple EDR / Android scRGB / HDR10 PQ / Linux scRGB。</td></tr>
           <tr><td class="m">ErikaOutputFallbackReason</td><td>HDR フォールバックの理由、メンバーは 9 人です。</td></tr>
           <tr><td class="m">ErikaOutputSurfaceFormat</td><td>8-bit UNORM / 10-bit UNORM / 16-bit float。</td></tr>
-          <tr><td class="m">ErikaLumaUpscalerMode</td><td>Off / ArtCNN F16 / ArtCNN F32 / ArtCNN F16 DS。</td></tr>
-          <tr><td class="m">ErikaUpscalerBackendStatus</td><td>スーパースコアバックエンドステータス、5種類。</td></tr>
+          <tr><td class="m">ErikaLumaUpscalerMode</td><td>Off / ArtCNN / Anime4K / FSR 1.0 / プラットフォーム動画超解像 / MetalFX / カスタムモデル。</td></tr>
+          <tr><td class="m">ErikaUpscalerBackendStatus</td><td>超解像バックエンドの状態、11 値。</td></tr>
         </tbody>
       </table>
     </div>
@@ -593,10 +593,27 @@
         <thead><tr><th>値</th><th>OutputSurfaceFormat</th><th>値</th><th>LumaUpscalerMode</th><th>値</th><th>UpscalerBackendStatus</th></tr></thead>
         <tbody>
           <tr><td class="m">0</td><td>EightBitUnorm</td><td class="m">0</td><td>Off</td><td class="m">0</td><td>Off</td></tr>
-          <tr><td class="m">1</td><td>TenBitUnorm</td><td class="m">1</td><td>ArtCnnC4F16</td><td class="m">1</td><td>Inactive (バックエンドは ArtCNN を実行せず、ネイティブの輝度サンプリングを保持します)</td></tr>
+          <tr><td class="m">1</td><td>TenBitUnorm</td><td class="m">1</td><td>ArtCnnC4F16</td><td class="m">1</td><td>Inactive（選択したモードを実行できず、通常サンプリングを維持）</td></tr>
           <tr><td class="m">2</td><td>SixteenBitFloat</td><td class="m">2</td><td>ArtCnnC4F32</td><td class="m">2</td><td>Building</td></tr>
           <tr><td></td><td></td><td class="m">3</td><td>ArtCnnC4F16Ds</td><td class="m">3</td><td>Scalar</td></tr>
-          <tr><td></td><td></td><td></td><td></td><td class="m">4</td><td>SimdgroupMatrix</td></tr>
+          <tr><td></td><td></td><td class="m">4</td><td>ArtCnnC4F16Dn</td><td class="m">4</td><td>SimdgroupMatrix</td></tr>
+          <tr><td></td><td></td><td class="m">5</td><td>ArtCnnC4F32Ds</td><td class="m">5</td><td>CooperativeMatrix</td></tr>
+          <tr><td></td><td></td><td class="m">6</td><td>ArtCnnC4F32Dn</td><td class="m">6</td><td>LinalgMatrix</td></tr>
+          <tr><td></td><td></td><td class="m">7</td><td>ArtCnnR8F64</td><td class="m">7</td><td>VideoProcessor</td></tr>
+          <tr><td></td><td></td><td class="m">16</td><td>Anime4kS</td><td class="m">8</td><td>VideoToolbox</td></tr>
+          <tr><td></td><td></td><td class="m">17</td><td>Anime4kM</td><td class="m">9</td><td>MetalFx</td></tr>
+          <tr><td></td><td></td><td class="m">18</td><td>Anime4kL</td><td class="m">10</td><td>TensorOps</td></tr>
+          <tr><td></td><td></td><td class="m">19</td><td>Anime4kVl</td><td></td><td></td></tr>
+          <tr><td></td><td></td><td class="m">20</td><td>Anime4kUl</td><td></td><td></td></tr>
+          <tr><td></td><td></td><td class="m">21</td><td>Anime4kDenoiseS</td><td></td><td></td></tr>
+          <tr><td></td><td></td><td class="m">22</td><td>Anime4kDenoiseM</td><td></td><td></td></tr>
+          <tr><td></td><td></td><td class="m">23</td><td>Anime4kDenoiseL</td><td></td><td></td></tr>
+          <tr><td></td><td></td><td class="m">24</td><td>Anime4kDenoiseVl</td><td></td><td></td></tr>
+          <tr><td></td><td></td><td class="m">25</td><td>Anime4kDenoiseUl</td><td></td><td></td></tr>
+          <tr><td></td><td></td><td class="m">32</td><td>Fsr1</td><td></td><td></td></tr>
+          <tr><td></td><td></td><td class="m">48</td><td>PlatformVideo</td><td></td><td></td></tr>
+          <tr><td></td><td></td><td class="m">49</td><td>MetalFxSpatial</td><td></td><td></td></tr>
+          <tr><td></td><td></td><td class="m">64</td><td>Custom</td><td></td><td></td></tr>
         </tbody>
       </table>
     </div>
@@ -688,11 +705,11 @@ typedef struct ErikaExternalTextureInfo {
   uint8_t device_uuid[16];
   uint8_t driver_uuid[16];
 } ErikaExternalTextureInfo;</pre></div>
-    <p>テクスチャフレームは presenter より長く保持できます。使用側 GPU の処理とインポートした別名が終了してから release してください。get_info のハンドルは借用です。Metal は GPU 利用中の独立 retain が可能です。Vulkan OPAQUE_FD はインポート前に dup し（0 も有効）、デバイス・ドライバー UUID と属性を一致させ、専用アロケーションをインポートします。読み込み前に旧レイアウト GENERAL で EXTERNAL からキュー所有権を取得します。読み取り専用、UNORM 格納の sRGB 符号化 RGBA です。 <a href="https://github.com/AimesSoft/liberika/blob/v0.3.1/docs/external_textures.ja.md">liberika テクスチャガイド</a>.</p>
+    <p>テクスチャフレームは presenter より長く保持できます。使用側 GPU の処理とインポートした別名が終了してから release してください。get_info のハンドルは借用です。Metal は GPU 利用中の独立 retain が可能です。Vulkan OPAQUE_FD はインポート前に dup し（0 も有効）、デバイス・ドライバー UUID と属性を一致させ、専用アロケーションをインポートします。読み込み前に旧レイアウト GENERAL で EXTERNAL からキュー所有権を取得します。読み取り専用、UNORM 格納の sRGB 符号化 RGBA です。 <a href="https://github.com/AimesSoft/liberika/blob/v0.3.4/docs/external_textures.ja.md">liberika テクスチャガイド</a>.</p>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.1</b></span>
+    <span>liberika <b>v0.3.4</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>OpenHarmony / OHPM アクセス — liberika 開発者ドキュメント</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261031-031">
-<script defer src="../docs.js?v=20261031-031"></script>
+<link rel="stylesheet" href="../docs.css?v=20261106-034">
+<script defer src="../docs.js?v=20261106-034"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
   <div class="language-switch" role="group" aria-label="言語"><a href="openharmony.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="openharmony.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="openharmony.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -64,17 +64,17 @@
   <p class="lead"><code>erika</code> OpenHarmony ネイティブ ArkTS SDK です。申請が通過しました <code>XComponent</code> ネイティブ surface を取得するには、次を使用します。 <code>ErikaPlayer</code> ドライブの再生制御、イベント処理、フレームごとのレンダリング スケジューリング。</p>
 
   <ul class="meta-strip">
-    <li>公開版 <b>erika 0.3.0</b></li>
+    <li>公開版 <b>erika 0.3.4</b></li>
     <li>ターゲットアーキテクチャ <b>arm64</b></li>
     <li>最小 API <b>API 18</b></li>
   </ul>
 
   <section id="install">
     <h2>設置と導入<span class="jp">インストール</span><a class="anchor" href="#install">#</a></h2>
-    <p>パブリック バージョン 0.3.0 を DevEco Studio プロジェクトのルート ディレクトリにインストールします。</p>
+    <p>パブリック バージョン 0.3.4 を DevEco Studio プロジェクトのルート ディレクトリにインストールします。</p>
     <div class="code">
       <p class="lbl">shell</p>
-<pre>ohpm install erika@0.3.0</pre>
+<pre>ohpm install erika@0.3.4</pre>
     </div>
     <p>パッケージの詳細については、を参照してください。 <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPMの詳細ページ</a>; ソース コード モジュールについては公式ウェアハウスを参照してください。 <code>packages/erika_ohos</code> 目次。</p>
   </section>
@@ -203,7 +203,7 @@
     </div>
   </section>
 
-  <p class="note">コア 0.3.1 の OpenHarmony ネイティブビルドはテキスト字幕が四角になる問題を修正しました。2026-10-31 時点の OHPM 公開版は 0.3.0 です。ネイティブランタイムとパッケージのバージョンをそれぞれ確認してください。</p>
+  <p class="note">コア 0.3.1 の OpenHarmony ネイティブビルドはテキスト字幕が四角になる問題を修正しました。2026-11-06 時点の OHPM 公開版は 0.3.4 です。ネイティブランタイムとパッケージのバージョンをそれぞれ確認してください。</p>
 
   <section id="http-cache">
     <h2>HTTP キャッシュオプション（0.2.1 以降）<a class="anchor" href="#http-cache">#</a></h2>
@@ -220,8 +220,10 @@ player.play();</pre>
     </div>
   </section>
 
+  <p class="note">0.3.4 は非同期 N-API を追加しました。従来の <code>ErikaOhosPlayerFromId</code> は null を返します。ネイティブプレイヤーをスレッド間で直接参照せず、ブリッジ経由で操作してください。</p>
+
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.1</b></span>
+    <span>liberika <b>v0.3.4</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

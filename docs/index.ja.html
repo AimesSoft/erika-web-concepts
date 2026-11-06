@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>開発者向けドキュメント — liberika</title>
 <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="docs.css?v=20261031-031">
-<script defer src="docs.js?v=20261031-031"></script>
+<link rel="stylesheet" href="docs.css?v=20261106-034">
+<script defer src="docs.js?v=20261106-034"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
+  <div class="brand"><a href="../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
   <div class="language-switch" role="group" aria-label="言語"><a href="index.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="index.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="index.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="reference/capi-json.ja.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -61,14 +61,20 @@
   <p class="crumb"><a href="../index.html">ホームページ</a><span class="sep">/</span>docs</p>
   <h1>開発者向けドキュメント</h1>
   <p class="kicker">Developer Documentation</p>
-  <p class="lead">liberika は、クロスプラットフォームの音声・動画アプリケーション向けの組み込み再生エンジンです。このドキュメントは、liberika をアプリに組み込むチームとエンジン開発者を対象とし、<b>v0.3.1</b> を基準とします。プロジェクト名は liberika ですが、<code>erika</code> crate、<code>erika_*</code> C ABI、SDK のパッケージ名は互換性のため維持されています。</p>
+  <p class="lead">liberika は、クロスプラットフォームの音声・動画アプリケーション向けの組み込み再生エンジンです。このドキュメントは、liberika をアプリに組み込むチームとエンジン開発者を対象とし、<b>v0.3.4</b> を基準とします。プロジェクト名は liberika ですが、<code>erika</code> crate、<code>erika_*</code> C ABI、SDK のパッケージ名は互換性のため維持されています。</p>
 
   <ul class="meta-strip">
-    <li>バージョン <b>0.3.1</b></li>
-    <li>C ABI エクスポート <b>116</b></li>
+    <li>バージョン <b>0.3.4</b></li>
+    <li>C ABI エクスポート <b>119</b></li>
     <li>Rust <b>1.92+</b></li>
     <li>ライセンス <b>MPL-2.0</b></li>
   </ul>
+
+  <section id="release034">
+    <h2>0.3.4 の更新<a class="anchor" href="#release034">#</a></h2>
+    <p>ArtCNN、Anime4K、FSR1、プラットフォーム超解像、カスタムモデルに対応し、Flutter プレイヤーは専用ネイティブスレッドで動作します。</p>
+    <p>コア、Flutter、Swift SDK、OHPM の 0.3.4 は公開済みです。 <a href="project/changelog.ja.html#v034">リリースノート</a></p>
+  </section>
 
   <section id="release031">
     <h2>0.3.1 の変更<a class="anchor" href="#release031">#</a></h2>
@@ -231,7 +237,7 @@
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.1</b></span>
+    <span>liberika <b>v0.3.4</b></span>
     <span>Source <b>crates/erika_capi/include/erika.h</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

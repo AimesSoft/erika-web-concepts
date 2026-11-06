@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>OpenHarmony / OHPM integration — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261031-031">
-<script defer src="../docs.js?v=20261031-031"></script>
+<link rel="stylesheet" href="../docs.css?v=20261106-034">
+<script defer src="../docs.js?v=20261106-034"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
   <div class="language-switch" role="group" aria-label="Language"><a href="openharmony.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="openharmony.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="openharmony.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -63,17 +63,17 @@
   <p class="lead"><code>erika</code> is the native ArkTS SDK for OpenHarmony. Your app obtains a native surface through <code>XComponent</code> and uses <code>ErikaPlayer</code> to drive playback control, event handling, and per-frame render scheduling.</p>
 
   <ul class="meta-strip">
-    <li>Public release <b>erika 0.3.0</b></li>
+    <li>Public release <b>erika 0.3.4</b></li>
     <li>Target architecture <b>arm64</b></li>
     <li>Minimum API <b>API 18</b></li>
   </ul>
 
   <section id="install">
     <h2>Installation and import<span class="jp">インストール</span><a class="anchor" href="#install">#</a></h2>
-    <p>Install the public release 0.3.0 from the root directory of your DevEco Studio project:</p>
+    <p>Install the public release 0.3.4 from the root directory of your DevEco Studio project:</p>
     <div class="code">
       <p class="lbl">shell</p>
-<pre>ohpm install erika@0.3.0</pre>
+<pre>ohpm install erika@0.3.4</pre>
     </div>
     <p>For package details, see the <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM details page</a>. The source module is in the <code>packages/erika_ohos</code> directory of the official repository.</p>
   </section>
@@ -202,7 +202,7 @@
     </div>
   </section>
 
-  <p class="note">The core 0.3.1 OpenHarmony native build fixes text subtitles rendered as boxes. As of 2026-10-31 the public OHPM package remains at 0.3.0; check the native runtime and package versions separately.</p>
+  <p class="note">The core 0.3.1 OpenHarmony native build fixes text subtitles rendered as boxes. As of 2026-11-06 the public OHPM package is 0.3.4; check the native runtime and package versions separately.</p>
 
   <section id="http-cache">
     <h2>HTTP cache options (since 0.2.1)<a class="anchor" href="#http-cache">#</a></h2>
@@ -219,8 +219,10 @@ player.play();</pre>
     </div>
   </section>
 
+  <p class="note">Version 0.3.4 adds asynchronous N-API entry points; the legacy <code>ErikaOhosPlayerFromId</code> returns null. Hosts should use bridge methods instead of accessing native player objects across threads.</p>
+
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.1</b></span>
+    <span>liberika <b>v0.3.4</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

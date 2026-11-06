@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>C ABI overview — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261031-031">
-<script defer src="../docs.js?v=20261031-031"></script>
+<link rel="stylesheet" href="../docs.css?v=20261106-034">
+<script defer src="../docs.js?v=20261106-034"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
   <div class="language-switch" role="group" aria-label="Language"><a href="capi.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="capi.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="capi.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,17 +53,17 @@
       <li><a href="capi-json.en.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>C ABI overview</p>
   <h1>C ABI overview</h1>
   <p class="kicker">C ABI Overview</p>
-  <p class="lead">Global conventions and type definitions for the C ABI. The function lists are split by entry family: <a href="capi-handle.en.html">ErikaHandle</a> (23), <a href="capi-presenter.en.html">ErikaPresenterHandle</a> (78), and general and standalone entry points (15). <code>crates/erika_capi/include/erika.h</code> is the sole authority.</p>
+  <p class="lead">Global conventions and type definitions for the C ABI. The function lists are split by entry family: <a href="capi-handle.en.html">ErikaHandle</a> (23), <a href="capi-presenter.en.html">ErikaPresenterHandle</a> (81), and general and standalone entry points (15). <code>crates/erika_capi/include/erika.h</code> is the sole authority.</p>
 
   <ul class="meta-strip">
-    <li>Exported functions <b>116</b></li>
+    <li>Exported functions <b>119</b></li>
     <li>Types <b>49</b></li>
     <li>Event kinds <b>13</b></li>
   </ul>
@@ -503,8 +503,8 @@
           <tr><td class="m">ErikaActiveOutputEncoding</td><td>SDR sRGB / Apple EDR / Android scRGB / HDR10 PQ / Linux scRGB.</td></tr>
           <tr><td class="m">ErikaOutputFallbackReason</td><td>HDR fallback reason, 9 members.</td></tr>
           <tr><td class="m">ErikaOutputSurfaceFormat</td><td>8-bit UNORM / 10-bit UNORM / 16-bit float.</td></tr>
-          <tr><td class="m">ErikaLumaUpscalerMode</td><td>Off / ArtCNN F16 / ArtCNN F32 / ArtCNN F16 DS.</td></tr>
-          <tr><td class="m">ErikaUpscalerBackendStatus</td><td>Upscaler backend status, 5 members.</td></tr>
+          <tr><td class="m">ErikaLumaUpscalerMode</td><td>Off / ArtCNN / Anime4K / FSR 1.0 / platform video super resolution / MetalFX / custom model.</td></tr>
+          <tr><td class="m">ErikaUpscalerBackendStatus</td><td>Upscaler backend status, 11 values.</td></tr>
         </tbody>
       </table>
     </div>
@@ -592,10 +592,27 @@
         <thead><tr><th>Value</th><th>OutputSurfaceFormat</th><th>Value</th><th>LumaUpscalerMode</th><th>Value</th><th>UpscalerBackendStatus</th></tr></thead>
         <tbody>
           <tr><td class="m">0</td><td>EightBitUnorm</td><td class="m">0</td><td>Off</td><td class="m">0</td><td>Off</td></tr>
-          <tr><td class="m">1</td><td>TenBitUnorm</td><td class="m">1</td><td>ArtCnnC4F16</td><td class="m">1</td><td>Inactive (the backend does not run ArtCNN and keeps native luma sampling)</td></tr>
+          <tr><td class="m">1</td><td>TenBitUnorm</td><td class="m">1</td><td>ArtCnnC4F16</td><td class="m">1</td><td>Inactive (the selected mode cannot run on this backend; native sampling is retained)</td></tr>
           <tr><td class="m">2</td><td>SixteenBitFloat</td><td class="m">2</td><td>ArtCnnC4F32</td><td class="m">2</td><td>Building</td></tr>
           <tr><td></td><td></td><td class="m">3</td><td>ArtCnnC4F16Ds</td><td class="m">3</td><td>Scalar</td></tr>
-          <tr><td></td><td></td><td></td><td></td><td class="m">4</td><td>SimdgroupMatrix</td></tr>
+          <tr><td></td><td></td><td class="m">4</td><td>ArtCnnC4F16Dn</td><td class="m">4</td><td>SimdgroupMatrix</td></tr>
+          <tr><td></td><td></td><td class="m">5</td><td>ArtCnnC4F32Ds</td><td class="m">5</td><td>CooperativeMatrix</td></tr>
+          <tr><td></td><td></td><td class="m">6</td><td>ArtCnnC4F32Dn</td><td class="m">6</td><td>LinalgMatrix</td></tr>
+          <tr><td></td><td></td><td class="m">7</td><td>ArtCnnR8F64</td><td class="m">7</td><td>VideoProcessor</td></tr>
+          <tr><td></td><td></td><td class="m">16</td><td>Anime4kS</td><td class="m">8</td><td>VideoToolbox</td></tr>
+          <tr><td></td><td></td><td class="m">17</td><td>Anime4kM</td><td class="m">9</td><td>MetalFx</td></tr>
+          <tr><td></td><td></td><td class="m">18</td><td>Anime4kL</td><td class="m">10</td><td>TensorOps</td></tr>
+          <tr><td></td><td></td><td class="m">19</td><td>Anime4kVl</td><td></td><td></td></tr>
+          <tr><td></td><td></td><td class="m">20</td><td>Anime4kUl</td><td></td><td></td></tr>
+          <tr><td></td><td></td><td class="m">21</td><td>Anime4kDenoiseS</td><td></td><td></td></tr>
+          <tr><td></td><td></td><td class="m">22</td><td>Anime4kDenoiseM</td><td></td><td></td></tr>
+          <tr><td></td><td></td><td class="m">23</td><td>Anime4kDenoiseL</td><td></td><td></td></tr>
+          <tr><td></td><td></td><td class="m">24</td><td>Anime4kDenoiseVl</td><td></td><td></td></tr>
+          <tr><td></td><td></td><td class="m">25</td><td>Anime4kDenoiseUl</td><td></td><td></td></tr>
+          <tr><td></td><td></td><td class="m">32</td><td>Fsr1</td><td></td><td></td></tr>
+          <tr><td></td><td></td><td class="m">48</td><td>PlatformVideo</td><td></td><td></td></tr>
+          <tr><td></td><td></td><td class="m">49</td><td>MetalFxSpatial</td><td></td><td></td></tr>
+          <tr><td></td><td></td><td class="m">64</td><td>Custom</td><td></td><td></td></tr>
         </tbody>
       </table>
     </div>
@@ -687,11 +704,11 @@ typedef struct ErikaExternalTextureInfo {
   uint8_t device_uuid[16];
   uint8_t driver_uuid[16];
 } ErikaExternalTextureInfo;</pre></div>
-    <p>A texture frame can outlive its presenter. Release only after consumer GPU work and imported aliases retire. get_info returns borrowed handles: a Metal consumer may independently retain the texture through all GPU use; duplicate the Vulkan OPAQUE_FD before import (0 is valid), match device and driver UUIDs, and import the dedicated allocation with identical properties. Acquire queue ownership from EXTERNAL with old layout GENERAL before reading. Read-only pixels are sRGB-encoded RGBA in UNORM storage. <a href="https://github.com/AimesSoft/liberika/blob/v0.3.1/docs/external_textures.md">liberika texture guide</a>.</p>
+    <p>A texture frame can outlive its presenter. Release only after consumer GPU work and imported aliases retire. get_info returns borrowed handles: a Metal consumer may independently retain the texture through all GPU use; duplicate the Vulkan OPAQUE_FD before import (0 is valid), match device and driver UUIDs, and import the dedicated allocation with identical properties. Acquire queue ownership from EXTERNAL with old layout GENERAL before reading. Read-only pixels are sRGB-encoded RGBA in UNORM storage. <a href="https://github.com/AimesSoft/liberika/blob/v0.3.4/docs/external_textures.md">liberika texture guide</a>.</p>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.1</b></span>
+    <span>liberika <b>v0.3.4</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

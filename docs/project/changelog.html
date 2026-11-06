@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>更新日志 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261031-031">
-<script defer src="../docs.js?v=20261031-031"></script>
+<link rel="stylesheet" href="../docs.css?v=20261106-034">
+<script defer src="../docs.js?v=20261106-034"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <div class="language-switch" role="group" aria-label="语言"><a href="changelog.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="changelog.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="changelog.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -63,9 +63,28 @@
   <p class="lead">按版本列出对宿主可见的变化。已回退的条目不在此列；完整历史以仓库根 <code>CHANGELOG.md</code> 为准。0.1.3 及更早的 breaking change 见文末小结。</p>
 
   <ul class="meta-strip">
-    <li>当前 <b>0.3.1</b></li>
-    <li>发布 <b>2026-10-31</b></li>
+    <li>当前 <b>0.3.4</b></li>
+    <li>发布 <b>2026-11-06</b></li>
   </ul>
+
+  <section id="v034">
+    <h2>0.3.4 · 2026-11-06<a class="anchor" href="#v034">#</a></h2>
+    <ul class="body"><li>新增 ArtCNN、Anime4K、FSR1、平台视频超分及自定义模型；不满足条件或后台编译时通过诊断报告状态。</li><li>Flutter 的 Windows、Linux、OpenHarmony 与 Apple 插件为每个播放器使用独立原生线程；OpenHarmony 新增异步桥接。</li><li>修复 Windows 视频窗口层级与退出崩溃、OpenHarmony P010 帧布局及 GLES 兼容问题。</li></ul>
+    <p>核心与 Flutter、Swift SDK、OHPM 0.3.4 已公开。</p>
+    <p><a href="https://github.com/AimesSoft/liberika/releases/tag/v0.3.4">完整发布说明</a></p>
+  </section>
+
+  <section id="v033">
+    <h2>0.3.3 · 2026-11-01<a class="anchor" href="#v033">#</a></h2>
+    <ul class="body"><li>新增保留音量的静音、容器格式与整体码率查询、Dolby Vision profile 元数据。</li><li>修复字幕轨影响视频码率估算和 macOS 备用 timer 未更新 EDR headroom；Web 构建使用 wasm-bindgen 0.2.130。</li></ul>
+    <p><a href="https://github.com/AimesSoft/liberika/releases/tag/v0.3.3">完整发布说明</a></p>
+  </section>
+
+  <section id="v032">
+    <h2>0.3.2 · 2026-10-31<a class="anchor" href="#v032">#</a></h2>
+    <ul class="body"><li>修复 Flutter Windows 插件打开媒体时越界写入 ErikaOpenOptions；0.3.1 Windows 用户应升级。</li><li>更新 Apple 插件的 Swift 镜像并增加头文件布局一致性测试。</li></ul>
+    <p><a href="https://github.com/AimesSoft/liberika/releases/tag/v0.3.2">完整发布说明</a></p>
+  </section>
 
   <section id="v031">
     <h2>0.3.1 · 2026-10-31<a class="anchor" href="#v031">#</a></h2>
@@ -256,7 +275,7 @@
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.1</b></span>
+    <span>liberika <b>v0.3.4</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
