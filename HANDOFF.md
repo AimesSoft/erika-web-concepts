@@ -41,12 +41,12 @@ CSS。交互增强统一走 `docs/docs.js`（代码块复制按钮等）。
 
 ## 4. 内容基线
 
-- 当前安装、接口及功能说明按 liberika v0.3.1 核对，更新日志保留旧版历史。
-- C ABI 共 116 个导出函数、49 个类型；78 个 Presenter 函数、23 个
+- 当前安装、接口及功能说明按 liberika v0.3.4 核对，更新日志保留旧版历史。
+- C ABI 共 119 个导出函数、49 个类型；81 个 Presenter 函数、23 个
   Handle 函数，另有 15 个通用/独立入口。
-- 截至 2026-10-31，Flutter 0.3.1 已公开，SwiftPM 和 OHPM 最新公开版仍为 0.3.0。
-- JSON bridge 共 51 个方法，支持 listMethods 发现、日志、章节和帧导出。
-- Web 通过 liberika-web-0.3.1.zip 分发，包含运行时和演示页，尚未发布到 npm；
+- 截至 2026-11-06，Flutter、SwiftPM 和 OHPM 的 0.3.4 均已公开。
+- JSON bridge 共 56 个方法，支持 listMethods 发现、日志、章节和帧导出。
+- Web 通过 liberika-web-0.3.4.zip 分发，包含运行时和演示页，尚未发布到 npm；
   需要 WebCodecs、OffscreenCanvas、WebGL2、Web Audio 和 HTTPS/localhost。
 - 字幕/弹幕超采样默认开启；原生软件视频解码默认多线程。
 - Linux 为实验性源码构建目标，没有预编译发布包。接入指南包含
@@ -84,6 +84,6 @@ HANDOFF.md 不在站点导航内，属于仓库维护说明。事实变化（文
 `docs/` 的中文原页保留原路径；英文与日文分别使用同目录的 `.en.html`、
 `.ja.html` 文件，例如 `guide/flutter.en.html`。页面语言切换会保留当前锚点，
 页内链接指向相同语言的版本；偏好保存在 `localStorage` 的 `liberika-language`。
-英文与日文正文目前为机器翻译，已在页面提示，关键术语和代码示例已抽查；
+英文正文已人工重译；日文正文仍含机器翻译并有页面提示，关键术语和代码示例已抽查；
 后续需要逐页人工校订。代码、命令及接口标识以中文页和源码为准，更新中文
 内容时应同步维护译文并检查链接，不能只改一个语言版本。

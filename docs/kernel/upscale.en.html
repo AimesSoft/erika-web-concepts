@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Neural upscaling — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261031-031">
-<script defer src="../docs.js?v=20261031-031"></script>
+<link rel="stylesheet" href="../docs.css?v=20261106-034">
+<script defer src="../docs.js?v=20261106-034"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
   <div class="language-switch" role="group" aria-label="Language"><a href="upscale.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="upscale.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="upscale.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,66 +53,21 @@
       <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>Neural upscaling</p>
   <h1>Neural upscaling</h1>
   <p class="kicker">Neural Upscaling</p>
-  <p class="lead">ArtCNN is a 2× luma neural upscaling model for anime content. It processes only the luma channel, and its output joins the rendering pipeline as the <code>NeuralUpscale</code> pass. When no backend is available, the kernel keeps the native luma sampling and explicitly reports the <code>Inactive</code> status.</p>
-
-  <ul class="meta-strip">
-    <li>Model <b>ArtCNN C4</b></li>
-    <li>Scale factor <b>Luma ×2</b></li>
-    <li>Execution <b>Metal / wgpu</b></li>
-  </ul>
-
-  <section id="model">
-    <h2>Models and modes<span class="jp">モデル</span><a class="anchor" href="#model">#</a></h2>
-    <p>The model weights are embedded in the crate (<code>crates/erika/assets/artcnn</code>) and packaged at compile time, so nothing is read from the file system at runtime. Weights come in two precisions, F16 and F32, which correspond to two request modes:</p>
-    <div class="tw">
-      <table>
-        <thead><tr><th>Mode</th><th>Value</th><th>Description</th></tr></thead>
-        <tbody>
-          <tr><td class="k">Off</td><td class="m">0</td><td>Turns upscaling off and uses native luma sampling.</td></tr>
-          <tr><td class="k">ArtCnnC4F16</td><td class="m">1</td><td>Half-precision weights, for the Metal simdgroup matrix path.</td></tr>
-          <tr><td class="k">ArtCnnC4F32</td><td class="m">2</td><td>Single-precision weights, for the wgpu compute path.</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section id="backends">
-    <h2>Execution paths<span class="jp">実行経路</span><a class="anchor" href="#backends">#</a></h2>
-    <p>The two compute implementations share one model description, and the weight format matches the request mode:</p>
-    <ul class="body">
-      <li><b>Metal</b>(macOS / iOS / tvOS) — simdgroup matrix convolution. The weights are built in the background on the <code>erika-upscaler-build</code> thread; once the build finishes, the path joins the pipeline with the <code>SimdgroupMatrix</code> status.</li>
-      <li><b>wgpu compute</b>(Android / HarmonyOS) — Tiled compute operators, F32 path.</li>
-    </ul>
-    <p>The remaining rendering backend (D3D11) has no ArtCNN executor. When upscaling is requested there, native luma sampling is kept and <code>active_backend</code> reports <code>Inactive</code>, so the host can tell that the platform does not support upscaling.</p>
-    <div class="tw">
-      <table>
-        <thead><tr><th>Backend status</th><th>Description</th></tr></thead>
-        <tbody>
-          <tr><td class="m">Off</td><td>Not requested.</td></tr>
-          <tr><td class="m">Inactive</td><td>Requested, but no backend is available; native sampling is kept.</td></tr>
-          <tr><td class="m">Building</td><td>Weights are being built and the path has not yet joined the pipeline.</td></tr>
-          <tr><td class="m">Scalar</td><td>Scalar execution path.</td></tr>
-          <tr><td class="m">SimdgroupMatrix</td><td>simdgroup matrix execution path.</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section id="pipeline">
-    <h2>Pipeline integration<span class="jp">パイプライン</span><a class="anchor" href="#pipeline">#</a></h2>
-    <p>Upscaling is inserted into the pass graph as the <code>NeuralUpscale</code> pass, between import and sampling. The model enlarges the luma channel by 2×, and the chroma channels are scaled conventionally. The later tone mapping, compositing, and output transform passes are unchanged.</p>
-    <p>The encode time and GPU time of each frame are recorded in <code>last_encode_micros</code> and <code>last_gpu_micros</code>. An execution failure increments <code>fallback_count</code> and temporarily falls back to native sampling; the kernel retries on the next frame.</p>
-  </section>
+  <p class="lead">liberika 0.3.4 provides neural, spatial and platform video upscalers. Select a bundled mode or load a custom model; unsupported conditions retain native sampling and report a reason.</p>
+  <ul class="meta-strip"><li>Version <b>0.3.4</b></li><li>Networks <b>2× luma</b></li><li>Backends <b>Metal / D3D11 / wgpu</b></li></ul>
+  <section id="model"><h2>Models and modes<a class="anchor" href="#model">#</a></h2><p>Modes are grouped by family. Network modes upscale luma 2×; chroma uses the regular scaler.</p><div class="tw"><table><thead><tr><th>Value</th><th>Family</th><th>Description</th></tr></thead><tbody><tr><td class="m">0</td><td class="k">Off</td><td>Disable upscaling</td></tr><tr><td class="m">1–7</td><td class="k">ArtCNN</td><td>C4F16 / C4F32, DS/DN variants and R8F64; R8F64 is bundled only on desktop</td></tr><tr><td class="m">16–25</td><td class="k">Anime4K</td><td>CNN x2 S/M/L/VL/UL and corresponding Upscale+Denoise modes</td></tr><tr><td class="m">32</td><td class="k">Fsr1</td><td>AMD FSR 1.0 EASU + RCAS scales luma to presentation size</td></tr><tr><td class="m">48</td><td class="k">PlatformVideo</td><td>Platform video super resolution scales the whole frame</td></tr><tr><td class="m">49</td><td class="k">MetalFxSpatial</td><td>Apple MetalFX Spatial</td></tr><tr><td class="m">64</td><td class="k">Custom</td><td>A network supplied by the host</td></tr></tbody></table></div></section>
+  <section id="backends"><h2>Execution paths<a class="anchor" href="#backends">#</a></h2><ul class="body"><li>Windows D3D11: networks, FSR1 and NVIDIA RTX Video Super Resolution / Intel VSR. Platform video upscaling requires a supported GPU and driver configuration, SDR and D3D11VA-decoded NV12/P010 frames.</li><li>Apple Metal: networks, FSR1, MetalFX and VideoToolbox low-latency super resolution. VideoToolbox requires macOS/iOS/tvOS 26+, 8-bit 4:2:0 sources between 96×96 and 960×960; it scales 2× only.</li><li>wgpu (Linux, Android, OpenHarmony and Windows wgpu fallback): network modes and FSR1; platform video and MetalFX are unavailable. Web has no upscaler.</li></ul></section>
+  <section id="pipeline"><h2>Custom models and status<a class="anchor" href="#pipeline">#</a></h2><p>Load an Erika .esr network or an FSRCNNX / Anime4K CNN mpv hook with C <code>erika_presenter_load_upscaler_model</code> or Flutter <code>ErikaPlayer.loadUpscalerModel</code>, then select custom; use <code>clearUpscalerModel</code> to unload. Only weights are parsed, not shader code; FSRCNNX weights are not bundled.</p><p><code>Building</code> indicates background compilation; <code>Inactive</code> indicates that requirements are unmet. Both retain native sampling. The diagnostic upscaler object exposes <code>engine</code>, <code>reason</code> and <code>lastGpuMs</code>.</p><p><a href="https://github.com/AimesSoft/liberika/blob/v0.3.4/docs/integration.md">See the source integration guide for constraints, examples and device measurement conditions.</a></p></section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.1</b></span>
+    <span>liberika <b>v0.3.4</b></span>
     <span>Section <b>Kernel</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

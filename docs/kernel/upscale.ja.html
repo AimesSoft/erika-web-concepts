@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ニューラル スーパー スコア — liberika 開発者ドキュメント</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261031-031">
-<script defer src="../docs.js?v=20261031-031"></script>
+<link rel="stylesheet" href="../docs.css?v=20261106-034">
+<script defer src="../docs.js?v=20261106-034"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.1</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
   <div class="language-switch" role="group" aria-label="言語"><a href="upscale.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="upscale.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="upscale.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.1<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -61,59 +61,14 @@
   <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>kernel<span class="sep">/</span>ニューラル超解像</p>
   <h1>ニューラル超解像</h1>
   <p class="kicker">Neural Upscaling</p>
-  <p class="lead">ArtCNNは、アニメコンテンツ向けの輝度2倍ニューラル超解像モデルです。輝度チャンネルのみを処理し、それを出力します。 <code>NeuralUpscale</code> pass はレンダリング パイプラインに接続されています。バックエンドが利用できない場合、ネイティブの輝度サンプルが保持され、明示的にレポートされます。 <code>Inactive</code> ステータス。</p>
-
-  <ul class="meta-strip">
-    <li>モデル <b>ArtCNN C4</b></li>
-    <li>複数の <b>明るさ×2</b></li>
-    <li>実行する <b>Metal / wgpu</b></li>
-  </ul>
-
-  <section id="model">
-    <h2>モデルとパターン<span class="jp">モデル</span><a class="anchor" href="#model">#</a></h2>
-    <p>モデルの重みは crate で埋め込まれます (<code>crates/erika/assets/artcnn</code>)、コンパイル中にパッケージ化され、実行時にはファイル システムにアクセスしません。重みは 2 つの精度 (F16 および F32) で提供され、2 つの要求モードに対応します。</p>
-    <div class="tw">
-      <table>
-        <thead><tr><th>モード</th><th>値</th><th>説明</th></tr></thead>
-        <tbody>
-          <tr><td class="k">Off</td><td class="m">0</td><td>超解像度をオフにして、ネイティブの輝度サンプリングを使用します。</td></tr>
-          <tr><td class="k">ArtCnnC4F16</td><td class="m">1</td><td>Metal simdgroup matrix パスの半精度重み。</td></tr>
-          <tr><td class="k">ArtCnnC4F32</td><td class="m">2</td><td>wgpu compute パスの単精度重み。</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section id="backends">
-    <h2>実行パス<span class="jp">実行経路</span><a class="anchor" href="#backends">#</a></h2>
-    <p>2 つの compute 実装は同じモデル記述を共有し、重み形式はリクエスト モードに対応します。</p>
-    <ul class="body">
-      <li><b>Metal</b>(macOS / iOS / tvOS) — simdgroup matrix 畳み込み。体重は入っています <code>erika-upscaler-build</code> スレッドの背景構築、構築完了後に使用します <code>SimdgroupMatrix</code> 状態アクセス パイプライン。</li>
-      <li><b>wgpu compute</b>(Android / HarmonyOS) — ブロックされた compute オペレーター、F32 パス。</li>
-    </ul>
-    <p>残りのレンダリング バックエンド (D3D11) には ArtCNN エグゼキュータがなく、有効になっている場合はネイティブ輝度サンプルを保持するよう要求します。<code>active_backend</code> 報告書 <code>Inactive</code>、ホストは、プラットフォームがスーパー スコアをサポートしていないことを確認できます。</p>
-    <div class="tw">
-      <table>
-        <thead><tr><th>バックエンドのステータス</th><th>意味</th></tr></thead>
-        <tbody>
-          <tr><td class="m">Off</td><td>要求されていません。</td></tr>
-          <tr><td class="m">Inactive</td><td>リクエストされましたが、バックエンドは利用できません。ネイティブ サンプリングは保持されます。</td></tr>
-          <tr><td class="m">Building</td><td>ウェイトは構築中であり、まだパイプラインに接続されていません。</td></tr>
-          <tr><td class="m">Scalar</td><td>スカラー実行パス。</td></tr>
-          <tr><td class="m">SimdgroupMatrix</td><td>simdgroup matrix 実行パス。</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section id="pipeline">
-    <h2>アクセス方法<span class="jp">パイプライン</span><a class="anchor" href="#pipeline">#</a></h2>
-    <p>やり過ぎ <code>NeuralUpscale</code> pass は、インポートとサンプリングの間に pass イメージを挿入します。ルマ チャネルはモデルによって 2 倍に増幅され、クロマ チャネルは通常どおりスケーリングされます。後続の tone mapping、合成および出力変換は変更されません。</p>
-    <p>各フレームのエンコードと GPU 時間の消費は、 <code>last_encode_micros</code> と <code>last_gpu_micros</code>。実行失敗が蓄積される <code>fallback_count</code> そして、一時的にネイティブ サンプリングにロールバックし、次のフレームで再試行します。</p>
-  </section>
+  <p class="lead">liberika 0.3.4 はニューラル、空間フィルター、プラットフォーム動画超解像を提供します。内蔵モードまたはカスタムモデルを選べます。条件を満たさない場合は元のサンプリングを維持し、理由を報告します。</p>
+  <ul class="meta-strip"><li>Version <b>0.3.4</b></li><li>Networks <b>2× luma</b></li><li>Backends <b>Metal / D3D11 / wgpu</b></li></ul>
+  <section id="model"><h2>モデルとモード<a class="anchor" href="#model">#</a></h2><p>モード値は種類ごとに分かれます。ネットワークは輝度を 2 倍にし、色差は通常のスケーラーで処理します。</p><div class="tw"><table><thead><tr><th>値</th><th>種類</th><th>説明</th></tr></thead><tbody><tr><td class="m">0</td><td class="k">Off</td><td>超解像を無効化</td></tr><tr><td class="m">1–7</td><td class="k">ArtCNN</td><td>C4F16 / C4F32、DS/DN と R8F64。R8F64 はデスクトップのみ同梱</td></tr><tr><td class="m">16–25</td><td class="k">Anime4K</td><td>CNN x2 S/M/L/VL/UL と対応する Upscale+Denoise</td></tr><tr><td class="m">32</td><td class="k">Fsr1</td><td>AMD FSR 1.0 EASU + RCAS で輝度を表示サイズに拡大</td></tr><tr><td class="m">48</td><td class="k">PlatformVideo</td><td>プラットフォーム動画超解像でフレーム全体を拡大</td></tr><tr><td class="m">49</td><td class="k">MetalFxSpatial</td><td>Apple MetalFX Spatial</td></tr><tr><td class="m">64</td><td class="k">Custom</td><td>ホストが読み込むネットワーク</td></tr></tbody></table></div></section>
+  <section id="backends"><h2>実行経路<a class="anchor" href="#backends">#</a></h2><ul class="body"><li>Windows D3D11：ネットワーク、FSR1、NVIDIA RTX Video Super Resolution / Intel VSR。プラットフォーム超解像には対応 GPU、ドライバー設定、SDR、D3D11VA デコードの NV12/P010 が必要です。</li><li>Apple Metal：ネットワーク、FSR1、MetalFX と VideoToolbox 低遅延超解像。VideoToolbox は macOS/iOS/tvOS 26 以降、8 ビット 4:2:0、96×96〜960×960 の入力が必要で、倍率は 2 倍です。</li><li>wgpu（Linux、Android、OpenHarmony、Windows wgpu フォールバック）：ネットワークと FSR1 に対応し、プラットフォーム動画超解像と MetalFX は使えません。Web に超解像はありません。</li></ul></section>
+  <section id="pipeline"><h2>カスタムモデルと状態<a class="anchor" href="#pipeline">#</a></h2><p>C <code>erika_presenter_load_upscaler_model</code> または Flutter <code>ErikaPlayer.loadUpscalerModel</code> で Erika .esr、FSRCNNX / Anime4K CNN mpv hook を読み込み、custom を選択します。<code>clearUpscalerModel</code> で解除します。重みのみを解析し、shader コードは実行しません。FSRCNNX の重みは同梱されません。</p><p>バックグラウンドコンパイル中は <code>Building</code>、条件を満たさない場合は <code>Inactive</code> となり、元のサンプリングを維持します。診断の upscaler オブジェクトには <code>engine</code>、<code>reason</code>、<code>lastGpuMs</code> があります。</p><p><a href="https://github.com/AimesSoft/liberika/blob/v0.3.4/docs/integration.ja.md">制限、例、デバイス測定条件の詳細はソースの導入ガイドを参照してください。</a></p></section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.1</b></span>
+    <span>liberika <b>v0.3.4</b></span>
     <span>Section <b>Kernel</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
