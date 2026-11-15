@@ -33,7 +33,7 @@ app.siteContent = {
     eyebrow: 'Case file / 01',
     title: '真相只有一条播放管线',
     lead:
-      '0.3.7 提供 Linux 双架构发布包、Bilibili 高级弹幕与 dma-buf 导出；延续系统字体回退、彩色 Emoji 和跨平台超分。',
+      '0.3.4 扩展 ArtCNN、Anime4K 与平台超分，支持自定义模型，并让 Flutter 播放器在独立原生线程运行。',
     items: [
       {
         number: '01',
@@ -188,7 +188,7 @@ erika_presenter_render_tick(player, host_time, &stats);`,
       { name: 'Android', minimum: '8+', render: 'wgpu', decode: 'MediaCodec', status: 'ready' },
       { name: 'HarmonyOS', minimum: 'API 18', render: 'wgpu', decode: 'AVCodec', status: 'ready' },
       { name: 'Web', minimum: 'HTTPS / localhost', render: 'WebGL2', decode: 'WebCodecs', status: 'ready' },
-      { name: 'Linux', minimum: 'glibc 2.35+', render: 'wgpu', decode: 'NVDEC / VA-API', status: 'ready', statusLabel: 'x64 / ARM64' },
+      { name: 'Linux', minimum: 'glibc 2.35+', render: 'wgpu', decode: 'NVDEC / VA-API', status: 'planned', statusLabel: '实验性' },
     ],
   },
   docs: {
