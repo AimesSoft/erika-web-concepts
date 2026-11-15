@@ -33,7 +33,7 @@ app.siteContent = {
     eyebrow: 'Case file / 01',
     title: '真相只有一条播放管线',
     lead:
-      '0.3.4 扩展 ArtCNN、Anime4K 与平台超分，支持自定义模型，并让 Flutter 播放器在独立原生线程运行。',
+      'liberika 把繁琐的媒体能力收进一致的内核边界，让每个宿主都能共享同一套播放行为。',
     items: [
       {
         number: '01',
