@@ -4,7 +4,7 @@ app.siteContent = {
     name: 'liberika',
     kana: '古戸ヱリカ',
     descriptor: 'Playback Kernel',
-    version: 'v0.3.4',
+    version: 'v0.3.7',
     repoUrl: 'https://github.com/AimesSoft/liberika',
   },
   navigation: [
@@ -33,7 +33,7 @@ app.siteContent = {
     eyebrow: 'Case file / 01',
     title: '真相只有一条播放管线',
     lead:
-      '0.3.4 扩展 ArtCNN、Anime4K 与平台超分，支持自定义模型，并让 Flutter 播放器在独立原生线程运行。',
+      '0.3.7 提供 Linux 双架构发布包、Bilibili 高级弹幕与 dma-buf 导出；延续系统字体回退、彩色 Emoji 和跨平台超分。',
     items: [
       {
         number: '01',
@@ -61,23 +61,27 @@ app.siteContent = {
   quickStart: {
     eyebrow: 'Evidence / 02',
     title: '留下最少的接入痕迹',
-    lead: '选择宿主环境，复制最短的开始方式。Flutter 走 pub.dev，Swift 走 SwiftPM，OpenHarmony 走 OHPM，其他原生宿主使用 GitHub Releases 预编译产物，Linux 从源码构建，Web 下载独立运行时。',
+    lead: '选择宿主环境，复制最短的开始方式。Flutter 走 pub.dev，Swift 走 SwiftPM，OpenHarmony 走 OHPM，其他原生宿主使用 GitHub Releases 预编译产物，Linux 可选 bundled / system 包或源码构建，Web 下载独立运行时。',
     tabs: [
       {
         id: 'release',
         label: '预编译产物',
         language: 'SHELL',
         code: `# github.com/AimesSoft/liberika/releases
-erika-swift-core-0.3.4.xcframework.zip
+erika-swift-core-0.3.7.xcframework.zip
 erika-capi-macos-universal.zip
 erika-capi-windows-x64.zip
 erika-capi-android.zip
 erika-capi-openharmony-arm64.zip
-liberika-web-0.3.4.zip`,
+erika-capi-linux-x64-bundled.zip
+erika-capi-linux-arm64-bundled.zip
+erika-capi-linux-x64-system.zip
+erika-capi-linux-arm64-system.zip
+liberika-web-0.3.7.zip`,
         note: 'C ABI 归档包含 erika.h、许可证与 MANIFEST.txt；Swift 使用 XCFramework。',
         action: {
           label: '查看 GitHub Releases',
-          url: 'https://github.com/AimesSoft/liberika/releases/tag/v0.3.4',
+          url: 'https://github.com/AimesSoft/liberika/releases/tag/v0.3.7',
         },
       },
       {
@@ -92,7 +96,7 @@ await player.play();
 
 // 放入 Widget 树
 ErikaVideoView(player: player)`,
-        note: 'pub.dev 0.3.4 已发布：flutter pub add erika_flutter:^0.3.4。',
+        note: 'pub.dev 0.3.7 已发布：flutter pub add erika_flutter:^0.3.7。',
       },
       {
         id: 'swift',
@@ -103,7 +107,7 @@ ErikaVideoView(player: player)`,
 let player = try ErikaPlayer()
 try player.open("https://example.com/video.mp4")
 try player.play()`,
-        note: 'SwiftPM 0.3.4：在 Xcode 中添加 https://github.com/AimesSoft/liberika-swift',
+        note: 'SwiftPM 0.3.7：在 Xcode 中添加 https://github.com/AimesSoft/liberika-swift',
         action: {
           label: '查看 Swift 接入指南',
           url: 'docs/guide/swift.html',
@@ -118,7 +122,7 @@ try player.play()`,
 const player = new ErikaPlayer();
 player.open('https://example.com/video.mp4');
 player.play();`,
-        note: 'OHPM 0.3.4 已公开：ohpm install erika@0.3.4。原生表面与帧调度示例收录在接入指南。',
+        note: 'OHPM 0.3.7 已公开：ohpm install erika@0.3.7。原生表面与帧调度示例收录在接入指南。',
         action: {
           label: '查看 OpenHarmony 接入指南',
           url: 'docs/guide/openharmony.html',
@@ -136,7 +140,7 @@ playButton.onclick = () => player.play();
 
 // 卸载时释放播放器
 // await player.destroy();`,
-        note: '下载 liberika-web-0.3.4.zip，完整解压后通过 HTTPS 或 localhost 访问。附带演示页；尚未发布到 npm。',
+        note: '下载 liberika-web-0.3.7.zip，完整解压后通过 HTTPS 或 localhost 访问。附带演示页；尚未发布到 npm。',
         action: {
           label: '查看 Web 接入与下载',
           url: 'docs/guide/web.html',
@@ -151,7 +155,7 @@ playButton.onclick = () => player.play();
 let player = Player::new(PlayerConfig::default());
 player.open(MediaRequest::new("/path/to/video.mp4"))?;
 player.play()?;`,
-        note: 'Cargo.toml：erika = { git = "https://github.com/AimesSoft/liberika", tag = "v0.3.4" }',
+        note: 'Cargo.toml：erika = { git = "https://github.com/AimesSoft/liberika", tag = "v0.3.7" }',
       },
       {
         id: 'c-api',
@@ -184,7 +188,7 @@ erika_presenter_render_tick(player, host_time, &stats);`,
       { name: 'Android', minimum: '8+', render: 'wgpu', decode: 'MediaCodec', status: 'ready' },
       { name: 'HarmonyOS', minimum: 'API 18', render: 'wgpu', decode: 'AVCodec', status: 'ready' },
       { name: 'Web', minimum: 'HTTPS / localhost', render: 'WebGL2', decode: 'WebCodecs', status: 'ready' },
-      { name: 'Linux', minimum: 'FFmpeg 8.x', render: 'wgpu', decode: 'NVDEC / VA-API', status: 'planned', statusLabel: '实验性' },
+      { name: 'Linux', minimum: 'glibc 2.35+', render: 'wgpu', decode: 'NVDEC / VA-API', status: 'ready', statusLabel: 'x64 / ARM64' },
     ],
   },
   docs: {

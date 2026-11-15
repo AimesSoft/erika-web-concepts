@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Rust 埋め込み — liberika 開発者ドキュメント</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261106-034">
-<script defer src="../docs.js?v=20261106-034"></script>
+<link rel="stylesheet" href="../docs.css?v=20261116-037">
+<script defer src="../docs.js?v=20261116-037"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
   <div class="language-switch" role="group" aria-label="言語"><a href="rust.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="rust.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="rust.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -74,7 +74,7 @@
     <div class="code">
       <p class="lbl">Cargo.toml</p>
 <pre>[dependencies]
-erika = { git = <span class="s">"https://github.com/AimesSoft/liberika"</span>, tag = <span class="s">"v0.3.4"</span> }</pre>
+erika = { git = <span class="s">"https://github.com/AimesSoft/liberika"</span>, tag = <span class="s">"v0.3.7"</span> }</pre>
     </div>
     <p>Apple、Windows、Android、および OpenHarmony の最初のソース コードを構築する前に、プリセット LGPL ネイティブ依存関係 (FFmpeg、libass、dav1d など) を xtask を通じてコンパイルする必要があります。</p>
     <div class="code">
@@ -233,8 +233,17 @@ player.open(request)?;</pre>
 
   <p class="note">0.3.1 では <code>MediaRequest::with_start_position</code>、自然終了時の <code>PlayerEvent::Ended</code>、<code>PresenterRuntime::set_subtitle_delay</code>、弾幕付きキャプチャとネイティブフレームテクスチャの出力を追加しました。明示的な停止では Ended は発生しません。</p>
 
+  <section id="linux-external">
+    <h2>Linux の外部 workspace と dma-buf<a class="anchor" href="#linux-external">#</a></h2>
+    <p>wgpu を有効にし、利用側 workspace のルート Cargo.toml に同じバージョンの HAL パッチを明示してください。Cargo は依存リポジトリの patch を継承しません。Linux の SoundTouch には利用側の PIC 設定も必要です。設定全体は Linux ガイドを参照してください。</p><div class="code"><p class="lbl">Cargo.toml</p><pre>[dependencies]
+erika = { git = "https://github.com/AimesSoft/liberika", tag = "v0.3.7", features = ["wgpu"] }
+
+[patch.crates-io]
+wgpu-hal = { git = "https://github.com/AimesSoft/liberika", tag = "v0.3.7" }</pre></div><p><a href="linux.ja.html#native">Linux 導入と PIC 設定</a></p><p>export_frame_dmabuf(w, h, scale) は再生を駆動して映像・字幕・弾幕を合成し、同一デバイス内の GPU コピー 1 回で線形 RGBA8 を生成します。GTK / EGL / Wayland ホスト自身の Vulkan デバイスは不要です。raw_fd()、stride()、offset() で取り込み、fourcc は ABGR8888、modifier は 0 です。3 回の出力後にスロットを再利用するため、その前に利用を終えて記述子を閉じてください。長期間保持できる不変の export_frame_texture とは異なります。C API に dma-buf 用の新しい入口はありません。</p>
+  </section>
+
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.4</b></span>
+    <span>liberika <b>v0.3.7</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ゼロコピーインポート — liberika 開発者ドキュメント</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261106-034">
-<script defer src="../docs.js?v=20261106-034"></script>
+<link rel="stylesheet" href="../docs.css?v=20261116-037">
+<script defer src="../docs.js?v=20261116-037"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
   <div class="language-switch" role="group" aria-label="言語"><a href="zero-copy.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="zero-copy.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="zero-copy.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -108,12 +108,17 @@
 
   <section id="linux">
     <h2>Linux GPU インポート<a class="anchor" href="#linux">#</a></h2>
-    <p>Linux VA-API は合格可能 FFmpeg <code>AV_HWFRAME_MAP_DIRECT</code> NV12 / P010 を Vulkan 画像にマッピングします。これは、wgpu によって直接サンプリングされます。この実験的なパスには、互換性のある機器、外部ビデオ メモリ、セマフォ、その他の機能が必要です。</p>
+    <p>Linux では FFmpeg が VA-API の NV12 / P010 フレームを Vulkan 画像へマッピングし、wgpu がサンプリングします。0.3.7 は FFmpeg 8.1 / 9 の一部経路で EINVAL を起こす AV_HWFRAME_MAP_DIRECT の強制指定を削除しました。対応デバイス、外部メモリ、同期機能は引き続き必要です。</p>
     <p>通常の NVDEC / WSL OpenGL パスは CPU プレーン転送を使用します。オプションの WSL D3D12 パスは、GPU レプリケーションを使用します。 Wayland ネイティブ ビデオ レイヤーは Flutter RGBA リードバックを削減できることと、デコードされたフレームのコピーがゼロかどうかは別のことです。ビルド手順は以下に含まれています <a href="../guide/linux.ja.html">Linux アクセス</a>。</p>
   </section>
 
+  <section id="dmabuf-export">
+    <h2>Linux の線形 dma-buf 出力（Rust）<a class="anchor" href="#dmabuf-export">#</a></h2>
+    <p>export_frame_dmabuf(w, h, scale) は再生を駆動して映像・字幕・弾幕を合成し、同一デバイス内の GPU コピー 1 回で線形 RGBA8 を生成します。GTK / EGL / Wayland ホスト自身の Vulkan デバイスは不要です。raw_fd()、stride()、offset() で取り込み、fourcc は ABGR8888、modifier は 0 です。3 回の出力後にスロットを再利用するため、その前に利用を終えて記述子を閉じてください。長期間保持できる不変の export_frame_texture とは異なります。C API に dma-buf 用の新しい入口はありません。</p><p><a href="https://github.com/AimesSoft/liberika/blob/v0.3.7/docs/external_textures.ja.md">ネイティブテクスチャの所有権と取り込み</a></p>
+  </section>
+
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.4</b></span>
+    <span>liberika <b>v0.3.7</b></span>
     <span>Section <b>Kernel</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

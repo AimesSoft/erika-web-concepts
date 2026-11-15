@@ -1,7 +1,7 @@
 # liberika 文档站 交接说明
 
 写给接手维护正文的人。本文件只陈述事实与已核实的数据（最近一次核实：
-2026-10-25），不含风格建议。
+2026-11-16），不含风格建议。
 
 ## 1. 这是什么
 
@@ -32,7 +32,7 @@
 直接手改 HTML，commit 后 push。** 没有任何"跑脚本会覆盖正文"的风险。
 
 链接校验脚本也没有了。需要校验时临时写一段解析器：遍历 `href`，检查
-同页锚点与相对路径目标是否存在即可（2026-10-25 全站 25 个文档页校验通过）。
+同页锚点与相对路径目标是否存在即可（2026-11-16 全站 75 个三语文档页与主页进行链接校验）。
 
 ## 3. 设计系统
 
@@ -41,16 +41,19 @@ CSS。交互增强统一走 `docs/docs.js`（代码块复制按钮等）。
 
 ## 4. 内容基线
 
-- 当前安装、接口及功能说明按 liberika v0.3.4 核对，更新日志保留旧版历史。
-- C ABI 共 119 个导出函数、49 个类型；81 个 Presenter 函数、23 个
-  Handle 函数，另有 15 个通用/独立入口。
-- 截至 2026-11-06，Flutter、SwiftPM 和 OHPM 的 0.3.4 均已公开。
+- 当前安装、接口及功能说明按 liberika v0.3.7 核对，更新日志保留旧版历史。
+- C ABI 共 120 个导出函数、49 个类型；81 个 Presenter 函数、23 个
+  Handle 函数，另有 16 个通用/独立入口。
+- 截至 2026-11-16，Flutter、SwiftPM 和 OHPM 的 0.3.7 均已公开。
 - JSON bridge 共 56 个方法，支持 listMethods 发现、日志、章节和帧导出。
-- Web 通过 liberika-web-0.3.4.zip 分发，包含运行时和演示页，尚未发布到 npm；
+- Web 通过 liberika-web-0.3.7.zip 与 liberika-web-nofont-0.3.7.zip 分发，包含运行时和演示页，尚未发布到 npm；
   需要 WebCodecs、OffscreenCanvas、WebGL2、Web Audio 和 HTTPS/localhost。
 - 字幕/弹幕超采样默认开启；原生软件视频解码默认多线程。
-- Linux 为实验性源码构建目标，没有预编译发布包。接入指南包含
-  FFmpeg 8、补丁 libass、X11 / Wayland、PulseAudio 和 Flutter 动态库配置。
+- 0.3.6 使用系统字体优先回退并支持彩色 Emoji；0.3.7 增加 mode 7 高级弹幕与 Rust
+  dma-buf 输出。公开发布内容与尚未合入的 issue 修复分别说明，不把本轮修复写进已发布版本。
+- Linux 提供 x64 / ARM64 × bundled / system 四种发布包，以 Ubuntu 22.04 / glibc 2.35 为基线；
+  HDR 与 VA-API 直接导入仍属实验性。Flutter 手动配置 ERIKA_LIBRARY_DIR；Rust 外部
+  workspace 显式添加同版本 HAL patch 和 PIC 配置。源码构建仍受支持。
 - 发布流程按当前 main 的 workflow 核对，涵盖独立 slice 构建、目标缓存
   及原生发布后的生态包发布。
 - 更新内容时以 liberika 仓库的 `CHANGELOG.md`、`docs/*.md`、

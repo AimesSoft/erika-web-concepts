@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>変更ログ — liberika 開発者ドキュメント</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261106-034">
-<script defer src="../docs.js?v=20261106-034"></script>
+<link rel="stylesheet" href="../docs.css?v=20261116-037">
+<script defer src="../docs.js?v=20261116-037"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
   <div class="language-switch" role="group" aria-label="言語"><a href="changelog.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="changelog.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="changelog.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -64,9 +64,24 @@
   <p class="lead">ホストに表示される変更をバージョンごとにリストします。ロールバックされたアイテムはここにはリストされません。完全な履歴はリポジトリのルートから始まります <code>CHANGELOG.md</code> が勝つだろう。 0.1.3 以前 breaking change 記事の最後にある概要を参照してください。</p>
 
   <ul class="meta-strip">
-    <li>現在の <b>0.3.4</b></li>
-    <li>公開する <b>2026-11-06</b></li>
+    <li>現在の <b>0.3.7</b></li>
+    <li>公開する <b>2026-11-14</b></li>
   </ul>
+
+  <section id="v037">
+    <h2>0.3.7 · 2026-11-13<a class="anchor" href="#v037">#</a></h2>
+    <ul class="body"><li>Ubuntu 22.04 / glibc 2.35 を基準に、Linux x64 / ARM64 × bundled / system の 4 アーカイブを提供。Flutter は自動取得せず ERIKA_LIBRARY_DIR で読み込みます。</li><li>Bilibili mode 7 の高度な弾幕に対応し、D3D11 / wgpu の弾幕全体の不透明度を修正。</li><li>Rust に PresenterRuntime::export_frame_dmabuf を追加。GTK / EGL / Wayland 向けの線形 RGBA8 dma-buf 出力です。</li></ul><p><a href="https://github.com/AimesSoft/liberika/releases/tag/v0.3.7">リリースノート</a></p>
+  </section>
+
+  <section id="v036">
+    <h2>0.3.6 · 2026-11-07<a class="anchor" href="#v036">#</a></h2>
+    <ul class="body"><li>字幕と弾幕はシステムフォントを優先し、不足時に内蔵フォントへフォールバックします。ネイティブ弾幕はカラー絵文字に対応し、libass 字幕は単色のままです。</li><li>embedded-fallback-font feature、Web nofont パッケージ、erika_embedded_fallback_font C API を追加。iOS 18+ / tvOS の中国語には内蔵フォールバックが引き続き必要です。</li><li>リリース用静的ライブラリのデバッグ情報を削減し、Linux libass パッチの適用を修正。</li></ul><p><a href="https://github.com/AimesSoft/liberika/releases/tag/v0.3.6">リリースノート</a></p>
+  </section>
+
+  <section id="v035">
+    <h2>0.3.5 · 2026-11-07<a class="anchor" href="#v035">#</a></h2>
+    <ul class="body"><li>Windows のネイティブ動画を Flutter の操作 UI の背面に配置し、超解像にシステム Vulkan loader を使用。</li><li>外部字幕の読み込み失敗で再生を止めず、重複する UTF-8 BOM を許容します。</li></ul><p><a href="https://github.com/AimesSoft/liberika/releases/tag/v0.3.5">リリースノート</a></p>
+  </section>
 
   <section id="v034">
     <h2>0.3.4 · 2026-11-06<a class="anchor" href="#v034">#</a></h2>
@@ -276,7 +291,7 @@
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.4</b></span>
+    <span>liberika <b>v0.3.7</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

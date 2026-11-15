@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>字幕与弹幕 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261106-034">
-<script defer src="../docs.js?v=20261106-034"></script>
+<link rel="stylesheet" href="../docs.css?v=20261116-037">
+<script defer src="../docs.js?v=20261116-037"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <div class="language-switch" role="group" aria-label="语言"><a href="subtitle-danmaku.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="subtitle-danmaku.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="subtitle-danmaku.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -71,7 +71,7 @@
   <section id="subtitle">
     <h2>字幕<span class="jp">字幕</span><a class="anchor" href="#subtitle">#</a></h2>
     <p>字幕轨分嵌入与外挂两种来源（<code>ErikaTrackSource</code>）。外挂字幕经 <code>add_external_subtitle</code> 添加，返回轨道 id；字幕轨 id 为 -1 表示禁用字幕。外部文本字幕自带字符集检测与转码，覆盖 GBK、Big5、Shift_JIS、UTF-16，UTF-8 直通，低置信度或二进制输入走保守回退。</p>
-    <p>渲染统一由 libass 完成，内嵌的 Droid Sans Fallback 在所有平台上注册为内存字体，无系统字体提供者的目标平台默认使用该家族。</p>
+    <p>字幕由 libass 渲染。原生目标优先使用可读取的系统字体补足缺字；启用默认的 <code>embedded-fallback-font</code> feature 时，才会注册内嵌 Droid Sans Fallback 作为后续回退。关闭该 feature 的构建需依赖系统字体或宿主提供的字体数据。</p>
     <h3>样式覆盖</h3>
     <p>宿主可以整体覆盖字幕样式。覆盖粒度按位控制，<code>ErikaSubtitleStyle.override_mask</code> 的位标志：</p>
     <div class="tw">
@@ -136,7 +136,7 @@
         <tbody>
           <tr><td class="m">content<br><span class="en">(text, c)</span></td><td class="k">String</td><td class="m">—</td><td>弹幕正文。缺失或仅含空白字符的条目会被自动跳过。</td></tr>
           <tr><td class="m">time<br><span class="en">(t)</span></td><td class="k">Number / String</td><td class="m">0.0</td><td>弹幕呈现时间（秒），支持浮点秒数（如 <code>12.45</code>）。</td></tr>
-          <tr><td class="m">type<br><span class="en">(mode, y)</span></td><td class="k">String / Number</td><td class="m">"scroll"</td><td>弹幕类型：<code>scroll</code> / <code>1</code>（滚动）、<code>bottom</code> / <code>4</code>（底部固定）、<code>top</code> / <code>5</code>（顶部固定）、<code>reverse</code> / <code>6</code>（逆向滚动）、<code>special</code> / <code>7</code>（高级特殊，当前解析后不进入布局渲染）。亦可使用数值字段 <code>type_code</code> / <code>mode_code</code>。</td></tr>
+          <tr><td class="m">type<br><span class="en">(mode, y)</span></td><td class="k">String / Number</td><td class="m">"scroll"</td><td>弹幕类型：<code>scroll</code> / <code>1</code>（滚动）、<code>bottom</code> / <code>4</code>（底部固定）、<code>top</code> / <code>5</code>（顶部固定）、<code>reverse</code> / <code>6</code>（逆向滚动）、<code>special</code> / <code>7</code>（mode 7 高级弹幕，支持定位、直线运动、时长与透明度渐变；暂不支持旋转和多行）。亦可使用数值字段 <code>type_code</code> / <code>mode_code</code>。</td></tr>
           <tr><td class="m">color<br><span class="en">(r)</span></td><td class="k">Number / String</td><td class="m">白色</td><td>弹幕颜色：支持十进制 RGB 整数（如 <code>16777215</code>）、完整的 <code>#RRGGBB</code> 十六进制字符串（如 <code>"#FFFFFF"</code>）或 CSS <code>rgb(r,g,b)</code>。注：不应使用 <code>#FFF</code> 等 3 位缩写（会按 16 进制直接解析为 <code>0x000FFF</code>）。</td></tr>
           <tr><td class="m">font_size<br><span class="en">(fontSize, size, s)</span></td><td class="k">Number / String</td><td class="m">25.0</td><td>源参考字号（点）。最终呈现字号还会相对全局配置与表面 scale 缩放。</td></tr>
           <tr><td class="m">opacity<br><span class="en">(alpha, a)</span></td><td class="k">Number / String</td><td class="m">1.0</td><td>自定义不透明度（<code>0.0</code> ~ <code>1.0</code>）。</td></tr>
@@ -171,8 +171,14 @@
     <p>暂停跳转、长字幕跨 seek 和暂停切轨会重新计算当前字幕。系统字体回退通过零拷贝覆盖检查与有界 LRU 缓存控制内存，保留有效字形。</p>
   </section>
 
+  <section id="fonts-and-mode7">
+    <h2>系统字体、彩色 Emoji 与高级弹幕<a class="anchor" href="#fonts-and-mode7">#</a></h2>
+    <p>0.3.6 起，原生字幕与弹幕优先选择系统字体，再使用内嵌回退字体。原生弹幕支持彩色 Emoji，Web 弹幕使用浏览器 Canvas 与系统彩色字体；libass 字幕仍为单色。iOS 18+ / tvOS 的中文需保留内嵌回退字体，或由宿主提供可读取的字体。</p><p>0.3.7 支持 Bilibili mode 7 定位、直线运动、时长和透明度渐变；尚不支持旋转、多行、mode 8 代码弹幕或 mode 9 BAS。直接构造 Rust DanmakuItem 时，普通弹幕填写 special: None；XML / JSON 解析器自动处理。</p><p>0.3.5 起外挂字幕加载失败仍向调用者返回错误，但不再发出终止播放的全局错误；宿主可显示错误并允许重试。重复 UTF-8 BOM 会被归一。</p>
+    <p>自行绘制原生弹幕的宿主必须同时处理 <code>DanmakuRenderPlan.color_atlas</code> 与 <code>color_glyphs</code>，不能只绘制单色 glyph atlas，否则彩色 Emoji 不会显示。带 <code>libass</code> 的构建用 HarfBuzz 合成旗帜、肤色、家庭等组合；缺少组合字形或关闭 <code>libass</code> 时逐个字形绘制。</p>
+  </section>
+
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.4</b></span>
+    <span>liberika <b>v0.3.7</b></span>
     <span>Section <b>Kernel</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

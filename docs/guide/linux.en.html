@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Linux integration — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261106-034">
-<script defer src="../docs.js?v=20261106-034"></script>
+<link rel="stylesheet" href="../docs.css?v=20261116-037">
+<script defer src="../docs.js?v=20261116-037"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
   <div class="language-switch" role="group" aria-label="Language"><a href="linux.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="linux.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="linux.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,22 +53,27 @@
       <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Linux integration</p>
   <h1>Linux integration</h1>
   <p class="kicker">Linux / X11 / Wayland / WSLg</p>
-  <p class="lead">Version 0.2.1 added experimental Linux support. Rust, C/C++, and Flutter hosts can display video through X11 or Wayland and output audio through PulseAudio. Linux is currently built from source; there is no prebuilt release package.</p>
+  <p class="lead">Linux now has x86_64 and ARM64 prebuilt bundles in bundled and system modes. Rust, C/C++, and Flutter hosts render through X11 or Wayland and output audio through PulseAudio. HDR surfaces and direct VA-API import remain experimental.</p>
   <ul class="meta-strip">
     <li>Depends on <b>FFmpeg 8.x</b></li>
     <li>Window <b>X11 / Wayland</b></li>
     <li>Audio <b>PulseAudio</b></li>
   </ul>
 
+  <section id="prebuilt">
+    <h2>Prebuilt bundles<a class="anchor" href="#prebuilt">#</a></h2>
+<p>All four archives are built on Ubuntu 22.04 / glibc 2.35, with maximum requirements GLIBCXX_3.4.30 and CXXABI_1.3.13. Ubuntu 26.04 is not required.</p><div class="tw"><table><thead><tr><th>CPU</th><th>bundled</th><th>system</th></tr></thead><tbody><tr><td>x86_64</td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/erika-capi-linux-x64-bundled.zip">erika-capi-linux-x64-bundled.zip</a></td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/erika-capi-linux-x64-system.zip">erika-capi-linux-x64-system.zip</a></td></tr><tr><td>ARM64</td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/erika-capi-linux-arm64-bundled.zip">erika-capi-linux-arm64-bundled.zip</a></td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/erika-capi-linux-arm64-system.zip">erika-capi-linux-arm64-system.zip</a></td></tr></tbody></table></div><p>bundled statically embeds FFmpeg, dav1d, zlib, patched libass and font libraries, but still needs system libc/libstdc++, PulseAudio, Fontconfig, VA-API/DRM, the Vulkan loader and GPU drivers. system uses FFmpeg 8 and font shared libraries; patched libass and SoundTouch remain embedded.</p><p>The system mode needs ABI-compatible shared libraries, not just an ffmpeg executable: avdevice/avformat/avcodec 62, avfilter 11, swresample 6, swscale 9, and avutil 60. Read each archive’s DEPENDENCIES.txt, use its matching erika.h, and verify the download against SHA256SUMS.</p>
+  </section>
+
   <section id="deps">
-    <h2>Install dependencies<a class="anchor" href="#deps">#</a></h2>
+    <h2>Alternative: source build with system libraries<a class="anchor" href="#deps">#</a></h2>
     <p>The following commands are for Ubuntu 26.04. Rust 1.92+ is required. The older FFmpeg in the default Ubuntu 22.04 and 24.04 repositories does not satisfy this build path.</p>
     <div class="code">
       <p class="lbl">Ubuntu 26.04</p>
@@ -92,7 +97,7 @@ sudo apt install -y \
       <p class="lbl">shell</p>
 <pre>git clone https://github.com/AimesSoft/liberika.git
 cd liberika
-git checkout v0.3.4
+git checkout v0.3.7
 bash scripts/build_linux_libass.sh
 cargo build --locked --release -p linux_native_demo -p erika_capi
 cargo run --locked --release -p linux_native_demo -- /path/to/video.mkv</pre>
@@ -103,15 +108,8 @@ cargo run --locked --release -p linux_native_demo -- /path/to/video.mkv</pre>
 
   <section id="flutter">
     <h2>Flutter integration<a class="anchor" href="#flutter">#</a></h2>
-    <div class="code">
-      <p class="lbl">shell</p>
-<pre>cargo build --locked --release -p erika_capi
-export ERIKA_LIBRARY_DIR=&quot;${CARGO_TARGET_DIR:-$PWD/target}/release&quot;
-# Run in the Flutter host directory:
-flutter build linux --release</pre>
-    </div>
-    <p>Add <code>erika_flutter: ^0.3.4</code> to the host app. <code>ErikaVideoView</code> and <code>ErikaTextureVideoView</code> use an SDR RGBA texture and support Flutter clipping and UI overlays; this path requires a per-frame GPU readback.</p>
-    <p>On Wayland you can optionally use <code>ErikaWindowOverlayVideoView</code>, which places the native video under the transparent Flutter UI with <code>wl_subsurface</code> to reduce per-frame RGBA readback. Leave the video area transparent. This native layer supports opaque srcOver compositing, and the video itself does not accept Flutter clipping or color filters. X11 uses the texture views.</p>
+<p>After extracting a prebuilt archive, point ERIKA_LIBRARY_DIR at its absolute lib/ path. The Linux plugin does not download archives automatically. Add erika_flutter: ^0.3.7 to the host.</p><div class="code"><p class="lbl">shell</p><pre>export ERIKA_LIBRARY_DIR=/absolute/path/to/extracted/lib
+flutter build linux --release</pre></div><p>ErikaVideoView / ErikaTextureVideoView use an SDR RGBA texture with Flutter clipping and overlays, but require per-frame GPU readback. On Wayland, ErikaWindowOverlayVideoView places native video below transparent Flutter UI through wl_subsurface to reduce readback; the video itself does not support Flutter clipping or color filters. X11 uses the texture views.</p>
   </section>
 
   <section id="native">
@@ -126,6 +124,19 @@ flutter build linux --release</pre>
     </table></div>
     <p>Attach a window with <code>erika_presenter_attach_wgpu_surface</code>. Convert pointers to <code>uint64_t</code> through <code>uintptr_t</code>, and pass the width and height in physical pixels. Release the window and display only after detach completes or the presenter is destroyed. Run attach, render, resize, and detach for the same presenter serially on the window event thread.</p>
     <p>Call order: <code>create → attach → open → play → render_tick → close → detach → destroy</code>. A runnable C example is at <code>examples/linux_native_demo/capi_smoke.c</code>.</p>
+  </section>
+
+  <section id="rust-consumer">
+    <h2>External Rust workspaces<a class="anchor" href="#rust-consumer">#</a></h2>
+<p>External Rust workspaces must add the HAL patch to their own root Cargo.toml. Cargo does not inherit a dependency’s [patch.crates-io]; Vulkan direct import needs the patch to preserve external image contents. Pin the dependency and patch to the same tag or commit:</p><div class="code"><p class="lbl">Cargo.toml</p><pre>[dependencies]
+erika = { git = &quot;https://github.com/AimesSoft/liberika&quot;, tag = &quot;v0.3.7&quot;, features = [&quot;wgpu&quot;] }
+
+[patch.crates-io]
+wgpu-hal = { git = &quot;https://github.com/AimesSoft/liberika&quot;, tag = &quot;v0.3.7&quot; }</pre></div><p>If an existing lockfile still selects the registry HAL, run cargo update -p wgpu-hal --precise 29.0.3, verify the source with cargo tree -i wgpu-hal, and commit Cargo.lock. Linux consumers also need PIC settings in their own .cargo/config.toml: soundtouch-ffi disables PIC by default, and dependency repositories’ .cargo settings do not propagate:</p><div class="code"><p class="lbl">.cargo/config.toml</p><pre>[env]
+CFLAGS_x86_64_unknown_linux_gnu = &quot;-fPIC&quot;
+CXXFLAGS_x86_64_unknown_linux_gnu = &quot;-fPIC&quot;
+CFLAGS_aarch64_unknown_linux_gnu = &quot;-fPIC&quot;
+CXXFLAGS_aarch64_unknown_linux_gnu = &quot;-fPIC&quot;</pre></div>
   </section>
 
   <section id="gpu">
@@ -164,7 +175,7 @@ ERIKA_TEST_WAYLAND=1 bash scripts/check_linux.sh</pre>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.4</b></span>
+    <span>liberika <b>v0.3.7</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

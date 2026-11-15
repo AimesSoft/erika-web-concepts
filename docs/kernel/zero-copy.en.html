@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Zero-copy import — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261106-034">
-<script defer src="../docs.js?v=20261106-034"></script>
+<link rel="stylesheet" href="../docs.css?v=20261116-037">
+<script defer src="../docs.js?v=20261116-037"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
   <div class="language-switch" role="group" aria-label="Language"><a href="zero-copy.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="zero-copy.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="zero-copy.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -107,12 +107,17 @@
 
   <section id="linux">
     <h2>Linux GPU import<a class="anchor" href="#linux">#</a></h2>
-    <p>On Linux, VA-API can map NV12 / P010 to a Vulkan image through FFmpeg's <code>AV_HWFRAME_MAP_DIRECT</code>, and wgpu samples it directly. This experimental path requires a compatible device with external memory, semaphores, and related capabilities.</p>
+    <p>On Linux, FFmpeg maps VA-API NV12 / P010 frames into Vulkan images for wgpu sampling. Version 0.3.7 removes the forced AV_HWFRAME_MAP_DIRECT flag that made some FFmpeg 8.1 / 9 driver paths fail with EINVAL. Compatible devices, external memory and synchronization support are still required.</p>
     <p>The regular NVDEC and WSL OpenGL paths pass planes through the CPU; the optional WSL D3D12 path uses a GPU copy. A native Wayland video layer can reduce Flutter RGBA readback, but that is a separate matter from whether decoded frames are zero-copy. For build steps, see <a href="../guide/linux.en.html">Linux integration</a>.</p>
   </section>
 
+  <section id="dmabuf-export">
+    <h2>Linear dma-buf output on Linux (Rust)<a class="anchor" href="#dmabuf-export">#</a></h2>
+    <p>export_frame_dmabuf(w, h, scale) drives playback and composites video, subtitles and danmaku, then uses one same-device GPU copy to produce linear RGBA8. GTK / EGL / Wayland hosts need no Vulkan device of their own. Import using raw_fd(), stride() and offset(); fourcc is ABGR8888 and modifier is 0. Slots are reused after three exports, so finish consuming and close the descriptor before reuse. This differs from the independently retained immutable export_frame_texture. The C API has no new dma-buf entry point.</p><p><a href="https://github.com/AimesSoft/liberika/blob/v0.3.7/docs/external_textures.md">Native texture ownership and import contracts</a></p>
+  </section>
+
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.4</b></span>
+    <span>liberika <b>v0.3.7</b></span>
     <span>Section <b>Kernel</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ビルドと依存関係 — liberika 開発者ドキュメント</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261106-034">
-<script defer src="../docs.js?v=20261106-034"></script>
+<link rel="stylesheet" href="../docs.css?v=20261116-037">
+<script defer src="../docs.js?v=20261116-037"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
   <div class="language-switch" role="group" aria-label="言語"><a href="building.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="building.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="building.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -116,13 +116,15 @@ third_party/dist      <span class="c"># 按 target / profile 分隔的产物前�
       <p class="lbl">ビルドプロセスを完了する</p>
 <pre>cargo run -p xtask -- deps plan                 <span class="c"># 打印依赖计划</span>
 cargo run -p xtask -- deps fetch                <span class="c"># 下载并解压源码</span>
-cargo run -p xtask -- deps build                <span class="c"># 构建 host 目标</span></pre>
+cargo run -p xtask -- deps build --all          <span class="c"># 构建 host 目标</span></pre>
     </div>
     <div class="tw">
       <table>
         <thead><tr><th>オプション</th><th>値</th><th>デフォルト</th></tr></thead>
         <tbody>
           <tr><td class="k">--profile</td><td>lgpl / gpl-full</td><td>lgpl</td></tr>
+          <tr><td class="k">--ffmpeg</td><td>FFmpeg 形式セット（full、common、slim、slim,&lt;group&gt;）</td><td>full</td></tr>
+          <tr><td class="k">--crt</td><td>Windows C ランタイム（dynamic / static）</td><td>dynamic</td></tr>
           <tr><td class="k">--target</td><td>以下の表 target を参照してください。</td><td>host</td></tr>
           <tr><td class="k">--force</td><td>ネイティブ依存関係を強制的に再構築する</td><td>近い;デフォルトで完成品を再利用する</td></tr>
           <tr><td class="k">--all</td><td>字幕スタックの追加構成: libass + FreeType + HarfBuzz + FriBidi (fetch はこれら 4 つのソース コードを同時にキャプチャします)</td><td>ビデオスタックのみを構築する</td></tr>
@@ -134,12 +136,20 @@ cargo run -p xtask -- deps build                <span class="c"># 构建 host �
     <p class="note">ビルド結果は、profile を使用してターゲットごとにビルド タグを保存します。 FFmpeg と dav1d は、バージョン、パッチ、ビルド オプションをチェックします。変わった <code>xtask/src/main.rs</code> または <code>third_party/patches/</code> 後で必要になる <code>deps build --force</code> 再構築をトリガーします。</p>
   </section>
 
+  <section id="windows">
+    <h2>Windows / MSVC<a class="anchor" href="#windows">#</a></h2>
+<p>Windows の v0.3.7 では、xtask の出力先と Cargo を一致させるため MSVC target を明示します。x64 の例：</p><div class="code"><p class="lbl">PowerShell</p><pre>cargo run -p xtask -- deps build --all --profile lgpl --target x86_64-pc-windows-msvc
+$env:ERIKA_NATIVE_TARGET = &quot;x86_64-pc-windows-msvc&quot;
+cargo build --locked -p erika_capi --target x86_64-pc-windows-msvc</pre></div><p>ARM64 では aarch64-pc-windows-msvc を使用します。既定は DLL CRT（/MD）です。Rust が -C target-feature=+crt-static を使う場合だけ --crt static を追加します。静的 CRT の依存は lgpl-crt-static に分離されます。</p>
+  </section>
+
   <section id="targets">
     <h2>ターゲットリスト<span class="jp">ターゲット</span><a class="anchor" href="#targets">#</a></h2>
     <div class="tw">
       <table>
         <thead><tr><th>targetパラメータ</th><th>プラットフォーム</th></tr></thead>
         <tbody>
+          <tr><td class="m">x86_64-unknown-linux-gnu / aarch64-unknown-linux-gnu</td><td>Linux（GNU、同一 CPU のネイティブビルド）。</td></tr>
           <tr><td class="m">host</td><td>現在のマシン。</td></tr>
           <tr><td class="m">aarch64-apple-darwin / x86_64-apple-darwin</td><td>macOS。</td></tr>
           <tr><td class="m">aarch64-apple-ios</td><td>iOS実機。</td></tr>
@@ -160,7 +170,7 @@ cargo run -p xtask -- deps build                <span class="c"># 构建 host �
 <pre>cargo build --workspace
 cargo test --workspace</pre>
     </div>
-    <p>ワークスペースには 3 つの crate が含まれています。<code>erika</code>(カーネル)、<code>erika_capi</code>（C ABI）、<code>erika_ffmpeg_sys</code>(FFmpeg バインディング)、および <code>xtask</code> 20以上の例があります。例は、特定のパスを検証する最小限のプログラムです。</p>
+    <p>ワークスペースには 4 つのライブラリ crate が含まれています。<code>erika</code>(カーネル)、<code>erika_capi</code>（C ABI）、<code>erika_plugin</code> （プラグイン ABI）、 <code>erika_ffmpeg_sys</code>(FFmpeg バインディング)、および <code>xtask</code> 20以上の例があります。例は、特定のパスを検証する最小限のプログラムです。</p>
     <div class="code">
       <p class="lbl">macOS デスクトップのスモークテスト</p>
 <pre>cargo run -p macos_native_demo -- --smoke-seconds 3 /path/to/video.mp4</pre>
@@ -169,18 +179,14 @@ cargo test --workspace</pre>
   </section>
 
   <section id="linux">
-    <h2>Linux システムライブラリ構築<a class="anchor" href="#linux">#</a></h2>
-    <p>Linux は、システム FFmpeg 8 および PulseAudio を使用し、liberika パッチ バージョン libass を個別にビルドします。入り口はxtaskのリリースターゲットとは異なります:</p>
-    <div class="code">
-      <p class="lbl">shell</p>
-<pre>bash scripts/build_linux_libass.sh
-cargo build --locked --release -p erika_capi -p linux_native_demo</pre>
-    </div>
-    <p>リリースの依存関係、Flutter ダイナミック ライブラリ パス、および X11 / Wayland の例が含まれています。 <a href="../guide/linux.ja.html">Linux アクセス</a>。システム FFmpeg のコーデックとライセンスは、ディストリビューションのビルドによって異なります。 lgpl profile を設定しても、システム ライブラリは変更されません。</p>
+    <h2>Linux のリリースとソースビルド<a class="anchor" href="#linux">#</a></h2>
+<p>0.3.7 は x64 / ARM64 × bundled / system の 4 種類の Linux ZIP を提供し、Ubuntu 22.04 / glibc 2.35 を基準にします。リリース用には同じ CPU の GNU/Linux ホスト、Rust 1.92+、Meson 1.8.5 と CI 記載の開発ツールが必要です。古いディストリビューション標準の Rust/Meson は使えません。各モードを別々に実行します：</p><div class="code"><p class="lbl">shell</p><pre>ERIKA_LINUX_DEPENDENCIES=bundled bash scripts/build_linux_release.sh
+
+ERIKA_LINUX_DEPENDENCIES=system bash scripts/build_linux_release.sh</pre></div><p>スクリプトは固定版の FFmpeg 8 SDK とビルド用ヘッダーを用意します。成果物は target/linux-&lt;mode&gt;/&lt;triple&gt;/release、ZIP は dist/ に分離します。bundled はメディア依存を内蔵し、system は一致する FFmpeg 8 共有ライブラリをホストに要求します。両方ともシステム音声・GPU ドライバーが必要です。Ubuntu 26.04 のシステムライブラリ方式も利用でき、scripts/build_linux_libass.sh の後に cargo build --locked --release -p erika_capi -p linux_native_demo を実行します。</p><p><a href="../guide/linux.ja.html#rust-consumer">Rust / C / Flutter · HAL patch · PIC</a></p>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.4</b></span>
+    <span>liberika <b>v0.3.7</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

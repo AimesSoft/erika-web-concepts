@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Building and dependencies — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261106-034">
-<script defer src="../docs.js?v=20261106-034"></script>
+<link rel="stylesheet" href="../docs.css?v=20261116-037">
+<script defer src="../docs.js?v=20261116-037"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
   <div class="language-switch" role="group" aria-label="Language"><a href="building.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="building.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="building.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -115,13 +115,15 @@ third_party/dist      <span class="c"># Output prefixes, split by target / profi
       <p class="lbl">Full build workflow</p>
 <pre>cargo run -p xtask -- deps plan                 <span class="c"># Print the dependency plan</span>
 cargo run -p xtask -- deps fetch                <span class="c"># Download and extract sources</span>
-cargo run -p xtask -- deps build                <span class="c"># Build the host target</span></pre>
+cargo run -p xtask -- deps build --all          <span class="c"># Build the host target</span></pre>
     </div>
     <div class="tw">
       <table>
         <thead><tr><th>Option</th><th>Values</th><th>Default</th></tr></thead>
         <tbody>
           <tr><td class="k">--profile</td><td>lgpl / gpl-full</td><td>lgpl</td></tr>
+          <tr><td class="k">--ffmpeg</td><td>FFmpeg format set (full, common, slim or slim,&lt;group&gt;)</td><td>full</td></tr>
+          <tr><td class="k">--crt</td><td>Windows C runtime (dynamic / static)</td><td>dynamic</td></tr>
           <tr><td class="k">--target</td><td>See the target table below</td><td>host</td></tr>
           <tr><td class="k">--force</td><td>Force a rebuild of native dependencies</td><td>Off; completed outputs are reused by default</td></tr>
           <tr><td class="k">--all</td><td>Also builds the subtitle stack: libass + FreeType + HarfBuzz + FriBidi (fetch downloads the sources of all four as well)</td><td>Builds only the video stack</td></tr>
@@ -133,12 +135,20 @@ cargo run -p xtask -- deps build                <span class="c"># Build the host
     <p class="note">Build results store a build marker per target and profile, and FFmpeg and dav1d check the version, patches, and build options against it. After you change <code>xtask/src/main.rs</code> or <code>third_party/patches/</code>, run <code>deps build --force</code> to trigger a rebuild.</p>
   </section>
 
+  <section id="windows">
+    <h2>Windows / MSVC<a class="anchor" href="#windows">#</a></h2>
+<p>On Windows, v0.3.7 requires an explicit MSVC target so the xtask output directory matches Cargo. For x64:</p><div class="code"><p class="lbl">PowerShell</p><pre>cargo run -p xtask -- deps build --all --profile lgpl --target x86_64-pc-windows-msvc
+$env:ERIKA_NATIVE_TARGET = &quot;x86_64-pc-windows-msvc&quot;
+cargo build --locked -p erika_capi --target x86_64-pc-windows-msvc</pre></div><p>For ARM64, use aarch64-pc-windows-msvc. The default is the DLL CRT (/MD); omit --crt static unless Rust uses -C target-feature=+crt-static. Static CRT dependencies are stored separately under lgpl-crt-static.</p>
+  </section>
+
   <section id="targets">
     <h2>Targets<span class="jp">ターゲット</span><a class="anchor" href="#targets">#</a></h2>
     <div class="tw">
       <table>
         <thead><tr><th>Target</th><th>Platform</th></tr></thead>
         <tbody>
+          <tr><td class="m">x86_64-unknown-linux-gnu / aarch64-unknown-linux-gnu</td><td>Linux (GNU, native build).</td></tr>
           <tr><td class="m">host</td><td>The current machine.</td></tr>
           <tr><td class="m">aarch64-apple-darwin / x86_64-apple-darwin</td><td>macOS.</td></tr>
           <tr><td class="m">aarch64-apple-ios</td><td>iOS device.</td></tr>
@@ -159,7 +169,7 @@ cargo run -p xtask -- deps build                <span class="c"># Build the host
 <pre>cargo build --workspace
 cargo test --workspace</pre>
     </div>
-    <p>The workspace contains three crates: <code>erika</code> (the kernel), <code>erika_capi</code> (the C ABI), and <code>erika_ffmpeg_sys</code> (the FFmpeg bindings), plus <code>xtask</code> and more than 20 examples. Each example is a minimal program that exercises one specific path:</p>
+    <p>The workspace contains four library crates: <code>erika</code> (the kernel), <code>erika_capi</code> (the C ABI), and <code>erika_plugin</code> (plugin ABI), <code>erika_ffmpeg_sys</code> (the FFmpeg bindings), plus <code>xtask</code> and more than 20 examples. Each example is a minimal program that exercises one specific path:</p>
     <div class="code">
       <p class="lbl">macOS desktop smoke test</p>
 <pre>cargo run -p macos_native_demo -- --smoke-seconds 3 /path/to/video.mp4</pre>
@@ -168,18 +178,14 @@ cargo test --workspace</pre>
   </section>
 
   <section id="linux">
-    <h2>Building against Linux system libraries<a class="anchor" href="#linux">#</a></h2>
-    <p>Linux uses the system FFmpeg 8 and PulseAudio, and builds liberika's patched libass separately. The entry point differs from xtask's release targets:</p>
-    <div class="code">
-      <p class="lbl">shell</p>
-<pre>bash scripts/build_linux_libass.sh
-cargo build --locked --release -p erika_capi -p linux_native_demo</pre>
-    </div>
-    <p>For distribution dependencies, the Flutter dynamic library path, and X11 / Wayland examples, see <a href="../guide/linux.en.html">Linux integration</a>. The codecs and license of the system FFmpeg depend on how your distribution built it; setting the lgpl profile does not change system libraries.</p>
+    <h2>Linux release and source builds<a class="anchor" href="#linux">#</a></h2>
+<p>Version 0.3.7 provides four Linux ZIPs: x64 / ARM64 × bundled / system, all based on Ubuntu 22.04 / glibc 2.35. Release builds need a native GNU/Linux host of the matching CPU, Rust 1.92+, Meson 1.8.5 and the development tools listed in CI; the old distro Rust/Meson are insufficient. Run the modes separately:</p><div class="code"><p class="lbl">shell</p><pre>ERIKA_LINUX_DEPENDENCIES=bundled bash scripts/build_linux_release.sh
+
+ERIKA_LINUX_DEPENDENCIES=system bash scripts/build_linux_release.sh</pre></div><p>The script prepares a pinned FFmpeg 8 SDK and build headers. Outputs are isolated in target/linux-&lt;mode&gt;/&lt;triple&gt;/release, with ZIPs in dist/. bundled embeds media dependencies; system requires matching FFmpeg 8 shared libraries on the host. Both need system audio and graphics drivers. The Ubuntu 26.04 system-library path remains available: run scripts/build_linux_libass.sh, then cargo build --locked --release -p erika_capi -p linux_native_demo.</p><p><a href="../guide/linux.en.html#rust-consumer">Rust / C / Flutter · HAL patch · PIC</a></p>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.4</b></span>
+    <span>liberika <b>v0.3.7</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

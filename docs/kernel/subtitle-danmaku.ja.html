@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>字幕と弾幕 — liberika 開発者ドキュメント</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261106-034">
-<script defer src="../docs.js?v=20261106-034"></script>
+<link rel="stylesheet" href="../docs.css?v=20261116-037">
+<script defer src="../docs.js?v=20261116-037"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
   <div class="language-switch" role="group" aria-label="言語"><a href="subtitle-danmaku.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="subtitle-danmaku.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="subtitle-danmaku.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -72,7 +72,7 @@
   <section id="subtitle">
     <h2>字幕<span class="jp">字幕</span><a class="anchor" href="#subtitle">#</a></h2>
     <p>字幕トラックは、埋め込みとプラグインの 2 つのソースに分かれています (<code>ErikaTrackSource</code>）。外部字幕 <code>add_external_subtitle</code> 追加、トラック id を返します。字幕トラック id は -1 で字幕を無効にします。外部テキスト字幕には文字セット検出とトランスコーディングが付属しており、GBK、Big5、Shift_JIS、UTF-16、UTF-8 パススルーをカバーし、信頼性の低い入力やバイナリ入力は控えめにフォールバックします。</p>
-    <p>レンダリングの統合は libass によって行われ、埋め込み Droid Sans Fallback はすべてのプラットフォームでメモリ内フォントとして登録され、システム フォント プロバイダーのないターゲット プラットフォームはデフォルトでこのファミリーを使用します。</p>
+    <p>字幕は libass が描画します。ネイティブ環境では不足する字形をまず読み取り可能なシステムフォントで補います。既定の <code>embedded-fallback-font</code> feature が有効な場合だけ、内蔵 Droid Sans Fallback を後段のフォールバックとして登録します。無効にしたビルドではシステムフォントかホスト提供のフォントデータが必要です。</p>
     <h3>スタイルの上書き</h3>
     <p>ホストは字幕スタイル全体をオーバーライドできます。カバレッジの粒度はビットによって制御されます。<code>ErikaSubtitleStyle.override_mask</code> ビットフラグ:</p>
     <div class="tw">
@@ -137,7 +137,7 @@
         <tbody>
           <tr><td class="m">content<br><span class="en">(text, c)</span></td><td class="k">String</td><td class="m">—</td><td>弾幕テキスト。欠落しているエントリ、または空白文字のみが含まれているエントリは、自動的にスキップされます。</td></tr>
           <tr><td class="m">time<br><span class="en">(t)</span></td><td class="k">Number / String</td><td class="m">0.0</td><td>弾幕表示時間 (秒)、浮動小数点秒をサポート (例: <code>12.45</code>）。</td></tr>
-          <tr><td class="m">type<br><span class="en">(mode, y)</span></td><td class="k">String / Number</td><td class="m">"scroll"</td><td>弾幕タイプ:<code>scroll</code> / <code>1</code>(スクロール)、<code>bottom</code> / <code>4</code>(底部固定)、<code>top</code> / <code>5</code>(上部固定)、<code>reverse</code> / <code>6</code>(逆スクロール)、<code>special</code> / <code>7</code>(高度な特殊。現在の解析後にレイアウトのレンダリングを開始しません)。数値フィールドも使用可能 <code>type_code</code> / <code>mode_code</code>。</td></tr>
+          <tr><td class="m">type<br><span class="en">(mode, y)</span></td><td class="k">String / Number</td><td class="m">"scroll"</td><td>弾幕タイプ:<code>scroll</code> / <code>1</code>(スクロール)、<code>bottom</code> / <code>4</code>(底部固定)、<code>top</code> / <code>5</code>(上部固定)、<code>reverse</code> / <code>6</code>(逆スクロール)、<code>special</code> / <code>7</code>（mode 7 の高度な弾幕。配置、直線移動、表示時間、不透明度の変化に対応し、回転と複数行は未対応）。数値フィールドも使用可能 <code>type_code</code> / <code>mode_code</code>。</td></tr>
           <tr><td class="m">color<br><span class="en">(r)</span></td><td class="k">Number / String</td><td class="m">白</td><td>弾幕カラー: 10 進数の RGB 整数 (例: <code>16777215</code>)、完了 <code>#RRGGBB</code> 16 進数の文字列 (例: <code>"#FFFFFF"</code>) または CSS <code>rgb(r,g,b)</code>。注: 使用しないでください <code>#FFF</code> およびその他の 3 桁の略語 (これらは直接解析されて <code>0x000FFF</code>）。</td></tr>
           <tr><td class="m">font_size<br><span class="en">(fontSize, size, s)</span></td><td class="k">Number / String</td><td class="m">25.0</td><td>ソース参照フォント サイズ (ポイント)。最終的にレンダリングされるフォント サイズも、グローバル構成とサーフェス scale に応じてスケーリングされます。</td></tr>
           <tr><td class="m">opacity<br><span class="en">(alpha, a)</span></td><td class="k">Number / String</td><td class="m">1.0</td><td>カスタムの不透明度 (<code>0.0</code> ~ <code>1.0</code>）。</td></tr>
@@ -172,8 +172,14 @@
     <p>一時停止ジャンプ、長い字幕スパン seek、および一時停止トラックのカットでは、現在の字幕が再計算されます。システム フォント フォールバックは、ゼロコピー上書きチェックと有界 LRU キャッシュを介してメモリを制御し、有効なグリフを保持します。</p>
   </section>
 
+  <section id="fonts-and-mode7">
+    <h2>システムフォント、カラー絵文字、高度な弾幕<a class="anchor" href="#fonts-and-mode7">#</a></h2>
+    <p>0.3.6 から、ネイティブの字幕と弾幕はシステムフォントを優先し、不足時に内蔵フォントへフォールバックします。ネイティブ弾幕はカラー絵文字、Web 弾幕はブラウザーの Canvas とカラーシステムフォントを使用します。libass 字幕は単色のままです。iOS 18+ / tvOS の中国語には内蔵フォント、またはホストが提供する読み取り可能なフォントが必要です。</p><p>0.3.7 は Bilibili mode 7 の配置、直線移動、表示時間、不透明度の変化に対応します。回転、複数行、mode 8 コード弾幕、mode 9 BAS は未対応です。通常の Rust DanmakuItem を直接作る場合は special: None を指定します。XML / JSON パーサーは自動処理します。</p><p>0.3.5 から外部字幕の読み込み失敗は呼び出し元へエラーを返し、再生全体を終了するイベントは発行しません。ホストでエラーを表示し、再試行できます。重複する UTF-8 BOM も正規化します。</p>
+    <p>ネイティブ弾幕を独自描画するホストは、単色 glyph atlas に加えて <code>DanmakuRenderPlan.color_atlas</code> と <code>color_glyphs</code> を処理してください。省略するとカラー絵文字が表示されません。<code>libass</code> 有効時は HarfBuzz が国旗・肌色・家族などの列を合成し、合成字形がない場合や <code>libass</code> 無効時は個別の字形を描画します。</p>
+  </section>
+
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.4</b></span>
+    <span>liberika <b>v0.3.7</b></span>
     <span>Section <b>Kernel</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

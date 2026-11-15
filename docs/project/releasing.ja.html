@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>リリースと製品 — liberika 開発者ドキュメント</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261106-034">
-<script defer src="../docs.js?v=20261106-034"></script>
+<link rel="stylesheet" href="../docs.css?v=20261116-037">
+<script defer src="../docs.js?v=20261116-037"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
   <div class="language-switch" role="group" aria-label="言語"><a href="releasing.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="releasing.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="releasing.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -61,11 +61,11 @@
   <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>project<span class="sep">/</span>リリースと製品</p>
   <h1>リリースと製品</h1>
   <p class="kicker">Releasing and Artifacts</p>
-  <p class="lead">release workflow ネイティブ ビルド <code>erika_capi</code> Web / WASM で製品をプリコンパイルし、GitHub Release にフックします。各 bundle にはライブラリ ファイルが含まれています。<code>erika.h</code>、MPL-2.0 ライセンスと依存関係の声明。デスクトップ Linux はまだリリースされていません。</p>
+  <p class="lead">v0.3.7 の C ABI と Web / WASM 配布物は公開済みです。Linux x64 / ARM64 の bundled / system 4 種類も含みます。各 native bundle は対応する erika.h、ライセンスと依存関係の通知を含み、Flutter、SwiftPM、OHPM の 0.3.7 も公開されています。</p>
 
   <ul class="meta-strip">
-    <li>プラットフォーム <b>6 ネイティブ + Web</b></li>
-    <li>ZIP アーカイブ <b>15</b> ある</li>
+    <li>プラットフォーム <b>7 ネイティブ + Web</b></li>
+    <li>ZIP アーカイブ <b>20</b> ある</li>
     <li>profile <b>lgpl</b></li>
   </ul>
 
@@ -102,24 +102,26 @@ git push origin "v${VERSION}"</pre>
           <tr><td class="k">Windows</td><td class="m">erika-capi-windows-x64<br>erika-capi-windows-arm64</td><td>DLL とインポート ライブラリ。</td></tr>
           <tr><td class="k">Android</td><td class="m">erika-capi-android</td><td>arm64 / armv7 / x86_64 / x86 4つのABIが1つに。</td></tr>
           <tr><td class="k">OpenHarmony</td><td class="m">erika-capi-openharmony-arm64</td><td>Flutter プラグイン ランタイム アーカイブ。スタンドアロン ArkTS SDK は OHPM 経由でリリースされました。</td></tr>
+          <tr><td class="k">Linux x64 / ARM64</td><td class="m">erika-capi-linux-x64-bundled<br>erika-capi-linux-x64-system<br>erika-capi-linux-arm64-bundled<br>erika-capi-linux-arm64-system</td><td>Ubuntu 22.04 / glibc 2.35 基準。.so、.a、対応ヘッダー、DEPENDENCIES.txt。</td></tr>
         </tbody>
       </table>
     </div>
-    <p>ネイティブの依存関係 (FFmpeg、dav1d、libass など) は、lgpl profile としてライブラリに静的にリンクされ、実行時のシステムのインストールには依存しません。</p>
+    <p>Linux bundled は FFmpeg、dav1d、zlib、パッチ済み libass とフォントライブラリを内蔵します。system はホストの FFmpeg 8 とフォント共有ライブラリを使い、パッチ済み libass と SoundTouch は内蔵します。どちらも libc/libstdc++、音声サービス、GPU ドライバーが必要で、完全静的ではありません。<a href="../guide/linux.ja.html#prebuilt">Linux ガイド</a>を参照してください。</p>
   </section>
 
   <section id="web">
     <h2>Web / WASM アーカイブ<a class="anchor" href="#web">#</a></h2>
-    <p><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.4/liberika-web-0.3.4.zip">liberika-web-0.3.4.zip</a> によって <code>cargo run -p xtask -- web build</code> JavaScript、2 つの WASM、Worker、ライセンスを含む生成、<code>build-manifest.json</code> そして <code>index.html</code> デモページ。ネイティブ ZIP で書き込みます <code>SHA256SUMS</code>。</p>
+    <p><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/liberika-web-0.3.7.zip">liberika-web-0.3.7.zip</a> によって <code>cargo run -p xtask -- web build</code> JavaScript、2 つの WASM、Worker、ライセンスを含む生成、<code>build-manifest.json</code> そして <code>index.html</code> デモページ。ネイティブ ZIP で書き込みます <code>SHA256SUMS</code>。</p>
     <p>完全な解凍後、HTTPS または localhost を通じてアクセスします。独立した静的展開では、ローカルの MKV 再生を選択できます。 Web パッケージはまだ npm にリリースされていません。アクセスと互換性の範囲を参照してください。 <a href="../guide/web.ja.html">Webガイド</a>。</p>
+      <p><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/liberika-web-nofont-0.3.7.zip">liberika-web-nofont-0.3.7.zip</a> は内蔵 Droid Sans Fallback（約 6 MB）を省略します。字幕と弾幕のフォントはホストが提供します。どちらの Web パッケージも npm には未公開です。</p>
   </section>
 
   <section id="ohpm">
     <h2>OpenHarmony OHPM パッケージ<span class="jp">OHPM パッケージ</span><a class="anchor" href="#ohpm">#</a></h2>
-    <p>OpenHarmony arm64 のネイティブ ArkTS パッケージ <code>erika</code> パス <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM</a> ディストリビューション、最小互換性は API 18 です。2026 年 11 月 6 日時点で 0.3.4 が公開されています。</p>
+    <p>OpenHarmony arm64 のネイティブ ArkTS パッケージ <code>erika</code> パス <a href="https://ohpm.openharmony.cn/#/cn/detail/erika">OHPM</a> ディストリビューション、最小互換性は API 18 です。2026 年 11 月 14 日時点で 0.3.7 が公開されています。</p>
     <div class="code">
       <p class="lbl">shell</p>
-<pre>ohpm install erika@0.3.4</pre>
+<pre>ohpm install erika@0.3.7</pre>
     </div>
     <p>パッケージには、一致する N-API bridge が含まれています <code>liberika_capi.so</code>、インターフェースは <code>XComponent</code> surface ライフサイクルを参照 <a href="https://github.com/AimesSoft/liberika/blob/main/packages/erika_ohos/README.md">OpenHarmony package guide</a>。</p>
   </section>
@@ -145,23 +147,25 @@ git push origin "v${VERSION}"</pre>
     <p>プリコンパイルされたランタイムは、Flutter プラグインのビルド時にデフォルトでダウンロードされます (<code>erika_flutter</code> pub.dev バージョンには検証とキャッシュが付属しています)。ソース コードからビルドする場合は、明示的にエクスポートする必要があります。</p>
     <div class="code">
 <pre><span class="k">export</span> ERIKA_FORCE_SOURCE_BUILD=1    <span class="c"># 改为源码构建（需 ERIKA_REPO_ROOT 指向仓库检出）</span>
-<span class="k">export</span> ERIKA_PREBUILT_TAG=v0.3.4       <span class="c"># 自定义预编译版本标签，默认匹配当前版本</span></pre>
+<span class="k">export</span> ERIKA_PREBUILT_TAG=v0.3.7       <span class="c"># 自定义预编译版本标签，默认匹配当前版本</span></pre>
     </div>
     <p>明示的なオーバーライド <code>ERIKA_PREBUILT_TAG</code> も設定する必要があります。 <code>ERIKA_PREBUILT_SHA256</code>;同じReleaseから <code>SHA256SUMS</code> 対応するプラットフォームの概要を読んでください。ソース コードのビルドとカスタム プリコンパイル バージョンは、2 つの独立した構成方法です。</p>
     <p>プラットフォームごとにスクリプトを構築する <code>github.com/AimesSoft/liberika/releases/download/&lt;tag&gt;/</code> 対応するbundleをダウンロードして解凍し、リリースレベルを押します <code>SHA256SUMS</code> 検証のまとめ。</p>
     <p>native ホストの消費方法: bundle を解凍し、<code>include/erika.h</code> 唯一のヘッダー ファイルとして、<code>lib/</code> ホスト内のライブラリをホストにリンクします。を参照してください。<a href="../guide/c.ja.html">C ABI 埋め込み</a>。</p>
+      <p class="note">Linux は例外で、プラグインは ZIP を自動ダウンロードしません。CPU と依存モードに合う配布物を展開し、ERIKA_LIBRARY_DIR=/absolute/path/to/extracted/lib を設定して Flutter ホストをビルドします。</p>
   </section>
 
   <section id="pipeline">
     <h2>ビルドとパッケージのリリースのプロセス<a class="anchor" href="#pipeline">#</a></h2>
     <p>mainの現在のRelease workflowは、macOSの2つの構造、sliceの3つ、tvOSの3つ、slice、Androidの4つ、ABI、Windows、OpenHarmonyの構造を個別に構築し、完成後にそれらをマージします。 universal / XCFramework、または ABI としてパッケージ化されています。ネイティブ依存関係キャッシュはターゲットに従って保存され、CI と Release が再利用されます。</p>
-    <p>このリリースでは、合計 15 の ZIP が生成されました: 9 つの C ABI アーカイブ、ABI で分割された 4 つの Flutter Android ランタイム、1 つの Swift XCFramework、および 1 つの Web / WASM パッケージ。<code>SHA256SUMS</code> すべてのアーカイブの概要を記録します。</p>
+    <p>v0.3.7 は 20 ZIP を公開します。C ABI 13 個（Linux 4 個を含む）、ABI 別 Flutter Android 4 個、Swift XCFramework 1 個、フォントあり / なしの Web / WASM 2 個です。SHA256SUMS に全配布物のダイジェストを記録します。</p>
     <p>ネイティブ タグが正常に公開されると、<code>Release ecosystem packages</code> Flutter / OHPM バージョンとネイティブ製品概要を更新し、pub.dev および OHPM をリリースします。 Swift XCFrameworkの構築とSwiftPMのリリースは並行して進められます。 OHPM が正常にアップロードされた後も、プラットフォームのレビューを完了する必要があります。公開版はregistryに従うものとします。</p>
     <p>メイン ブランチ CI は、変更パスに従ってネイティブ タスクを選択します。古いブランチのビルドはキャンセルできます。ドキュメントまたはエコロジカル パッケージ リリース スクリプトのみが変更された場合、メインの CI はネイティブ ビルドをスキップします。ネイティブ ソース コード、依存関係パッチ、および CI / Release ビルド スクリプトへの変更は引き続きトリガーされます。</p>
+      <p>Linux は x64 / ARM64 × bundled / system の 4 構成で検証します。Ubuntu 22.04 でビルドし、glibc シンボル要件を確認します。system モードの検証用 FFmpeg SDK は公開アーカイブに含めません。</p>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.4</b></span>
+    <span>liberika <b>v0.3.7</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

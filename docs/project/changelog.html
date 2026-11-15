@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>更新日志 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261106-034">
-<script defer src="../docs.js?v=20261106-034"></script>
+<link rel="stylesheet" href="../docs.css?v=20261116-037">
+<script defer src="../docs.js?v=20261116-037"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <div class="language-switch" role="group" aria-label="语言"><a href="changelog.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="changelog.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="changelog.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -63,9 +63,24 @@
   <p class="lead">按版本列出对宿主可见的变化。已回退的条目不在此列；完整历史以仓库根 <code>CHANGELOG.md</code> 为准。0.1.3 及更早的 breaking change 见文末小结。</p>
 
   <ul class="meta-strip">
-    <li>当前 <b>0.3.4</b></li>
-    <li>发布 <b>2026-11-06</b></li>
+    <li>当前 <b>0.3.7</b></li>
+    <li>发布 <b>2026-11-14</b></li>
   </ul>
+
+  <section id="v037">
+    <h2>0.3.7 · 2026-11-13<a class="anchor" href="#v037">#</a></h2>
+    <ul class="body"><li>新增 Linux x64 / ARM64 的 bundled 与 system 四种归档，构建基线为 Ubuntu 22.04 / glibc 2.35。Flutter 通过 ERIKA_LIBRARY_DIR 加载，不自动下载。</li><li>支持 Bilibili mode 7 高级弹幕；修复 D3D11 / wgpu 整条弹幕透明度。</li><li>Rust 新增 PresenterRuntime::export_frame_dmabuf：线性 RGBA8 dma-buf 输出，供 GTK / EGL / Wayland 宿主导入。</li></ul><p><a href="https://github.com/AimesSoft/liberika/releases/tag/v0.3.7">完整变更</a></p>
+  </section>
+
+  <section id="v036">
+    <h2>0.3.6 · 2026-11-07<a class="anchor" href="#v036">#</a></h2>
+    <ul class="body"><li>字幕和弹幕优先使用系统字体，缺字时回退内嵌字体；原生弹幕支持彩色 Emoji。字幕仍使用单色 libass 位图。</li><li>增加可选 embedded-fallback-font feature、Web nofont 包与 erika_embedded_fallback_font C 接口。iOS 18+ / tvOS 中文仍依赖内嵌回退字体。</li><li>发布静态库移除调试信息以减小体积；修复 Linux libass 补丁应用。</li></ul><p><a href="https://github.com/AimesSoft/liberika/releases/tag/v0.3.6">完整变更</a></p>
+  </section>
+
+  <section id="v035">
+    <h2>0.3.5 · 2026-11-07<a class="anchor" href="#v035">#</a></h2>
+    <ul class="body"><li>修复 Flutter Windows 原生视频挡住播放控件，Windows 超分通过系统 Vulkan loader 加载运行时。</li><li>外挂字幕加载失败不再终止播放；容忍重复 UTF-8 BOM。</li></ul><p><a href="https://github.com/AimesSoft/liberika/releases/tag/v0.3.5">完整变更</a></p>
+  </section>
 
   <section id="v034">
     <h2>0.3.4 · 2026-11-06<a class="anchor" href="#v034">#</a></h2>
@@ -275,7 +290,7 @@
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.4</b></span>
+    <span>liberika <b>v0.3.7</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

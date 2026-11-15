@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Subtitles and danmaku — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261106-034">
-<script defer src="../docs.js?v=20261106-034"></script>
+<link rel="stylesheet" href="../docs.css?v=20261116-037">
+<script defer src="../docs.js?v=20261116-037"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
   <div class="language-switch" role="group" aria-label="Language"><a href="subtitle-danmaku.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="subtitle-danmaku.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="subtitle-danmaku.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -71,7 +71,7 @@
   <section id="subtitle">
     <h2>Subtitles<span class="jp">字幕</span><a class="anchor" href="#subtitle">#</a></h2>
     <p>A subtitle track comes from one of two sources, embedded or external (<code>ErikaTrackSource</code>). Add an external subtitle with <code>add_external_subtitle</code>, which returns the track id. A subtitle track id of -1 disables subtitles. External text subtitles get built-in charset detection and transcoding that covers GBK, Big5, Shift_JIS, and UTF-16, passes UTF-8 through, and falls back conservatively for low-confidence or binary input.</p>
-    <p>libass handles all rendering. The built-in Droid Sans Fallback is registered as an in-memory font on every platform, and targets without a system font provider use that family by default.</p>
+    <p>libass renders subtitles. Native targets first try readable system fonts for missing glyphs. The embedded Droid Sans Fallback is registered as a later fallback only when the default <code>embedded-fallback-font</code> feature is enabled. Builds without it need system fonts or font data supplied by the host.</p>
     <h3>Style overrides</h3>
     <p>The host can override the subtitle style. The granularity is controlled bit by bit through the bit flags of <code>ErikaSubtitleStyle.override_mask</code>:</p>
     <div class="tw">
@@ -136,7 +136,7 @@
         <tbody>
           <tr><td class="m">content<br><span class="en">(text, c)</span></td><td class="k">String</td><td class="m">—</td><td>Danmaku text. Entries where it is missing or contains only whitespace are skipped.</td></tr>
           <tr><td class="m">time<br><span class="en">(t)</span></td><td class="k">Number / String</td><td class="m">0.0</td><td>Time at which the danmaku is shown, in seconds. Fractional seconds are supported (for example <code>12.45</code>).</td></tr>
-          <tr><td class="m">type<br><span class="en">(mode, y)</span></td><td class="k">String / Number</td><td class="m">"scroll"</td><td>Danmaku type: <code>scroll</code> / <code>1</code> (scrolling), <code>bottom</code> / <code>4</code> (fixed at the bottom), <code>top</code> / <code>5</code> (fixed at the top), <code>reverse</code> / <code>6</code> (reverse scrolling), <code>special</code> / <code>7</code> (advanced; currently parsed but not laid out or rendered). You can also use the numeric fields <code>type_code</code> / <code>mode_code</code>.</td></tr>
+          <tr><td class="m">type<br><span class="en">(mode, y)</span></td><td class="k">String / Number</td><td class="m">"scroll"</td><td>Danmaku type: <code>scroll</code> / <code>1</code> (scrolling), <code>bottom</code> / <code>4</code> (fixed at the bottom), <code>top</code> / <code>5</code> (fixed at the top), <code>reverse</code> / <code>6</code> (reverse scrolling), <code>special</code> / <code>7</code> (mode 7 advanced comments: positioning, linear motion, duration and opacity fades; rotation and multiline text are not supported). You can also use the numeric fields <code>type_code</code> / <code>mode_code</code>.</td></tr>
           <tr><td class="m">color<br><span class="en">(r)</span></td><td class="k">Number / String</td><td class="m">White</td><td>Danmaku color: a decimal RGB integer (for example <code>16777215</code>), a full <code>#RRGGBB</code> hex string (for example <code>"#FFFFFF"</code>), or CSS <code>rgb(r,g,b)</code>. Note: do not use 3-digit shorthand such as <code>#FFF</code>; it is parsed directly as hex <code>0x000FFF</code>.</td></tr>
           <tr><td class="m">font_size<br><span class="en">(fontSize, size, s)</span></td><td class="k">Number / String</td><td class="m">25.0</td><td>Reference font size of the source (in points). The final rendered size is also scaled by the global configuration and the surface scale.</td></tr>
           <tr><td class="m">opacity<br><span class="en">(alpha, a)</span></td><td class="k">Number / String</td><td class="m">1.0</td><td>Custom opacity (<code>0.0</code> to <code>1.0</code>).</td></tr>
@@ -171,8 +171,14 @@
     <p>Seeking while paused, a long subtitle that spans a seek, and switching tracks while paused all recompute the current subtitle. System font fallback bounds memory with a zero-copy coverage check and a bounded LRU cache, and keeps the valid glyphs.</p>
   </section>
 
+  <section id="fonts-and-mode7">
+    <h2>System fonts, color emoji and advanced danmaku<a class="anchor" href="#fonts-and-mode7">#</a></h2>
+    <p>Since 0.3.6, native subtitles and danmaku try system fonts before the embedded fallback. Native danmaku supports color emoji; Web danmaku uses browser Canvas and system color fonts. Libass subtitles remain monochrome. Chinese on iOS 18+ / tvOS still requires an embedded fallback or readable font bytes supplied by the host.</p><p>Version 0.3.7 supports Bilibili mode 7 positioning, straight-line motion, duration and opacity fades. Rotation, multiline text, mode 8 code comments and mode 9 BAS are not supported. When constructing a normal Rust DanmakuItem directly, supply special: None; XML / JSON parsers handle this automatically.</p><p>Since 0.3.5, external subtitle loading failures return an error to the caller without emitting a fatal playback event. The host can show the error and offer a retry. Repeated UTF-8 BOMs are normalized.</p>
+    <p>Hosts that draw native danmaku themselves must handle <code>DanmakuRenderPlan.color_atlas</code> and <code>color_glyphs</code> as well as the monochrome glyph atlas, or color emoji will be invisible. With <code>libass</code>, HarfBuzz composes flags, skin tones and family sequences; when a composed glyph is unavailable, or <code>libass</code> is disabled, glyphs are drawn separately.</p>
+  </section>
+
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.4</b></span>
+    <span>liberika <b>v0.3.7</b></span>
     <span>Section <b>Kernel</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

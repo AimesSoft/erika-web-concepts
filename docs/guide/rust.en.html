@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Rust integration — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261106-034">
-<script defer src="../docs.js?v=20261106-034"></script>
+<link rel="stylesheet" href="../docs.css?v=20261116-037">
+<script defer src="../docs.js?v=20261116-037"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
   <div class="language-switch" role="group" aria-label="Language"><a href="rust.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="rust.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="rust.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -73,7 +73,7 @@
     <div class="code">
       <p class="lbl">Cargo.toml</p>
 <pre>[dependencies]
-erika = { git = <span class="s">"https://github.com/AimesSoft/liberika"</span>, tag = <span class="s">"v0.3.4"</span> }</pre>
+erika = { git = <span class="s">"https://github.com/AimesSoft/liberika"</span>, tag = <span class="s">"v0.3.7"</span> }</pre>
     </div>
     <p>Before you build from source for the first time on Apple platforms, Windows, Android, or OpenHarmony, use xtask to compile the preset LGPL native dependencies (FFmpeg, libass, dav1d, and others):</p>
     <div class="code">
@@ -232,8 +232,17 @@ player.open(request)?;</pre>
 
   <p class="note">Version 0.3.1 adds <code>MediaRequest::with_start_position</code>, <code>PlayerEvent::Ended</code> on natural completion, <code>PresenterRuntime::set_subtitle_delay</code>, danmaku-inclusive capture and native frame texture export. An explicit stop does not emit Ended.</p>
 
+  <section id="linux-external">
+    <h2>External Linux workspaces and dma-buf<a class="anchor" href="#linux-external">#</a></h2>
+    <p>Enable wgpu and explicitly add the matching HAL patch to the consumer workspace root Cargo.toml: Cargo does not inherit a dependency repository’s patch. The Linux SoundTouch build also needs the consumer’s own PIC configuration; see the Linux guide for the complete setup.</p><div class="code"><p class="lbl">Cargo.toml</p><pre>[dependencies]
+erika = { git = "https://github.com/AimesSoft/liberika", tag = "v0.3.7", features = ["wgpu"] }
+
+[patch.crates-io]
+wgpu-hal = { git = "https://github.com/AimesSoft/liberika", tag = "v0.3.7" }</pre></div><p><a href="linux.en.html#native">Linux integration and PIC setup</a></p><p>export_frame_dmabuf(w, h, scale) drives playback and composites video, subtitles and danmaku, then uses one same-device GPU copy to produce linear RGBA8. GTK / EGL / Wayland hosts need no Vulkan device of their own. Import using raw_fd(), stride() and offset(); fourcc is ABGR8888 and modifier is 0. Slots are reused after three exports, so finish consuming and close the descriptor before reuse. This differs from the independently retained immutable export_frame_texture. The C API has no new dma-buf entry point.</p>
+  </section>
+
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.4</b></span>
+    <span>liberika <b>v0.3.7</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

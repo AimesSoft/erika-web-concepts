@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>开发者文档 — liberika</title>
 <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="docs.css?v=20261106-034">
-<script defer src="docs.js?v=20261106-034"></script>
+<link rel="stylesheet" href="docs.css?v=20261116-037">
+<script defer src="docs.js?v=20261116-037"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../index.html"><span class="n">liberika</span><span class="v">v0.3.4</span></a></div>
+  <div class="brand"><a href="../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <div class="language-switch" role="group" aria-label="语言"><a href="index.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="index.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="index.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,26 +53,25 @@
       <li><a href="reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.4<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../index.html">主页</a><span class="sep">/</span>docs</p>
   <h1>开发者文档</h1>
   <p class="kicker">Developer Documentation</p>
-  <p class="lead">liberika 是为现代跨平台音视频应用量身打造的高性能嵌入式播放内核。本文档面向在应用中接入 liberika 的工程团队，以及参与内核演进的开发者。内容以 <b>v0.3.4</b> 为准。项目现名 liberika，<code>erika</code> crate、<code>erika_*</code> C ABI 与 SDK 包名保持兼容。</p>
+  <p class="lead">liberika 是为现代跨平台音视频应用量身打造的高性能嵌入式播放内核。本文档面向在应用中接入 liberika 的工程团队，以及参与内核演进的开发者。内容以 <b>v0.3.7</b> 为准。项目现名 liberika，<code>erika</code> crate、<code>erika_*</code> C ABI 与 SDK 包名保持兼容。</p>
 
   <ul class="meta-strip">
-    <li>版本 <b>0.3.4</b></li>
-    <li>C ABI 导出 <b>119</b></li>
+    <li>版本 <b>0.3.7</b></li>
+    <li>C ABI 导出 <b>120</b></li>
     <li>Rust <b>1.92+</b></li>
     <li>许可证 <b>MPL-2.0</b></li>
   </ul>
 
-  <section id="release034">
-    <h2>0.3.4 更新<a class="anchor" href="#release034">#</a></h2>
-    <p>ArtCNN、Anime4K、FSR1、平台超分和自定义模型；Flutter 播放器使用独立原生线程。</p>
-    <p>核心、Flutter、Swift SDK 和 OHPM 的 0.3.4 均已公开。 <a href="project/changelog.html#v034">完整变更</a></p>
+  <section id="release037">
+    <h2>0.3.7 更新<a class="anchor" href="#release037">#</a></h2>
+    <p>Linux 双架构四种发布包、Bilibili mode 7 高级弹幕、线性 dma-buf 输出；0.3.6 还带来系统字体回退与彩色 Emoji。</p><p>核心、Flutter、Swift SDK 和 OHPM 的 0.3.7 均已公开（2026-11-16 核验）。 <a href="project/changelog.html#v037">完整变更</a></p>
   </section>
 
   <section id="release031">
@@ -99,7 +98,7 @@
       <div class="crow">
         <span class="no">02</span>
         <div class="ttl"><a href="guide/flutter.html">Flutter 嵌入</a><span class="en">Flutter Embedding</span></div>
-        <div class="txt">官方插件覆盖七个平台，提供原生视频层、Flutter 纹理与兼容视图；Linux 从源码构建。</div>
+        <div class="txt">Linux x64 / ARM64 提供 bundled 与 system 发布包；Flutter 手动解压并配置 ERIKA_LIBRARY_DIR，也可源码构建。</div>
       </div>
       <div class="crow">
         <span class="no">03</span>
@@ -124,7 +123,7 @@
       <div class="crow">
         <span class="no">07</span>
         <div class="ttl"><a href="guide/linux.html">Linux 接入</a><span class="en">Linux / WSLg</span></div>
-        <div class="txt">实验性 Linux 支持：FFmpeg 8、X11 / Wayland、PulseAudio 与 Flutter 源码接入。</div>
+        <div class="txt">Linux x64 / ARM64 发布包、FFmpeg 8、X11 / Wayland、PulseAudio 与 Flutter 接入。</div>
       </div>
       <div class="crow">
         <span class="no">08</span>
@@ -236,7 +235,7 @@
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.4</b></span>
+    <span>liberika <b>v0.3.7</b></span>
     <span>Source <b>crates/erika_capi/include/erika.h</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
