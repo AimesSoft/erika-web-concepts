@@ -107,7 +107,7 @@
 
   <section id="linux">
     <h2>Linux GPU import<a class="anchor" href="#linux">#</a></h2>
-    <p>On Linux, FFmpeg maps VA-API NV12 / P010 frames into Vulkan images for wgpu sampling. Version 0.3.7 removes the forced AV_HWFRAME_MAP_DIRECT flag that made some FFmpeg 8.1 / 9 driver paths fail with EINVAL. Compatible devices, external memory and synchronization support are still required.</p>
+    <p>On Linux, FFmpeg maps VA-API NV12 / P010 frames into Vulkan images for wgpu sampling. Version 0.3.7 removes the forced AV_HWFRAME_MAP_DIRECT flag that made some FFmpeg 8.1 / 9 driver paths fail with EINVAL. This experimental path still requires compatible devices, external memory and synchronization support.</p>
     <p>The regular NVDEC and WSL OpenGL paths pass planes through the CPU; the optional WSL D3D12 path uses a GPU copy. A native Wayland video layer can reduce Flutter RGBA readback, but that is a separate matter from whether decoded frames are zero-copy. For build steps, see <a href="../guide/linux.en.html">Linux integration</a>.</p>
   </section>
 

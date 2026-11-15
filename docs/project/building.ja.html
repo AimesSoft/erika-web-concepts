@@ -183,6 +183,7 @@ cargo test --workspace</pre>
 <p>0.3.7 は x64 / ARM64 × bundled / system の 4 種類の Linux ZIP を提供し、Ubuntu 22.04 / glibc 2.35 を基準にします。リリース用には同じ CPU の GNU/Linux ホスト、Rust 1.92+、Meson 1.8.5 と CI 記載の開発ツールが必要です。古いディストリビューション標準の Rust/Meson は使えません。各モードを別々に実行します：</p><div class="code"><p class="lbl">shell</p><pre>ERIKA_LINUX_DEPENDENCIES=bundled bash scripts/build_linux_release.sh
 
 ERIKA_LINUX_DEPENDENCIES=system bash scripts/build_linux_release.sh</pre></div><p>スクリプトは固定版の FFmpeg 8 SDK とビルド用ヘッダーを用意します。成果物は target/linux-&lt;mode&gt;/&lt;triple&gt;/release、ZIP は dist/ に分離します。bundled はメディア依存を内蔵し、system は一致する FFmpeg 8 共有ライブラリをホストに要求します。両方ともシステム音声・GPU ドライバーが必要です。Ubuntu 26.04 のシステムライブラリ方式も利用でき、scripts/build_linux_libass.sh の後に cargo build --locked --release -p erika_capi -p linux_native_demo を実行します。</p><p><a href="../guide/linux.ja.html#rust-consumer">Rust / C / Flutter · HAL patch · PIC</a></p>
+    <p>システム FFmpeg のコーデックとライセンスは、ディストリビューションのビルドによって異なります。 lgpl profile を設定しても、システム ライブラリは変更されません。</p>
   </section>
 
   <footer class="doc-foot">

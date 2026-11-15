@@ -60,7 +60,7 @@
   <p class="crumb"><a href="../../index.html">Home</a><span class="sep">/</span><a href="../index.en.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Linux integration</p>
   <h1>Linux integration</h1>
   <p class="kicker">Linux / X11 / Wayland / WSLg</p>
-  <p class="lead">Linux now has x86_64 and ARM64 prebuilt bundles in bundled and system modes. Rust, C/C++, and Flutter hosts render through X11 or Wayland and output audio through PulseAudio. HDR surfaces and direct VA-API import remain experimental.</p>
+  <p class="lead">Linux support remains experimental, with x86_64 and ARM64 prebuilt bundles now available in bundled and system modes. Rust, C/C++, and Flutter hosts render through X11 or Wayland and output audio through PulseAudio. HDR surfaces and direct VA-API import remain experimental.</p>
   <ul class="meta-strip">
     <li>Depends on <b>FFmpeg 8.x</b></li>
     <li>Window <b>X11 / Wayland</b></li>
@@ -109,7 +109,7 @@ cargo run --locked --release -p linux_native_demo -- /path/to/video.mkv</pre>
   <section id="flutter">
     <h2>Flutter integration<a class="anchor" href="#flutter">#</a></h2>
 <p>After extracting a prebuilt archive, point ERIKA_LIBRARY_DIR at its absolute lib/ path. The Linux plugin does not download archives automatically. Add erika_flutter: ^0.3.7 to the host.</p><div class="code"><p class="lbl">shell</p><pre>export ERIKA_LIBRARY_DIR=/absolute/path/to/extracted/lib
-flutter build linux --release</pre></div><p>ErikaVideoView / ErikaTextureVideoView use an SDR RGBA texture with Flutter clipping and overlays, but require per-frame GPU readback. On Wayland, ErikaWindowOverlayVideoView places native video below transparent Flutter UI through wl_subsurface to reduce readback; the video itself does not support Flutter clipping or color filters. X11 uses the texture views.</p>
+flutter build linux --release</pre></div><p>ErikaVideoView / ErikaTextureVideoView use an SDR RGBA texture with Flutter clipping and overlays, but require per-frame GPU readback. On Wayland, ErikaWindowOverlayVideoView places native video below transparent Flutter UI through wl_subsurface to reduce readback. Leave the video area transparent. This native layer supports opaque srcOver compositing, and the video itself does not support Flutter clipping or color filters. X11 uses the texture views.</p>
   </section>
 
   <section id="native">

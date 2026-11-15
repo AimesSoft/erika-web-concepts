@@ -108,7 +108,7 @@
 
   <section id="linux">
     <h2>Linux GPU インポート<a class="anchor" href="#linux">#</a></h2>
-    <p>Linux では FFmpeg が VA-API の NV12 / P010 フレームを Vulkan 画像へマッピングし、wgpu がサンプリングします。0.3.7 は FFmpeg 8.1 / 9 の一部経路で EINVAL を起こす AV_HWFRAME_MAP_DIRECT の強制指定を削除しました。対応デバイス、外部メモリ、同期機能は引き続き必要です。</p>
+    <p>Linux では FFmpeg が VA-API の NV12 / P010 フレームを Vulkan 画像へマッピングし、wgpu がサンプリングします。0.3.7 は FFmpeg 8.1 / 9 の一部経路で EINVAL を起こす AV_HWFRAME_MAP_DIRECT の強制指定を削除しました。この実験的なパスには、対応デバイス、外部メモリ、同期機能が引き続き必要です。</p>
     <p>通常の NVDEC / WSL OpenGL パスは CPU プレーン転送を使用します。オプションの WSL D3D12 パスは、GPU レプリケーションを使用します。 Wayland ネイティブ ビデオ レイヤーは Flutter RGBA リードバックを削減できることと、デコードされたフレームのコピーがゼロかどうかは別のことです。ビルド手順は以下に含まれています <a href="../guide/linux.ja.html">Linux アクセス</a>。</p>
   </section>
 

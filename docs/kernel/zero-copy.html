@@ -107,7 +107,7 @@
 
   <section id="linux">
     <h2>Linux GPU 导入<a class="anchor" href="#linux">#</a></h2>
-    <p>Linux VA-API 经 FFmpeg 将 NV12 / P010 映射至 Vulkan 图像供 wgpu 采样。0.3.7 移除了会使部分 FFmpeg 8.1 / 9 驱动路径返回 EINVAL 的 AV_HWFRAME_MAP_DIRECT 强制标志；仍需兼容设备、外部内存和同步能力。</p>
+    <p>Linux VA-API 经 FFmpeg 将 NV12 / P010 映射至 Vulkan 图像供 wgpu 采样。0.3.7 移除了会使部分 FFmpeg 8.1 / 9 驱动路径返回 EINVAL 的 AV_HWFRAME_MAP_DIRECT 强制标志；该实验性路径仍需兼容设备、外部内存和同步能力。</p>
     <p>普通 NVDEC / WSL OpenGL 路径使用 CPU 平面传递；可选 WSL D3D12 路径使用 GPU 复制。Wayland 原生视频层可减少 Flutter RGBA 读回，和解码帧是否零拷贝是两件事。构建步骤收录在 <a href="../guide/linux.html">Linux 接入</a>。</p>
   </section>
 

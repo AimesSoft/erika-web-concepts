@@ -60,7 +60,7 @@
   <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Linux 接入</p>
   <h1>Linux 接入</h1>
   <p class="kicker">Linux / X11 / Wayland / WSLg</p>
-  <p class="lead">Linux 现已提供 x86_64 与 ARM64 的 bundled / system 预编译包。Rust、C/C++ 和 Flutter 宿主可通过 X11 或 Wayland 输出视频，通过 PulseAudio 输出音频；HDR surface 与直接 VA-API 导入仍属实验性功能。</p>
+  <p class="lead">Linux 支持仍属实验性，现已提供 x86_64 与 ARM64 的 bundled / system 预编译包。Rust、C/C++ 和 Flutter 宿主可通过 X11 或 Wayland 输出视频，通过 PulseAudio 输出音频；HDR surface 与直接 VA-API 导入仍属实验性功能。</p>
   <ul class="meta-strip">
     <li>依赖 <b>FFmpeg 8.x</b></li>
     <li>窗口 <b>X11 / Wayland</b></li>
@@ -109,7 +109,7 @@ cargo run --locked --release -p linux_native_demo -- /path/to/video.mkv</pre>
   <section id="flutter">
     <h2>Flutter 接入<a class="anchor" href="#flutter">#</a></h2>
 <p>预编译包解压后，将 ERIKA_LIBRARY_DIR 指向绝对路径的 lib/。Linux 插件不会自动下载归档；宿主依赖 erika_flutter: ^0.3.7。</p><div class="code"><p class="lbl">shell</p><pre>export ERIKA_LIBRARY_DIR=/absolute/path/to/extracted/lib
-flutter build linux --release</pre></div><p>ErikaVideoView / ErikaTextureVideoView 使用 SDR RGBA 纹理，支持 Flutter 裁剪和叠加，但有逐帧 GPU 回读。Wayland 可选 ErikaWindowOverlayVideoView，以 wl_subsurface 将原生视频放在透明 Flutter UI 下方，减少回读；视频本身不接受 Flutter 裁剪或颜色滤镜。X11 使用纹理视图。</p>
+flutter build linux --release</pre></div><p>ErikaVideoView / ErikaTextureVideoView 使用 SDR RGBA 纹理，支持 Flutter 裁剪和叠加，但有逐帧 GPU 回读。Wayland 可选 ErikaWindowOverlayVideoView，以 wl_subsurface 将原生视频放在透明 Flutter UI 下方，减少回读。视频区域需留透明；该原生层支持不透明 srcOver，视频本身不接受 Flutter 裁剪或颜色滤镜。X11 使用纹理视图。</p>
   </section>
 
   <section id="native">

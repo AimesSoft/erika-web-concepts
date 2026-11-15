@@ -61,7 +61,7 @@
   <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Linux アクセス</p>
   <h1>Linux アクセス</h1>
   <p class="kicker">Linux / X11 / Wayland / WSLg</p>
-  <p class="lead">Linux では x86_64 と ARM64 向けに bundled / system のビルド済みパッケージを提供します。Rust、C/C++、Flutter から X11 / Wayland に映像を表示し、PulseAudio で音声を出力できます。HDR surface と VA-API の直接インポートは引き続き実験的です。</p>
+  <p class="lead">Linux サポートは引き続き実験的で、x86_64 と ARM64 向けに bundled / system のビルド済みパッケージを提供します。Rust、C/C++、Flutter から X11 / Wayland に映像を表示し、PulseAudio で音声を出力できます。HDR surface と VA-API の直接インポートは引き続き実験的です。</p>
   <ul class="meta-strip">
     <li>依存する <b>FFmpeg 8.x</b></li>
     <li>窓 <b>X11 / Wayland</b></li>
@@ -110,7 +110,7 @@ cargo run --locked --release -p linux_native_demo -- /path/to/video.mkv</pre>
   <section id="flutter">
     <h2>Flutter 連携<a class="anchor" href="#flutter">#</a></h2>
 <p>配布物を展開し、ERIKA_LIBRARY_DIR を lib/ の絶対パスに設定します。Linux プラグインは自動ダウンロードしません。ホストには erika_flutter: ^0.3.7 を追加してください。</p><div class="code"><p class="lbl">shell</p><pre>export ERIKA_LIBRARY_DIR=/absolute/path/to/extracted/lib
-flutter build linux --release</pre></div><p>ErikaVideoView / ErikaTextureVideoView は SDR RGBA テクスチャで Flutter のクリッピングと重ね合わせに対応しますが、毎フレーム GPU 読み戻しが必要です。Wayland の ErikaWindowOverlayVideoView は wl_subsurface で透明な Flutter UI の下に映像を置き、読み戻しを減らします。映像自体への Flutter クリッピングや色フィルターは非対応です。X11 はテクスチャを使います。</p>
+flutter build linux --release</pre></div><p>ErikaVideoView / ErikaTextureVideoView は SDR RGBA テクスチャで Flutter のクリッピングと重ね合わせに対応しますが、毎フレーム GPU 読み戻しが必要です。Wayland の ErikaWindowOverlayVideoView は wl_subsurface で透明な Flutter UI の下に映像を置き、読み戻しを減らします。映像領域は透明にしてください。このネイティブレイヤーは不透明な srcOver 合成をサポートし、映像自体への Flutter クリッピングや色フィルターは非対応です。X11 はテクスチャを使います。</p>
   </section>
 
   <section id="native">
