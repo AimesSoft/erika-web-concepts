@@ -19,7 +19,7 @@ app.siteContent = {
     titleLead: '把播放，',
     titleAccent: '交给她来推理。',
     description:
-      '从原生应用到浏览器，宿主只需递出一块画布。解码、同步、字幕、弹幕与渲染，全部在内核之内完成。',
+      '原生应用和浏览器都只需提供一个渲染表面或 Canvas，解码、同步、字幕、弹幕与渲染全部在内核里完成。',
     primaryAction: { label: '开始接入', href: '#start' },
     secondaryAction: { label: '阅读文档', href: 'docs/index.html' },
     characterImage: 'assets/images/erika-character.png',
@@ -34,7 +34,7 @@ app.siteContent = {
     eyebrow: 'Case file / 01',
     title: '真相只有一条播放管线',
     lead:
-      'liberika 把繁琐的媒体能力收进一致的内核边界，让每个宿主都能共享同一套播放行为。',
+      'liberika 在内核里统一处理解码、渲染、字幕和弹幕，不同平台接入后保持一致的播放行为。',
     items: [
       {
         number: '01',
@@ -47,7 +47,7 @@ app.siteContent = {
         number: '02',
         icon: 'spark',
         title: '零拷贝路径',
-        text: '尽可能让硬件解码帧直接进入 GPU，减少多余搬运，也减少宿主侧的状态负担。',
+        text: '在支持的平台上，硬件解码帧直接导入 GPU 纹理，避免多余的 CPU 拷贝。',
         tags: ['VideoToolbox', 'D3D11VA', 'MediaCodec'],
       },
       {
@@ -62,7 +62,7 @@ app.siteContent = {
   quickStart: {
     eyebrow: 'Evidence / 02',
     title: '留下最少的接入痕迹',
-    lead: '选择宿主环境，复制最短的开始方式。Flutter 走 pub.dev，Swift 走 SwiftPM，OpenHarmony 走 OHPM，其他原生宿主使用 GitHub Releases 预编译产物，Linux 可选 bundled / system 包或源码构建，Web 走 npm 或下载独立运行时。',
+    lead: '按宿主环境选择对应的接入方式。Flutter 走 pub.dev，Swift 走 SwiftPM，OpenHarmony 走 OHPM，其他原生宿主使用 GitHub Releases 预编译产物，Linux 可选 bundled / system 包或源码构建，Web 走 npm 或下载独立运行时。',
     tabs: [
       {
         id: 'release',
@@ -157,7 +157,7 @@ playButton.onclick = () => player.play();
 let player = Player::new(PlayerConfig::default());
 player.open(MediaRequest::new("/path/to/video.mp4"))?;
 player.play()?;`,
-        note: 'Cargo.toml：erika = { git = "https://github.com/AimesSoft/liberika", tag = "v0.3.8" }',
+        note: 'Cargo.toml: erika = { git = "https://github.com/AimesSoft/liberika", tag = "v0.3.8" }',
       },
       {
         id: 'c-api',
@@ -181,7 +181,7 @@ erika_presenter_render_tick(player, host_time, &stats);`,
   platforms: {
     eyebrow: 'Coverage / 03',
     title: '七个原生平台，加上 Web',
-    lead: '平台能力留在内核里，产品逻辑留在宿主里。Web 使用 JavaScript Player 接口，编码支持由浏览器决定。',
+    lead: '各平台的渲染与硬解适配都在内核内部完成。Web 使用 JavaScript Player 接口，编码支持由浏览器决定。',
     items: [
       { name: 'macOS', minimum: '11+', render: 'Metal', decode: 'VideoToolbox', status: 'ready' },
       { name: 'iOS', minimum: '13+', render: 'Metal', decode: 'VideoToolbox', status: 'ready' },
@@ -250,7 +250,7 @@ erika_presenter_render_tick(player, host_time, &stats);`,
     quote: '“GOOD！我是 liberika，是 NipaPlay 里第五个播放器内核。”',
     reply: '“即便算上你，也只有四个播放器内核！”',
     note:
-      '名字取自《海猫鸣泣之时》的侦探古戸ヱリカ（古户绘梨花）。一个是台前的播放器，一个是幕后的引擎。',
+      '名字取自《海猫鸣泣之时》的侦探古戸ヱリカ（古户绘梨花）。最初为 NipaPlay 编写，现在也作为独立的播放内核开源。',
   },
   artworkCredit: {
     label: '角色插画：w栗子w · 经作者授权使用',
