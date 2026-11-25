@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Linux 接入 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261116-037">
-<script defer src="../docs.js?v=20261116-037"></script>
+<link rel="stylesheet" href="../docs.css?v=20261126-038">
+<script defer src="../docs.js?v=20261126-038"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.8</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <div class="language-switch" role="group" aria-label="语言"><a href="linux.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="linux.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="linux.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.8<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -69,7 +69,7 @@
 
   <section id="prebuilt">
     <h2>预编译包<a class="anchor" href="#prebuilt">#</a></h2>
-<p>四种归档均以 Ubuntu 22.04 / glibc 2.35 构建，最高要求 GLIBCXX_3.4.30、CXXABI_1.3.13；无需 Ubuntu 26.04。</p><div class="tw"><table><thead><tr><th>CPU</th><th>bundled</th><th>system</th></tr></thead><tbody><tr><td>x86_64</td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/erika-capi-linux-x64-bundled.zip">erika-capi-linux-x64-bundled.zip</a></td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/erika-capi-linux-x64-system.zip">erika-capi-linux-x64-system.zip</a></td></tr><tr><td>ARM64</td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/erika-capi-linux-arm64-bundled.zip">erika-capi-linux-arm64-bundled.zip</a></td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/erika-capi-linux-arm64-system.zip">erika-capi-linux-arm64-system.zip</a></td></tr></tbody></table></div><p>bundled 静态内嵌 FFmpeg、dav1d、zlib、补丁 libass 和字体库，但仍依赖系统 libc/libstdc++、PulseAudio、Fontconfig、VA-API/DRM、Vulkan loader 与 GPU 驱动。system 使用 FFmpeg 8 与字体共享库，补丁 libass 和 SoundTouch 仍内嵌。</p><p>system 必须安装 ABI 匹配的共享库，仅有 ffmpeg 可执行文件不够：avdevice/avformat/avcodec 62、avfilter 11、swresample 6、swscale 9、avutil 60。逐包的 DEPENDENCIES.txt 是运行时依赖清单；使用同包 erika.h 并按 SHA256SUMS 校验下载。</p>
+<p>四种归档均以 Ubuntu 22.04 / glibc 2.35 构建，最高要求 GLIBCXX_3.4.30、CXXABI_1.3.13；无需 Ubuntu 26.04。</p><div class="tw"><table><thead><tr><th>CPU</th><th>bundled</th><th>system</th></tr></thead><tbody><tr><td>x86_64</td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.8/erika-capi-linux-x64-bundled.zip">erika-capi-linux-x64-bundled.zip</a></td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.8/erika-capi-linux-x64-system.zip">erika-capi-linux-x64-system.zip</a></td></tr><tr><td>ARM64</td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.8/erika-capi-linux-arm64-bundled.zip">erika-capi-linux-arm64-bundled.zip</a></td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.8/erika-capi-linux-arm64-system.zip">erika-capi-linux-arm64-system.zip</a></td></tr></tbody></table></div><p>bundled 静态内嵌 FFmpeg、dav1d、zlib、补丁 libass 和字体库，但仍依赖系统 libc/libstdc++、PulseAudio、Fontconfig、VA-API/DRM、Vulkan loader 与 GPU 驱动。system 使用 FFmpeg 8 与字体共享库，补丁 libass 和 SoundTouch 仍内嵌。</p><p>system 必须安装 ABI 匹配的共享库，仅有 ffmpeg 可执行文件不够：avdevice/avformat/avcodec 62、avfilter 11、swresample 6、swscale 9、avutil 60。逐包的 DEPENDENCIES.txt 是运行时依赖清单；使用同包 erika.h 并按 SHA256SUMS 校验下载。</p>
   </section>
 
   <section id="deps">
@@ -97,7 +97,7 @@ sudo apt install -y \
       <p class="lbl">shell</p>
 <pre>git clone https://github.com/AimesSoft/liberika.git
 cd liberika
-git checkout v0.3.7
+git checkout v0.3.8
 bash scripts/build_linux_libass.sh
 cargo build --locked --release -p linux_native_demo -p erika_capi
 cargo run --locked --release -p linux_native_demo -- /path/to/video.mkv</pre>
@@ -108,7 +108,7 @@ cargo run --locked --release -p linux_native_demo -- /path/to/video.mkv</pre>
 
   <section id="flutter">
     <h2>Flutter 接入<a class="anchor" href="#flutter">#</a></h2>
-<p>预编译包解压后，将 ERIKA_LIBRARY_DIR 指向绝对路径的 lib/。Linux 插件不会自动下载归档；宿主依赖 erika_flutter: ^0.3.7。</p><div class="code"><p class="lbl">shell</p><pre>export ERIKA_LIBRARY_DIR=/absolute/path/to/extracted/lib
+<p>预编译包解压后，将 ERIKA_LIBRARY_DIR 指向绝对路径的 lib/。Linux 插件不会自动下载归档；宿主依赖 erika_flutter: ^0.3.8。</p><div class="code"><p class="lbl">shell</p><pre>export ERIKA_LIBRARY_DIR=/absolute/path/to/extracted/lib
 flutter build linux --release</pre></div><p>ErikaVideoView / ErikaTextureVideoView 使用 SDR RGBA 纹理，支持 Flutter 裁剪和叠加，但有逐帧 GPU 回读。Wayland 可选 ErikaWindowOverlayVideoView，以 wl_subsurface 将原生视频放在透明 Flutter UI 下方，减少回读。视频区域需留透明；该原生层支持不透明 srcOver，视频本身不接受 Flutter 裁剪或颜色滤镜。X11 使用纹理视图。</p>
   </section>
 
@@ -129,10 +129,10 @@ flutter build linux --release</pre></div><p>ErikaVideoView / ErikaTextureVideoVi
   <section id="rust-consumer">
     <h2>外部 Rust workspace<a class="anchor" href="#rust-consumer">#</a></h2>
 <p>仓库外的 Rust workspace 必须在自己的根 Cargo.toml 添加 HAL patch。Cargo 不会继承依赖里的 [patch.crates-io]；Vulkan 直接导入需要该补丁保留外部图像内容。依赖和补丁固定到同一 tag 或 commit：</p><div class="code"><p class="lbl">Cargo.toml</p><pre>[dependencies]
-erika = { git = &quot;https://github.com/AimesSoft/liberika&quot;, tag = &quot;v0.3.7&quot;, features = [&quot;wgpu&quot;] }
+erika = { git = &quot;https://github.com/AimesSoft/liberika&quot;, tag = &quot;v0.3.8&quot;, features = [&quot;wgpu&quot;] }
 
 [patch.crates-io]
-wgpu-hal = { git = &quot;https://github.com/AimesSoft/liberika&quot;, tag = &quot;v0.3.7&quot; }</pre></div><p>已有锁文件若仍解析到 registry HAL，运行 cargo update -p wgpu-hal --precise 29.0.3，再用 cargo tree -i wgpu-hal 确认来源，提交 Cargo.lock。Linux 消费者还需在自己的 .cargo/config.toml 添加 PIC 设置，因为 soundtouch-ffi 默认关闭 PIC，依赖仓库的 .cargo 配置不会传递：</p><div class="code"><p class="lbl">.cargo/config.toml</p><pre>[env]
+wgpu-hal = { git = &quot;https://github.com/AimesSoft/liberika&quot;, tag = &quot;v0.3.8&quot; }</pre></div><p>已有锁文件若仍解析到 registry HAL，运行 cargo update -p wgpu-hal --precise 29.0.3，再用 cargo tree -i wgpu-hal 确认来源，提交 Cargo.lock。Linux 消费者还需在自己的 .cargo/config.toml 添加 PIC 设置，因为 soundtouch-ffi 默认关闭 PIC，依赖仓库的 .cargo 配置不会传递：</p><div class="code"><p class="lbl">.cargo/config.toml</p><pre>[env]
 CFLAGS_x86_64_unknown_linux_gnu = &quot;-fPIC&quot;
 CXXFLAGS_x86_64_unknown_linux_gnu = &quot;-fPIC&quot;
 CFLAGS_aarch64_unknown_linux_gnu = &quot;-fPIC&quot;
@@ -175,7 +175,7 @@ ERIKA_TEST_WAYLAND=1 bash scripts/check_linux.sh</pre>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.7</b></span>
+    <span>liberika <b>v0.3.8</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

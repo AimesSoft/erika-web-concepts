@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>更新日志 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261116-037">
-<script defer src="../docs.js?v=20261116-037"></script>
+<link rel="stylesheet" href="../docs.css?v=20261126-038">
+<script defer src="../docs.js?v=20261126-038"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.8</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <div class="language-switch" role="group" aria-label="语言"><a href="changelog.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="changelog.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="changelog.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.8<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -63,9 +63,14 @@
   <p class="lead">按版本列出对宿主可见的变化。已回退的条目不在此列；完整历史以仓库根 <code>CHANGELOG.md</code> 为准。0.1.3 及更早的 breaking change 见文末小结。</p>
 
   <ul class="meta-strip">
-    <li>当前 <b>0.3.7</b></li>
-    <li>发布 <b>2026-11-14</b></li>
+    <li>当前 <b>0.3.8</b></li>
+    <li>发布 <b>2026-11-20</b></li>
   </ul>
+
+  <section id="v038">
+    <h2>0.3.8 · 2026-11-20<a class="anchor" href="#v038">#</a></h2>
+    <ul class="body"><li>Windows：D3D11 截图读回当前帧的 SDR 画面，含字幕和可选弹幕，HDR 经色调映射；不改变实时输出配置，不应用超分。读取统计或调用不支持的方法不再触发重绘。</li><li>HTTP 来源：校验响应身份，响应被截短时外挂文件也能读完整；读取停滞后恢复，并遵守有上限的 Retry-After。</li><li>C ABI 新增实验性的可取消打开：erika_presenter_open_with_options_cancellable、erika_open_validate 与 ErikaColdOpenCancellation。Flutter 在 Windows 和 macOS 上取消已被取代的 HTTP 打开。</li><li>字幕与弹幕：仅导出画面的宿主不再生成无人使用的字幕层；弹幕首次排版直接显示，计时不再随泵循环抖动。</li><li>渲染：Metal 与 D3D11 直接上传软件解码的视频平面；D3D11 复用字幕图集，画面未变时跳过呈现；macOS 普通 SDR 视频走不含杜比视界处理的专用路径。</li><li>构建：Windows 依赖构建的 host 自动解析为对应的 MSVC 目标。</li><li>Web 运行时在 0.3.8 发布后以 @aimessoft/liberika-web 和 @aimessoft/liberika-web-nofont 发布到 npm。</li></ul><p><a href="https://github.com/AimesSoft/liberika/releases/tag/v0.3.8">完整变更</a></p>
+  </section>
 
   <section id="v037">
     <h2>0.3.7 · 2026-11-13<a class="anchor" href="#v037">#</a></h2>
@@ -290,7 +295,7 @@
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.7</b></span>
+    <span>liberika <b>v0.3.8</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

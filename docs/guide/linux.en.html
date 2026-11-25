@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Linux integration — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261116-037">
-<script defer src="../docs.js?v=20261116-037"></script>
+<link rel="stylesheet" href="../docs.css?v=20261126-038">
+<script defer src="../docs.js?v=20261126-038"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.8</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
   <div class="language-switch" role="group" aria-label="Language"><a href="linux.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="linux.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="linux.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.8<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -69,7 +69,7 @@
 
   <section id="prebuilt">
     <h2>Prebuilt bundles<a class="anchor" href="#prebuilt">#</a></h2>
-<p>All four archives are built on Ubuntu 22.04 / glibc 2.35, with maximum requirements GLIBCXX_3.4.30 and CXXABI_1.3.13. Ubuntu 26.04 is not required.</p><div class="tw"><table><thead><tr><th>CPU</th><th>bundled</th><th>system</th></tr></thead><tbody><tr><td>x86_64</td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/erika-capi-linux-x64-bundled.zip">erika-capi-linux-x64-bundled.zip</a></td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/erika-capi-linux-x64-system.zip">erika-capi-linux-x64-system.zip</a></td></tr><tr><td>ARM64</td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/erika-capi-linux-arm64-bundled.zip">erika-capi-linux-arm64-bundled.zip</a></td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/erika-capi-linux-arm64-system.zip">erika-capi-linux-arm64-system.zip</a></td></tr></tbody></table></div><p>bundled statically embeds FFmpeg, dav1d, zlib, patched libass and font libraries, but still needs system libc/libstdc++, PulseAudio, Fontconfig, VA-API/DRM, the Vulkan loader and GPU drivers. system uses FFmpeg 8 and font shared libraries; patched libass and SoundTouch remain embedded.</p><p>The system mode needs ABI-compatible shared libraries, not just an ffmpeg executable: avdevice/avformat/avcodec 62, avfilter 11, swresample 6, swscale 9, and avutil 60. Read each archive’s DEPENDENCIES.txt, use its matching erika.h, and verify the download against SHA256SUMS.</p>
+<p>All four archives are built on Ubuntu 22.04 / glibc 2.35, with maximum requirements GLIBCXX_3.4.30 and CXXABI_1.3.13. Ubuntu 26.04 is not required.</p><div class="tw"><table><thead><tr><th>CPU</th><th>bundled</th><th>system</th></tr></thead><tbody><tr><td>x86_64</td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.8/erika-capi-linux-x64-bundled.zip">erika-capi-linux-x64-bundled.zip</a></td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.8/erika-capi-linux-x64-system.zip">erika-capi-linux-x64-system.zip</a></td></tr><tr><td>ARM64</td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.8/erika-capi-linux-arm64-bundled.zip">erika-capi-linux-arm64-bundled.zip</a></td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.8/erika-capi-linux-arm64-system.zip">erika-capi-linux-arm64-system.zip</a></td></tr></tbody></table></div><p>bundled statically embeds FFmpeg, dav1d, zlib, patched libass and font libraries, but still needs system libc/libstdc++, PulseAudio, Fontconfig, VA-API/DRM, the Vulkan loader and GPU drivers. system uses FFmpeg 8 and font shared libraries; patched libass and SoundTouch remain embedded.</p><p>The system mode needs ABI-compatible shared libraries, not just an ffmpeg executable: avdevice/avformat/avcodec 62, avfilter 11, swresample 6, swscale 9, and avutil 60. Read each archive’s DEPENDENCIES.txt, use its matching erika.h, and verify the download against SHA256SUMS.</p>
   </section>
 
   <section id="deps">
@@ -97,7 +97,7 @@ sudo apt install -y \
       <p class="lbl">shell</p>
 <pre>git clone https://github.com/AimesSoft/liberika.git
 cd liberika
-git checkout v0.3.7
+git checkout v0.3.8
 bash scripts/build_linux_libass.sh
 cargo build --locked --release -p linux_native_demo -p erika_capi
 cargo run --locked --release -p linux_native_demo -- /path/to/video.mkv</pre>
@@ -108,7 +108,7 @@ cargo run --locked --release -p linux_native_demo -- /path/to/video.mkv</pre>
 
   <section id="flutter">
     <h2>Flutter integration<a class="anchor" href="#flutter">#</a></h2>
-<p>After extracting a prebuilt archive, point ERIKA_LIBRARY_DIR at its absolute lib/ path. The Linux plugin does not download archives automatically. Add erika_flutter: ^0.3.7 to the host.</p><div class="code"><p class="lbl">shell</p><pre>export ERIKA_LIBRARY_DIR=/absolute/path/to/extracted/lib
+<p>After extracting a prebuilt archive, point ERIKA_LIBRARY_DIR at its absolute lib/ path. The Linux plugin does not download archives automatically. Add erika_flutter: ^0.3.8 to the host.</p><div class="code"><p class="lbl">shell</p><pre>export ERIKA_LIBRARY_DIR=/absolute/path/to/extracted/lib
 flutter build linux --release</pre></div><p>ErikaVideoView / ErikaTextureVideoView use an SDR RGBA texture with Flutter clipping and overlays, but require per-frame GPU readback. On Wayland, ErikaWindowOverlayVideoView places native video below transparent Flutter UI through wl_subsurface to reduce readback. Leave the video area transparent. This native layer supports opaque srcOver compositing, and the video itself does not support Flutter clipping or color filters. X11 uses the texture views.</p>
   </section>
 
@@ -129,10 +129,10 @@ flutter build linux --release</pre></div><p>ErikaVideoView / ErikaTextureVideoVi
   <section id="rust-consumer">
     <h2>External Rust workspaces<a class="anchor" href="#rust-consumer">#</a></h2>
 <p>External Rust workspaces must add the HAL patch to their own root Cargo.toml. Cargo does not inherit a dependency’s [patch.crates-io]; Vulkan direct import needs the patch to preserve external image contents. Pin the dependency and patch to the same tag or commit:</p><div class="code"><p class="lbl">Cargo.toml</p><pre>[dependencies]
-erika = { git = &quot;https://github.com/AimesSoft/liberika&quot;, tag = &quot;v0.3.7&quot;, features = [&quot;wgpu&quot;] }
+erika = { git = &quot;https://github.com/AimesSoft/liberika&quot;, tag = &quot;v0.3.8&quot;, features = [&quot;wgpu&quot;] }
 
 [patch.crates-io]
-wgpu-hal = { git = &quot;https://github.com/AimesSoft/liberika&quot;, tag = &quot;v0.3.7&quot; }</pre></div><p>If an existing lockfile still selects the registry HAL, run cargo update -p wgpu-hal --precise 29.0.3, verify the source with cargo tree -i wgpu-hal, and commit Cargo.lock. Linux consumers also need PIC settings in their own .cargo/config.toml: soundtouch-ffi disables PIC by default, and dependency repositories’ .cargo settings do not propagate:</p><div class="code"><p class="lbl">.cargo/config.toml</p><pre>[env]
+wgpu-hal = { git = &quot;https://github.com/AimesSoft/liberika&quot;, tag = &quot;v0.3.8&quot; }</pre></div><p>If an existing lockfile still selects the registry HAL, run cargo update -p wgpu-hal --precise 29.0.3, verify the source with cargo tree -i wgpu-hal, and commit Cargo.lock. Linux consumers also need PIC settings in their own .cargo/config.toml: soundtouch-ffi disables PIC by default, and dependency repositories’ .cargo settings do not propagate:</p><div class="code"><p class="lbl">.cargo/config.toml</p><pre>[env]
 CFLAGS_x86_64_unknown_linux_gnu = &quot;-fPIC&quot;
 CXXFLAGS_x86_64_unknown_linux_gnu = &quot;-fPIC&quot;
 CFLAGS_aarch64_unknown_linux_gnu = &quot;-fPIC&quot;
@@ -175,7 +175,7 @@ ERIKA_TEST_WAYLAND=1 bash scripts/check_linux.sh</pre>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.7</b></span>
+    <span>liberika <b>v0.3.8</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>构建与依赖 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261116-037">
-<script defer src="../docs.js?v=20261116-037"></script>
+<link rel="stylesheet" href="../docs.css?v=20261126-038">
+<script defer src="../docs.js?v=20261126-038"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.8</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <div class="language-switch" role="group" aria-label="语言"><a href="building.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="building.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="building.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.8<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -137,7 +137,7 @@ cargo run -p xtask -- deps build --all          <span class="c"># 构建 host �
 
   <section id="windows">
     <h2>Windows / MSVC<a class="anchor" href="#windows">#</a></h2>
-<p>v0.3.7 在 Windows 上必须显式指定 MSVC target，使 xtask 产物目录与 Cargo 一致。x64 示例：</p><div class="code"><p class="lbl">PowerShell</p><pre>cargo run -p xtask -- deps build --all --profile lgpl --target x86_64-pc-windows-msvc
+<p>0.3.8 起，Windows x64 和 ARM64 上的 <code>host</code> 自动解析为对应的 MSVC 目标，依赖目录与不带 <code>--target</code> 的 <code>cargo build</code> 一致。需要其他架构时仍可显式指定，x64 示例：</p><div class="code"><p class="lbl">PowerShell</p><pre>cargo run -p xtask -- deps build --all --profile lgpl --target x86_64-pc-windows-msvc
 $env:ERIKA_NATIVE_TARGET = &quot;x86_64-pc-windows-msvc&quot;
 cargo build --locked -p erika_capi --target x86_64-pc-windows-msvc</pre></div><p>ARM64 改用 aarch64-pc-windows-msvc。默认链接动态 CRT（/MD），不要添加 --crt static；只有 Rust 使用 -C target-feature=+crt-static 时才需要该选项，依赖会放入独立的 lgpl-crt-static 目录。</p>
   </section>
@@ -179,14 +179,14 @@ cargo test --workspace</pre>
 
   <section id="linux">
     <h2>Linux 发布与源码构建<a class="anchor" href="#linux">#</a></h2>
-<p>0.3.7 提供 x64 / ARM64 × bundled / system 四种 Linux ZIP，均以 Ubuntu 22.04 / glibc 2.35 为基线。发布构建使用原生同架构 GNU/Linux、Rust 1.92+、Meson 1.8.5 与 CI 所列开发工具；不用系统自带的旧 Rust/Meson。两个模式分别运行：</p><div class="code"><p class="lbl">shell</p><pre>ERIKA_LINUX_DEPENDENCIES=bundled bash scripts/build_linux_release.sh
+<p>0.3.7 起提供 x64 / ARM64 × bundled / system 四种 Linux ZIP，均以 Ubuntu 22.04 / glibc 2.35 为基线。发布构建使用原生同架构 GNU/Linux、Rust 1.92+、Meson 1.8.5 与 CI 所列开发工具；不用系统自带的旧 Rust/Meson。两个模式分别运行：</p><div class="code"><p class="lbl">shell</p><pre>ERIKA_LINUX_DEPENDENCIES=bundled bash scripts/build_linux_release.sh
 
 ERIKA_LINUX_DEPENDENCIES=system bash scripts/build_linux_release.sh</pre></div><p>脚本准备固定的 FFmpeg 8 SDK 和构建头文件，输出隔离在 target/linux-&lt;mode&gt;/&lt;triple&gt;/release，ZIP 在 dist/。bundled 内嵌媒体依赖；system 需要宿主提供匹配的 FFmpeg 8 共享库。两者仍需系统音频与图形驱动。Ubuntu 26.04 的系统库构建仍可用：先运行 scripts/build_linux_libass.sh，再 cargo build --locked --release -p erika_capi -p linux_native_demo。</p><p><a href="../guide/linux.html#rust-consumer">Rust / C / Flutter · HAL patch · PIC</a></p>
     <p>系统 FFmpeg 的编解码器和许可证取决于发行版构建；设置 lgpl profile 不会改变系统库。</p>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.7</b></span>
+    <span>liberika <b>v0.3.8</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

@@ -1,7 +1,7 @@
 # liberika 文档站 交接说明
 
 写给接手维护正文的人。本文件只陈述事实与已核实的数据（最近一次核实：
-2026-11-16），不含风格建议。
+2026-11-26），不含风格建议。
 
 ## 1. 这是什么
 
@@ -23,6 +23,7 @@
 | `docs/project/` | 项目文档 4 页：building / releasing / contributing / changelog |
 | `docs/docs.css` | 唯一样式表（1135 行） |
 | `docs/docs.js` | 代码块一键复制等增强（46 行） |
+| `demo/` | Web 在线演示：`index.html` 从 jsDelivr（失败时 unpkg）加载 npm 包 `@aimessoft/liberika-web`，不自带 WASM；`sample.mkv` 是示例片段，由 `sample.ass` 和 ffmpeg 的 lavfi 源生成。升级版本时改 `index.html` 里的两个 CDN 地址和页面上的代码示例 |
 | `06-washi-home.html` | 旧版原型主页残留：不在现行导航中，文档统一返回根 `index.html` |
 
 ## 2. 生成器已删除（旧警告作废）
@@ -32,7 +33,7 @@
 直接手改 HTML，commit 后 push。** 没有任何"跑脚本会覆盖正文"的风险。
 
 链接校验脚本也没有了。需要校验时临时写一段解析器：遍历 `href`，检查
-同页锚点与相对路径目标是否存在即可（2026-11-16 全站 75 个三语文档页与主页进行链接校验）。
+同页锚点与相对路径目标是否存在即可（2026-11-26 全站 75 个三语文档页、主页与演示页进行链接校验）。
 
 ## 3. 设计系统
 
@@ -46,12 +47,14 @@ CSS。交互增强统一走 `docs/docs.js`（代码块复制按钮等）。
 
 ## 4. 内容基线
 
-- 当前安装、接口及功能说明按 liberika v0.3.7 核对，更新日志保留旧版历史。
-- C ABI 共 120 个导出函数、49 个类型；81 个 Presenter 函数、23 个
-  Handle 函数，另有 16 个通用/独立入口。
-- 截至 2026-11-16，Flutter、SwiftPM 和 OHPM 的 0.3.7 均已公开。
+- 当前安装、接口及功能说明按 liberika v0.3.8 核对，更新日志保留旧版历史。
+- C ABI 共 125 个导出函数、50 个类型；82 个 Presenter 函数、23 个
+  Handle 函数，另有 20 个通用/独立入口。0.3.8 新增的 5 个函数是实验性的可取消打开。
+- 截至 2026-11-26，Flutter、SwiftPM 和 OHPM 的 0.3.8 均已公开。
 - JSON bridge 共 56 个方法，支持 listMethods 发现、日志、章节和帧导出。
-- Web 通过 liberika-web-0.3.7.zip 与 liberika-web-nofont-0.3.7.zip 分发，包含运行时和演示页，尚未发布到 npm；
+- Web 通过 npm 的 @aimessoft/liberika-web 与 @aimessoft/liberika-web-nofont（0.3.8，2026-11-26 首次发布），以及
+  liberika-web-0.3.8.zip 与 liberika-web-nofont-0.3.8.zip 分发；ZIP 另含演示页。npm 的自动发布要等 liberika
+  仓库的 PR #279 合并后才随发版运行，在那之前不把它写成已有流程；
   需要 WebCodecs、OffscreenCanvas、WebGL2、Web Audio 和 HTTPS/localhost。
 - 字幕/弹幕超采样默认开启；原生软件视频解码默认多线程。
 - 0.3.6 使用系统字体优先回退并支持彩色 Emoji；0.3.7 增加 mode 7 高级弹幕与 Rust

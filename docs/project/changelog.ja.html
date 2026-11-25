@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>変更ログ — liberika 開発者ドキュメント</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261116-037">
-<script defer src="../docs.js?v=20261116-037"></script>
+<link rel="stylesheet" href="../docs.css?v=20261126-038">
+<script defer src="../docs.js?v=20261126-038"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.8</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
   <div class="language-switch" role="group" aria-label="言語"><a href="changelog.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="changelog.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="changelog.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.8<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -64,9 +64,14 @@
   <p class="lead">ホストに表示される変更をバージョンごとにリストします。ロールバックされたアイテムはここにはリストされません。完全な履歴はリポジトリのルートから始まります <code>CHANGELOG.md</code> が勝つだろう。 0.1.3 以前 breaking change 記事の最後にある概要を参照してください。</p>
 
   <ul class="meta-strip">
-    <li>現在の <b>0.3.7</b></li>
-    <li>公開する <b>2026-11-14</b></li>
+    <li>現在の <b>0.3.8</b></li>
+    <li>公開する <b>2026-11-20</b></li>
   </ul>
+
+  <section id="v038">
+    <h2>0.3.8 · 2026-11-20<a class="anchor" href="#v038">#</a></h2>
+    <ul class="body"><li>Windows：D3D11 スクリーンショットは現在のフレームを SDR で読み戻し、字幕と任意の弾幕を含みます。HDR はトーンマッピングされ、ライブ出力の設定は変更せず、超解像は適用しません。統計の読み取りや未対応メソッドの呼び出しで再描画されなくなりました。</li><li>HTTP ソース：応答を検証し、応答が途中で切れてもサイドカーファイルを最後まで読み込みます。読み取りの停滞から復帰し、上限付きの Retry-After に従います。</li><li>C ABI に実験的なキャンセル可能オープンを追加：erika_presenter_open_with_options_cancellable、erika_open_validate、ErikaColdOpenCancellation。Flutter は Windows と macOS で、置き換えられた HTTP オープンをキャンセルします。</li><li>字幕と弾幕：フレームのエクスポートだけを行うホストでは未使用の字幕レイヤーを生成しません。弾幕は最初のレイアウトでそのまま表示され、タイミングがポンプループで揺れなくなりました。</li><li>レンダリング：Metal と D3D11 はソフトウェアデコードしたプレーンを直接アップロードします。D3D11 は字幕アトラスを再利用し、変化のないフレームの提示を省略します。macOS の通常の SDR 動画は Dolby Vision 処理を含まない経路を使います。</li><li>ビルド：Windows の依存関係ビルドで host が対応する MSVC ターゲットに解決されます。</li><li>0.3.8 のリリース後、Web ランタイムを npm の @aimessoft/liberika-web と @aimessoft/liberika-web-nofont として公開しました。</li></ul><p><a href="https://github.com/AimesSoft/liberika/releases/tag/v0.3.8">リリースノート</a></p>
+  </section>
 
   <section id="v037">
     <h2>0.3.7 · 2026-11-13<a class="anchor" href="#v037">#</a></h2>
@@ -291,7 +296,7 @@
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.7</b></span>
+    <span>liberika <b>v0.3.8</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

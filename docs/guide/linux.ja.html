@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Linux アクセス — liberika 開発者ドキュメント</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261116-037">
-<script defer src="../docs.js?v=20261116-037"></script>
+<link rel="stylesheet" href="../docs.css?v=20261126-038">
+<script defer src="../docs.js?v=20261126-038"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.8</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
   <div class="language-switch" role="group" aria-label="言語"><a href="linux.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="linux.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="linux.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.ja.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.8<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -70,7 +70,7 @@
 
   <section id="prebuilt">
     <h2>ビルド済み配布物<a class="anchor" href="#prebuilt">#</a></h2>
-<p>4 種類とも Ubuntu 22.04 / glibc 2.35 でビルドし、最大要件は GLIBCXX_3.4.30、CXXABI_1.3.13 です。Ubuntu 26.04 は不要です。</p><div class="tw"><table><thead><tr><th>CPU</th><th>bundled</th><th>system</th></tr></thead><tbody><tr><td>x86_64</td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/erika-capi-linux-x64-bundled.zip">erika-capi-linux-x64-bundled.zip</a></td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/erika-capi-linux-x64-system.zip">erika-capi-linux-x64-system.zip</a></td></tr><tr><td>ARM64</td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/erika-capi-linux-arm64-bundled.zip">erika-capi-linux-arm64-bundled.zip</a></td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/erika-capi-linux-arm64-system.zip">erika-capi-linux-arm64-system.zip</a></td></tr></tbody></table></div><p>bundled は FFmpeg、dav1d、zlib、パッチ済み libass とフォントライブラリを静的に含みますが、システムの libc/libstdc++、PulseAudio、Fontconfig、VA-API/DRM、Vulkan loader と GPU ドライバーは必要です。system は FFmpeg 8 とフォント共有ライブラリを使い、パッチ済み libass と SoundTouch は内蔵します。</p><p>system は ABI が一致する共有ライブラリを必要とします。ffmpeg 実行ファイルだけでは不十分です。ABI major は avdevice/avformat/avcodec 62、avfilter 11、swresample 6、swscale 9、avutil 60。各配布物の DEPENDENCIES.txt を確認し、同梱の erika.h を使い、SHA256SUMS で検証してください。</p>
+<p>4 種類とも Ubuntu 22.04 / glibc 2.35 でビルドし、最大要件は GLIBCXX_3.4.30、CXXABI_1.3.13 です。Ubuntu 26.04 は不要です。</p><div class="tw"><table><thead><tr><th>CPU</th><th>bundled</th><th>system</th></tr></thead><tbody><tr><td>x86_64</td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.8/erika-capi-linux-x64-bundled.zip">erika-capi-linux-x64-bundled.zip</a></td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.8/erika-capi-linux-x64-system.zip">erika-capi-linux-x64-system.zip</a></td></tr><tr><td>ARM64</td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.8/erika-capi-linux-arm64-bundled.zip">erika-capi-linux-arm64-bundled.zip</a></td><td><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.8/erika-capi-linux-arm64-system.zip">erika-capi-linux-arm64-system.zip</a></td></tr></tbody></table></div><p>bundled は FFmpeg、dav1d、zlib、パッチ済み libass とフォントライブラリを静的に含みますが、システムの libc/libstdc++、PulseAudio、Fontconfig、VA-API/DRM、Vulkan loader と GPU ドライバーは必要です。system は FFmpeg 8 とフォント共有ライブラリを使い、パッチ済み libass と SoundTouch は内蔵します。</p><p>system は ABI が一致する共有ライブラリを必要とします。ffmpeg 実行ファイルだけでは不十分です。ABI major は avdevice/avformat/avcodec 62、avfilter 11、swresample 6、swscale 9、avutil 60。各配布物の DEPENDENCIES.txt を確認し、同梱の erika.h を使い、SHA256SUMS で検証してください。</p>
   </section>
 
   <section id="deps">
@@ -98,7 +98,7 @@ sudo apt install -y \
       <p class="lbl">shell</p>
 <pre>git clone https://github.com/AimesSoft/liberika.git
 cd liberika
-git checkout v0.3.7
+git checkout v0.3.8
 bash scripts/build_linux_libass.sh
 cargo build --locked --release -p linux_native_demo -p erika_capi
 cargo run --locked --release -p linux_native_demo -- /path/to/video.mkv</pre>
@@ -109,7 +109,7 @@ cargo run --locked --release -p linux_native_demo -- /path/to/video.mkv</pre>
 
   <section id="flutter">
     <h2>Flutter 連携<a class="anchor" href="#flutter">#</a></h2>
-<p>配布物を展開し、ERIKA_LIBRARY_DIR を lib/ の絶対パスに設定します。Linux プラグインは自動ダウンロードしません。ホストには erika_flutter: ^0.3.7 を追加してください。</p><div class="code"><p class="lbl">shell</p><pre>export ERIKA_LIBRARY_DIR=/absolute/path/to/extracted/lib
+<p>配布物を展開し、ERIKA_LIBRARY_DIR を lib/ の絶対パスに設定します。Linux プラグインは自動ダウンロードしません。ホストには erika_flutter: ^0.3.8 を追加してください。</p><div class="code"><p class="lbl">shell</p><pre>export ERIKA_LIBRARY_DIR=/absolute/path/to/extracted/lib
 flutter build linux --release</pre></div><p>ErikaVideoView / ErikaTextureVideoView は SDR RGBA テクスチャで Flutter のクリッピングと重ね合わせに対応しますが、毎フレーム GPU 読み戻しが必要です。Wayland の ErikaWindowOverlayVideoView は wl_subsurface で透明な Flutter UI の下に映像を置き、読み戻しを減らします。映像領域は透明にしてください。このネイティブレイヤーは不透明な srcOver 合成をサポートし、映像自体への Flutter クリッピングや色フィルターは非対応です。X11 はテクスチャを使います。</p>
   </section>
 
@@ -130,10 +130,10 @@ flutter build linux --release</pre></div><p>ErikaVideoView / ErikaTextureVideoVi
   <section id="rust-consumer">
     <h2>外部 Rust workspace<a class="anchor" href="#rust-consumer">#</a></h2>
 <p>外部 Rust workspace のルート Cargo.toml に HAL patch を追加してください。Cargo は依存先の [patch.crates-io] を継承しません。Vulkan 直接インポートでは外部画像の内容を保持するこのパッチが必要です。依存とパッチを同じ tag または commit に固定します：</p><div class="code"><p class="lbl">Cargo.toml</p><pre>[dependencies]
-erika = { git = &quot;https://github.com/AimesSoft/liberika&quot;, tag = &quot;v0.3.7&quot;, features = [&quot;wgpu&quot;] }
+erika = { git = &quot;https://github.com/AimesSoft/liberika&quot;, tag = &quot;v0.3.8&quot;, features = [&quot;wgpu&quot;] }
 
 [patch.crates-io]
-wgpu-hal = { git = &quot;https://github.com/AimesSoft/liberika&quot;, tag = &quot;v0.3.7&quot; }</pre></div><p>既存の lockfile が registry の HAL を選ぶ場合は cargo update -p wgpu-hal --precise 29.0.3 を実行し、cargo tree -i wgpu-hal で参照元を確認して Cargo.lock をコミットします。Linux 利用側の .cargo/config.toml には PIC 設定も必要です。soundtouch-ffi は既定で PIC を無効にし、依存先の .cargo 設定は継承されません：</p><div class="code"><p class="lbl">.cargo/config.toml</p><pre>[env]
+wgpu-hal = { git = &quot;https://github.com/AimesSoft/liberika&quot;, tag = &quot;v0.3.8&quot; }</pre></div><p>既存の lockfile が registry の HAL を選ぶ場合は cargo update -p wgpu-hal --precise 29.0.3 を実行し、cargo tree -i wgpu-hal で参照元を確認して Cargo.lock をコミットします。Linux 利用側の .cargo/config.toml には PIC 設定も必要です。soundtouch-ffi は既定で PIC を無効にし、依存先の .cargo 設定は継承されません：</p><div class="code"><p class="lbl">.cargo/config.toml</p><pre>[env]
 CFLAGS_x86_64_unknown_linux_gnu = &quot;-fPIC&quot;
 CXXFLAGS_x86_64_unknown_linux_gnu = &quot;-fPIC&quot;
 CFLAGS_aarch64_unknown_linux_gnu = &quot;-fPIC&quot;
@@ -176,7 +176,7 @@ ERIKA_TEST_WAYLAND=1 bash scripts/check_linux.sh</pre>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.7</b></span>
+    <span>liberika <b>v0.3.8</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

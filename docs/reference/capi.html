@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>C ABI 总览 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261116-037">
-<script defer src="../docs.js?v=20261116-037"></script>
+<link rel="stylesheet" href="../docs.css?v=20261126-038">
+<script defer src="../docs.js?v=20261126-038"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.8</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <div class="language-switch" role="group" aria-label="语言"><a href="capi.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="capi.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="capi.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,14 +53,14 @@
       <li><a href="capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.8<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>C ABI 总览</p>
   <h1>C ABI 总览</h1>
   <p class="kicker">C ABI Overview</p>
-  <p class="lead">C ABI 的全局约定与类型定义。函数清单按入口族分页：<a href="capi-handle.html">ErikaHandle</a>（23 个）、<a href="capi-presenter.html">ErikaPresenterHandle</a>（81 个）、通用与独立入口（16 个）。以 <code>crates/erika_capi/include/erika.h</code> 为唯一权威。</p>
+  <p class="lead">C ABI 的全局约定与类型定义。函数清单按入口族分页：<a href="capi-handle.html">ErikaHandle</a>（23 个）、<a href="capi-presenter.html">ErikaPresenterHandle</a>（82 个）、通用与独立入口（20 个）。以 <code>crates/erika_capi/include/erika.h</code> 为唯一权威。</p>
 
   <ul class="meta-strip">
     <li>导出函数 <b>120</b></li>
@@ -152,12 +152,13 @@
 
   <section id="types">
     <h2>类型清单<span class="jp">型</span><a class="anchor" href="#types">#</a></h2>
-    <p>49 个类型定义全部位于 <code>erika.h</code>。主要结构体字段见下方各表；完整字段和枚举定义以同版本头文件为准。</p>
+    <p>50 个类型定义全部位于 <code>erika.h</code>。主要结构体字段见下方各表；完整字段和枚举定义以同版本头文件为准。</p>
     <h3>句柄</h3>
     <ul class="body">
       <li><code>ErikaHandle</code> — pull 模型句柄。</li>
       <li><code>ErikaPresenterHandle</code> — push 模型句柄。</li>
       <li><code>ErikaFrameExportSession</code> — 独立帧导出会话句柄。</li>
+      <li><code>ErikaColdOpenCancellation</code> — 一次性的打开取消凭据（0.3.8，实验性）。</li>
     </ul>
     <h3>结构体</h3>
     <div class="tw">
@@ -704,7 +705,16 @@ typedef struct ErikaExternalTextureInfo {
   uint8_t device_uuid[16];
   uint8_t driver_uuid[16];
 } ErikaExternalTextureInfo;</pre></div>
-    <p>纹理帧可比 presenter 活得更久；消费者 GPU 工作及导入别名结束后再 release。get_info 的句柄为借用：Metal 可独立 retain 并覆盖消费期间；Vulkan OPAQUE_FD（0 也有效）导入前须 dup，匹配设备和驱动 UUID，并按相同属性导入专用分配；读取前从 EXTERNAL 获取队列所有权，旧布局 GENERAL。纹理只读、UNORM 存储中的像素为 sRGB 编码 RGBA。 <a href="https://github.com/AimesSoft/liberika/blob/v0.3.7/docs/external_textures.zh.md">liberika 纹理指南</a>.</p>
+    <p>纹理帧可比 presenter 活得更久；消费者 GPU 工作及导入别名结束后再 release。get_info 的句柄为借用：Metal 可独立 retain 并覆盖消费期间；Vulkan OPAQUE_FD（0 也有效）导入前须 dup，匹配设备和驱动 UUID，并按相同属性导入专用分配；读取前从 EXTERNAL 获取队列所有权，旧布局 GENERAL。纹理只读、UNORM 存储中的像素为 sRGB 编码 RGBA。 <a href="https://github.com/AimesSoft/liberika/blob/v0.3.8/docs/external_textures.zh.md">liberika 纹理指南</a>.</p>
+  </section>
+
+  <section id="cancellable-open">
+    <h2>可取消的打开 · 0.3.8（实验性）<a class="anchor" href="#cancellable-open">#</a></h2>
+    <p><code>ErikaColdOpenCancellation</code> 是一次性的取消凭据，不持有 Presenter 指针，用于让另一个线程中止一次仍在连接或重试的同步打开。配合 <a href="capi-presenter.html#erika_presenter_open_with_options_cancellable">erika_presenter_open_with_options_cancellable</a> 使用。</p>
+    <div class="api" id="erika_open_validate"><p class="sig"><b>ErikaStatus erika_open_validate</b>(const char *uri, const ErikaOpenOptions *options)</p><p class="desc">通过后返回 <code>ErikaStatus::Ok</code>：检查 URI 非空以及 <code>ErikaOpenOptions</code> 是否合法，不借用 Presenter，也不消耗取消凭据。宿主可在替换一个仍在进行的打开之前先校验新参数。字符串必须是以 NUL 结尾的有效 C 字符串。</p></div>
+    <div class="api" id="erika_cold_open_cancellation_create"><p class="sig"><b>ErikaColdOpenCancellation *erika_cold_open_cancellation_create</b>(void)</p><p class="desc">创建一个取消凭据。每次打开使用一个新的凭据。</p></div>
+    <div class="api" id="erika_cold_open_cancellation_cancel"><p class="sig"><b>void erika_cold_open_cancellation_cancel</b>(const ErikaColdOpenCancellation *ticket)</p><p class="desc">请求取消，可在任意线程调用；传入 NULL 时不做任何事。</p></div>
+    <div class="api" id="erika_cold_open_cancellation_release"><p class="sig"><b>void erika_cold_open_cancellation_release</b>(ErikaColdOpenCancellation *ticket)</p><p class="desc">释放凭据。须在所有调用取消的一方和对应的同步打开都结束之后调用；传入 NULL 时不做任何事。</p></div>
   </section>
 
   <section id="embedded-fallback-font">
@@ -713,7 +723,7 @@ typedef struct ErikaExternalTextureInfo {
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.7</b></span>
+    <span>liberika <b>v0.3.8</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

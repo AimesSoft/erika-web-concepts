@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ErikaPresenterHandle リファレンス — liberika 開発者ドキュメント</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261116-037">
-<script defer src="../docs.js?v=20261116-037"></script>
+<link rel="stylesheet" href="../docs.css?v=20261126-038">
+<script defer src="../docs.js?v=20261126-038"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.8</span></a></div>
   <p class="brand-sub">埋め込み可能な再生カーネル · 開発者ドキュメント</p>
   <div class="language-switch" role="group" aria-label="言語"><a href="capi-presenter.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="capi-presenter.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="capi-presenter.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語" aria-current="page">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="capi-json.ja.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.8<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -61,7 +61,7 @@
   <p class="crumb"><a href="../../index.html">ホームページ</a><span class="sep">/</span><a href="../index.ja.html">docs</a><span class="sep">/</span>reference<span class="sep">/</span>ErikaPresenterHandle</p>
   <h1>ErikaPresenterHandleリファレンス</h1>
   <p class="kicker">ErikaPresenterHandle Reference</p>
-  <p class="lead">push モデル入口の 81 個の機能すべて: ライフ サイクル、再生および実行パラメーター、字幕、弾幕、出力診断、サーフェスとプレゼンテーション、レンダリング ループ、JSON bridge、スクリーンショット。 macOS/iOS/tvOS/Windows/Android/OpenHarmony/Linux、その他のターゲットでのみコンパイルします <code>create</code> NULLを返します。</p>
+  <p class="lead">push モデル入口の 82 個の機能すべて: ライフ サイクル、再生および実行パラメーター、字幕、弾幕、出力診断、サーフェスとプレゼンテーション、レンダリング ループ、JSON bridge、スクリーンショット。 macOS/iOS/tvOS/Windows/Android/OpenHarmony/Linux、その他のターゲットでのみコンパイルします <code>create</code> NULLを返します。</p>
 
   <ul class="meta-strip">
     <li>機能 <b>81</b> ある</li>
@@ -113,6 +113,11 @@
     <div class="api" id="erika_presenter_open_with_options">
       <p class="sig"><b>ErikaStatus erika_presenter_open_with_options</b>( ErikaPresenterHandle *handle, const char *uri, const ErikaOpenOptions *options)</p>
       <p class="desc">使用する <code>ErikaOpenOptions</code> メディアを開くときに、HTTP リクエスト ヘッダー、先読みウィンドウ、およびフォールバック キャッシュ バジェットを同時に渡すことができます。オプションは通話中にのみ借りられますが、<code>reserved</code> ゼロに設定します。 <code>start_position_micros</code> は開始位置（マイクロ秒）で、0 は先頭から開きます。従来の最初の reserved 枠を使うため、ゼロ初期化した旧構造体は先頭から開きます。</p>
+    </div>
+
+    <div class="api" id="erika_presenter_open_with_options_cancellable">
+      <p class="sig"><b>ErikaStatus erika_presenter_open_with_options_cancellable</b>(ErikaPresenterHandle *presenter, const char *uri, const ErikaOpenOptions *options, const ErikaColdOpenCancellation *ticket)</p>
+      <p class="desc"><code>erika_presenter_open_with_options</code> に <code>ErikaColdOpenCancellation</code> を加えたものです。<code>ticket</code> が NULL の場合は同じ動作です。別スレッドが <code>erika_cold_open_cancellation_cancel</code> を呼ぶと、この同期オープンは接続または再試行の待機から早期にエラーで戻ります。0.3.8 で追加された実験的機能です。ticket はこの 1 回のオープン専用で、Presenter 自体をスレッド間で共有することはできません。</p>
     </div>
 
 
@@ -509,11 +514,11 @@
     <div class="api" id="erika_presenter_export_frame_texture"><p class="sig"><b>ErikaStatus erika_presenter_export_frame_texture</b>(ErikaPresenterHandle *handle, uint32_t width, uint32_t height, double content_scale, ErikaTextureFrame **out_frame)</p><p class="desc">WgpuFallback から動画・字幕・有効な弾幕を含み HUD を除く不変の SDR ネイティブテクスチャを出力します。Linux Vulkan OPAQUE_FD と Apple Metal に対応し、surface、Flutter registrar、CPU 読み戻し、GPU テクスチャコピーは不要です。生成側 GPU の完了を待ち、音声も処理します。NoEvent は映像待ちを示し、非 Ok 時 out_frame は NULL です。</p></div>
     <div class="api" id="erika_texture_frame_get_info"><p class="sig"><b>ErikaStatus erika_texture_frame_get_info</b>(const ErikaTextureFrame *frame, ErikaExternalTextureInfo *out_info)</p><p class="desc">テクスチャフレームは presenter より長く保持できます。使用側 GPU の処理とインポートした別名が終了してから release してください。get_info のハンドルは借用です。Metal は GPU 利用中の独立 retain が可能です。Vulkan OPAQUE_FD はインポート前に dup し（0 も有効）、デバイス・ドライバー UUID と属性を一致させ、専用アロケーションをインポートします。読み込み前に旧レイアウト GENERAL で EXTERNAL からキュー所有権を取得します。読み取り専用、UNORM 格納の sRGB 符号化 RGBA です。</p></div>
     <div class="api" id="erika_texture_frame_release"><p class="sig"><b>void erika_texture_frame_release</b>(ErikaTextureFrame *frame)</p><p class="desc">使用側 GPU の処理とインポートした別名が終了してから解放します。</p></div>
-    <p><a href="capi.ja.html#external-texture-types">ErikaExternalTextureInfo</a> · <a href="https://github.com/AimesSoft/liberika/blob/v0.3.7/docs/external_textures.ja.md">Texture guide</a></p>
+    <p><a href="capi.ja.html#external-texture-types">ErikaExternalTextureInfo</a> · <a href="https://github.com/AimesSoft/liberika/blob/v0.3.8/docs/external_textures.ja.md">Texture guide</a></p>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.7</b></span>
+    <span>liberika <b>v0.3.8</b></span>
     <span>Section <b>Reference</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Web / WASM 接入 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261116-037">
-<script defer src="../docs.js?v=20261116-037"></script>
+<link rel="stylesheet" href="../docs.css?v=20261126-038">
+<script defer src="../docs.js?v=20261126-038"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.8</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <div class="language-switch" role="group" aria-label="语言"><a href="web.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="web.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="web.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,27 +53,30 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.8<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
   <p class="crumb"><a href="../../index.html">主页</a><span class="sep">/</span><a href="../index.html">docs</a><span class="sep">/</span>guide<span class="sep">/</span>Web / WASM 接入</p>
   <h1>Web / WASM 接入</h1>
   <p class="kicker">Browser Playback</p>
-  <p class="lead">把原始 MKV 交给浏览器，保留 ASS 特效、字体附件和弹幕。liberika 0.3.7 用 FFmpeg WASM 解封装、WebCodecs 解码、libass 绘制字幕，再以 WebGL2 合成到宿主的一块 Canvas。</p>
-  <ul class="meta-strip"><li>版本 <b>0.3.7</b></li><li>分发 <b>GitHub Release ZIP</b></li><li>环境 <b>HTTPS / localhost</b></li><li>输出 <b>SDR</b></li></ul>
+  <p class="lead">把原始 MKV 交给浏览器，保留 ASS 特效、字体附件和弹幕。liberika 0.3.8 用 FFmpeg WASM 解封装、WebCodecs 解码、libass 绘制字幕，再以 WebGL2 合成到宿主的一块 Canvas。</p>
+  <ul class="meta-strip"><li>版本 <b>0.3.8</b></li><li>分发 <b>npm / GitHub Release ZIP</b></li><li>环境 <b>HTTPS / localhost</b></li><li>输出 <b>SDR</b></li></ul>
 
   <section id="download">
     <h2>下载与试播<a class="anchor" href="#download">#</a></h2>
-    <p>下载 <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/liberika-web-0.3.7.zip">liberika-web-0.3.7.zip</a>，按同一 Release 的 <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/SHA256SUMS">SHA256SUMS</a> 校验，完整解压后通过 HTTPS 或本机 HTTP 服务访问 <code>index.html</code>。演示页可选择本地视频、字幕和弹幕，无需媒体服务器。</p>
+    <p>不想下载时，直接打开<a href="../../demo/">在线演示</a>：可播放内置示例，或选择本地视频、字幕和弹幕，文件不会上传。</p>
+    <div class="code"><p class="lbl">npm</p><pre>npm install @aimessoft/liberika-web</pre></div>
+    <p>运行时以 <a href="https://www.npmjs.com/package/@aimessoft/liberika-web">@aimessoft/liberika-web</a> 发布到 npm。Worker 和两个 WASM 都通过 <code>new URL(..., import.meta.url)</code> 引用，Vite 无需配置即可构建和开发，其他识别这种写法的打包器同样适用。</p>
+    <p>也可下载 <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.8/liberika-web-0.3.8.zip">liberika-web-0.3.8.zip</a>，按同一 Release 的 <a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.8/SHA256SUMS">SHA256SUMS</a> 校验，完整解压后通过 HTTPS 或本机 HTTP 服务访问 <code>index.html</code>。演示页可选择本地视频、字幕和弹幕，无需媒体服务器。</p>
     <div class="code"><p class="lbl">在解压后的目录运行</p><pre>python3 -m http.server 18765 --bind 127.0.0.1
 # 浏览器打开 http://127.0.0.1:18765</pre></div>
-    <p>包内包含 JavaScript、两个 WASM、Worker、许可证、构建清单和演示页。运行时尚未发布到 npm。部署时保留完整目录及相对路径，正确提供 JavaScript 模块和 <code>application/wasm</code> MIME；无需 SharedArrayBuffer 或跨源隔离。</p>
+    <p>归档包含 JavaScript、两个 WASM、Worker、许可证、构建清单和演示页，npm 包不含演示页和构建清单。部署时保留完整目录及相对路径，正确提供 JavaScript 模块和 <code>application/wasm</code> MIME；无需 SharedArrayBuffer 或跨源隔离。页面也可以从返回 CORS 头的其他源（例如 npm CDN）加载运行时，此时 Worker 通过同源 blob 模块启动，设置了 Content-Security-Policy 的页面需要允许 <code>worker-src blob:</code>；只自行托管 <code>worker.js</code> 及其同目录文件时，用 <code>Player.create({ canvas, workerURL })</code> 指定地址。</p>
   </section>
 
   <section id="integration">
     <h2>最小接入<a class="anchor" href="#integration">#</a></h2>
-    <p>把运行时资源放入网站的 <code>liberika/</code> 目录。示例让用户选择本地 File，浏览器在 Worker 内分块读取；也可向 <code>open</code> 传入 Blob 或允许跨域的媒体 URL。</p>
+    <p>使用打包器时写 <code>import { Player } from '@aimessoft/liberika-web'</code>。不使用打包器时，把运行时资源放入网站的 <code>liberika/</code> 目录。示例让用户选择本地 File，浏览器在 Worker 内分块读取；也可向 <code>open</code> 传入 Blob 或允许跨域的媒体 URL。</p>
     <div class="code"><p class="lbl">HTML + JavaScript module</p><pre>&lt;input id=&quot;media&quot; type=&quot;file&quot;&gt;
 &lt;button id=&quot;play&quot; disabled&gt;播放&lt;/button&gt;
 &lt;canvas id=&quot;video&quot; style=&quot;width:100%;height:60vh&quot;&gt;&lt;/canvas&gt;
@@ -124,7 +127,7 @@ await player.configureSubtitles({ scale: 1 });</pre></div>
       <tr><td>截图</td><td><code>capture(width?)</code> 返回含视频、字幕和弹幕的 PNG Blob。</td></tr>
       <tr><td>关闭 / 释放</td><td><code>close()</code> 清空当前媒体后可重新 open；<code>destroy()</code> 释放 Worker、解码器、帧、GPU 和音频资源。</td></tr>
     </tbody></table></div>
-    <p>完整类型见 <a href="https://github.com/AimesSoft/liberika/blob/v0.3.7/packages/erika_web/index.d.ts">index.d.ts</a>。<code>loaded</code>、<code>stats</code>、<code>timeupdate</code>、<code>error</code>、<code>log</code> 是 CustomEvent，数据在 detail 中；play / pause / ended 是普通 Event。</p>
+    <p>完整类型见 <a href="https://github.com/AimesSoft/liberika/blob/v0.3.8/packages/erika_web/index.d.ts">index.d.ts</a>。<code>loaded</code>、<code>stats</code>、<code>timeupdate</code>、<code>error</code>、<code>log</code> 是 CustomEvent，数据在 detail 中；play / pause / ended 是普通 Event。</p>
   </section>
 
   <section id="compatibility">
@@ -137,7 +140,7 @@ await player.configureSubtitles({ scale: 1 });</pre></div>
       <li>当前输出为 SDR，暂不包含桌面 HDR/EDR/Dolby Vision、ArtCNN、DRM、未知长度直播、位图字幕和内嵌非 ASS 字幕转换。SRT/VTT 作为纯文本转换，不保留复杂 VTT 排版。</li>
       <li>内嵌 ASS 跳转预读前 5 秒并保留已见事件；首次跳到更早开始的长事件可能暂时缺失。完整外挂 ASS 脚本没有此限制。</li>
     </ul>
-    <p>源码验证记录覆盖 Chrome 与 Safari 的指定版本和素材；Firefox 尚未验证。详细构建与测试步骤见<a href="https://github.com/AimesSoft/liberika/blob/v0.3.7/docs/web.zh.md">源码 Web 指南</a>。</p>
+    <p>源码验证记录覆盖 Chrome 与 Safari 的指定版本和素材；Firefox 尚未验证。详细构建与测试步骤见<a href="https://github.com/AimesSoft/liberika/blob/v0.3.8/docs/web.zh.md">源码 Web 指南</a>。</p>
   </section>
 
   <section id="build">
@@ -151,10 +154,10 @@ python3 scripts/serve_web.py
 
   <section id="font-packages">
     <h2>完整包与无内嵌字体包<a class="anchor" href="#font-packages">#</a></h2>
-    <p>完整包默认包含约 6 MB 的回退字体。liberika-web-nofont-0.3.7.zip 去掉这部分；浏览器不能把系统字体字节直接交给 WASM 字幕路径，宿主须通过 Player.create({ canvas, fallbackFont: { data, index } }) 提供字体。原生宿主可使用 erika_embedded_fallback_font 将自己的字体传给网页，避免重复打包。</p><p><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.7/liberika-web-nofont-0.3.7.zip">liberika-web-nofont-0.3.7.zip</a></p><p>0.3.7 支持 Bilibili mode 7 定位、直线运动、时长和透明度渐变；尚不支持旋转、多行、mode 8 代码弹幕或 mode 9 BAS。直接构造 Rust DanmakuItem 时，普通弹幕填写 special: None；XML / JSON 解析器自动处理。</p>
+    <p>完整包默认包含约 6 MB 的回退字体。npm 的 <a href="https://www.npmjs.com/package/@aimessoft/liberika-web-nofont">@aimessoft/liberika-web-nofont</a> 和 liberika-web-nofont-0.3.8.zip 去掉这部分；浏览器不能把系统字体字节直接交给 WASM 字幕路径，宿主须通过 Player.create({ canvas, fallbackFont: { data, index } }) 提供字体。原生宿主可使用 erika_embedded_fallback_font 将自己的字体传给网页，避免重复打包。</p><p><a href="https://github.com/AimesSoft/liberika/releases/download/v0.3.8/liberika-web-nofont-0.3.8.zip">liberika-web-nofont-0.3.8.zip</a></p><p>0.3.7 支持 Bilibili mode 7 定位、直线运动、时长和透明度渐变；尚不支持旋转、多行、mode 8 代码弹幕或 mode 9 BAS。直接构造 Rust DanmakuItem 时，普通弹幕填写 special: None；XML / JSON 解析器自动处理。</p>
   </section>
 
-  <footer class="doc-foot"><span>liberika <b>v0.3.7</b></span><span>Section <b>Guide</b></span><span>License <b>MPL-2.0</b></span></footer>
+  <footer class="doc-foot"><span>liberika <b>v0.3.8</b></span><span>Section <b>Guide</b></span><span>License <b>MPL-2.0</b></span></footer>
   <nav class="pager"><a href="linux.html"><span class="dir">Prev</span>Linux 接入</a><a class="nx" href="../kernel/architecture.html"><span class="dir">Next</span>架构总览</a></nav>
 </main>
 </div>

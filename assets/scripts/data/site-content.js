@@ -4,7 +4,7 @@ app.siteContent = {
     name: 'liberika',
     kana: '古戸ヱリカ',
     descriptor: 'Playback Kernel',
-    version: 'v0.3.7',
+    version: 'v0.3.8',
     repoUrl: 'https://github.com/AimesSoft/liberika',
   },
   navigation: [
@@ -12,6 +12,7 @@ app.siteContent = {
     { label: '接入', href: '#start' },
     { label: '平台', href: '#platforms' },
     { label: '文档', href: '#docs' },
+    { label: '在线演示', href: 'demo/' },
   ],
   hero: {
     eyebrow: 'NipaPlay presents / embeddable playback kernel',
@@ -61,14 +62,14 @@ app.siteContent = {
   quickStart: {
     eyebrow: 'Evidence / 02',
     title: '留下最少的接入痕迹',
-    lead: '选择宿主环境，复制最短的开始方式。Flutter 走 pub.dev，Swift 走 SwiftPM，OpenHarmony 走 OHPM，其他原生宿主使用 GitHub Releases 预编译产物，Linux 可选 bundled / system 包或源码构建，Web 下载独立运行时。',
+    lead: '选择宿主环境，复制最短的开始方式。Flutter 走 pub.dev，Swift 走 SwiftPM，OpenHarmony 走 OHPM，其他原生宿主使用 GitHub Releases 预编译产物，Linux 可选 bundled / system 包或源码构建，Web 走 npm 或下载独立运行时。',
     tabs: [
       {
         id: 'release',
         label: '预编译产物',
         language: 'SHELL',
         code: `# github.com/AimesSoft/liberika/releases
-erika-swift-core-0.3.7.xcframework.zip
+erika-swift-core-0.3.8.xcframework.zip
 erika-capi-macos-universal.zip
 erika-capi-windows-x64.zip
 erika-capi-android.zip
@@ -77,11 +78,11 @@ erika-capi-linux-x64-bundled.zip
 erika-capi-linux-arm64-bundled.zip
 erika-capi-linux-x64-system.zip
 erika-capi-linux-arm64-system.zip
-liberika-web-0.3.7.zip`,
+liberika-web-0.3.8.zip`,
         note: 'C ABI 归档包含 erika.h、许可证与 MANIFEST.txt；Swift 使用 XCFramework。',
         action: {
           label: '查看 GitHub Releases',
-          url: 'https://github.com/AimesSoft/liberika/releases/tag/v0.3.7',
+          url: 'https://github.com/AimesSoft/liberika/releases/tag/v0.3.8',
         },
       },
       {
@@ -96,7 +97,7 @@ await player.play();
 
 // 放入 Widget 树
 ErikaVideoView(player: player)`,
-        note: 'pub.dev 0.3.7 已发布：flutter pub add erika_flutter:^0.3.7。',
+        note: 'pub.dev 0.3.8 已发布：flutter pub add erika_flutter:^0.3.8。',
       },
       {
         id: 'swift',
@@ -107,7 +108,7 @@ ErikaVideoView(player: player)`,
 let player = try ErikaPlayer()
 try player.open("https://example.com/video.mp4")
 try player.play()`,
-        note: 'SwiftPM 0.3.7：在 Xcode 中添加 https://github.com/AimesSoft/liberika-swift',
+        note: 'SwiftPM 0.3.8：在 Xcode 中添加 https://github.com/AimesSoft/liberika-swift',
         action: {
           label: '查看 Swift 接入指南',
           url: 'docs/guide/swift.html',
@@ -122,7 +123,7 @@ try player.play()`,
 const player = new ErikaPlayer();
 player.open('https://example.com/video.mp4');
 player.play();`,
-        note: 'OHPM 0.3.7 已公开：ohpm install erika@0.3.7。原生表面与帧调度示例收录在接入指南。',
+        note: 'OHPM 0.3.8 已公开：ohpm install erika@0.3.8。原生表面与帧调度示例收录在接入指南。',
         action: {
           label: '查看 OpenHarmony 接入指南',
           url: 'docs/guide/openharmony.html',
@@ -132,7 +133,8 @@ player.play();`,
         id: 'web',
         label: 'Web · WASM',
         language: 'JAVASCRIPT',
-        code: `import { Player } from './liberika/index.js';
+        code: `// npm install @aimessoft/liberika-web
+import { Player } from '@aimessoft/liberika-web';
 
 const player = await Player.create({ canvas });
 await player.open(file); // 本地 File / Blob 或远程 URL
@@ -140,9 +142,9 @@ playButton.onclick = () => player.play();
 
 // 卸载时释放播放器
 // await player.destroy();`,
-        note: '下载 liberika-web-0.3.7.zip，完整解压后通过 HTTPS 或 localhost 访问。附带演示页；尚未发布到 npm。',
+        note: 'npm 包 @aimessoft/liberika-web 0.3.8 已发布，Vite 等打包器无需配置；也可下载 liberika-web-0.3.8.zip 自行托管。在线演示：liberika.aimes-soft.com/demo/',
         action: {
-          label: '查看 Web 接入与下载',
+          label: '查看 Web 接入与在线演示',
           url: 'docs/guide/web.html',
         },
       },
@@ -155,7 +157,7 @@ playButton.onclick = () => player.play();
 let player = Player::new(PlayerConfig::default());
 player.open(MediaRequest::new("/path/to/video.mp4"))?;
 player.play()?;`,
-        note: 'Cargo.toml：erika = { git = "https://github.com/AimesSoft/liberika", tag = "v0.3.7" }',
+        note: 'Cargo.toml：erika = { git = "https://github.com/AimesSoft/liberika", tag = "v0.3.8" }',
       },
       {
         id: 'c-api',

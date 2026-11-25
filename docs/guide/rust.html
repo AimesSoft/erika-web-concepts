@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Rust 嵌入 — liberika 开发者文档</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261116-037">
-<script defer src="../docs.js?v=20261116-037"></script>
+<link rel="stylesheet" href="../docs.css?v=20261126-038">
+<script defer src="../docs.js?v=20261126-038"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.8</span></a></div>
   <p class="brand-sub">可嵌入播放内核 · 开发者文档</p>
   <div class="language-switch" role="group" aria-label="语言"><a href="rust.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文" aria-current="page">中</a><a href="rust.en.html" hreflang="en" lang="en" title="English" aria-label="English">EN</a><a href="rust.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.8<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -73,7 +73,7 @@
     <div class="code">
       <p class="lbl">Cargo.toml</p>
 <pre>[dependencies]
-erika = { git = <span class="s">"https://github.com/AimesSoft/liberika"</span>, tag = <span class="s">"v0.3.7"</span> }</pre>
+erika = { git = <span class="s">"https://github.com/AimesSoft/liberika"</span>, tag = <span class="s">"v0.3.8"</span> }</pre>
     </div>
     <p>Apple、Windows、Android 与 OpenHarmony 首次源码构建前，需通过 xtask 编译预设的 LGPL 原生依赖（FFmpeg、libass、dav1d 等）：</p>
     <div class="code">
@@ -235,14 +235,14 @@ player.open(request)?;</pre>
   <section id="linux-external">
     <h2>Linux 外部 workspace 与 dma-buf<a class="anchor" href="#linux-external">#</a></h2>
     <p>启用 wgpu 并在消费者根 Cargo.toml 显式添加同一版本的 HAL 补丁；Cargo 不会继承依赖仓库的 patch。Linux 的 SoundTouch 构建还需消费者自行配置 PIC，完整配置见 Linux 接入页。</p><div class="code"><p class="lbl">Cargo.toml</p><pre>[dependencies]
-erika = { git = "https://github.com/AimesSoft/liberika", tag = "v0.3.7", features = ["wgpu"] }
+erika = { git = "https://github.com/AimesSoft/liberika", tag = "v0.3.8", features = ["wgpu"] }
 
 [patch.crates-io]
-wgpu-hal = { git = "https://github.com/AimesSoft/liberika", tag = "v0.3.7" }</pre></div><p><a href="linux.html#native">Linux 接入与 PIC 配置</a></p><p>export_frame_dmabuf(w, h, scale) 每次调用同时驱动播放并合成视频、字幕与弹幕，通过一次同设备 GPU 拷贝得到线性 RGBA8。GTK / EGL / Wayland 宿主无需自己的 Vulkan 设备。使用 raw_fd()、stride()、offset() 导入；fourcc 为 ABGR8888、modifier 为 0。槽位每三次导出复用，必须在复用前完成消费并关闭描述符。该接口与可长期保留的不可变 export_frame_texture 不同；C API 未新增 dma-buf 入口。</p>
+wgpu-hal = { git = "https://github.com/AimesSoft/liberika", tag = "v0.3.8" }</pre></div><p><a href="linux.html#native">Linux 接入与 PIC 配置</a></p><p>export_frame_dmabuf(w, h, scale) 每次调用同时驱动播放并合成视频、字幕与弹幕，通过一次同设备 GPU 拷贝得到线性 RGBA8。GTK / EGL / Wayland 宿主无需自己的 Vulkan 设备。使用 raw_fd()、stride()、offset() 导入；fourcc 为 ABGR8888、modifier 为 0。槽位每三次导出复用，必须在复用前完成消费并关闭描述符。该接口与可长期保留的不可变 export_frame_texture 不同；C API 未新增 dma-buf 入口。</p>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.7</b></span>
+    <span>liberika <b>v0.3.8</b></span>
     <span>Section <b>Guide</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

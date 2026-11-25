@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Building and dependencies — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261116-037">
-<script defer src="../docs.js?v=20261116-037"></script>
+<link rel="stylesheet" href="../docs.css?v=20261126-038">
+<script defer src="../docs.js?v=20261126-038"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.8</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
   <div class="language-switch" role="group" aria-label="Language"><a href="building.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="building.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="building.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.8<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -137,7 +137,7 @@ cargo run -p xtask -- deps build --all          <span class="c"># Build the host
 
   <section id="windows">
     <h2>Windows / MSVC<a class="anchor" href="#windows">#</a></h2>
-<p>On Windows, v0.3.7 requires an explicit MSVC target so the xtask output directory matches Cargo. For x64:</p><div class="code"><p class="lbl">PowerShell</p><pre>cargo run -p xtask -- deps build --all --profile lgpl --target x86_64-pc-windows-msvc
+<p>Since 0.3.8, <code>host</code> on Windows x64 and ARM64 resolves to the matching MSVC target, so the dependency directory matches a <code>cargo build</code> without <code>--target</code>. Name a target explicitly when you need another architecture. For x64:</p><div class="code"><p class="lbl">PowerShell</p><pre>cargo run -p xtask -- deps build --all --profile lgpl --target x86_64-pc-windows-msvc
 $env:ERIKA_NATIVE_TARGET = &quot;x86_64-pc-windows-msvc&quot;
 cargo build --locked -p erika_capi --target x86_64-pc-windows-msvc</pre></div><p>For ARM64, use aarch64-pc-windows-msvc. The default is the DLL CRT (/MD); omit --crt static unless Rust uses -C target-feature=+crt-static. Static CRT dependencies are stored separately under lgpl-crt-static.</p>
   </section>
@@ -179,14 +179,14 @@ cargo test --workspace</pre>
 
   <section id="linux">
     <h2>Linux release and source builds<a class="anchor" href="#linux">#</a></h2>
-<p>Version 0.3.7 provides four Linux ZIPs: x64 / ARM64 × bundled / system, all based on Ubuntu 22.04 / glibc 2.35. Release builds need a native GNU/Linux host of the matching CPU, Rust 1.92+, Meson 1.8.5 and the development tools listed in CI; the old distro Rust/Meson are insufficient. Run the modes separately:</p><div class="code"><p class="lbl">shell</p><pre>ERIKA_LINUX_DEPENDENCIES=bundled bash scripts/build_linux_release.sh
+<p>Since 0.3.7 there are four Linux ZIPs: x64 / ARM64 × bundled / system, all based on Ubuntu 22.04 / glibc 2.35. Release builds need a native GNU/Linux host of the matching CPU, Rust 1.92+, Meson 1.8.5 and the development tools listed in CI; the old distro Rust/Meson are insufficient. Run the modes separately:</p><div class="code"><p class="lbl">shell</p><pre>ERIKA_LINUX_DEPENDENCIES=bundled bash scripts/build_linux_release.sh
 
 ERIKA_LINUX_DEPENDENCIES=system bash scripts/build_linux_release.sh</pre></div><p>The script prepares a pinned FFmpeg 8 SDK and build headers. Outputs are isolated in target/linux-&lt;mode&gt;/&lt;triple&gt;/release, with ZIPs in dist/. bundled embeds media dependencies; system requires matching FFmpeg 8 shared libraries on the host. Both need system audio and graphics drivers. The Ubuntu 26.04 system-library path remains available: run scripts/build_linux_libass.sh, then cargo build --locked --release -p erika_capi -p linux_native_demo.</p><p><a href="../guide/linux.en.html#rust-consumer">Rust / C / Flutter · HAL patch · PIC</a></p>
     <p>The codecs and license of the system FFmpeg depend on how your distribution built it; setting the lgpl profile does not change system libraries.</p>
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.7</b></span>
+    <span>liberika <b>v0.3.8</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>

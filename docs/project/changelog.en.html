@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Changelog — liberika developer documentation</title>
 <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../docs.css?v=20261116-037">
-<script defer src="../docs.js?v=20261116-037"></script>
+<link rel="stylesheet" href="../docs.css?v=20261126-038">
+<script defer src="../docs.js?v=20261126-038"></script>
 </head>
 <body>
 <div class="layout">
 
 <aside>
-  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.7</span></a></div>
+  <div class="brand"><a href="../../index.html"><span class="n">liberika</span><span class="v">v0.3.8</span></a></div>
   <p class="brand-sub">Embeddable playback kernel · Developer documentation</p>
   <div class="language-switch" role="group" aria-label="Language"><a href="changelog.html" hreflang="zh-CN" lang="zh-CN" title="中文" aria-label="中文">中</a><a href="changelog.en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-current="page">EN</a><a href="changelog.ja.html" hreflang="ja" lang="ja" title="日本語" aria-label="日本語">日</a></div>
   <nav>
@@ -53,7 +53,7 @@
       <li><a href="../reference/capi-json.en.html">JSON bridge</a></li>
     </ul>
   </nav>
-  <p class="side-foot">liberika v0.3.7<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
+  <p class="side-foot">liberika v0.3.8<br>MPL-2.0 · github.com/AimesSoft/liberika</p>
 </aside>
 
 <main>
@@ -63,9 +63,14 @@
   <p class="lead">Changes that are visible to the host, listed by version. Entries that were later reverted are omitted; the repository’s root <code>CHANGELOG.md</code> is authoritative for the full history. Breaking changes in 0.1.3 and earlier are summarized at the end of this page.</p>
 
   <ul class="meta-strip">
-    <li>Current <b>0.3.7</b></li>
-    <li>Released <b>2026-11-14</b></li>
+    <li>Current <b>0.3.8</b></li>
+    <li>Released <b>2026-11-20</b></li>
   </ul>
+
+  <section id="v038">
+    <h2>0.3.8 · 2026-11-20<a class="anchor" href="#v038">#</a></h2>
+    <ul class="body"><li>Windows: D3D11 screenshots read back the current frame as SDR with subtitles and optional danmaku, tone-mapping HDR. They leave the live output configuration alone and do not apply upscaling. Reading statistics or calling an unsupported method no longer triggers a redraw.</li><li>HTTP sources: responses are validated, sidecar files read completely when a response is cut short, stalled reads recover, and a bounded Retry-After is honoured.</li><li>The C ABI adds an experimental cancellable open: erika_presenter_open_with_options_cancellable, erika_open_validate and ErikaColdOpenCancellation. Flutter cancels superseded HTTP opens on Windows and macOS.</li><li>Subtitles and danmaku: hosts that only export frames no longer build an unused subtitle layer; danmaku appears on its first layout and its timing no longer jitters with the pump loop.</li><li>Rendering: Metal and D3D11 upload software-decoded planes directly; D3D11 reuses the subtitle atlas and skips unchanged presents; ordinary SDR video on macOS takes a path without Dolby Vision processing.</li><li>Build: on Windows, the dependency build's host resolves to the matching MSVC target.</li><li>After the 0.3.8 release, the Web runtime was published to npm as @aimessoft/liberika-web and @aimessoft/liberika-web-nofont.</li></ul><p><a href="https://github.com/AimesSoft/liberika/releases/tag/v0.3.8">Release notes</a></p>
+  </section>
 
   <section id="v037">
     <h2>0.3.7 · 2026-11-13<a class="anchor" href="#v037">#</a></h2>
@@ -290,7 +295,7 @@
   </section>
 
   <footer class="doc-foot">
-    <span>liberika <b>v0.3.7</b></span>
+    <span>liberika <b>v0.3.8</b></span>
     <span>Section <b>Project</b></span>
     <span>License <b>MPL-2.0</b></span>
   </footer>
