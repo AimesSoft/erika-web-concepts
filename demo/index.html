@@ -22,17 +22,23 @@
         display: block; margin-left: auto; overflow: hidden; color: var(--ink-faint);
         letter-spacing: 0.06em; text-overflow: ellipsis; white-space: nowrap;
       }
-      /* The picture keeps 16:9 and the stage never outgrows the window; what is
-         left at the sides is part of the frame, not letterboxing. */
+      /* The whole card (toolbar, picture, note) fits under the header, so the
+         controls are never below the fold. The engine letterboxes inside. */
       .stage {
-        position: relative; display: grid; place-items: center; aspect-ratio: 16 / 9; max-height: 68vh; width: 100%;
-        background-color: var(--ink);
-        background-image: radial-gradient(circle, rgba(255, 255, 255, 0.09) 1px, transparent 1.2px);
-        background-size: 16px 16px;
+        position: relative; overflow: hidden; width: 100%; aspect-ratio: 16 / 9; background: #000; outline: none;
+        max-height: max(220px, calc(100vh - 230px));
+        max-height: max(220px, calc(100svh - 230px));
       }
-      .stage canvas { display: block; height: 100%; width: auto; max-width: 100%; aspect-ratio: 16 / 9; background: #000; }
+      /* A canvas handed to a worker takes its intrinsic size from the drawing
+         buffer the player sets, which follows the element's size. Positioning it
+         out of flow keeps that loop from ever growing the stage. */
+      .stage canvas { position: absolute; inset: 0; z-index: 0; display: block; width: 100%; height: 100%; cursor: pointer; }
+      .stage:focus-visible { box-shadow: inset 0 0 0 2px var(--blue); }
+      .stage:fullscreen { max-height: none; aspect-ratio: auto; width: 100%; height: 100%; }
+      .stage:-webkit-full-screen { max-height: none; aspect-ratio: auto; width: 100%; height: 100%; }
+      .stage.idle, .stage.idle canvas { cursor: none; }
       .stage-cover {
-        position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 26px;
+        position: absolute; inset: 0; z-index: 3; display: grid; place-content: center; justify-items: center; gap: 26px;
         padding: 28px; text-align: center; background-color: var(--white);
         background-image: radial-gradient(circle, rgba(89, 111, 192, 0.13) 1px, transparent 1.2px);
         background-size: 16px 16px;
@@ -49,18 +55,40 @@
       .button:disabled { cursor: default; opacity: 0.45; transform: none; }
       .button input, .chip input[type="file"] { display: none; }
 
-      .transport { display: flex; align-items: center; gap: 18px; padding: 14px 18px; border-top: 1px solid var(--ink); }
-      .transport .play {
-        min-width: 76px; min-height: 36px; padding: 0 14px; border: 1px solid var(--ink); border-radius: 5px;
-        background: var(--white); font-size: 12px; font-weight: 800; letter-spacing: 0.05em; cursor: pointer;
-        transition: color 160ms ease, background 160ms ease;
+      /* Controls sit on the picture, as in any player: shown while paused or
+         when the pointer moves, hidden after a few idle seconds of playback. */
+      .controls {
+        position: absolute; right: 0; bottom: 0; left: 0; z-index: 2;
+        display: flex; align-items: center; gap: 14px; padding: 42px 16px 12px;
+        color: var(--white); background: linear-gradient(to top, rgba(23, 24, 42, 0.88), rgba(23, 24, 42, 0));
+        transition: opacity 240ms ease, transform 240ms ease;
       }
-      .transport .play:hover:not(:disabled) { color: var(--white); background: var(--ink); }
-      .transport .play:disabled { cursor: default; opacity: 0.4; }
-      .transport #seek { flex: 1; min-width: 120px; }
-      .transport .time, .transport label { color: var(--ink-soft); font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; }
-      .transport label { display: inline-flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 0.12em; font-size: 9px; font-weight: 700; }
-      .transport label input { width: 96px; }
+      .controls[hidden] { display: none; }
+      .stage.idle .controls { opacity: 0; transform: translateY(6px); pointer-events: none; }
+      .ctl {
+        display: grid; width: 34px; height: 34px; flex: none; place-items: center; padding: 0;
+        border: 1px solid rgba(255, 255, 255, 0.55); border-radius: 50%; color: inherit; background: transparent;
+        cursor: pointer; transition: color 160ms ease, background 160ms ease, border-color 160ms ease;
+      }
+      .ctl:hover { color: var(--ink); background: var(--white); border-color: var(--white); }
+      .ctl.play { width: 40px; height: 40px; border-color: var(--pink); background: var(--pink); }
+      .ctl.play:hover { color: var(--white); background: var(--pink-dark); border-color: var(--pink-dark); }
+      .ctl .icon { width: 17px; height: 17px; }
+      .ctl [data-when] { display: none; }
+      .ctl[data-state="playing"] [data-when="playing"], .ctl[data-state="paused"] [data-when="paused"],
+      .ctl[data-state="in"] [data-when="in"], .ctl[data-state="out"] [data-when="out"] { display: block; }
+      .controls .time { flex: none; font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; opacity: 0.9; }
+      .controls #seek { flex: 1; min-width: 80px; }
+      .controls .volume { display: inline-flex; flex: none; align-items: center; gap: 8px; }
+      .controls .volume .icon { width: 16px; height: 16px; opacity: 0.85; }
+      .controls .volume input { width: 84px; }
+      .controls input[type="range"]::-webkit-slider-runnable-track {
+        height: 3px; border-radius: 3px;
+        background: linear-gradient(to right, var(--pink) var(--fill, 0%), rgba(255, 255, 255, 0.32) var(--fill, 0%));
+      }
+      .controls input[type="range"]::-moz-range-track { height: 3px; border-radius: 3px; background: rgba(255, 255, 255, 0.32); }
+      .controls input[type="range"]::-moz-range-progress { height: 3px; border-radius: 3px; background: var(--pink); }
+      .controls input[type="range"]::-webkit-slider-thumb { margin-top: -5px; border-color: var(--white); background: var(--pink); }
 
       input[type="range"] { height: 18px; margin: 0; background: transparent; cursor: pointer; -webkit-appearance: none; appearance: none; }
       input[type="range"]:disabled { cursor: default; opacity: 0.4; }
@@ -114,8 +142,8 @@
 
       @media (max-width: 820px) {
         .bench, .try-grid { grid-template-columns: 1fr; }
-        .transport { flex-wrap: wrap; }
-        .transport #seek { order: 3; flex-basis: 100%; }
+        .controls { gap: 10px; padding: 34px 10px 8px; }
+        .controls .volume { display: none; }
         .code-toolbar > .player-summary { display: none; }
       }
     </style>
@@ -166,8 +194,15 @@
             <b>PLAYER</b>
             <span class="player-summary" id="summary">@aimessoft/liberika-web · 0.3.8</span>
           </div>
-          <div class="stage">
-            <canvas id="video" aria-label="liberika player"></canvas>
+          <div class="stage" id="stage" tabindex="0" data-t-label="playerLabel" aria-label="播放器">
+            <canvas id="video"></canvas>
+            <div class="controls" id="controls" hidden>
+              <button class="ctl play" id="play" type="button" data-state="paused" data-t-label="play" aria-label="播放"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path data-when="paused" d="M8.5 5.8v12.4l10-6.2z"/><path data-when="playing" d="M7.5 5.5h3v13h-3zM13.5 5.5h3v13h-3z"/></svg></button>
+              <span class="time" id="time">0:00 / 0:00</span>
+              <input id="seek" type="range" min="0" max="100" value="0" step="0.01" data-t-label="seekLabel" aria-label="进度">
+              <label class="volume"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.7 7.7 0 0 1 0 11"/></svg><input id="volume" type="range" min="0" max="1" value="1" step="0.01" data-t-label="volume" aria-label="音量"></label>
+              <button class="ctl" id="fullscreen" type="button" data-state="in" data-t-label="fullscreen" aria-label="全屏"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path data-when="in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path data-when="out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg></button>
+            </div>
             <div class="stage-cover" id="overlay">
               <p class="section-eyebrow">Exhibit A / sample.mkv</p>
               <p class="cover-text" id="overlayText" data-t="loading">正在加载播放内核…</p>
@@ -176,12 +211,6 @@
                 <label class="button button-ghost"><span data-t="openFile">打开本地视频</span><input id="file" type="file" accept="video/*,.mkv,.mp4,.webm,.mov,.ts,.flv"></label>
               </div>
             </div>
-          </div>
-          <div class="transport">
-            <button class="play" id="play" type="button" disabled data-t="play">播放</button>
-            <input id="seek" type="range" min="0" max="100" value="0" step="0.01" disabled aria-label="Seek">
-            <span class="time" id="time">0:00 / 0:00</span>
-            <label><span data-t="volume">音量</span><input id="volume" type="range" min="0" max="1" value="1" step="0.01"></label>
           </div>
           <div class="code-note">
             <p><span>NOTE</span><span id="status" role="status" style="color:inherit;font-weight:400;letter-spacing:0"></span></p>
@@ -294,7 +323,8 @@ await player.play();</code></pre>
           lead: "视频留在你的设备上：FFmpeg WASM 解封装，浏览器 WebCodecs 解码，libass 绘制 ASS 字幕和内嵌字体，Rust 弹幕引擎排版，最后由 WebGL2 合成到一块画布。",
           loading: "正在加载播放内核…", ready: "选一个视频开始。本地文件不会上传到任何服务器。",
           playSample: "播放示例片段", openFile: "打开本地视频", openOther: "换一个视频",
-          play: "播放", pause: "暂停", volume: "音量", loadSubtitle: "载入字幕", loadDanmaku: "载入弹幕",
+          play: "播放", pause: "暂停", volume: "音量", fullscreen: "全屏", exitFullscreen: "退出全屏",
+          playerLabel: "播放器：点击画面或按空格暂停，左右方向键快退快进，F 键全屏", seekLabel: "进度", loadSubtitle: "载入字幕", loadDanmaku: "载入弹幕",
           demoDanmaku: "加一批示例弹幕", danmakuOn: "显示弹幕", opacity: "不透明度", size: "字号",
           subhd: "字幕双倍采样", hd: "弹幕双倍采样", subtitleOff: "关闭字幕", subtitleTrack: "字幕轨",
           sourcesTitle: "换成你的素材", danmakuTitle: "调一调弹幕", guideLink: "查看 Web 接入文档",
@@ -322,7 +352,8 @@ await player.play();</code></pre>
           lead: "The video stays on your device. FFmpeg in WASM demuxes it, the browser's WebCodecs decodes it, libass draws the ASS subtitles with their attached fonts, a Rust engine lays out the danmaku, and WebGL2 composites everything into one canvas.",
           loading: "Loading the playback engine…", ready: "Pick a video to start. Local files are not uploaded anywhere.",
           playSample: "Play the sample clip", openFile: "Open a local video", openOther: "Open another video",
-          play: "Play", pause: "Pause", volume: "Volume", loadSubtitle: "Load subtitles", loadDanmaku: "Load danmaku",
+          play: "Play", pause: "Pause", volume: "Volume", fullscreen: "Full screen", exitFullscreen: "Exit full screen",
+          playerLabel: "Player: click the picture or press Space to pause, arrow keys to seek, F for full screen", seekLabel: "Position", loadSubtitle: "Load subtitles", loadDanmaku: "Load danmaku",
           demoDanmaku: "Add sample danmaku", danmakuOn: "Show danmaku", opacity: "Opacity", size: "Font size",
           subhd: "2x subtitle sampling", hd: "2x danmaku sampling", subtitleOff: "Subtitles off", subtitleTrack: "Subtitle track",
           sourcesTitle: "Bring your own material", danmakuTitle: "Tune the danmaku", guideLink: "Read the Web guide",
@@ -350,7 +381,8 @@ await player.play();</code></pre>
           lead: "動画は端末の外に出ません。FFmpeg WASM がデマルチプレクスし、ブラウザーの WebCodecs がデコードし、libass が ASS 字幕と添付フォントを描画し、Rust の弾幕エンジンがレイアウトして、WebGL2 が 1 枚の Canvas に合成します。",
           loading: "再生エンジンを読み込んでいます…", ready: "動画を選んで開始します。ローカルファイルはどこにもアップロードされません。",
           playSample: "サンプルを再生", openFile: "ローカル動画を開く", openOther: "別の動画を開く",
-          play: "再生", pause: "一時停止", volume: "音量", loadSubtitle: "字幕を読み込む", loadDanmaku: "弾幕を読み込む",
+          play: "再生", pause: "一時停止", volume: "音量", fullscreen: "全画面", exitFullscreen: "全画面を終了",
+          playerLabel: "プレーヤー：画面クリックまたは Space で一時停止、矢印キーでシーク、F で全画面", seekLabel: "再生位置", loadSubtitle: "字幕を読み込む", loadDanmaku: "弾幕を読み込む",
           demoDanmaku: "サンプル弾幕を追加", danmakuOn: "弾幕を表示", opacity: "不透明度", size: "文字サイズ",
           subhd: "字幕 2 倍サンプリング", hd: "弾幕 2 倍サンプリング", subtitleOff: "字幕オフ", subtitleTrack: "字幕トラック",
           sourcesTitle: "自分の素材で試す", danmakuTitle: "弾幕を調整する", guideLink: "Web 導入ガイドを見る",
@@ -399,7 +431,8 @@ await player.play();</code></pre>
         for (const link of document.querySelectorAll("[data-doc]")) link.href = `../docs/${link.dataset.doc}${suffix}.html`;
         for (const link of document.querySelectorAll("[data-doc-root]")) link.href = `../docs/index${suffix}.html`;
         $("overlayText").textContent = (t[overlayKey] ?? overlayKey) + overlayDetail;
-        $("play").textContent = playing ? t.pause : t.play;
+        $("play").setAttribute("aria-label", playing ? t.pause : t.play);
+        $("fullscreen").setAttribute("aria-label", document.fullscreenElement ? t.exitFullscreen : t.fullscreen);
         const off = $("tracks").querySelector('option[value="-1"]');
         if (off) off.textContent = t.subtitleOff;
         if (statusKey) status.textContent = t[statusKey];
@@ -481,12 +514,85 @@ await player.play();</code></pre>
             }
           };
 
+          const stage = $("stage"), controls = $("controls");
+          let idleTimer = 0, overControls = false, lastPointer = "mouse";
+          // Controls stay up while paused, while the pointer is on them, and
+          // while a control has keyboard focus; otherwise they fade after a pause.
+          function wake(delay = 2600) {
+            stage.classList.remove("idle");
+            clearTimeout(idleTimer);
+            if (!playing) return;
+            idleTimer = setTimeout(() => {
+              if (playing && !overControls && !controls.contains(document.activeElement)) stage.classList.add("idle");
+            }, delay);
+          }
+          const toggle = () => (player.playing ? player.pause() : player.play());
+
+          stage.addEventListener("pointermove", (e) => { lastPointer = e.pointerType; wake(); });
+          stage.addEventListener("pointerdown", (e) => { lastPointer = e.pointerType; });
+          stage.addEventListener("pointerleave", () => wake(700));
+          controls.addEventListener("pointerenter", () => { overControls = true; wake(); });
+          controls.addEventListener("pointerleave", () => { overControls = false; wake(); });
+          controls.addEventListener("focusin", () => wake());
+          $("video").addEventListener("click", safe(async () => {
+            if (controls.hidden) return;
+            stage.focus({ preventScroll: true });
+            // On touch the first tap only brings the controls back.
+            if (lastPointer === "touch" && stage.classList.contains("idle")) return wake();
+            wake();
+            await toggle();
+          }));
+          stage.addEventListener("keydown", safe(async (e) => {
+            if (controls.hidden || e.target instanceof HTMLInputElement || e.metaKey || e.ctrlKey || e.altKey) return;
+            const key = e.key.toLowerCase();
+            if (key === " " || key === "k") {
+              if (e.target instanceof HTMLButtonElement) return;
+              e.preventDefault(); wake(); await toggle();
+            } else if (key === "arrowleft" || key === "arrowright") {
+              e.preventDefault(); wake();
+              const to = Math.min(duration, Math.max(0, player.currentTime + (key === "arrowright" ? 5 : -5)));
+              await player.seek(to);
+            } else if (key === "f") {
+              e.preventDefault(); toggleFullscreen();
+            }
+          }));
+
+          const fullscreenElement = () => document.fullscreenElement ?? document.webkitFullscreenElement ?? null;
+          function toggleFullscreen() {
+            if (fullscreenElement()) (document.exitFullscreen ?? document.webkitExitFullscreen)?.call(document);
+            else (stage.requestFullscreen ?? stage.webkitRequestFullscreen)?.call(stage);
+          }
+          const syncFullscreen = () => {
+            const active = fullscreenElement() === stage;
+            $("fullscreen").dataset.state = active ? "out" : "in";
+            $("fullscreen").setAttribute("aria-label", active ? t.exitFullscreen : t.fullscreen);
+            wake();
+          };
+          document.addEventListener("fullscreenchange", syncFullscreen);
+          document.addEventListener("webkitfullscreenchange", syncFullscreen);
+          $("fullscreen").onclick = () => toggleFullscreen();
+          if (!stage.requestFullscreen && !stage.webkitRequestFullscreen) $("fullscreen").hidden = true;
+
+          const fill = (input) => {
+            const max = Number(input.max) || 1;
+            input.style.setProperty("--fill", `${(Number(input.value) / max) * 100}%`);
+          };
+          fill($("volume"));
+
           async function open(source) {
             say(t.opening);
             overlay.hidden = true;
             try {
               await player.open(source);
+              controls.hidden = false;
+              // Bring the whole player into view, controls included. The card is
+              // sized to fit under the fixed header (main.css pads scrolling by it).
+              const card = document.querySelector(".player-case").getBoundingClientRect();
+              if (card.top < 76 || card.bottom > innerHeight)
+                document.querySelector(".player-case").scrollIntoView({ behavior: "smooth", block: "start" });
+              stage.focus({ preventScroll: true });
               await player.play();
+              wake();
             } catch (error) {
               overlay.hidden = false;
               throw error;
@@ -514,8 +620,6 @@ await player.play();</code></pre>
             summary = `${info.backend} · ${info.decoder} · ${Math.round(info.duration)} ${t.seconds}`;
             $("summary").textContent = summary;
             $("seek").max = info.duration;
-            $("seek").disabled = false;
-            $("play").disabled = false;
             $("demoDanmaku").disabled = false;
             const tracks = $("tracks");
             tracks.replaceChildren(new Option(t.subtitleOff, "-1"));
@@ -526,13 +630,16 @@ await player.play();</code></pre>
             say(summary);
           });
           player.addEventListener("stats", (e) => say(t.stats(e.detail)));
+          let seeking = false;
           player.addEventListener("timeupdate", (e) => {
-            if (document.activeElement !== $("seek")) $("seek").value = e.detail;
-            $("time").textContent = `${clock(e.detail)} / ${clock(duration)}`;
+            if (!seeking) { $("seek").value = e.detail; fill($("seek")); }
+            $("time").textContent = `${clock(seeking ? Number($("seek").value) : e.detail)} / ${clock(duration)}`;
           });
           const setPlaying = (value) => {
             playing = value;
-            $("play").textContent = value ? t.pause : t.play;
+            $("play").dataset.state = value ? "playing" : "paused";
+            $("play").setAttribute("aria-label", value ? t.pause : t.play);
+            wake();
           };
           player.addEventListener("play", () => setPlaying(true));
           player.addEventListener("pause", () => setPlaying(false));
@@ -551,9 +658,16 @@ await player.play();</code></pre>
             });
           $("file").onchange = pick($("file"));
           $("file2").onchange = pick($("file2"));
-          $("play").onclick = safe(() => (player.playing ? player.pause() : player.play()));
-          $("seek").onchange = safe(() => player.seek(Number($("seek").value)));
-          $("volume").oninput = () => player.setVolume(Number($("volume").value));
+          $("play").onclick = safe(toggle);
+          $("seek").oninput = () => {
+            seeking = true;
+            fill($("seek"));
+            $("time").textContent = `${clock(Number($("seek").value))} / ${clock(duration)}`;
+          };
+          $("seek").onchange = safe(async () => {
+            try { await player.seek(Number($("seek").value)); } finally { seeking = false; }
+          });
+          $("volume").oninput = () => { fill($("volume")); player.setVolume(Number($("volume").value)); };
           $("subs").onchange = safe(async () => {
             const file = $("subs").files[0];
             $("subs").value = "";
