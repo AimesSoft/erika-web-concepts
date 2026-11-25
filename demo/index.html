@@ -122,9 +122,9 @@
       }
       .bench select:disabled { opacity: 0.45; }
       .bench input[type="range"] { width: min(190px, 46vw); }
-      .switch { position: relative; width: 34px; height: 18px; flex: none; }
-      .switch input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
-      .switch i { position: absolute; inset: 0; border: 1px solid var(--line-strong); border-radius: 999px; background: var(--white); transition: border-color 160ms ease, background 160ms ease; }
+      .switch { position: relative; display: inline-block; width: 34px; height: 18px; flex: none; cursor: pointer; }
+      .switch input { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+      .switch i { position: absolute; inset: 0; border: 1px solid var(--line-strong); border-radius: 999px; background: var(--white); pointer-events: none; transition: border-color 160ms ease, background 160ms ease; }
       .switch i::after { position: absolute; top: 3px; left: 3px; width: 10px; height: 10px; border-radius: 50%; background: var(--line-strong); content: ""; transition: transform 160ms ease, background 160ms ease; }
       .switch input:checked + i { border-color: var(--pink); background: var(--pink-soft); }
       .switch input:checked + i::after { background: var(--pink); transform: translateX(16px); }
@@ -229,16 +229,16 @@
             </div>
             <ul>
               <li><span data-t="subtitleTrack">字幕轨</span><select id="tracks" aria-label="Subtitle track" disabled></select></li>
-              <li><span data-t="subhd">字幕双倍采样</span><span class="switch"><input id="subhd" type="checkbox" checked aria-label="2x subtitle sampling"><i></i></span></li>
+              <li><label for="subhd" data-t="subhd">字幕双倍采样</label><label class="switch"><input id="subhd" type="checkbox" checked aria-label="2x subtitle sampling"><i></i></label></li>
             </ul>
           </article>
           <article class="doc-card reveal">
             <header><span>B</span><div><p>Danmaku</p><h3 data-t="danmakuTitle">调一调弹幕</h3></div></header>
             <ul>
-              <li><span data-t="danmakuOn">显示弹幕</span><span class="switch"><input id="danmakuOn" type="checkbox" checked aria-label="Show danmaku"><i></i></span></li>
+              <li><label for="danmakuOn" data-t="danmakuOn">显示弹幕</label><label class="switch"><input id="danmakuOn" type="checkbox" checked aria-label="Show danmaku"><i></i></label></li>
               <li><span data-t="opacity">不透明度</span><input id="opacity" type="range" min="0" max="1" value="1" step="0.01" aria-label="Danmaku opacity"></li>
               <li><span data-t="size">字号</span><input id="size" type="range" min="12" max="70" value="30" aria-label="Danmaku size"></li>
-              <li><span data-t="hd">弹幕双倍采样</span><span class="switch"><input id="hd" type="checkbox" checked aria-label="2x danmaku sampling"><i></i></span></li>
+              <li><label for="hd" data-t="hd">弹幕双倍采样</label><label class="switch"><input id="hd" type="checkbox" checked aria-label="2x danmaku sampling"><i></i></label></li>
             </ul>
           </article>
         </div>
