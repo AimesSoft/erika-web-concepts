@@ -23,7 +23,7 @@
 | `docs/project/` | 项目文档 4 页：building / releasing / contributing / changelog |
 | `docs/docs.css` | 唯一样式表（1135 行） |
 | `docs/docs.js` | 代码块一键复制等增强（46 行） |
-| `demo/` | Web 在线演示：`index.html` 从 jsDelivr（失败时 unpkg）加载 npm 包 `@aimessoft/liberika-web`，不自带 WASM；`sample.mkv` 是示例片段，由 `sample.ass` 和 ffmpeg 的 lavfi 源生成。升级版本时改 `index.html` 里的两个 CDN 地址和页面上的代码示例 |
+| `demo/` | Web 在线演示：`index.html` 直接引用根目录的 `assets/styles/main.css`，页眉、页脚、`.code-case`、`.doc-card`、`.feature-card`、`.button` 都沿用主页的组件，只在页内 `<style>` 里补播放器相关的样式；修改主页样式或页眉结构时要同步检查本页。脚本从 jsDelivr（失败时 unpkg）加载 npm 包 `@aimessoft/liberika-web`，不自带 WASM；`sample.mkv` 是示例片段，由 `sample.ass` 和 ffmpeg 的 lavfi 源生成。升级版本时改 `index.html` 里的两个 CDN 地址和页面上的代码示例 |
 | `06-washi-home.html` | 旧版原型主页残留：不在现行导航中，文档统一返回根 `index.html` |
 
 ## 2. 生成器已删除（旧警告作废）

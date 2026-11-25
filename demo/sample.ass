@@ -19,7 +19,7 @@ Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
 Dialogue: 0,0:00:00.20,0:00:04.00,Title,,0,0,0,,{\fad(500,500)\blur2}liberika Web
 Dialogue: 0,0:00:01.00,0:00:04.00,Default,,0,0,0,,{\fad(400,400)}MKV · ASS 字幕 · 弹幕，直接在浏览器里播放
 Dialogue: 1,0:00:00.20,0:00:20.00,Note,,0,0,0,,{\an1\alpha&H50&}libass in WASM · WebCodecs · WebGL2
-Dialogue: 0,0:00:04.30,0:00:08.00,Default,,0,0,0,,{\an8\pos(640,90)\c&H74D7FF&}\pos 定位{\c&HFFFFFF&} · {\i1}斜体{\i0} · {\b1}粗体{\b0} · {\u1}下划线{\u0}
+Dialogue: 0,0:00:04.30,0:00:08.00,Default,,0,0,0,,{\an5\pos(640,300)\c&H74D7FF&}\pos 定位{\c&HFFFFFF&} · {\i1}斜体{\i0} · {\b1}粗体{\b0} · {\u1}下划线{\u0}
 Dialogue: 0,0:00:04.30,0:00:08.00,Default,,0,0,0,,{\move(-200,400,1480,400)\c&HEE4774&\bord4}\move 横向移动的字幕
 Dialogue: 0,0:00:08.20,0:00:12.00,Default,,0,0,0,,{\an5\pos(640,330)\fs72\t(0,3800,\frz360)\c&HC06F59&\3c&HFFFFFF&}\frz 旋转
 Dialogue: 0,0:00:08.20,0:00:12.00,Default,,0,0,0,,{\fad(300,300)\t(0,1900,\fscx130\fscy130)\t(1900,3800,\fscx100\fscy100)}\t 动画缩放与 \fad 淡入淡出

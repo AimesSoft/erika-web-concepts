@@ -5,193 +5,280 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="liberika Web 在线演示：在浏览器里直接播放 MKV，保留 ASS 字幕特效、字体附件和弹幕。">
     <meta name="theme-color" content="#ffffff">
-    <title>liberika Web 在线演示</title>
+    <title>liberika — Web 在线演示</title>
     <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../assets/styles/main.css?v=20261126-038">
     <style>
-      :root {
-        --white: #ffffff;
-        --ink: #17182a;
-        --ink-soft: #55586e;
-        --ink-faint: #898ca0;
-        --pink: #ee4774;
-        --pink-dark: #cf2858;
-        --pink-soft: #fff0f5;
-        --blue: #596fc0;
-        --blue-soft: #eef1ff;
-        --line: #e7e7ef;
-        --line-strong: #cfd0dd;
-        --sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", sans-serif;
-        --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      /* Everything here builds on main.css: its tokens, .code-case, .doc-card,
+         .feature-card, .button and the header and footer are used as they are. */
+      .site-nav > a[aria-current="page"] { color: var(--pink); }
+      .site-nav > a[aria-current="page"]::after { transform: scaleX(1); }
+
+      .demo-top { padding-top: clamp(124px, 12vw, 168px); }
+      .demo-top .section-heading { margin-bottom: 42px; }
+
+      .player-case .code-toolbar b { color: var(--ink-soft); }
+      .code-toolbar > .player-summary {
+        display: block; margin-left: auto; overflow: hidden; color: var(--ink-faint);
+        letter-spacing: 0.06em; text-overflow: ellipsis; white-space: nowrap;
       }
-      *, *::before, *::after { box-sizing: border-box; }
-      body {
-        margin: 0;
-        color: var(--ink);
-        background: var(--white);
-        font-family: var(--sans);
-        font-size: 15px;
-        line-height: 1.6;
-        -webkit-font-smoothing: antialiased;
-      }
-      a { color: inherit; }
-      .bar {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        max-width: 1120px;
-        margin: 0 auto;
-        padding: 18px 24px;
-      }
-      .brand { font-weight: 700; font-size: 18px; text-decoration: none; letter-spacing: -0.01em; }
-      .brand span { color: var(--ink-faint); font-weight: 500; font-size: 13px; margin-left: 8px; }
-      .bar nav { display: flex; gap: 18px; margin-left: auto; font-size: 14px; color: var(--ink-soft); }
-      .bar nav a { text-decoration: none; }
-      .bar nav a:hover { color: var(--pink-dark); }
-      .lang { display: flex; border: 1px solid var(--line-strong); border-radius: 999px; overflow: hidden; }
-      .lang button {
-        border: 0; background: none; font: inherit; font-size: 12px; color: var(--ink-soft);
-        padding: 4px 10px; cursor: pointer;
-      }
-      .lang button[aria-pressed="true"] { background: var(--ink); color: var(--white); }
-      main { max-width: 1120px; margin: 0 auto; padding: 8px 24px 64px; }
-      h1 { font-size: 30px; line-height: 1.25; letter-spacing: -0.02em; margin: 12px 0 6px; }
-      .lead { color: var(--ink-soft); max-width: 46em; margin: 0 0 22px; }
+      /* The picture keeps 16:9 and the stage never outgrows the window; what is
+         left at the sides is part of the frame, not letterboxing. */
       .stage {
-        position: relative;
-        background: #0c0d16;
-        border-radius: 14px;
-        overflow: hidden;
-        aspect-ratio: 16 / 9;
-        max-height: 70vh;
-        width: 100%;
+        position: relative; display: grid; place-items: center; aspect-ratio: 16 / 9; max-height: 68vh; width: 100%;
+        background-color: var(--ink);
+        background-image: radial-gradient(circle, rgba(255, 255, 255, 0.09) 1px, transparent 1.2px);
+        background-size: 16px 16px;
       }
-      canvas { display: block; width: 100%; height: 100%; }
-      .overlay {
-        position: absolute; inset: 0;
-        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
-        color: #e9ebf6; text-align: center; padding: 24px;
-        background: rgba(12, 13, 22, 0.72);
+      .stage canvas { display: block; height: 100%; width: auto; max-width: 100%; aspect-ratio: 16 / 9; background: #000; }
+      .stage-cover {
+        position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 26px;
+        padding: 28px; text-align: center; background-color: var(--white);
+        background-image: radial-gradient(circle, rgba(89, 111, 192, 0.13) 1px, transparent 1.2px);
+        background-size: 16px 16px;
       }
-      .overlay[hidden] { display: none; }
-      .overlay p { margin: 0; max-width: 34em; color: #c5c8dc; }
-      .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
-      button.action, label.action {
-        display: inline-flex; align-items: center; gap: 6px;
-        border: 1px solid var(--line-strong); border-radius: 9px; background: var(--white);
-        color: var(--ink); font: inherit; font-size: 14px; padding: 8px 14px; cursor: pointer;
+      .stage-cover[hidden] { display: none; }
+      .stage-cover .section-eyebrow { margin: 0; }
+      .stage-cover p.cover-text {
+        max-width: 30em; margin: 0; font-family: var(--serif); font-size: clamp(20px, 2.4vw, 30px);
+        font-weight: 700; letter-spacing: -0.02em; line-height: 1.35;
       }
-      button.action:hover, label.action:hover { border-color: var(--ink-faint); }
-      button.action:disabled { opacity: 0.45; cursor: default; }
-      button.primary { background: var(--pink); border-color: var(--pink); color: var(--white); font-weight: 600; }
-      button.primary:hover { background: var(--pink-dark); border-color: var(--pink-dark); }
-      .overlay button.action { font-size: 15px; padding: 10px 20px; }
-      input[type="file"] { display: none; }
-      input[type="range"] { accent-color: var(--pink); }
-      #seek { flex: 1; min-width: 180px; }
-      #time { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); min-width: 96px; text-align: right; }
-      .field { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-soft); }
-      select {
-        font: inherit; font-size: 14px; color: var(--ink); background: var(--white);
-        border: 1px solid var(--line-strong); border-radius: 9px; padding: 7px 10px; max-width: 240px;
+      .cover-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
+      .button { background: var(--white); cursor: pointer; }
+      .button.button-primary { background: var(--pink); }
+      .button:disabled { cursor: default; opacity: 0.45; transform: none; }
+      .button input, .chip input[type="file"] { display: none; }
+
+      .transport { display: flex; align-items: center; gap: 18px; padding: 14px 18px; border-top: 1px solid var(--ink); }
+      .transport .play {
+        min-width: 76px; min-height: 36px; padding: 0 14px; border: 1px solid var(--ink); border-radius: 5px;
+        background: var(--white); font-size: 12px; font-weight: 800; letter-spacing: 0.05em; cursor: pointer;
+        transition: color 160ms ease, background 160ms ease;
       }
-      .panel { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 4px; }
-      #status {
-        margin: 14px 0 0; font-family: var(--mono); font-size: 12.5px; color: var(--ink-soft);
-        white-space: pre-wrap; overflow-wrap: anywhere; min-height: 2.6em;
+      .transport .play:hover:not(:disabled) { color: var(--white); background: var(--ink); }
+      .transport .play:disabled { cursor: default; opacity: 0.4; }
+      .transport #seek { flex: 1; min-width: 120px; }
+      .transport .time, .transport label { color: var(--ink-soft); font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; }
+      .transport label { display: inline-flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 0.12em; font-size: 9px; font-weight: 700; }
+      .transport label input { width: 96px; }
+
+      input[type="range"] { height: 18px; margin: 0; background: transparent; cursor: pointer; -webkit-appearance: none; appearance: none; }
+      input[type="range"]:disabled { cursor: default; opacity: 0.4; }
+      input[type="range"]::-webkit-slider-runnable-track { height: 2px; background: var(--line-strong); }
+      input[type="range"]::-moz-range-track { height: 2px; background: var(--line-strong); }
+      input[type="range"]::-webkit-slider-thumb {
+        width: 13px; height: 13px; margin-top: -5.5px; border: 2px solid var(--pink); border-radius: 50%;
+        background: var(--white); -webkit-appearance: none; appearance: none; transition: transform 140ms ease;
       }
+      input[type="range"]::-moz-range-thumb { width: 9px; height: 9px; border: 2px solid var(--pink); border-radius: 50%; background: var(--white); }
+      input[type="range"]:hover:not(:disabled)::-webkit-slider-thumb { transform: scale(1.25); background: var(--pink); }
+
+      .player-case .code-note p { min-width: 0; }
+      #status { overflow-wrap: anywhere; font-family: var(--mono); font-size: 11px; white-space: pre-wrap; }
       #status.error { color: var(--pink-dark); }
-      .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px; margin-top: 40px; }
-      .notes h2 { font-size: 16px; margin: 0 0 8px; }
-      .notes p, .notes li { color: var(--ink-soft); font-size: 14px; }
-      .notes ul { margin: 0; padding-left: 18px; }
-      pre {
-        margin: 0; padding: 14px 16px; border-radius: 10px; background: var(--blue-soft);
-        font-family: var(--mono); font-size: 12.5px; line-height: 1.65; overflow-x: auto; color: var(--ink);
+
+      .bench { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 46px; }
+      .bench .doc-card ul { margin-top: 18px; }
+      .bench .doc-card li { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 12px 4px; color: var(--ink-soft); font-size: 13px; }
+      .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+      .chip {
+        display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border: 1px solid var(--line-strong); border-radius: 5px;
+        color: var(--ink); background: var(--white); font: inherit; font-size: 12px; font-weight: 800; letter-spacing: 0.04em; cursor: pointer;
+        transition: border-color 160ms ease, color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
       }
-      code { font-family: var(--mono); font-size: 0.92em; }
-      @media (max-width: 640px) {
-        .bar nav { display: none; }
-        .lang { margin-left: auto; }
-        h1 { font-size: 24px; }
+      .chip:hover:not(:disabled) { border-color: var(--ink); box-shadow: 4px 4px 0 var(--pink-soft); transform: translateY(-2px); }
+      .chip:disabled { cursor: default; opacity: 0.45; }
+      .bench select {
+        max-width: 230px; padding: 7px 10px; border: 1px solid var(--line-strong); border-radius: 5px;
+        color: var(--ink); background: var(--white); font: inherit; font-size: 12px;
+      }
+      .bench select:disabled { opacity: 0.45; }
+      .bench input[type="range"] { width: min(190px, 46vw); }
+      .switch { position: relative; width: 34px; height: 18px; flex: none; }
+      .switch input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+      .switch i { position: absolute; inset: 0; border: 1px solid var(--line-strong); border-radius: 999px; background: var(--white); transition: border-color 160ms ease, background 160ms ease; }
+      .switch i::after { position: absolute; top: 3px; left: 3px; width: 10px; height: 10px; border-radius: 50%; background: var(--line-strong); content: ""; transition: transform 160ms ease, background 160ms ease; }
+      .switch input:checked + i { border-color: var(--pink); background: var(--pink-soft); }
+      .switch input:checked + i::after { background: var(--pink); transform: translateX(16px); }
+      .switch input:focus-visible + i { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+      .how .code-panel pre { min-height: 0; }
+      .how .code-note code, .try-grid code { padding: 1px 5px; border: 1px solid var(--line); border-radius: 4px; font-family: var(--mono); font-size: 0.92em; }
+      .try-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 46px; }
+      .try-grid .feature-card { min-height: 0; }
+      .try-grid .feature-card h3 { font-size: 22px; }
+      .limits { max-width: 760px; margin: 34px 0 0; padding-left: 18px; border-left: 2px solid var(--pink); color: var(--ink-soft); font-size: 13px; }
+      .demo-end { padding-bottom: clamp(70px, 9vw, 120px); }
+      .site-footer { padding-top: 0; }
+      .site-footer .footer-inner { padding-top: 38px; border-top: 1px solid var(--ink); }
+
+      @media (max-width: 820px) {
+        .bench, .try-grid { grid-template-columns: 1fr; }
+        .transport { flex-wrap: wrap; }
+        .transport #seek { order: 3; flex-basis: 100%; }
+        .code-toolbar > .player-summary { display: none; }
       }
     </style>
   </head>
   <body>
-    <header class="bar">
-      <a class="brand" href="../index.html">liberika<span data-t="brandNote">Web 在线演示</span></a>
-      <nav>
-        <a href="../docs/guide/web.html" data-doc="web" data-t="navDocs">Web 接入文档</a>
-        <a href="https://www.npmjs.com/package/@aimessoft/liberika-web">npm</a>
-        <a href="https://github.com/AimesSoft/liberika">GitHub</a>
-      </nav>
-      <div class="lang" role="group" aria-label="Language">
-        <button type="button" data-language="zh">中文</button>
-        <button type="button" data-language="en">EN</button>
-        <button type="button" data-language="ja">日本語</button>
+    <a class="skip-link" href="#main" data-t="skip">跳到正文</a>
+
+    <header class="site-header" data-header>
+      <div class="shell header-inner">
+        <a class="brand" href="../index.html" data-t-label="home" aria-label="liberika 首页">
+          <img class="brand-mark" src="../assets/images/favicon.svg" alt="" width="64" height="64">
+          <span class="brand-name">liberika</span>
+          <span class="brand-kana">古戸ヱリカ</span>
+        </a>
+        <nav class="site-nav" data-nav data-t-label="navigation" aria-label="主导航">
+          <a href="../index.html#features" data-t="navFeatures">能力</a>
+          <a href="../index.html#start" data-t="navStart">接入</a>
+          <a href="../index.html#platforms" data-t="navPlatforms">平台</a>
+          <a href="../docs/index.html" data-doc-root data-t="navDocs">文档</a>
+          <a href="./" aria-current="page" data-t="navDemo">在线演示</a>
+          <a class="nav-repo" href="https://github.com/AimesSoft/liberika" target="_blank" rel="noreferrer"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3.3-.4 6.8-1.6 6.8-7A5.5 5.5 0 0 0 19.3 3 5 5 0 0 0 19.1.1S18 0 15 1.7a15.4 15.4 0 0 0-8 0C4-.1 2.9.1 2.9.1A5 5 0 0 0 2.7 3a5.5 5.5 0 0 0-1.5 4.5c0 5.4 3.5 6.6 6.8 7A4.8 4.8 0 0 0 7 18v4"/><path d="M7 19c-3 .9-3-1.5-4-2"/></svg> GitHub</a>
+        </nav>
+        <div class="language-switch" role="group" data-t-label="language" aria-label="语言">
+          <button type="button" lang="zh-CN" title="中文" aria-label="中文" data-language="zh">中</button>
+          <button type="button" lang="en" title="English" aria-label="English" data-language="en">EN</button>
+          <button type="button" lang="ja" title="日本語" aria-label="日本語" data-language="ja">日</button>
+        </div>
+        <button class="nav-toggle" type="button" aria-label="打开菜单" aria-expanded="false" data-nav-toggle>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
       </div>
     </header>
-    <main id="main">
-      <h1 data-t="title">在浏览器里直接播放 MKV</h1>
-      <p class="lead" data-t="lead">视频留在你的设备上：FFmpeg WASM 解封装，浏览器 WebCodecs 解码，libass 绘制 ASS 字幕和内嵌字体，Rust 弹幕引擎排版，最后由 WebGL2 合成到一块画布。</p>
 
-      <div class="stage">
-        <canvas id="video" aria-label="liberika player"></canvas>
-        <div class="overlay" id="overlay">
-          <p id="overlayText" data-t="loading">正在加载播放内核…</p>
-          <div class="row" style="margin-top:0;justify-content:center">
-            <button class="action primary" id="sample" type="button" disabled data-t="playSample">播放示例片段</button>
-            <label class="action"><span data-t="openFile">打开本地视频</span><input id="file" type="file" accept="video/*,.mkv,.mp4,.webm,.mov,.ts,.flv"></label>
+    <main id="main">
+      <section class="section shell demo-top" id="top" aria-labelledby="demo-title">
+        <header class="section-heading reveal">
+          <p class="section-eyebrow">Live demo / Web · WASM</p>
+          <div class="section-title-row">
+            <h2 id="demo-title" data-t="title">让浏览器当场播放 MKV</h2>
+            <span class="title-dots" aria-hidden="true"></span>
+          </div>
+          <p data-t="lead">视频留在你的设备上：FFmpeg WASM 解封装，浏览器 WebCodecs 解码，libass 绘制 ASS 字幕和内嵌字体，Rust 弹幕引擎排版，最后由 WebGL2 合成到一块画布。</p>
+        </header>
+
+        <div class="code-case player-case reveal">
+          <div class="code-toolbar">
+            <span><i></i><i></i><i></i></span>
+            <b>PLAYER</b>
+            <span class="player-summary" id="summary">@aimessoft/liberika-web · 0.3.8</span>
+          </div>
+          <div class="stage">
+            <canvas id="video" aria-label="liberika player"></canvas>
+            <div class="stage-cover" id="overlay">
+              <p class="section-eyebrow">Exhibit A / sample.mkv</p>
+              <p class="cover-text" id="overlayText" data-t="loading">正在加载播放内核…</p>
+              <div class="cover-actions">
+                <button class="button button-primary" id="sample" type="button" disabled><span data-t="playSample">播放示例片段</span> <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M14 7l5 5-5 5"/></svg></button>
+                <label class="button button-ghost"><span data-t="openFile">打开本地视频</span><input id="file" type="file" accept="video/*,.mkv,.mp4,.webm,.mov,.ts,.flv"></label>
+              </div>
+            </div>
+          </div>
+          <div class="transport">
+            <button class="play" id="play" type="button" disabled data-t="play">播放</button>
+            <input id="seek" type="range" min="0" max="100" value="0" step="0.01" disabled aria-label="Seek">
+            <span class="time" id="time">0:00 / 0:00</span>
+            <label><span data-t="volume">音量</span><input id="volume" type="range" min="0" max="1" value="1" step="0.01"></label>
+          </div>
+          <div class="code-note">
+            <p><span>NOTE</span><span id="status" role="status" style="color:inherit;font-weight:400;letter-spacing:0"></span></p>
+            <a href="../docs/guide/web.html" data-doc="guide/web"><span data-t="guideLink">查看 Web 接入文档</span> <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M14 7l5 5-5 5"/></svg></a>
           </div>
         </div>
-      </div>
 
-      <div class="row">
-        <button class="action" id="play" type="button" disabled data-t="play">播放</button>
-        <input id="seek" type="range" min="0" max="100" value="0" step="0.01" disabled aria-label="Seek">
-        <span id="time">0:00 / 0:00</span>
-        <label class="field"><span data-t="volume">音量</span><input id="volume" type="range" min="0" max="1" value="1" step="0.01"></label>
-      </div>
-
-      <div class="panel">
-        <div class="row">
-          <label class="action"><span data-t="openOther">换一个视频</span><input id="file2" type="file" accept="video/*,.mkv,.mp4,.webm,.mov,.ts,.flv"></label>
-          <label class="action"><span data-t="loadSubtitle">载入字幕</span><input id="subs" type="file" accept=".ass,.ssa,.srt,.vtt"></label>
-          <label class="action"><span data-t="loadDanmaku">载入弹幕</span><input id="comments" type="file" accept=".xml,.json"></label>
-          <button class="action" id="demoDanmaku" type="button" disabled data-t="demoDanmaku">加一批示例弹幕</button>
-          <select id="tracks" aria-label="Subtitle track" disabled></select>
-        </div>
-        <div class="row">
-          <label class="field"><input id="danmakuOn" type="checkbox" checked><span data-t="danmakuOn">显示弹幕</span></label>
-          <label class="field"><span data-t="opacity">弹幕不透明度</span><input id="opacity" type="range" min="0" max="1" value="1" step="0.01"></label>
-          <label class="field"><span data-t="size">弹幕字号</span><input id="size" type="range" min="12" max="70" value="30"></label>
-          <label class="field"><input id="subhd" type="checkbox" checked><span data-t="subhd">字幕双倍采样</span></label>
-          <label class="field"><input id="hd" type="checkbox" checked><span data-t="hd">弹幕双倍采样</span></label>
-        </div>
-        <p id="status" role="status"></p>
-      </div>
-
-      <section class="notes">
-        <div>
-          <h2 data-t="howTitle">这个页面是怎么接入的</h2>
-          <pre><code>import { Player } from
-  'https://cdn.jsdelivr.net/npm/@aimessoft/liberika-web@0.3.8/index.js';
-
-const player = await Player.create({ canvas });
-await player.open(fileOrURL);   // File, Blob, or a URL
-await player.play();</code></pre>
-          <p data-t="howText">本页直接从 npm CDN 加载 <code>@aimessoft/liberika-web</code>，没有自带任何 WASM 文件。在自己的项目里用 <code>npm install @aimessoft/liberika-web</code>，Vite 等打包器无需额外配置。</p>
-        </div>
-        <div>
-          <h2 data-t="tryTitle">可以试什么</h2>
-          <ul>
-            <li data-t="try1">带 ASS 特效字幕和字体附件的 MKV：定位、旋转、卡拉 OK、描边都按原脚本绘制。</li>
-            <li data-t="try2">Bilibili XML 或弹弹play JSON 弹幕文件，再拖动不透明度和字号。</li>
-            <li data-t="try3">在地址后加 <code>?src=视频地址</code> 打开远程文件，服务器需要支持 CORS 和 HTTP Range。</li>
-          </ul>
-          <p data-t="limits">能否播放取决于浏览器的 WebCodecs 支持的编码；当前输出为 SDR。需要较新的 Chrome、Edge 或 Safari。</p>
+        <div class="bench">
+          <article class="doc-card reveal">
+            <header><span>A</span><div><p>Sources</p><h3 data-t="sourcesTitle">换成你的素材</h3></div></header>
+            <div class="chips">
+              <label class="chip"><span data-t="openOther">换一个视频</span><input id="file2" type="file" accept="video/*,.mkv,.mp4,.webm,.mov,.ts,.flv"></label>
+              <label class="chip"><span data-t="loadSubtitle">载入字幕</span><input id="subs" type="file" accept=".ass,.ssa,.srt,.vtt"></label>
+              <label class="chip"><span data-t="loadDanmaku">载入弹幕</span><input id="comments" type="file" accept=".xml,.json"></label>
+              <button class="chip" id="demoDanmaku" type="button" disabled data-t="demoDanmaku">加一批示例弹幕</button>
+            </div>
+            <ul>
+              <li><span data-t="subtitleTrack">字幕轨</span><select id="tracks" aria-label="Subtitle track" disabled></select></li>
+              <li><span data-t="subhd">字幕双倍采样</span><span class="switch"><input id="subhd" type="checkbox" checked aria-label="2x subtitle sampling"><i></i></span></li>
+            </ul>
+          </article>
+          <article class="doc-card reveal">
+            <header><span>B</span><div><p>Danmaku</p><h3 data-t="danmakuTitle">调一调弹幕</h3></div></header>
+            <ul>
+              <li><span data-t="danmakuOn">显示弹幕</span><span class="switch"><input id="danmakuOn" type="checkbox" checked aria-label="Show danmaku"><i></i></span></li>
+              <li><span data-t="opacity">不透明度</span><input id="opacity" type="range" min="0" max="1" value="1" step="0.01" aria-label="Danmaku opacity"></li>
+              <li><span data-t="size">字号</span><input id="size" type="range" min="12" max="70" value="30" aria-label="Danmaku size"></li>
+              <li><span data-t="hd">弹幕双倍采样</span><span class="switch"><input id="hd" type="checkbox" checked aria-label="2x danmaku sampling"><i></i></span></li>
+            </ul>
+          </article>
         </div>
       </section>
+
+      <section class="section shell how demo-end" id="how" aria-labelledby="how-title">
+        <header class="section-heading reveal">
+          <p class="section-eyebrow">Evidence / npm</p>
+          <div class="section-title-row">
+            <h2 id="how-title" data-t="howTitle">这一页只写了三行</h2>
+            <span class="title-dots" aria-hidden="true"></span>
+          </div>
+          <p data-t="howLead">本页没有自带任何 WASM 文件，播放内核直接从 npm CDN 加载。在自己的项目里安装同一个包即可。</p>
+        </header>
+
+        <div class="code-case reveal">
+          <section class="code-panel">
+            <div class="code-toolbar">
+              <span><i></i><i></i><i></i></span>
+              <b>JAVASCRIPT</b>
+              <button type="button" id="copy"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span data-t="copy">复制</span></button>
+            </div>
+            <pre><code id="snippet">// npm install @aimessoft/liberika-web
+import { Player } from '@aimessoft/liberika-web';
+
+const player = await Player.create({ canvas });
+await player.open(fileOrURL); // File, Blob, or a URL
+await player.play();</code></pre>
+            <div class="code-note">
+              <p><span>NOTE</span><span data-t="howNote" style="color:inherit;font-family:inherit;font-size:inherit;font-weight:400;letter-spacing:0">Vite 等打包器无需额外配置；不用打包器时可以像本页一样从 CDN 导入。</span></p>
+              <a href="https://www.npmjs.com/package/@aimessoft/liberika-web" target="_blank" rel="noreferrer">npm <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M14 7l5 5-5 5"/></svg></a>
+            </div>
+          </section>
+        </div>
+
+        <div class="try-grid">
+          <article class="feature-card reveal">
+            <div class="feature-top"><span>01</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15h4M13 15h4M8 11h8"/></svg></div>
+            <h3 data-t="try1Title">特效字幕</h3>
+            <p data-t="try1">打开带 ASS 特效字幕和字体附件的 MKV：定位、旋转、卡拉 OK、描边都按原脚本绘制。</p>
+            <ul><li>libass</li><li>ASS / SSA</li><li>Fonts</li></ul>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-top"><span>02</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3Z"/><path d="m19 16 .7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z"/></svg></div>
+            <h3 data-t="try2Title">弹幕文件</h3>
+            <p data-t="try2">载入 Bilibili XML 或弹弹play JSON 弹幕，再拖动不透明度和字号，观察实时重排。</p>
+            <ul><li>XML</li><li>JSON</li><li>Rust DFM</li></ul>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-top"><span>03</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M8 9h8v6H8z"/></svg></div>
+            <h3 data-t="try3Title">远程文件</h3>
+            <p data-t="try3">在地址后加 <code>?src=视频地址</code> 打开远程文件，服务器需要支持 CORS 和 HTTP Range。</p>
+            <ul><li>HTTP Range</li><li>CORS</li></ul>
+          </article>
+        </div>
+        <p class="limits reveal" data-t="limits">能否播放取决于浏览器的 WebCodecs 支持的编码；当前输出为 SDR。需要较新的 Chrome、Edge 或 Safari。</p>
+      </section>
     </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <a class="brand footer-brand" href="../index.html"><img class="brand-mark" src="../assets/images/favicon.svg" alt="" width="64" height="64"><span class="brand-name">liberika</span></a>
+        <div class="footer-statements">
+          <p>Playback Kernel · v0.3.8 · MPL-2.0</p>
+          <p>© 2026 AIMESSOFT</p>
+        </div>
+        <a href="https://github.com/AimesSoft/liberika" target="_blank" rel="noreferrer">GitHub <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M14 7l5 5-5 5"/></svg></a>
+      </div>
+    </footer>
 
     <script type="module">
       const RUNTIME = "https://cdn.jsdelivr.net/npm/@aimessoft/liberika-web@0.3.8/index.js";
@@ -200,70 +287,85 @@ await player.play();</code></pre>
 
       const text = {
         zh: {
-          pageTitle: "liberika Web 在线演示", brandNote: "Web 在线演示", navDocs: "Web 接入文档",
-          title: "在浏览器里直接播放 MKV",
+          pageTitle: "liberika — Web 在线演示", skip: "跳到正文", home: "liberika 首页", navigation: "主导航", language: "语言",
+          openMenu: "打开菜单", closeMenu: "关闭菜单",
+          navFeatures: "能力", navStart: "接入", navPlatforms: "平台", navDocs: "文档", navDemo: "在线演示",
+          title: "让浏览器当场播放 MKV",
           lead: "视频留在你的设备上：FFmpeg WASM 解封装，浏览器 WebCodecs 解码，libass 绘制 ASS 字幕和内嵌字体，Rust 弹幕引擎排版，最后由 WebGL2 合成到一块画布。",
           loading: "正在加载播放内核…", ready: "选一个视频开始。本地文件不会上传到任何服务器。",
           playSample: "播放示例片段", openFile: "打开本地视频", openOther: "换一个视频",
           play: "播放", pause: "暂停", volume: "音量", loadSubtitle: "载入字幕", loadDanmaku: "载入弹幕",
-          demoDanmaku: "加一批示例弹幕", danmakuOn: "显示弹幕", opacity: "弹幕不透明度", size: "弹幕字号",
-          subhd: "字幕双倍采样", hd: "弹幕双倍采样", subtitleOff: "关闭字幕", subtitleTrack: "字幕",
-          opening: "正在打开…", seconds: "秒", blocked: "浏览器阻止了自动播放，请点一下“播放”。",
+          demoDanmaku: "加一批示例弹幕", danmakuOn: "显示弹幕", opacity: "不透明度", size: "字号",
+          subhd: "字幕双倍采样", hd: "弹幕双倍采样", subtitleOff: "关闭字幕", subtitleTrack: "字幕轨",
+          sourcesTitle: "换成你的素材", danmakuTitle: "调一调弹幕", guideLink: "查看 Web 接入文档",
+          copy: "复制", copied: "已复制", copyFailed: "复制失败",
+          idle: "等待打开视频。", opening: "正在打开…", seconds: "秒", blocked: "浏览器阻止了自动播放，请点一下“播放”。",
           stats: (s) => `视频解码 ${s.decodedVideo ?? 0} 帧 · 绘制 ${s.rendered ?? 0} 帧 · 字幕图像 ${s.subtitleImages ?? 0} · 弹幕字形 ${s.glyphs ?? 0}`,
           added: (n) => `已加入 ${n} 条弹幕`,
           unsupported: "这个浏览器缺少 WebCodecs、OffscreenCanvas 或 WebGL2，无法运行演示。请换用较新的 Chrome、Edge 或 Safari。",
           loadFailed: "播放内核加载失败，请检查网络后刷新：",
-          howTitle: "这个页面是怎么接入的",
-          howText: "本页直接从 npm CDN 加载 <code>@aimessoft/liberika-web</code>，没有自带任何 WASM 文件。在自己的项目里用 <code>npm install @aimessoft/liberika-web</code>，Vite 等打包器无需额外配置。",
-          tryTitle: "可以试什么",
-          try1: "带 ASS 特效字幕和字体附件的 MKV：定位、旋转、卡拉 OK、描边都按原脚本绘制。",
-          try2: "Bilibili XML 或弹弹play JSON 弹幕文件，再拖动不透明度和字号。",
+          howTitle: "这一页只写了三行",
+          howLead: "本页没有自带任何 WASM 文件，播放内核直接从 npm CDN 加载。在自己的项目里安装同一个包即可。",
+          howNote: "Vite 等打包器无需额外配置；不用打包器时可以像本页一样从 CDN 导入。",
+          try1Title: "特效字幕", try2Title: "弹幕文件", try3Title: "远程文件",
+          try1: "打开带 ASS 特效字幕和字体附件的 MKV：定位、旋转、卡拉 OK、描边都按原脚本绘制。",
+          try2: "载入 Bilibili XML 或弹弹play JSON 弹幕，再拖动不透明度和字号，观察实时重排。",
           try3: "在地址后加 <code>?src=视频地址</code> 打开远程文件，服务器需要支持 CORS 和 HTTP Range。",
           limits: "能否播放取决于浏览器的 WebCodecs 支持的编码；当前输出为 SDR。需要较新的 Chrome、Edge 或 Safari。",
           comments: ["好耶", "前方高能", "这字幕居然是 libass 画的", "浏览器直接播 MKV", "弹幕来了", "666", "不用转码", "WASM 真香", "字体附件也能读", "にぱー"],
         },
         en: {
-          pageTitle: "liberika Web live demo", brandNote: "Web live demo", navDocs: "Web guide",
-          title: "Play MKV right in the browser",
+          pageTitle: "liberika — Web live demo", skip: "Skip to content", home: "liberika home", navigation: "Main navigation", language: "Language",
+          openMenu: "Open menu", closeMenu: "Close menu",
+          navFeatures: "Features", navStart: "Get started", navPlatforms: "Platforms", navDocs: "Documentation", navDemo: "Live demo",
+          title: "MKV, played on the spot",
           lead: "The video stays on your device. FFmpeg in WASM demuxes it, the browser's WebCodecs decodes it, libass draws the ASS subtitles with their attached fonts, a Rust engine lays out the danmaku, and WebGL2 composites everything into one canvas.",
           loading: "Loading the playback engine…", ready: "Pick a video to start. Local files are not uploaded anywhere.",
           playSample: "Play the sample clip", openFile: "Open a local video", openOther: "Open another video",
           play: "Play", pause: "Pause", volume: "Volume", loadSubtitle: "Load subtitles", loadDanmaku: "Load danmaku",
-          demoDanmaku: "Add sample danmaku", danmakuOn: "Show danmaku", opacity: "Danmaku opacity", size: "Danmaku size",
-          subhd: "2x subtitle sampling", hd: "2x danmaku sampling", subtitleOff: "Subtitles off", subtitleTrack: "Subtitle",
-          opening: "Opening…", seconds: "s", blocked: "The browser blocked autoplay. Press Play.",
+          demoDanmaku: "Add sample danmaku", danmakuOn: "Show danmaku", opacity: "Opacity", size: "Font size",
+          subhd: "2x subtitle sampling", hd: "2x danmaku sampling", subtitleOff: "Subtitles off", subtitleTrack: "Subtitle track",
+          sourcesTitle: "Bring your own material", danmakuTitle: "Tune the danmaku", guideLink: "Read the Web guide",
+          copy: "Copy", copied: "Copied", copyFailed: "Copy failed",
+          idle: "Waiting for a video.", opening: "Opening…", seconds: "s", blocked: "The browser blocked autoplay. Press Play.",
           stats: (s) => `decoded ${s.decodedVideo ?? 0} frames · drawn ${s.rendered ?? 0} · subtitle images ${s.subtitleImages ?? 0} · danmaku glyphs ${s.glyphs ?? 0}`,
           added: (n) => `Added ${n} comments`,
           unsupported: "This browser lacks WebCodecs, OffscreenCanvas or WebGL2, so the demo cannot run. Try a recent Chrome, Edge or Safari.",
           loadFailed: "The playback engine failed to load. Check your connection and reload: ",
-          howTitle: "How this page embeds it",
-          howText: "This page loads <code>@aimessoft/liberika-web</code> straight from an npm CDN and ships no WASM of its own. In your project, run <code>npm install @aimessoft/liberika-web</code>; Vite and similar bundlers need no configuration.",
-          tryTitle: "Things to try",
-          try1: "An MKV with styled ASS subtitles and attached fonts: positioning, rotation, karaoke and borders are drawn as the script says.",
-          try2: "A Bilibili XML or Dandanplay JSON danmaku file, then drag opacity and size.",
+          howTitle: "This page is three lines",
+          howLead: "This page ships no WASM of its own; the playback engine loads straight from an npm CDN. Install the same package in your project.",
+          howNote: "Vite and similar bundlers need no configuration. Without a bundler, import it from a CDN the way this page does.",
+          try1Title: "Styled subtitles", try2Title: "Danmaku files", try3Title: "Remote files",
+          try1: "Open an MKV with styled ASS subtitles and attached fonts: positioning, rotation, karaoke and borders are drawn as the script says.",
+          try2: "Load a Bilibili XML or Dandanplay JSON file, then drag opacity and font size and watch the layout update live.",
           try3: "Append <code>?src=VIDEO_URL</code> to open a remote file. Its server needs CORS and HTTP Range.",
           limits: "What plays depends on the codecs your browser's WebCodecs supports. Output is SDR for now. A recent Chrome, Edge or Safari is required.",
           comments: ["nice", "here it comes", "libass drew that subtitle", "MKV in a browser", "danmaku incoming", "666", "no transcoding", "WASM is neat", "attached fonts work too", "nipah~"],
         },
         ja: {
-          pageTitle: "liberika Web オンラインデモ", brandNote: "Web オンラインデモ", navDocs: "Web 導入ガイド",
-          title: "ブラウザーで MKV をそのまま再生",
+          pageTitle: "liberika — Web オンラインデモ", skip: "本文へ移動", home: "liberika ホーム", navigation: "メインナビゲーション", language: "言語",
+          openMenu: "メニューを開く", closeMenu: "メニューを閉じる",
+          navFeatures: "機能", navStart: "導入", navPlatforms: "プラットフォーム", navDocs: "ドキュメント", navDemo: "オンラインデモ",
+          title: "MKV を、その場で再生",
           lead: "動画は端末の外に出ません。FFmpeg WASM がデマルチプレクスし、ブラウザーの WebCodecs がデコードし、libass が ASS 字幕と添付フォントを描画し、Rust の弾幕エンジンがレイアウトして、WebGL2 が 1 枚の Canvas に合成します。",
           loading: "再生エンジンを読み込んでいます…", ready: "動画を選んで開始します。ローカルファイルはどこにもアップロードされません。",
           playSample: "サンプルを再生", openFile: "ローカル動画を開く", openOther: "別の動画を開く",
           play: "再生", pause: "一時停止", volume: "音量", loadSubtitle: "字幕を読み込む", loadDanmaku: "弾幕を読み込む",
-          demoDanmaku: "サンプル弾幕を追加", danmakuOn: "弾幕を表示", opacity: "弾幕の不透明度", size: "弾幕の文字サイズ",
-          subhd: "字幕 2 倍サンプリング", hd: "弾幕 2 倍サンプリング", subtitleOff: "字幕オフ", subtitleTrack: "字幕",
-          opening: "開いています…", seconds: "秒", blocked: "ブラウザーが自動再生をブロックしました。「再生」を押してください。",
+          demoDanmaku: "サンプル弾幕を追加", danmakuOn: "弾幕を表示", opacity: "不透明度", size: "文字サイズ",
+          subhd: "字幕 2 倍サンプリング", hd: "弾幕 2 倍サンプリング", subtitleOff: "字幕オフ", subtitleTrack: "字幕トラック",
+          sourcesTitle: "自分の素材で試す", danmakuTitle: "弾幕を調整する", guideLink: "Web 導入ガイドを見る",
+          copy: "コピー", copied: "コピーしました", copyFailed: "コピーできませんでした",
+          idle: "動画を待っています。", opening: "開いています…", seconds: "秒", blocked: "ブラウザーが自動再生をブロックしました。「再生」を押してください。",
           stats: (s) => `デコード ${s.decodedVideo ?? 0} フレーム · 描画 ${s.rendered ?? 0} · 字幕画像 ${s.subtitleImages ?? 0} · 弾幕グリフ ${s.glyphs ?? 0}`,
           added: (n) => `弾幕を ${n} 件追加しました`,
           unsupported: "このブラウザーには WebCodecs、OffscreenCanvas または WebGL2 がないため、デモを実行できません。新しい Chrome、Edge、Safari をお試しください。",
           loadFailed: "再生エンジンを読み込めませんでした。接続を確認して再読み込みしてください：",
-          howTitle: "このページの組み込み方",
-          howText: "このページは npm CDN から <code>@aimessoft/liberika-web</code> を直接読み込み、WASM を同梱していません。自分のプロジェクトでは <code>npm install @aimessoft/liberika-web</code> を実行します。Vite などのバンドラーは設定不要です。",
-          tryTitle: "試せること",
-          try1: "ASS 特殊効果字幕と添付フォント付きの MKV：位置指定、回転、カラオケ、縁取りがスクリプトどおりに描画されます。",
-          try2: "Bilibili XML または Dandanplay JSON の弾幕ファイルを読み込み、不透明度と文字サイズを動かす。",
+          howTitle: "このページは 3 行だけ",
+          howLead: "このページは WASM を同梱せず、再生エンジンを npm CDN から直接読み込みます。自分のプロジェクトでも同じパッケージをインストールするだけです。",
+          howNote: "Vite などのバンドラーは設定不要です。バンドラーを使わない場合は、このページのように CDN からインポートできます。",
+          try1Title: "特殊効果字幕", try2Title: "弾幕ファイル", try3Title: "リモートファイル",
+          try1: "ASS 特殊効果字幕と添付フォント付きの MKV を開くと、位置指定、回転、カラオケ、縁取りがスクリプトどおりに描画されます。",
+          try2: "Bilibili XML または Dandanplay JSON を読み込み、不透明度と文字サイズを動かしてレイアウトの更新を確認できます。",
           try3: "URL の末尾に <code>?src=動画の URL</code> を付けるとリモートファイルを開けます。サーバーは CORS と HTTP Range に対応している必要があります。",
           limits: "再生できるかどうかはブラウザーの WebCodecs が対応するコーデック次第です。現在の出力は SDR です。新しい Chrome、Edge、Safari が必要です。",
           comments: ["いいね", "キタ━━━", "この字幕 libass が描いてる", "ブラウザーで MKV", "弾幕きた", "888888", "変換なし", "WASM すごい", "添付フォントも読める", "にぱー"],
@@ -276,10 +378,11 @@ await player.play();</code></pre>
       try {
         const saved = localStorage.getItem("liberika-language");
         const query = new URL(location.href).searchParams.get("lang");
-        language = text[query] ? query : text[saved] ? saved : (navigator.language || "").startsWith("ja") ? "ja" : (navigator.language || "").startsWith("zh") ? "zh" : saved ? "zh" : "en";
+        const browser = navigator.language || "";
+        language = text[query] ? query : text[saved] ? saved : browser.startsWith("ja") ? "ja" : browser.startsWith("zh") ? "zh" : "en";
       } catch { /* Storage may be unavailable. */ }
       let t = text[language];
-      let overlayKey = "loading", statusLine = "", summary = "", playing = false;
+      let overlayKey = "loading", overlayDetail = "", summary = "", statusKey = "idle", playing = false;
 
       function applyLanguage() {
         t = text[language];
@@ -289,17 +392,19 @@ await player.play();</code></pre>
           const key = node.dataset.t;
           if (typeof t[key] === "string") node.innerHTML = t[key];
         }
-        for (const button of document.querySelectorAll(".lang button"))
+        for (const node of document.querySelectorAll("[data-t-label]")) node.setAttribute("aria-label", t[node.dataset.tLabel]);
+        for (const button of document.querySelectorAll(".language-switch button"))
           button.setAttribute("aria-pressed", String(button.dataset.language === language));
         const suffix = { zh: "", en: ".en", ja: ".ja" }[language];
-        for (const link of document.querySelectorAll("[data-doc]"))
-          link.href = `../docs/guide/${link.dataset.doc}${suffix}.html`;
-        $("overlayText").textContent = t[overlayKey] ?? overlayKey;
+        for (const link of document.querySelectorAll("[data-doc]")) link.href = `../docs/${link.dataset.doc}${suffix}.html`;
+        for (const link of document.querySelectorAll("[data-doc-root]")) link.href = `../docs/index${suffix}.html`;
+        $("overlayText").textContent = (t[overlayKey] ?? overlayKey) + overlayDetail;
         $("play").textContent = playing ? t.pause : t.play;
         const off = $("tracks").querySelector('option[value="-1"]');
         if (off) off.textContent = t.subtitleOff;
+        if (statusKey) status.textContent = t[statusKey];
       }
-      for (const button of document.querySelectorAll(".lang button"))
+      for (const button of document.querySelectorAll(".language-switch button"))
         button.onclick = () => {
           language = button.dataset.language;
           try { localStorage.setItem("liberika-language", language); } catch { /* optional */ }
@@ -307,7 +412,37 @@ await player.play();</code></pre>
         };
       applyLanguage();
 
+      // The same header behaviour and reveal as the landing page.
+      const header = document.querySelector("[data-header]"), toggle = document.querySelector("[data-nav-toggle]");
+      toggle.onclick = () => {
+        const open = !header.classList.contains("nav-open");
+        header.classList.toggle("nav-open", open);
+        toggle.setAttribute("aria-expanded", String(open));
+        toggle.setAttribute("aria-label", open ? t.closeMenu : t.openMenu);
+      };
+      addEventListener("scroll", () => header.classList.toggle("is-scrolled", scrollY > 12), { passive: true });
+      const reveal = new IntersectionObserver(
+        (entries) => entries.forEach((entry) => {
+          if (entry.isIntersecting) { entry.target.classList.add("is-visible"); reveal.unobserve(entry.target); }
+        }),
+        { threshold: 0.08 },
+      );
+      document.querySelectorAll(".reveal").forEach((node) => reveal.observe(node));
+
+      $("copy").onclick = async () => {
+        const label = $("copy").querySelector("span");
+        try {
+          await navigator.clipboard.writeText($("snippet").textContent);
+          label.textContent = t.copied;
+          $("copy").classList.add("copied");
+        } catch {
+          label.textContent = t.copyFailed;
+        }
+        setTimeout(() => { label.textContent = t.copy; $("copy").classList.remove("copied"); }, 1600);
+      };
+
       const say = (message, error = false) => {
+        statusKey = "";
         status.textContent = message;
         status.classList.toggle("error", error);
       };
@@ -377,6 +512,7 @@ await player.play();</code></pre>
             const info = e.detail;
             duration = info.duration;
             summary = `${info.backend} · ${info.decoder} · ${Math.round(info.duration)} ${t.seconds}`;
+            $("summary").textContent = summary;
             $("seek").max = info.duration;
             $("seek").disabled = false;
             $("play").disabled = false;
@@ -389,7 +525,7 @@ await player.play();</code></pre>
             tracks.disabled = tracks.options.length < 2;
             say(summary);
           });
-          player.addEventListener("stats", (e) => say(`${summary}\n${t.stats(e.detail)}`));
+          player.addEventListener("stats", (e) => say(t.stats(e.detail)));
           player.addEventListener("timeupdate", (e) => {
             if (document.activeElement !== $("seek")) $("seek").value = e.detail;
             $("time").textContent = `${clock(e.detail)} / ${clock(duration)}`;
@@ -404,7 +540,7 @@ await player.play();</code></pre>
 
           $("sample").onclick = safe(async () => {
             await open(SAMPLE);
-            await player.configureDanmaku({ area: 0.5 });
+            await player.configureDanmaku({ area: 0.3 });
             await player.addDanmaku(sampleDanmaku(20));
           });
           const pick = (input) =>
@@ -426,10 +562,10 @@ await player.play();</code></pre>
           $("comments").onchange = safe(async () => {
             const file = $("comments").files[0];
             $("comments").value = "";
-            if (file) say(`${summary}\n${t.added(await player.addDanmaku(await file.text()))}`);
+            if (file) say(t.added(await player.addDanmaku(await file.text())));
           });
           $("demoDanmaku").onclick = safe(async () =>
-            say(`${summary}\n${t.added(await player.addDanmaku(sampleDanmaku(Math.min(duration || 60, 600))))}`),
+            say(t.added(await player.addDanmaku(sampleDanmaku(Math.min(duration || 60, 600))))),
           );
           $("danmakuOn").onchange = safe(() => player.configureDanmaku({ enabled: $("danmakuOn").checked }));
           $("opacity").oninput = safe(() => player.configureDanmaku({ opacity: Number($("opacity").value) }));
@@ -443,11 +579,11 @@ await player.play();</code></pre>
 
           const src = new URL(location.href).searchParams.get("src");
           if (src) safe(() => open(new URL(src, location.href).href))();
-          window.addEventListener("pagehide", () => player.destroy());
+          addEventListener("pagehide", () => player.destroy());
         } catch (error) {
           overlayKey = "loadFailed";
+          overlayDetail = String(error?.message ?? error);
           applyLanguage();
-          $("overlayText").textContent = t.loadFailed + String(error?.message ?? error);
         }
       }
     </script>
